@@ -7,7 +7,7 @@ import CampaignLot from '#models/campaign_lot';
 import ErrorCampaignImport from '#models/error_campaign_import';
 import SendEmailJob from '#jobs/send_email_job';
 import queue from '@rlanz/bull-queue/services/main';
-import SendSmsJob from '#jobs/send_sms_job.js';
+import SendSmsJob from '#jobs/send_sms_job';
 
 interface LoadCsvCampaignJobPayload { newFileName: string; campaign_id: number; user_id: any; }
 

@@ -250,7 +250,6 @@ export default class ActionService extends RecuperaService {
     async createActionAca(action: Action) {
 
         await action.load('type_action');
-        const raw = db.raw;
         const abbr = action.type_action.abbreviation;
         const abbreviations = ['ACP', 'ACV', 'ACA'];
 

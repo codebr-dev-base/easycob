@@ -2,7 +2,7 @@ import Campaign from "#models/campaign";
 import CampaignLot from "#models/campaign_lot";
 import db from "@adonisjs/lucid/services/db";
 import RecuperaService from "#services/recupera_service";
-import { groupBy } from 'lodash';
+import lodash from 'lodash';
 import { chunks } from '#utils/array';
 import env from '#start/env';
 import { $fetch } from 'ofetch';
@@ -164,7 +164,7 @@ export default class SmsService extends RecuperaService {
 
         const clients = await this.getClients(lots);
 
-        const clientsGroups = groupBy(clients, 'contato');
+        const clientsGroups = lodash.groupBy(clients, 'contato');
 
         const envios: any[] = [];
         const items: any[] = [];

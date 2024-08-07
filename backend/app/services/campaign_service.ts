@@ -7,7 +7,7 @@ import db from '@adonisjs/lucid/services/db';
 
 export default class CampaignService {
 
-  async generateWherePaginate(q: DatabaseQueryBuilderContract<any>, qs: any) {
+  generateWherePaginate(q: DatabaseQueryBuilderContract<any>, qs: any) {
 
     const type = qs.type || 'SMS';
 

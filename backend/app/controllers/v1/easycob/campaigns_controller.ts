@@ -28,6 +28,7 @@ export default class CampaignsController {
 
     const campaigns = await db.from('public.campaigns as c')
       .select('c.*')
+
       .select(
         db.raw(sql)
       )

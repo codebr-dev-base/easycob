@@ -1,14 +1,14 @@
 import db from "@adonisjs/lucid/services/db";
 import Campaign from '#models/campaign';
 import CampaignLot from "#models/campaign_lot";
-import { groupBy } from 'lodash';
+import lodash from 'lodash';
 import { chunks } from '#utils/array';
 import mail from '@adonisjs/mail/services/main';
 import Action from "#models/action";
 import TypeAction from "#models/type_action";
 import { DateTime } from "luxon";
 import CatchLog from "#models/catch_log";
-import RecuperaService from "#services/recupera_service.js";
+import RecuperaService from "#services/recupera_service";
 
 type MailerConfig =
     | 'manaus_com'
@@ -190,7 +190,7 @@ export default class EmailService extends RecuperaService {
 
         const clients = await this.getClients(lots);
 
-        const clientsGroups = groupBy(clients, 'contato');
+        const clientsGroups = lodash.groupBy(clients, 'contato');
 
         const envios: any[] = [];
         const items: any[] = [];
