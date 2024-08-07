@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email de Cobrança - Yuan Soluções</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 20px;
+        border: 1px solid #dddddd;
+      }
+      .header {
+        background-color: #f4f4f4;
+        color: #333333;
+        padding: 10px 0;
+        text-align: center;
+      }
+      .header img {
+        max-width: 100%;
+        height: auto;
+      }
+      .content {
+        padding: 20px;
+      }
+      .highlight {
+        color: #eeac00;
+      }
+      .footer {
+        background-color: #f1f1f1;
+        color: #555555;
+        text-align: center;
+        padding: 10px 0;
+        font-size: 12px;
+      }
+      .button-container {
+        text-align: center;
+        margin: 20px 0;
+      }
+      .button {
+        background-color: green;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img
+          src="https://ci3.googleusercontent.com/meips/ADKq_NYDUym067_5yoyUS6eyQvIuG0eD6p9WOryOat5jKBmFxbjc6BhAltI9_6MxL-uxBMtqYlliLhw6ol0BG8KezEeCYeu51nOak7s_EiHlcmRuyU277FNKDoppc-M1K46CPN--5pctOGn17EvZm4Y2qLMQ78YbILP8v6olYqtLj-2jN27Mm9YAeC1XAwl83Jz1lzmA9hgZ1CZnfWz2qEDE2ffr8W2Xa4E2SQsrsWihyHqcG7NZpBB4w3C85EJgpyXKU1d_jz0Yz1L6tb8Ys_myCKf8GSEX4qCs5gaPhUrFFgo3GD1pzXVan5z5rdcayjJkhWApYoV3EdYbaIvgieM4zK7oQvkRccMYWi5rJ2LKlwXaQSiPdYflKkd6X34QinrtpeZtBgbTkgbwA1OJ6u-FupA7oWqyyvTVVU5YEu-KTL-IZuPYf3n5MbuvYCekL7i1ypS4-O9jKmzQl_jXVzWvd1cbYRLk-zoiimExxc_Xn7jF_XkEgTtUedmRBmNLve-OZq2JrYTtk_iJEdXSF_bRZB7JN13ndnwOsmV2leJ7kCI9dgsZ5ISJMGlGn5LNNwg6uEWX2qJpNezsT4xpNucKq8b7=s0-d-e1-ft#https://fgihcee.r.af.d.sendibt2.com/im/5687244/1c4fbe418663c6dd12bea989711d0bc428cc32e71c4f6be6fd6d386e7c2e2bb9.png?e=To3gPAndvxLhP_bW913K2IGiAZDWkcAzQm-rXyaH1u_36zTP0Hzg_abktVARD1CurTC5BDOlQHxsq59mzRxvZ0OvF1lJVHcAe15kWZ0LE9X31b_W3_VKouMdRX3yQ-tFTiPatDeWiY41tSVz3RrfT4alLhkeJP34iSZssdUtYYec1Nij3HJ_p5giP-97Poxnl8XEFR3Xp4CdqfhIhnGP6RziO-yETqd-fFXBj0oUApN2rsfTqAzZyl8RHB1Xmr5u1IKkXtzeXV9t2uNjMpyHO10mkZes2z045q-8cS-Xn_Tg_L7xjTz3"
+          alt="Yuan Soluções"
+        />
+        <h1>Notificação de Cobrança</h1>
+        <img
+          src="https://a45ca1787b3b2a2e85f8f907fc97fc23.cdn.bubble.io/f1704819823389x429255161638106400/unnamed%20%283%29.png?_gl=1*yokev4*_gcl_aw*R0NMLjE3MDA4NDkzNTkuQ2p3S0NBaUFzSUdyQmhBQUVpd0FFek1sQzlCSWdsUGJSUnZ4dWhwU2dESEw1N2lWdG1RaEJlR3lkYk1FZGVDWWtaNGdIZlZEYzB6ZGhob0NnOEVRQXZEX0J3RQ..*_gcl_au*NTkyMjU5NzM1LjE3MDA4NDkzNTk.*_ga*MTc5MjQ3MzU2Ny4xNzAwODQ5MzU5*_ga_BFPVR2DEE2*MTcwNDgxOTY5Ny4xMi4xLjE3MDQ4MTk3MzIuMjUuMC4w"
+          alt="Notificação"
+        />
+      </div>
+      <div class="content">
+        <p>Prezado(a) <span class="highlight">{{ cliente }}</span>,</p>
+        <p>Espero que esta mensagem o encontre bem.</p>
+        <p>
+          Estamos entrando em contato para informar que há débitos pendentes em
+          sua conta junto à <b>{{ filial }}</b>.
+        </p>
+        <p>
+          É fundamental que esses valores sejam regularizados o mais rápido
+          possível para evitar quaisquer inconvenientes.
+        </p>
+        <p>
+          Para facilitar o processo de regularização, pedimos que entre em
+          contato conosco por meio do seguinte link abaixo ou pelo número
+          <span class="highlight">
+            <a class="highlight" href="{{ whatsapp }}">Clique aqui!</a> </span
+          >:
+        </p>
+        <div class="button-container">
+          <a class="button" href="{{ whatsapp }}">Clique aqui!</a>
+        </div>
+        <p>
+          Este link direcionará você para o nosso canal de atendimento, onde
+          poderá obter informações detalhadas sobre o débito e as opções
+          disponíveis para regularização.
+        </p>
+        <p>
+          Entendemos que imprevistos podem ocorrer, e estamos aqui para ajudar a
+          encontrar a melhor solução para você.
+        </p>
+        <p>
+          Caso já tenha efetuado o pagamento ou tenha alguma dúvida, pedimos a
+          gentileza de utilizar o link fornecido para nos informar sobre a
+          situação atual.
+        </p>
+        <p>
+          Agradecemos antecipadamente pela sua atenção e colaboração na
+          regularização dessa pendência.
+        </p>
+        <p>Atenciosamente,</p>
+        <p>Equipe Yuan Soluções </p>
+      </div>
+      <div class="footer">
+        <p>© 2024 Yuan Soluções. Todos os direitos reservados.</p>
+        <p>
+          <a class="highlight" href="http://www.yuancob.com.br"
+            >http://www.yuancob.com.br</a
+          >
+          | <a class="highlight" href="mailto:{{ email }}">{{ email }}</a>
+        </p>
+        <p>Endereço: R. Prof. Darcy Araújo, n 3025, 64051-040, Teresina - PI</p>
+      </div>
+    </div>
+  </body>
+</html>

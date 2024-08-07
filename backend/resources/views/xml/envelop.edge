@@ -1,0 +1,13 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+    xmlns:web="http://localhost/recupera/webservice/">
+    <soapenv:Header />
+    <soapenv:Body>
+        <web:IncluirOcorrencia>
+            <web:strXML>
+                <![CDATA[
+                  {{ xml }}
+                ]]>
+            </web:strXML>
+        </web:IncluirOcorrencia>
+    </soapenv:Body>
+</soapenv:Envelope>
