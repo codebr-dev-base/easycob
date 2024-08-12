@@ -124,5 +124,8 @@ export default class LoadCsvCampaignJob extends Job {
   /**
    * This is an optional method that gets called when the retries has exceeded and is marked failed.
    */
-  async rescue(payload: LoadCsvCampaignJobPayload) { }
+  async rescue(payload: LoadCsvCampaignJobPayload) {
+    throw new Error(`Rescue method not implemented LoadCsvCampaignJob. payload: ${JSON.stringify(payload)}`);
+
+  }
 }

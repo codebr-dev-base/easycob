@@ -1,14 +1,12 @@
 import { DateTime } from 'luxon';
 import type { HasMany, BelongsTo } from '@adonisjs/lucid/types/relations';
 import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm';
-import db from '@adonisjs/lucid/services/db';
 import TypeAction from '#models/type_action';
 import Contract from '#models/recovery/contract';
 import PromiseOfPayment from '#models/promise_of_payment';
 import NegotiationOfPayment from '#models/negotiation_of_payment';
 import User from '#models/user';
 import Client from '#models/recovery/client';
-import LastAction from '#models/last_action';
 
 
 export default class Action extends BaseModel {

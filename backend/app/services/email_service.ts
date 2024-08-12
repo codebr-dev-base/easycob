@@ -1,4 +1,3 @@
-import db from "@adonisjs/lucid/services/db";
 import Campaign from '#models/campaign';
 import CampaignLot from "#models/campaign_lot";
 import lodash from 'lodash';
@@ -229,6 +228,7 @@ export default class EmailService extends RecuperaService {
                                     message
                                         .to(email.to)
                                         .from(
+                                            //TODO corrigir  remetente
                                             'info@example.com',
                                             'AdonisJS'
                                         )

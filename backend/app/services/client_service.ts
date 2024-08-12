@@ -1,12 +1,9 @@
-import CampaignLot from '#models/campaign_lot';
-import ErrorCampaignImport from '#models/error_campaign_import';
-import Client from '#models/recovery/client';
-import Contact from '#models/recovery/contact';
-import Contract from '#models/recovery/contract';
-import { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
-//import CampaignLot from '../models/campaign_lot';
+import Client from "#models/recovery/client";
+import Contact from "#models/recovery/contact";
+import Contract from "#models/recovery/contract";
+import { ModelQueryBuilderContract } from "@adonisjs/lucid/types/model";
 
-export default class CampaignLotService {
+export default class ClientService {
 
     protected async getListCodCredorDesRegis(column: string, keyword: string, minLength: number,) {
 
@@ -44,15 +41,6 @@ export default class CampaignLotService {
                     return resultArray;
                     break;
 
-                case 'name':
-                    const clients = await Client.query()
-                        .select('cod_credor_des_regis')
-                        .whereILike('nom_clien', `%${keyword}%`)
-                        .where('status', 'ATIVO');
-                    clients.forEach(result => resultArray.push(result.cod_credor_des_regis));
-                    return resultArray;
-                    break;
-
                 default:
                     return resultArray;
                     break;
@@ -63,35 +51,35 @@ export default class CampaignLotService {
 
     };
 
-    async generateWherePaginate(
-        q: ModelQueryBuilderContract<typeof CampaignLot, CampaignLot>
-            | ModelQueryBuilderContract<typeof ErrorCampaignImport, ErrorCampaignImport>,
-        qs: any) {
-
-        if (qs.start_date && qs.end_date) {
-            q.whereRaw(`created_at::date >= ?`, [qs.start_date]).andWhereRaw(
-                `created_at::date <= ?`,
-                [qs.end_date]
-            );
-        }
-
-        if (qs.campaign_id) {
-            q.where('campaign_id', Number(qs.campaign_id));
-        }
-
+    protected async generateWhereInPaginate(qs: any) {
         const keyword = qs.keyword;
         const keywordColumn = qs.keyword_column;
 
         if (!keyword || !keywordColumn) {
-            return q;
+            return null;
         }
 
-        const listCodCredorDesRegis = await this.getListCodCredorDesRegis(keywordColumn, keyword, 4);
-        if (listCodCredorDesRegis.length > 0) {
-            q.whereIn('cod_credor_des_regis', listCodCredorDesRegis);
+        return {
+            column: 'cod_credor_des_regis',
+            list: await this.getListCodCredorDesRegis(keywordColumn, keyword, 4)
+        };
+
+    }
+
+    async generateWherePaginate(q: ModelQueryBuilderContract<typeof Client, Client>, qs: any) {
+        const listOutColumn = ['phone', 'email', 'des_contr'];
+
+        const selected = await this.generateWhereInPaginate(qs);
+
+        if (selected) {
+            q.whereIn(selected.column, selected.list);
+        } else if (qs.keyword && qs.keyword.length > 4) {
+            if (!listOutColumn.includes(qs.keyword_column)) {
+                q.whereILike(qs.keyword_column, `%${qs.keyword}%`);
+            }
         }
 
         return q;
-    }
 
+    }
 }

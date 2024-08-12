@@ -236,10 +236,10 @@ export default class ActionService extends RecuperaService {
                 raw(`sum(pt.val_princ) FILTER ( WHERE ${filterIndBaixa}) as val_princ`), // Soma total
                 raw(`
             SUM(CASE
-                WHEN pt.dat_venci >= ${oneYearAgo} AND (${filterIndBaixa})
+                WHEN pt.dat_venci <= ${oneYearAgo} AND (${filterIndBaixa})
                 THEN pt.val_princ
                 ELSE 0
-            END) AS pecld`), // Soma dos últimos 365 dias
+            END) AS pecld`),
                 raw(`MIN(pt.dat_venci) FILTER (WHERE ${filterIndBaixa}) AS dat_venci`)
             )
             .where('matricula_contrato', matricula_contrato)

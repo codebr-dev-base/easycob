@@ -1,6 +1,5 @@
 import Campaign from "#models/campaign";
 import CampaignLot from "#models/campaign_lot";
-import db from "@adonisjs/lucid/services/db";
 import RecuperaService from "#services/recupera_service";
 import lodash from 'lodash';
 import { chunks } from '#utils/array';

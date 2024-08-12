@@ -38,5 +38,8 @@ export default class SendSmsJob extends Job {
   /**
    * This is an optional method that gets called when the retries has exceeded and is marked failed.
    */
-  async rescue(payload: SendSmsJobPayload) { }
+  async rescue(payload: SendSmsJobPayload) {
+    throw new Error(`Rescue method not implemented SendSmsJob. payload: ${JSON.stringify(payload)}`);
+
+  }
 }

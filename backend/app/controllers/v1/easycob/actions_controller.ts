@@ -6,6 +6,7 @@ import { createActionValidator } from '#validators/action_validator';
 import User from '#models/user';
 import db from '@adonisjs/lucid/services/db';
 import fs from 'fs';
+import TypeAction from '#models/type_action';
 
 
 @inject()
@@ -134,5 +135,10 @@ export default class ActionsController {
     } catch (error) {
       response.badRequest({ messages: error.messages });
     }
+  }
+
+  public async getTypeAction({ }: HttpContext) {
+    const typeActions = TypeAction.query().orderBy('name');
+    return typeActions;
   }
 }

@@ -118,11 +118,11 @@ export default abstract class RecuperaService {
             .select(
                 db.raw(`
               SUM(CASE
-                  WHEN pt.dat_venci >= ${oneYearAgo} AND (${filterIndBaixa})
+                  WHEN pt.dat_venci <= ${oneYearAgo} AND (${filterIndBaixa})
                   THEN pt.val_princ
                   ELSE 0
               END) AS pecld`)
-            ) // Soma para os últimos 365 dias
+            )
             .select(db.raw('max(la.synced_at) last_action'))
             .select(
                 db.raw(
