@@ -38,31 +38,34 @@ export default abstract class RecuperaService {
         const lastAction = JSON.parse(jsonString);
         lastAction.type_action = await TypeAction.find(lastAction.type_action_id);
 
-        if (typeAction) {
-            if (typeAction.commissioned >= lastAction.type_action.commissioned) {
-                return true;
-            } else {
-                if (lastAction.type_action.timelife >= 1) {
-                    const dtNow = DateTime.now().set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-
-                    const dtLimit = DateTime.fromISO(lastAction.synced_at).plus({ days: typeAction.timelife });
-
-                    if (dtNow.startOf('day') > dtLimit.startOf('day')) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return true;
-                }
-            }
-        } else {
+        if (!typeAction) {
             return true;
         }
+
+        if (typeAction.commissioned >= lastAction.type_action.commissioned) {
+            return true;
+        }
+
+        if (lastAction.type_action.timelife < 1) {
+            return true;
+        }
+
+        const dtNow = DateTime.now().set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+
+        const dtLimit = DateTime.fromISO(lastAction.synced_at).plus({ days: typeAction.timelife });
+
+        if (dtNow.startOf('day') > dtLimit.startOf('day')) {
+            return true;
+        } else {
+            return false;
+        }
+
+
+
     }
 
     async dispatchToRecupera(action: Action, queueName = 'Oparation', delay: number = 1,) {
-        const contract = await Contract.findBy('matricula_contrato', action.matricula_contrato);
+        const contract = await Contract.findBy('des_contr', action.des_contr);
         const typeAction = await TypeAction.find(action.type_action_id);
 
         const randoDelay = Math.floor(Math.random() * 10) + delay;
@@ -98,7 +101,8 @@ export default abstract class RecuperaService {
             contatos.push(lot.contato);
         });
 
-        const filterIndBaixa = "pt.ind_baixa is null or pt.ind_baixa = ''";
+        const filterIndAlter = "pt.ind_alter = '1'";
+
         const oneYearAgo = "CURRENT_DATE - INTERVAL '1 year'";
 
         const clients = await db.from('recupera.tbl_arquivos_cliente_numero as n')
@@ -114,11 +118,11 @@ export default abstract class RecuperaService {
                 'sb.email as subsidiary_mail',
                 'sb.config_email as subsidiary_config_email'
             )
-            .select(db.raw(`sum(pt.val_princ) filter ( WHERE ${filterIndBaixa}) as val_princ`))
+            .select(db.raw(`sum(pt.val_princ) filter ( WHERE ${filterIndAlter}) as val_princ`))
             .select(
                 db.raw(`
               SUM(CASE
-                  WHEN pt.dat_venci <= ${oneYearAgo} AND (${filterIndBaixa})
+                  WHEN pt.dat_venci <= ${oneYearAgo} AND (${filterIndAlter})
                   THEN pt.val_princ
                   ELSE 0
               END) AS pecld`)
@@ -134,10 +138,10 @@ export default abstract class RecuperaService {
                     "case when (max(la.synced_at)::date + (max(ta.timelife) || ' days')::interval)<=current_date  then true else false end is_send_recupera"
                 )
             )
-            .select(db.raw(`min(pt.dat_venci) filter ( WHERE ${filterIndBaixa}) as dat_venci`))
+            .select(db.raw(`min(pt.dat_venci) filter ( WHERE ${filterIndAlter}) as dat_venci`))
             .select(
                 db.raw(
-                    `current_date - min(pt.dat_venci) filter ( WHERE ${filterIndBaixa}) as day_late`
+                    `current_date - min(pt.dat_venci) filter ( WHERE ${filterIndAlter}) as day_late`
                 )
             )
             .whereIn('n.contato', contatos)
@@ -157,20 +161,20 @@ export default abstract class RecuperaService {
             })
             .leftJoin('recupera.tbl_arquivos_prestacao as pt', (q) => {
                 q.on('c.cod_credor_des_regis', '=', 'pt.cod_credor_des_regis')
-                    .andOn('c.matricula_contrato', '=', 'pt.matricula_contrato')
+                    .andOn('c.des_contr', '=', 'pt.des_contr')
                     .andOnVal('c.status', '=', 'ATIVO');
             })
             .leftJoin('public.last_actions as la', (q) => {
                 q.on('c.cod_credor_des_regis', '=', 'la.cod_credor_des_regis').andOn(
-                    'c.matricula_contrato',
+                    'c.des_contr',
                     '=',
-                    'la.matricula_contrato'
+                    'la.des_contr'
                 );
             })
             .leftJoin('public.type_actions as ta', 'la.type_action_id', 'ta.id')
             .leftJoin('public.subsidiaries as sb', 'c.nom_loja', '=', 'sb.nom_loja')
             .groupByRaw('1,2,3,4,5,6,7,8,9,10')
-            .havingRaw('sum(pt.val_princ) filter (?) is not null', [filterIndBaixa]);
+            .havingRaw('sum(pt.val_princ) filter (?) is not null', [filterIndAlter]);
 
         return clients;
     }

@@ -132,7 +132,7 @@ export default class CampaignService {
       })
       .leftJoin('recupera.tbl_arquivos_prestacao as pt', (q) => {
         q.on('c.cod_credor_des_regis', '=', 'pt.cod_credor_des_regis')
-          .andOn('c.matricula_contrato', '=', 'pt.matricula_contrato')
+          .andOn('c.des_contr', '=', 'pt.des_contr')
           .andOnVal('c.status', '=', 'ATIVO');
       })
       .groupByRaw('1,2');

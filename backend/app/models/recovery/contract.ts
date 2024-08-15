@@ -1,93 +1,93 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import db from '@adonisjs/lucid/services/db'
-import Action from '#models/action'
-import Client from '#models/recovery/client'
-import TypeAction from '#models/type_action'
+import { DateTime } from 'luxon';
+import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm';
+import type { BelongsTo } from '@adonisjs/lucid/types/relations';
+import db from '@adonisjs/lucid/services/db';
+import Action from '#models/action';
+import Client from '#models/recovery/client';
+import TypeAction from '#models/type_action';
 
 
 export default class Contract extends BaseModel {
 
   //declare static connection = 'recover'
-  static table = 'recupera.tbl_arquivos_contratos'
+  static table = 'recupera.tbl_arquivos_contratos';
 
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column.dateTime()
-  declare dt_update: DateTime
+  declare dt_update: DateTime;
 
   @column.date()
-  declare dat_movto: DateTime
+  declare dat_movto: DateTime;
 
   @column()
-  declare cod_credor_des_regis: number | string
+  declare cod_credor_des_regis: number | string;
 
   @column()
-  declare matricula_contrato: number
+  declare matricula_contrato: number;
 
   @column()
-  declare cod_credor: string
+  declare cod_credor: string;
 
   @column()
-  declare des_regis: string
+  declare des_regis: string;
 
   @column()
-  declare des_contr: string
+  declare des_contr: string;
 
   @column()
-  declare nom_filia: string
+  declare nom_filia: string;
 
   @column()
-  declare nom_rede: string
+  declare nom_rede: string;
 
   @column()
-  declare val_compr: string
+  declare val_compr: string;
 
   @column()
-  declare val_entra: string
+  declare val_entra: string;
 
   @column.date()
-  declare dat_inici_contr: DateTime
+  declare dat_inici_contr: DateTime;
 
   @column()
-  declare qtd_prest: number
+  declare qtd_prest: number;
 
   @column()
-  declare ind_alter: string
+  declare ind_alter: string;
 
   @column()
-  declare desc_cod_movimento: string
+  declare desc_cod_movimento: string;
 
   @column()
-  declare nom_loja: string
+  declare nom_loja: string;
 
   @column()
-  declare status: string
+  declare status: string;
 
   @column()
-  declare matricula_antiga: string
+  declare matricula_antiga: string;
 
   @belongsTo(() => Client, {
     foreignKey: 'cod_credor_des_regis',
     localKey: 'cod_credor_des_regis',
   })
-  declare client: BelongsTo<typeof Client>
+  declare client: BelongsTo<typeof Client>;
 
   @column()
-  declare actions: Action[]
+  declare actions: Action[];
 
-  async loadActions(){
+  async loadActions() {
     try {
       const actions: any[] = await db
         .from('contract_action')
-        .where('matricula_contrato', this.matricula_contrato)
+        .where('des_contr', this.des_contr);
 
-      const ids: any[] = []
+      const ids: any[] = [];
 
       for (const action of actions) {
-        ids.push(action.id)
+        ids.push(action.id);
       }
 
       this.actions = await Action.query()
@@ -95,35 +95,35 @@ export default class Contract extends BaseModel {
         .preload('type_action')
         .preload('promises')
         .preload('negotiations', (q) => {
-          q.preload('invoices')
-        })
+          q.preload('invoices');
+        });
 
-      return true
+      return true;
     } catch (error) {
-      return error
+      return error;
     }
   }
 
   @column()
-  declare action_negotiation: Action | null
+  declare action_negotiation: Action | null;
 
   async loadNegotiation() {
     try {
-      const typeActions: any[] = await TypeAction.query().where('type', 'negotiation')
+      const typeActions: any[] = await TypeAction.query().where('type', 'negotiation');
 
       const actions: any[] = await db
         .from('contract_action')
-        .where('matricula_contrato', this.matricula_contrato)
+        .where('des_contr', this.des_contr);
 
-      const ids: any[] = []
-      const typeActionIds: any[] = []
+      const ids: any[] = [];
+      const typeActionIds: any[] = [];
 
       for (const action of actions) {
-        ids.push(action.action_id)
+        ids.push(action.action_id);
       }
 
       for (const typeAction of typeActions) {
-        typeActionIds.push(typeAction.id)
+        typeActionIds.push(typeAction.id);
       }
 
       this.action_negotiation = await Action.query()
@@ -131,49 +131,49 @@ export default class Contract extends BaseModel {
         .whereIn('type_action_id', typeActionIds)
         .preload('type_action')
         .preload('negotiations', (q) => {
-          q.preload('invoices').first()
+          q.preload('invoices').first();
         })
         .preload('user')
         .orderBy('created_at', 'desc')
-        .first()
+        .first();
 
-      return true
+      return true;
     } catch (error) {
-      return error
+      return error;
     }
   }
 
   @column()
-  declare action_promise: Action | null
+  declare action_promise: Action | null;
 
   async loadPromise() {
     try {
       const actions: any[] = await db
         .from('contract_action')
-        .where('matricula_contrato', this.matricula_contrato)
+        .where('des_contr', this.des_contr);
 
-      const ids: any[] = []
+      const ids: any[] = [];
 
       for (const action of actions) {
-        ids.push(action.action_id)
+        ids.push(action.action_id);
       }
 
       this.action_promise = await Action.query()
         .whereIn('id', ids)
         .whereHas('type_action', (q) => {
-          q.where('type', 'promise')
+          q.where('type', 'promise');
         })
         .preload('type_action')
         .preload('promises', (q) => {
-          q.first()
+          q.first();
         })
         .preload('user')
         .orderBy('created_at', 'desc')
-        .first()
+        .first();
 
-      return true
+      return true;
     } catch (error) {
-      return error
+      return error;
     }
   }
 
@@ -184,6 +184,6 @@ export default class Contract extends BaseModel {
       count_princ: this.$extras.count_princ,
       count_pago: this.$extras.count_pago,
       dat_venci: this.$extras.dat_venci,
-    }
+    };
   }
 }

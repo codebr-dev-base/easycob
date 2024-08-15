@@ -13,8 +13,8 @@ import './routes/action.ts';
 import './routes/auth.ts';
 import './routes/campaign.ts';
 import './routes/invoice.ts';
-import './routes/negotiation.ts';
-import './routes/promise.ts';
+import './routes/promise.js';
+import './routes/negotiation.js';
 import './routes/templates.ts';
 
 //Routes Recupera

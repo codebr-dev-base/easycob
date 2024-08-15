@@ -6,10 +6,10 @@ export default class InvoicesController {
         const qs = request.qs();
         const status = qs.status || 'ATIVO';
         const cod_credor_des_regis = qs.cod_credor_des_regis || null;
-        const matricula_contrato = qs.matricula_contrato || null;
+        const des_contr = qs.des_contr || null;
 
 
-        if (!cod_credor_des_regis || !matricula_contrato) {
+        if (!cod_credor_des_regis || !des_contr) {
             return response.badRequest("you didn't send the cod_credor_des_regis");
         }
 
@@ -17,15 +17,15 @@ export default class InvoicesController {
             .where((q) => {
                 q.where('cod_credor_des_regis', `${cod_credor_des_regis}`);
 
-                let matriculaContrato: any[] = [];
-                if (typeof matricula_contrato === 'string') {
-                    matriculaContrato = [parseInt(matricula_contrato)];
+                let desContr: any[] = [];
+                if (typeof des_contr === 'string') {
+                    desContr = [des_contr];
                 } else {
-                    for (let index = 0; index < matricula_contrato.length; index++) {
-                        matriculaContrato.push(parseInt(matricula_contrato[index]));
+                    for (let index = 0; index < des_contr.length; index++) {
+                        desContr.push(des_contr[index]);
                     }
                 }
-                q.whereIn('matricula_contrato', matriculaContrato).orderBy('matricula_contrato');
+                q.whereIn('des_contr', desContr).orderBy('des_contr');
                 q.where('status', `${status}`);
 
             });

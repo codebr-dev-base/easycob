@@ -117,9 +117,9 @@ export default class ActionService extends RecuperaService {
         return q;
     }
 
-    async checkExisteContract(matricula_contrato: number) {
+    async checkExisteContract(des_contr: string) {
         const contract = await Contract.query()
-            .where('matricula_contrato', matricula_contrato)
+            .where('des_contr', des_contr)
             .where('status', 'ATIVO')
             .first();
 
@@ -133,7 +133,7 @@ export default class ActionService extends RecuperaService {
     async checkDuplicate(data: any) {
         const lastAction = await Action.query()
             .where('type_action_id', data.type_action_id)
-            .where('matricula_contrato', data.matricula_contrato)
+            .where('des_contr', data.des_contr)
             .whereRaw(`created_at >= current_timestamp - INTERVAL '30 minutes'`)
             .first();
 
@@ -226,23 +226,23 @@ export default class ActionService extends RecuperaService {
         return this.handlerData(action, data);
     }
 
-    async getAggregationContract(matricula_contrato: string | number) {
-        const filterIndBaixa = "ind_baixa is null or ind_baixa = ''";
+    async getAggregationContract(des_contr: string) {
+        const filterIndAlter = "ind_alter = '1'";
         const oneYearAgo = "CURRENT_DATE - INTERVAL '1 year'";
         const raw = db.raw;
 
         return await db.from('recupera.tbl_arquivos_prestacao as pt')
             .select(
-                raw(`sum(pt.val_princ) FILTER ( WHERE ${filterIndBaixa}) as val_princ`), // Soma total
+                raw(`sum(pt.val_princ) FILTER ( WHERE ${filterIndAlter}) as val_princ`), // Soma total
                 raw(`
             SUM(CASE
-                WHEN pt.dat_venci <= ${oneYearAgo} AND (${filterIndBaixa})
+                WHEN pt.dat_venci <= ${oneYearAgo} AND (${filterIndAlter})
                 THEN pt.val_princ
                 ELSE 0
             END) AS pecld`),
-                raw(`MIN(pt.dat_venci) FILTER (WHERE ${filterIndBaixa}) AS dat_venci`)
+                raw(`MIN(pt.dat_venci) FILTER (WHERE ${filterIndAlter}) AS dat_venci`)
             )
-            .where('matricula_contrato', matricula_contrato)
+            .where('des_contr', des_contr)
             .where('status', 'ATIVO')
             .first();
     }
@@ -258,14 +258,14 @@ export default class ActionService extends RecuperaService {
 
             const contracts = await Contract.query()
                 .where('cod_credor_des_regis', action.cod_credor_des_regis)
-                .where('matricula_contrato', '!=', action.matricula_contrato)
+                .where('des_contr', '!=', action.des_contr)
                 .where('status', 'ATIVO');
 
             for (const contract of contracts) {
 
                 const a = new Action();
 
-                const aggregation = await this.getAggregationContract(contract.matricula_contrato);
+                const aggregation = await this.getAggregationContract(contract.des_contr);
 
                 const datVenci = new Date(aggregation.dat_venci);
                 const interval = DateTime.now().diff(

@@ -75,9 +75,9 @@ export default class ActionsController {
 
         if (await this.service.checkDuplicate(data)) {
 
-          if (await this.service.checkExisteContract(payload.matricula_contrato)) {
+          if (await this.service.checkExisteContract(payload.des_contr)) {
 
-            const aggregation = await this.service.getAggregationContract(payload.matricula_contrato);
+            const aggregation = await this.service.getAggregationContract(payload.des_contr);
 
             const action = await Action.create({
               ...payload,
