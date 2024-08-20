@@ -2,7 +2,8 @@ require("dotenv").config({ path: "/data/docker/frontend/.env" });
 module.exports = {
   apps: [
     {
-      name: "easycob-front",
+      name: "front",
+      port: "3000",
       script: "./.output/server/index.mjs",
       cwd: "/data/docker/frontend/",
       instances: 4,

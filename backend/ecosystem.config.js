@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'easycob-backend',
+      name: 'backend',
       script: './build/server.js',
       cwd: '/data/docker/backend/',
       instances: 4,
@@ -12,7 +12,7 @@ module.exports = {
       },
     },
     {
-      name: 'queue',
+      name: 'queueLoadCsv',
       script: './build/ace',
       cwd: '/data/docker/backend/',
       args: 'queue:listen --queue=LoadCsv',
@@ -24,7 +24,7 @@ module.exports = {
       },
     },
     {
-      name: 'queue',
+      name: 'queueActionsOparation',
       script: './build/ace',
       cwd: '/data/docker/backend/',
       args: 'queue:listen --queue=ActionsOparation',
@@ -36,7 +36,7 @@ module.exports = {
       },
     },
     {
-      name: 'queue',
+      name: 'queueActionsEmail',
       script: './build/ace',
       cwd: '/data/docker/backend/',
       args: 'node ace queue:listen --queue=ActionsEmail',
@@ -48,7 +48,7 @@ module.exports = {
       },
     },
     {
-      name: 'queue',
+      name: 'queueActionsSms',
       script: './build/ace',
       cwd: '/data/docker/backend/',
       args: 'node ace queue:listen --queue=ActionsSms',
@@ -60,7 +60,7 @@ module.exports = {
       },
     },
     {
-      name: 'queue',
+      name: 'queueSendEmail',
       script: './build/ace',
       cwd: '/data/docker/backend/',
       args: 'node ace queue:listen --queue=SendEmail',
@@ -72,7 +72,7 @@ module.exports = {
       },
     },
     {
-      name: 'queue',
+      name: 'queueSendSms',
       script: './build/ace',
       cwd: '/data/docker/backend/',
       args: 'node ace queue:listen --queue=SendSms',
@@ -84,7 +84,7 @@ module.exports = {
       },
     },
     {
-      name: 'queue',
+      name: 'queueSendInvoice',
       script: './build/ace',
       cwd: '/data/docker/backend/',
       args: 'node ace queue:listen --queue=SendInvoice',
