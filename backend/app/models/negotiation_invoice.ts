@@ -1,46 +1,46 @@
-import { DateTime } from 'luxon'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
-import NegotiationOfPayment from '#models/negotiation_of_payment'
+import { DateTime } from 'luxon';
+import type { BelongsTo } from '@adonisjs/lucid/types/relations';
+import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm';
+import NegotiationOfPayment from '#models/negotiation_of_payment';
 
 export default class NegotiationInvoice extends BaseModel {
   //declare static connection = 'pg'
 
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column()
-  declare val_prest: number
+  declare valPrest: number;
 
   @column.date()
-  declare dat_prest: DateTime
+  declare datPrest: DateTime;
 
   @column()
-  declare val_payment: number
+  declare valPayment: number;
 
   @column.date()
-  declare dat_payment: DateTime
+  declare datPayment: DateTime;
 
   @column()
-  declare status: boolean
+  declare status: boolean;
 
   @column()
-  declare following_status: string
+  declare followingStatus: string;
 
   @column.date()
-  declare dat_breach: DateTime
+  declare datBreach: DateTime;
 
   @column()
-  declare negotiation_of_payment_id: number
+  declare negotiationOfPaymentId: number;
 
   @belongsTo(() => NegotiationOfPayment, {
-    localKey: 'negotiation_of_payment_id',
+    localKey: 'negotiationOfPaymentId',
   })
-  declare negotiation: BelongsTo<typeof NegotiationOfPayment>
+  declare negotiation: BelongsTo<typeof NegotiationOfPayment>;
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare createdAt: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  declare updatedAt: DateTime;
 }

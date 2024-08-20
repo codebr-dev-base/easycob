@@ -1,36 +1,36 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { DateTime } from 'luxon';
+import { BaseModel, column } from '@adonisjs/lucid/orm';
 
 export default class Subsidiary extends BaseModel {
   //declare static connection = 'pg'
 
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column()
-  declare cod_credor: string
+  declare codCredor: string;
 
   @column()
-  declare nom_loja: string
+  declare nomLoja: string;
 
   @column()
-  declare name: string
+  declare name: string;
 
   @column()
-  declare credor: string
+  declare credor: string;
 
   @column()
-  declare loja: string
+  declare loja: string;
 
   @column()
-  declare email: string
+  declare email: string;
 
   @column()
-  declare config_email: string
+  declare configEmail: string;
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare createdAt: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  declare updatedAt: DateTime;
 }

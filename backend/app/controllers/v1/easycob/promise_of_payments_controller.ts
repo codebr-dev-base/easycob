@@ -1,15 +1,22 @@
 import PromiseOfPayment from '#models/promise_of_payment';
 import PromiseOfPaymentHistory from '#models/promise_of_payment_history';
+import SerializeService from '#services/serialize_service';
 import { updatePromiseOfPaymentValidator } from '#validators/promise_of_payment_validator';
+import { inject } from '@adonisjs/core';
 import type { HttpContext } from '@adonisjs/core/http';
 import db from '@adonisjs/lucid/services/db';
 
+@inject()
 export default class PromiseOfPaymentsController {
+
+    constructor(protected serialize: SerializeService) {
+    }
+
     public async index({ request }: HttpContext) {
         const qs = request.qs();
         const pageNumber = qs.page || '1';
-        const limit = qs.per_page || '10';
-        const orderBy = qs.order_by || 'id';
+        const limit = qs.perPage || '10';
+        const orderBy = qs.orderBy || 'id';
         const descending = qs.descending || 'true';
 
         const actions = await db.from('promise_of_payments')
@@ -29,21 +36,21 @@ export default class PromiseOfPaymentsController {
                 'actions.cod_credor_des_regis'
             )
             .where((q) => {
-                if (qs.start_date && qs.end_date) {
-                    q.whereRaw(`promise_of_payments.dat_prev::date >= ?`, [qs.start_date]).andWhereRaw(
+                if (qs.startDate && qs.endDate) {
+                    q.whereRaw(`promise_of_payments.dat_prev::date >= ?`, [qs.startDate]).andWhereRaw(
                         `promise_of_payments.dat_prev::date <= ?`,
-                        [qs.end_date]
+                        [qs.endDate]
                     );
                 }
 
-                if (qs.start_date_create && qs.end_date_create) {
+                if (qs.startDateCreate && qs.endDateCreate) {
                     q.whereRaw(`promise_of_payments.created_at::date >= ?`, [
-                        qs.start_date_create,
-                    ]).andWhereRaw(`promise_of_payments.created_at::date <= ?`, [qs.end_date_create]);
+                        qs.startDateCreate,
+                    ]).andWhereRaw(`promise_of_payments.created_at::date <= ?`, [qs.endDateCreate]);
                 }
 
-                if (qs.user_id) {
-                    q.where('actions.user_id', qs.user_id);
+                if (qs.userId) {
+                    q.where('actions.user_id', qs.userId);
                 }
 
                 if (qs.discount && qs.discount === 'true') {
@@ -59,7 +66,7 @@ export default class PromiseOfPaymentsController {
             .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
             .paginate(pageNumber, limit);
 
-        return actions;
+        return this.serialize.serializeKeys(actions.toJSON());
     }
 
     public async update({ auth, params, request, response }: HttpContext) {
@@ -75,9 +82,9 @@ export default class PromiseOfPaymentsController {
 
             if (body.comments) {
                 const promiseOfPaymentHistory = await PromiseOfPaymentHistory.create({
-                    promise_of_payment_id: promiseOfPayment.id,
+                    promiseOfPaymentId: promiseOfPayment.id,
                     comments: body.comments,
-                    user_id: auth?.user?.id,
+                    userId: auth?.user?.id,
                 });
                 return promiseOfPaymentHistory;
             }
@@ -89,7 +96,7 @@ export default class PromiseOfPaymentsController {
 
     public async getHistory({ params, request }: HttpContext) {
         const qs = request.qs();
-        const orderBy = qs.order_by || 'id';
+        const orderBy = qs.orderBy || 'id';
         const descending = qs.descending || 'true';
         const { id } = params;
 
@@ -105,6 +112,6 @@ export default class PromiseOfPaymentsController {
             })
             .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc');
 
-        return actions;
+        return this.serialize.serializeKeys(actions);
     }
 }

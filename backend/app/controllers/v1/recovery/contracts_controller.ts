@@ -1,7 +1,14 @@
 import type { HttpContext } from '@adonisjs/core/http';
 import db from '@adonisjs/lucid/services/db';
+import SerializeService from '#services/serialize_service';
+import { inject } from '@adonisjs/core';
 
+@inject()
 export default class ContractsController {
+
+
+    constructor(protected serialize: SerializeService) {
+    }
 
     public async index({ request, response }: HttpContext) {
         const raw = db.raw;
@@ -10,11 +17,12 @@ export default class ContractsController {
 
         const qs = request.qs();
         const pageNumber = qs.page || '1';
-        const limit = qs.per_page || '5';
-        const orderBy = qs.order_by || 'des_contr';
+        const limit = qs.perPage || '5';
+        //const orderBy = qs.orderBy || 'des_contr';
+        const orderBy = 'des_contr';
         const descending = qs.descending || 'true';
         const status = qs.status || 'ATIVO';
-        const cod_credor_des_regis = qs.cod_credor_des_regis || null;
+        const cod_credor_des_regis = qs.codCredorDesRegis || null;
 
         if (!cod_credor_des_regis) {
             return response.badRequest("you didn't send the cod_credor_des_regis");
@@ -29,7 +37,7 @@ export default class ContractsController {
             .select(raw('count(pt.val_pago) filter(WHERE pt.val_pago > 0) as count_pago'))
             .select(raw(`min(pt.dat_venci) filter (WHERE ${filterIndAlter}) as dat_venci`))
             .where((q) => {
-                q.where('c.cod_credor_des_regis', `${qs.cod_credor_des_regis}`);
+                q.where('c.cod_credor_des_regis', `${qs.codCredorDesRegis}`);
             })
             .where((q) => {
                 if (qs.status) {
@@ -41,10 +49,10 @@ export default class ContractsController {
                     .andOn('c.des_contr', '=', 'pt.des_contr')
                     .andOnVal('c.status', '=', `${status}`.toUpperCase());
             })
-            .groupByRaw('1, 2')
+            .groupByRaw('1')
             .orderBy(`c.${orderBy}`, descending === 'true' ? 'desc' : 'asc')
             .paginate(pageNumber, limit);
 
-        return contracts;
+        return this.serialize.serializeKeys(contracts.toJSON());
     }
 }

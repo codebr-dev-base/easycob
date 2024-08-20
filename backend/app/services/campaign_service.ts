@@ -4,6 +4,7 @@ import type { Request } from '@adonisjs/core/http';
 import app from '@adonisjs/core/services/app';
 import Contact from '#models/recovery/contact';
 import db from '@adonisjs/lucid/services/db';
+import csvtojsonV2 from "csvtojson";
 
 export default class CampaignService {
 
@@ -11,12 +12,12 @@ export default class CampaignService {
 
     const type = qs.type || 'SMS';
 
-    if (qs.keyword_column === 'name') {
+    if (qs.keywordColumn === 'name') {
       q.whereILike('c.name', `%${qs.keyword}%`);
     }
 
-    if (qs.start_date && qs.end_date) {
-      q.whereBetween('c.date', [qs.start_date, qs.end_date]);
+    if (qs.startDate && qs.endDate) {
+      q.whereBetween('c.date', [qs.startDate, qs.endDate]);
     }
 
     q.where('c.type', type);
@@ -52,19 +53,20 @@ export default class CampaignService {
   async createCampaignValidator(request: Request) {
 
     try {
-      const data = request.all();
-      const payload = await createCampaignValidator.validate(data);
+      const payload = await request.validateUsing(
+        createCampaignValidator
+      );
 
       return {
         name: payload.name,
         date: payload.date,
         message: payload.message,
-        single_send: payload.single_send,
-        num_whatsapp: payload.num_whatsapp ? payload.num_whatsapp : undefined,
+        singleSend: payload.singleSend,
+        numWhatsapp: payload.numWhatsapp ? payload.numWhatsapp : undefined,
         type: payload.type ? payload.type : 'SMS',
         subject: payload.subject ? payload.subject : undefined,
         email: payload.email ? payload.email : undefined,
-        template_external_id: payload.template_external_id ? payload.template_external_id : undefined,
+        templateExternalId: payload.templateExternalId ? payload.templateExternalId : undefined,
       };
     } catch (error) {
       throw error;
@@ -92,11 +94,11 @@ export default class CampaignService {
 
   async readCsvFile(filePath: string) {
     try {
-      const csvtojsonV2 = require('csvtojson');
+
       const contacts = await csvtojsonV2({
         trim: true,
         delimiter: ';',
-      }).fromFile(`${app.makePath('uploads/csv')}/${filePath}`);
+      }).fromFile(`${app.makePath('uploads')}${filePath}`);
       return contacts;
     } catch (error) {
       console.error('Erro ao ler o arquivo CSV:', error);
@@ -151,23 +153,23 @@ export default class CampaignService {
 
   handleInvalidContact(status: string, contact: any, campaign: any, dateTime: any) {
     return {
-      cod_credor_des_regis: contact.cod_credor_des_regis,
+      codCredorDesRegis: contact.cod_credor_des_regis,
       contato: contact.contato,
       standardized: contact.standardized,
       status,
-      codigo_campanha: `${campaign.id}-${dateTime}`,
-      campaign_id: campaign.id,
+      codigoCampanha: `${campaign.id}-${dateTime}`,
+      campaignId: campaign.id,
     };
   };
 
   handleValidContact(contact: any, campaign: any, dateTime: any) {
     return {
-      cod_credor_des_regis: contact.cod_credor_des_regis,
+      codCredorDesRegis: contact.cod_credor_des_regis,
       contato: contact.contato,
       standardized: contact.standardized,
       status: 'Em processamento!',
-      codigo_campanha: `${campaign.id}-${dateTime}`,
-      campaign_id: campaign.id,
+      codigoCampanha: `${campaign.id}-${dateTime}`,
+      campaignId: campaign.id,
     };
   };
 
@@ -178,7 +180,7 @@ export default class CampaignService {
   }
 
   isSpecificBlock(contact: any, array: any[]): boolean {
-    return !array.some(item =>
+    return array.some(item =>
       item.contato.trim().toLowerCase().localeCompare(contact.contato.trim().toLowerCase()) === 0 &&
       `${item.cod_credor_des_regis}` === contact.cod_credor_des_regis
     );

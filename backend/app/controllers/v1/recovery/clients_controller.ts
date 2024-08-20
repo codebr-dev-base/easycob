@@ -20,16 +20,27 @@ export default class ClientsController {
         //const raw = Database.raw
         const qs = request.qs();
         const pageNumber = qs.page || '1';
-        const limit = qs.per_page || '10';
-        const orderBy = qs.order_by || 'id';
+        const limit = qs.perPage || '10';
+        const orderBy = qs.orderBy || 'id';
         const descending = qs.descending || 'true';
+
+        const listOutColumn = ['phone', 'email', 'desContr'];
+
+        let selected = null;
+        if (listOutColumn.includes(qs.keywordColumn)) {
+            selected = await this.service.generateWhereInPaginate(qs);
+        }
 
         const clients = await Client.query()
             .select('id', 'des_regis', 'nom_clien', 'des_cpf', 'cod_credor_des_regis', 'status')
-            .where(async (q) => {
-                return await this.service.generateWherePaginate(q, qs);
-            })
             .where((q) => {
+
+                if (selected) {
+                    q.whereIn(selected.column, selected.list);
+                } else if (qs.keyword && qs.keyword.length > 4) {
+                    q.whereILike(qs.keywordColumn, `%${qs.keyword}%`);
+                }
+
                 if (qs.status) {
                     q.where('status', `${qs.status}`.toUpperCase());
                 }
@@ -72,10 +83,10 @@ export default class ClientsController {
         const payload = await request.validateUsing(createClientMailValidator);
 
         const mailInvoice = await MailInvoice.create({
-            cod_credor_des_regis: payload.cod_credor_des_regis,
+            codCredorDesRegis: payload.cod_credor_des_regis,
             contact: payload.contact,
             type: payload.type,
-            user_id: auth?.user?.id,
+            userId: auth?.user?.id,
         });
 
         const files = request.files('file', {
@@ -102,8 +113,8 @@ export default class ClientsController {
             await file.move(app.makePath('uploads/invoices'), { name: newFileName });
 
             await MailInvoiceFile.create({
-                file_name: `/invoices/${newFileName}`,
-                mail_invoice_id: mailInvoice.id,
+                fileName: `/invoices/${newFileName}`,
+                mailInvoiceId: mailInvoice.id,
             });
 
             await mailInvoice.load('files');

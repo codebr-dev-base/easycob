@@ -1,46 +1,46 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { DateTime } from 'luxon';
+import { BaseModel, column } from '@adonisjs/lucid/orm';
 
 export default class Contact extends BaseModel {
   //declare static connection = 'recover'
-  static table = 'recupera.tbl_arquivos_cliente_numero'
+  static table = 'recupera.tbl_arquivos_cliente_numero';
 
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column()
-  declare cod_credor_des_regis: number | string
+  declare codCredorDesRegis: number | string;
 
   @column()
-  declare tipo_contato: string
+  declare tipoContato: string;
 
   @column()
-  declare contato: string
+  declare contato: string;
 
   @column.date()
-  declare dt_import: DateTime
+  declare dtImport: DateTime;
 
   @column()
-  declare is_whatsapp: boolean
+  declare isWhatsapp: boolean;
 
   @column()
-  declare cpc: boolean
+  declare cpc: boolean;
 
   @column()
-  declare numero_whats: string
+  declare numeroWhats: string;
 
   @column()
-  declare block: boolean
+  declare block: boolean;
 
   @column()
-  declare block_all: boolean
+  declare blockAll: boolean;
 
   @column()
-  declare percentual_atender: number
+  declare percentualAtender: number;
 
   @column()
-  declare count_atender: number
+  declare countAtender: number;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  declare updatedAt: DateTime;
 }

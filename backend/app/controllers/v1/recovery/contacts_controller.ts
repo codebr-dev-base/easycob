@@ -5,7 +5,7 @@ import type { HttpContext } from '@adonisjs/core/http';
 export default class ContactsController {
     public async index({ request, response }: HttpContext) {
         const qs = request.qs();
-        const cod_credor_des_regis = qs.cod_credor_des_regis || null;
+        const cod_credor_des_regis = qs.codCredorDesRegis || null;
 
         if (!cod_credor_des_regis) {
             return response.badRequest("you didn't send the cod_credor_des_regis");

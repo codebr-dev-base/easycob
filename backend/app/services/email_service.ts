@@ -8,6 +8,7 @@ import TypeAction from "#models/type_action";
 import { DateTime } from "luxon";
 import CatchLog from "#models/catch_log";
 import RecuperaService from "#services/recupera_service";
+import logger from '@adonisjs/core/services/logger';
 
 type MailerConfig =
     | 'manaus_com'
@@ -35,13 +36,13 @@ type MailerConfig =
 export default class EmailService extends RecuperaService {
 
     private blacklist: string[];
-    private typeAction: TypeAction | null;
-
 
     constructor() {
         super();
         this.blacklist = [];
         this.typeAction = null;
+        this.abbreviation = 'EME';
+        this.tipoContato = 'EMAIL';
     }
 
     protected getMailerConfig(
@@ -53,65 +54,7 @@ export default class EmailService extends RecuperaService {
         return config;
     }
 
-    async getTypeAction() {
-        this.typeAction = await TypeAction.findBy('abbreviation', 'EME');
 
-        if (!this.typeAction) {
-            throw new Error('Not find type action!');
-        }
-
-        return this.typeAction;
-    }
-
-    private async createAction(item: CampaignLot, clientsGroups: { [key: string]: any[]; }, campaign: Campaign) {
-
-
-        try {
-            const typeAction: TypeAction = await this.getTypeAction();
-
-            Object.keys(clientsGroups).forEach((key: string) => {
-                if (key === item.contato.toUpperCase()) {
-                    const group = clientsGroups[key];
-
-                    group.forEach(async (client) => {
-                        const action = await Action.create({
-                            cod_credor_des_regis: client.cod_credor_des_regis,
-                            des_regis: client.des_regis,
-                            des_contr: client.des_contr,
-                            cod_credor: client.cod_credor,
-                            matricula_contrato: client.matricula_contrato,
-                            tipo_contato: 'EMAIL',
-                            contato: client.contato,
-                            type_action_id: typeAction.id,
-                            description: '',
-                            retorno: 'Q',
-                            retornotexto: 'Em fila',
-                            user_id: campaign.user_id,
-                            val_princ: client.val_princ,
-                            dat_venci: DateTime.fromJSDate(client.dat_venci),
-                            day_late: client.day_late,
-                        });
-
-                        this.handleSendingForRecupera(action, 'ActionsEmail');
-                    });
-                }
-            });
-
-        } catch (error) {
-            throw error;
-        }
-
-    }
-
-    async findClient(item: any, clients: Array<any>) {
-        return await clients.find((client) => {
-            return (
-                client.cod_credor_des_regis
-                    .toLowerCase()
-                    .localeCompare(item.cod_credor_des_regis.toLowerCase()) === 0
-            );
-        });
-    }
 
     async checkContactValid(campaign: Campaign, item: CampaignLot) {
         const regex =
@@ -123,7 +66,7 @@ export default class EmailService extends RecuperaService {
         )
         */
         if (regex.test(item.standardized)) {
-            if (campaign.single_send) {
+            if (campaign.singleSend) {
                 const isContato = await this.blacklist.includes(item.standardized);
                 await item.refresh();
 
@@ -167,7 +110,7 @@ export default class EmailService extends RecuperaService {
 
             let cliente = 'Cliente';
 
-            const nomClien = <string[]>client?.nom_clien.split(' ');
+            const nomClien = <string[]>client?.nomClien.split(' ');
             cliente = nomClien[0];
 
             return {
@@ -176,10 +119,10 @@ export default class EmailService extends RecuperaService {
                     subject: 'Aviso de Débito em Atraso - Entre em Contato para Regularização',
                     cliente: cliente,
                     filial: client.subsidiary,
-                    whatsapp: `https://wa.me/55${campaign.num_whatsapp}`,
-                    from: `${client.subsidiary_mail}`.replace('"', ''),
+                    whatsapp: `https://wa.me/55${campaign.numWhatsapp}`,
+                    from: `${client.subsidiaryMail}`.replace('"', ''),
                     to: item.standardized,
-                    config: client.subsidiary_config_email,
+                    config: client.subsidiaryConfigEmail,
                 },
             };
         }
@@ -211,7 +154,7 @@ export default class EmailService extends RecuperaService {
                     try {
                         let sufixEmail = 'yuansolucoes.com';
                         let sufixConfigMail = '_com';
-                        let emailModel = 'emails/aegea_modelo1';
+                        let emailModel = 'emails/aegea_modelo_1';
                         if (j % 2 === 0) {
                             sufixEmail = 'yuansolucoes.com.br';
                             sufixConfigMail = '_com_br';
@@ -222,15 +165,15 @@ export default class EmailService extends RecuperaService {
 
                         try {
                             const configName = this.getMailerConfig(email.config, sufixConfigMail);
+
                             //`Cobrança AEGEA <${email.from}@${sufixEmail}>`
                             if (configName) {
                                 const response = await mail.use(configName).send((message) => {
                                     message
                                         .to(email.to)
                                         .from(
-                                            //TODO corrigir  remetente
-                                            'info@example.com',
-                                            'AdonisJS'
+                                            `${email.from}@${sufixEmail}`,
+                                            'Cobrança AEGEA'
                                         )
                                         .subject('Aviso de Débito em Atraso - Entre em Contato para Regularização')
                                         .htmlView(`${emailModel}_html`, {
@@ -270,9 +213,7 @@ export default class EmailService extends RecuperaService {
                             }
 
                         } catch (error) {
-                            throw new Error(
-                                JSON.stringify({ error, config: email.config, sufix: sufixConfigMail })
-                            );
+                            throw new Error(error);
                         }
                     } catch (error) {
                         const item = itemsChunks[i][j];

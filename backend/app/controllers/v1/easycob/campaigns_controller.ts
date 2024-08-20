@@ -12,23 +12,23 @@ import { sep, normalize } from 'node:path';
 import fs from 'fs';
 import SendEmailJob from '#jobs/send_email_job';
 import SendSmsJob from '#jobs/send_sms_job';
+import SerializeService from '#services/serialize_service';
 
 @inject()
 export default class CampaignsController {
 
-  constructor(protected service: CampaignService) {
+  constructor(protected service: CampaignService, protected serialize: SerializeService) {
   }
   public async index({ request }: HttpContext) {
     const sql = fs.readFileSync('app/sql/campaign/exists_pendencies.sql', 'utf8');
     const qs = request.qs();
     const pageNumber = qs.page || '1';
-    const limit = qs.per_page || '10';
-    const orderBy = qs.order_by || 'id';
+    const limit = qs.perPage || '10';
+    const orderBy = qs.orderBy || 'id';
     const descending = qs.descending || 'true';
 
     const campaigns = await db.from('public.campaigns as c')
       .select('c.*')
-
       .select(
         db.raw(sql)
       )
@@ -40,22 +40,24 @@ export default class CampaignsController {
       .orderBy(`c.${orderBy}`, descending === 'true' ? 'desc' : 'asc')
       .paginate(pageNumber, limit);
 
-    return campaigns;
+    return this.serialize.serializeKeys(campaigns.toJSON());
+
   }
 
   public async create({ auth, request, response }: HttpContext) {
 
     const user: User = auth.user!;
 
-    const payload = this.service.createCampaignValidator(request);
+    const payload = await this.service.createCampaignValidator(request);
+
 
     try {
       const newFileName = await this.service.handlerFile(request);
 
       const campaign = await Campaign.create({
         ...payload,
-        file_name: `/csv/${newFileName}`,
-        user_id: user.id,
+        fileName: `/csv/${newFileName}`,
+        userId: user.id,
       });
 
       await queue.dispatch(
@@ -76,7 +78,7 @@ export default class CampaignsController {
 
       return {
         ...campaign.serialize(),
-        url_file: `${campaign.file_name}`,
+        url_file: `${campaign.fileName}`,
       };
 
     } catch (error) {
@@ -140,9 +142,6 @@ export default class CampaignsController {
           return true;
 
         }
-
-
-
 
       }
       return false;

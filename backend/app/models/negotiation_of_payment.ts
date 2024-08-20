@@ -1,80 +1,80 @@
-import { DateTime } from 'luxon'
-import type { HasMany, BelongsTo } from '@adonisjs/lucid/types/relations'
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
-import Action from '#models/action'
-import NegotiationInvoice from '#models/negotiation_invoice'
+import { DateTime } from 'luxon';
+import type { HasMany, BelongsTo } from '@adonisjs/lucid/types/relations';
+import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm';
+import Action from '#models/action';
+import NegotiationInvoice from '#models/negotiation_invoice';
 
 
 export default class NegotiationOfPayment extends BaseModel {
   //declare static connection = 'pg'
 
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column()
-  declare id_negotiation: string
+  declare idNegotiation: string;
 
   @column()
-  declare val_original: number
+  declare valOriginal: number;
 
   @column()
-  declare val_total_prest: number
+  declare valTotalPrest: number;
 
   @column()
-  declare val_entra: number
+  declare valEntra: number;
 
   @column()
-  declare num_vezes: number
+  declare numVezes: number;
 
   @column()
-  declare val_prest: number
+  declare valPrest: number;
 
   @column()
-  declare val_discount: number
+  declare valDiscount: number;
 
   @column()
-  declare perc_discount: number
+  declare percDiscount: number;
 
   @column.date()
-  declare dat_entra: DateTime
+  declare datEntra: DateTime;
 
   @column.date()
-  declare dat_prest: DateTime
+  declare datPrest: DateTime;
 
   @column.date()
-  declare dat_entra_payment: DateTime
+  declare datEntraPayment: DateTime;
 
   @column()
-  declare val_entra_payment: number
+  declare valEntraPayment: number;
 
   @column()
-  declare status: boolean
+  declare status: boolean;
 
   @column()
-  declare following_status: string
+  declare followingStatus: string;
 
   @column.date()
-  declare dat_breach: DateTime
+  declare datBreach: DateTime;
 
   @column()
-  declare action_id: number
+  declare actionId: number;
 
   @column()
-  declare discount: boolean
+  declare discount: boolean;
 
   @belongsTo(() => Action, {
-    localKey: 'action_id',
+    localKey: 'actionId',
   })
-  declare action: BelongsTo<typeof Action>
+  declare action: BelongsTo<typeof Action>;
 
   @hasMany(() => NegotiationInvoice, {
-    foreignKey: 'negotiation_of_payment_id',
+    foreignKey: 'negotiationOfPaymentId',
   })
-  declare invoices: HasMany<typeof NegotiationInvoice>
+  declare invoices: HasMany<typeof NegotiationInvoice>;
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare createdAt: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  declare updatedAt: DateTime;
 }

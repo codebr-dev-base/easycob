@@ -2,6 +2,7 @@ import Client from "#models/recovery/client";
 import Contact from "#models/recovery/contact";
 import Contract from "#models/recovery/contract";
 import { ModelQueryBuilderContract } from "@adonisjs/lucid/types/model";
+import string from '@adonisjs/core/helpers/string';
 
 export default class ClientService {
 
@@ -17,7 +18,7 @@ export default class ClientService {
                         .whereILike('contato', `%${keyword}%`)
                         .where('tipo_contato', 'TELEFONE');
 
-                    phones.forEach(result => resultArray.push(result.cod_credor_des_regis));
+                    phones.forEach(result => resultArray.push(result.codCredorDesRegis));
                     return resultArray;
                     break;
 
@@ -27,17 +28,17 @@ export default class ClientService {
                         .whereILike('contato', `%${keyword}%`)
                         .where('tipo_contato', 'EMAIL');
 
-                    emails.forEach(result => resultArray.push(result.cod_credor_des_regis));
+                    emails.forEach(result => resultArray.push(result.codCredorDesRegis));
                     return resultArray;
                     break;
 
-                case 'contract':
+                case 'des_contr':
                     const contracts = await Contract.query()
                         .select('cod_credor_des_regis')
                         .whereILike('des_contr', `%${keyword}%`)
                         .where('status', 'ATIVO');
 
-                    contracts.forEach(result => resultArray.push(result.cod_credor_des_regis));
+                    contracts.forEach(result => resultArray.push(result.codCredorDesRegis));
                     return resultArray;
                     break;
 
@@ -51,9 +52,9 @@ export default class ClientService {
 
     };
 
-    protected async generateWhereInPaginate(qs: any) {
+    async generateWhereInPaginate(qs: any) {
         const keyword = qs.keyword;
-        const keywordColumn = qs.keyword_column;
+        const keywordColumn = string.snakeCase(qs.keywordColumn);
 
         if (!keyword || !keywordColumn) {
             return null;
@@ -74,12 +75,10 @@ export default class ClientService {
         if (selected) {
             q.whereIn(selected.column, selected.list);
         } else if (qs.keyword && qs.keyword.length > 4) {
-            if (!listOutColumn.includes(qs.keyword_column)) {
-                q.whereILike(qs.keyword_column, `%${qs.keyword}%`);
+            if (!listOutColumn.includes(qs.keywordColumn)) {
+                q.whereILike(qs.keywordColumn, `%${qs.keyword}%`);
             }
         }
-
-        return q;
 
     }
 }

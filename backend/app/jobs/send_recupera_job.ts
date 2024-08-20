@@ -93,22 +93,22 @@ export default class SendRecuperaJob extends Job {
           await this.service.handleSendingForRecupera(action);
         } else {
           action.sync = true;
-          action.result_sync = JSON.stringify(resultSync);
-          action.synced_at = DateTime.now();
+          action.resultSync = JSON.stringify(resultSync);
+          action.syncedAt = DateTime.now();
           action.retorno = resultSync.XML.RETORNO;
           action.retornotexto = resultSync.XML.RETORNOTEXTO;
         }
         await action.save();
 
         if (action.retorno === '00') {
-          const des_contr = action.des_contr;
+          const des_contr = action.desContr;
           const jsonString = JSON.stringify(action.toJSON());
           redis.hset('last_actions', des_contr, jsonString);
         }
 
       } catch (error) {
         action.sync = false;
-        //await this.service.handleSendingForRecupera(action);
+        await this.service.handleSendingForRecupera(action);
 
         await CatchLog.create({
           classJob: 'SendXmlRecupera',
@@ -134,7 +134,7 @@ export default class SendRecuperaJob extends Job {
     const action = await Action.find(payload.action_id);
     if (action) {
       action.sync = false;
-      //await this.service.handleSendingForRecupera(action);
+      await this.service.handleSendingForRecupera(action);
     }
   }
 }

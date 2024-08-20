@@ -10,7 +10,7 @@ export default class CampaignLot extends BaseModel {
   declare id: number;
 
   @column()
-  declare cod_credor_des_regis: string;
+  declare codCredorDesRegis: string;
 
   @column()
   declare contato: string;
@@ -22,7 +22,7 @@ export default class CampaignLot extends BaseModel {
   declare status: string;
 
   @column()
-  declare codigo_status: string;
+  declare codigoStatus: string;
 
   @column()
   declare operadora: string;
@@ -31,21 +31,21 @@ export default class CampaignLot extends BaseModel {
   declare descricao: string | null;
 
   @column()
-  declare campaign_id: number;
+  declare campaignId: number;
 
   @belongsTo(() => Campaign, {
-    foreignKey: 'campaign_id',
+    foreignKey: 'campaignId',
   })
   declare campaign: BelongsTo<typeof Campaign>;
 
   @column()
-  declare codigo_campanha: string;
+  declare codigoCampanha: string;
 
   @column()
   declare standardized: string;
 
   @column()
-  declare campo_informado: number;
+  declare campoInformado: number;
 
   @column()
   declare mensagem: number;
@@ -54,7 +54,7 @@ export default class CampaignLot extends BaseModel {
   declare valid: boolean;
 
   @column.date()
-  declare data_retorno: DateTime;
+  declare dataRetorno: DateTime;
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime;

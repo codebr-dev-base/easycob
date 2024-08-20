@@ -5,8 +5,8 @@ export default class InvoicesController {
     public async index({ request, response }: HttpContext) {
         const qs = request.qs();
         const status = qs.status || 'ATIVO';
-        const cod_credor_des_regis = qs.cod_credor_des_regis || null;
-        const des_contr = qs.des_contr || null;
+        const cod_credor_des_regis = qs.codCredorDesRegis || null;
+        const des_contr = qs.desContr || null;
 
 
         if (!cod_credor_des_regis || !des_contr) {

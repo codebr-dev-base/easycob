@@ -16,22 +16,22 @@ export default class HistoryAction extends BaseModel {
   declare id: number;
 
   @column()
-  declare cod_credor_des_regis: number | string;
+  declare codCredorDesRegis: number | string;
 
   @column()
-  declare des_regis: string;
+  declare desRegis: string;
 
   @column()
-  declare matricula_contrato: number;
+  declare matriculaContrato: number;
 
   @column()
-  declare des_contr: string;
+  declare desContr: string;
 
   @column()
-  declare cod_credor: string;
+  declare codCredor: string;
 
   @column()
-  declare tipo_contato: string;
+  declare tipoContato: string;
 
   @column()
   declare contato: string;
@@ -43,47 +43,46 @@ export default class HistoryAction extends BaseModel {
   declare sync: boolean;
 
   @column()
-  declare result_sync: string;
+  declare resultSync: string;
 
   @column()
   declare channel: string;
 
   @column()
-  declare type_action_id: number;
+  declare typeActionId: number;
 
   @column()
-  declare unification_check: boolean;
+  declare unificationCheck: boolean;
 
   @belongsTo(() => TypeAction, {
-    foreignKey: 'type_action_id',
+    foreignKey: 'typeActionId',
   })
-  declare type_action: BelongsTo<typeof TypeAction>;
+  declare typeAction: BelongsTo<typeof TypeAction>;
 
   @column()
-  declare user_id: number;
+  declare userId: number;
 
   @belongsTo(() => User, {
-    foreignKey: 'user_id',
+    foreignKey: 'userId',
   })
   declare user: BelongsTo<typeof User>;
 
-  async loadClient() {
-    this.client = await Client.findBy('cod_credor_des_regis', this.cod_credor_des_regis);
-  }
-
-  @column()
-  declare client: Client | null;
+  @belongsTo(() => Client, {
+    foreignKey: 'codCredorDesRegis',
+    localKey: 'codCredorDesRegis',
+  })
+  declare client: BelongsTo<typeof Client>;
 
   @column()
   declare contracts: Contract[];
 
   @hasMany(() => PromiseOfPayment, {
-    foreignKey: 'action_id',
+    foreignKey: 'actionId',
   })
   declare promises: HasMany<typeof PromiseOfPayment>;
 
   @hasMany(() => NegotiationOfPayment, {
-    foreignKey: 'action_id',
+    foreignKey: 'actionId',
   })
   declare negotiations: HasMany<typeof NegotiationOfPayment>;
 
@@ -97,13 +96,13 @@ export default class HistoryAction extends BaseModel {
   declare updatedAt: DateTime;
 
   @column()
-  declare val_princ: number;
+  declare valPrinc: number;
 
   @column.date()
-  declare dat_venci: DateTime;
+  declare datVenci: DateTime;
 
   @column()
-  declare day_late: number;
+  declare dayLate: number;
 
   @column()
   declare retorno: string | null;

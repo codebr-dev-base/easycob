@@ -1,16 +1,23 @@
 import NegotiationInvoice from '#models/negotiation_invoice';
 import NegotiationInvoiceHistory from '#models/negotiation_invoice_history';
 import User from '#models/user';
+import SerializeService from '#services/serialize_service';
 import { updateNegotiationInvoiceValidator } from '#validators/negotiation_invoice_validator';
+import { inject } from '@adonisjs/core';
 import type { HttpContext } from '@adonisjs/core/http';
 import db from '@adonisjs/lucid/services/db';
 
+@inject()
 export default class NegotiationInvoicesController {
+
+    constructor(protected serialize: SerializeService) {
+    }
+
     public async index({ request }: HttpContext) {
         const qs = request.qs();
         const pageNumber = qs.page || '1';
-        const limit = qs.per_page || '10';
-        const orderBy = qs.order_by || 'id';
+        const limit = qs.perPage || '10';
+        const orderBy = qs.orderBy || 'id';
         const descending = qs.descending || 'true';
 
         const actions = await db.from('negotiation_invoices')
@@ -37,26 +44,26 @@ export default class NegotiationInvoicesController {
             )
             .where((q) => {
                 /*
-                if (qs.start_date && qs.end_date) {
-                  q.whereBetween('negotiation_invoices.dat_prest', [qs.start_date, qs.end_date])
+                if (qs.startDate && qs.endDate) {
+                  q.whereBetween('negotiation_invoices.dat_prest', [qs.startDate, qs.endDate])
                 }
                  */
 
-                if (qs.start_date && qs.end_date) {
-                    q.whereRaw(`negotiation_invoices.dat_prest::date >= ?`, [qs.start_date]).andWhereRaw(
+                if (qs.startDate && qs.endDate) {
+                    q.whereRaw(`negotiation_invoices.dat_prest::date >= ?`, [qs.startDate]).andWhereRaw(
                         `negotiation_invoices.dat_prest::date <= ?`,
-                        [qs.end_date]
+                        [qs.endDate]
                     );
                 }
 
-                if (qs.start_date_create && qs.end_date_create) {
+                if (qs.startDate_create && qs.endDateCreate) {
                     q.whereRaw(`negotiation_invoices.created_at::date >= ?`, [
-                        qs.start_date_create,
-                    ]).andWhereRaw(`negotiation_invoices.created_at::date <= ?`, [qs.end_date_create]);
+                        qs.startDate_create,
+                    ]).andWhereRaw(`negotiation_invoices.created_at::date <= ?`, [qs.endDateCreate]);
                 }
 
-                if (qs.user_id) {
-                    q.where('actions.user_id', qs.user_id);
+                if (qs.userId) {
+                    q.where('actions.user_id', qs.userId);
                 }
 
                 if (qs.status && qs.status === 'true') {
@@ -68,7 +75,8 @@ export default class NegotiationInvoicesController {
             .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
             .paginate(pageNumber, limit);
 
-        return actions;
+        return this.serialize.serializeKeys(actions.toJSON());
+
     }
 
     public async update({ auth, params, request, response }: HttpContext) {
@@ -100,7 +108,7 @@ export default class NegotiationInvoicesController {
 
     public async getHistory({ params, request }: HttpContext) {
         const qs = request.qs();
-        const orderBy = qs.order_by || 'id';
+        const orderBy = qs.orderBy || 'id';
         const descending = qs.descending || 'true';
         const { id } = params;
 
@@ -116,6 +124,6 @@ export default class NegotiationInvoicesController {
             })
             .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc');
 
-        return actions;
+        return this.serialize.serializeKeys(actions);
     }
 }

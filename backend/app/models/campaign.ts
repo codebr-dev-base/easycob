@@ -1,61 +1,61 @@
-import { DateTime } from 'luxon'
-import type { HasMany, BelongsTo } from '@adonisjs/lucid/types/relations'
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
-import User from '#models/user'
-import CampaignLot from '#models/campaign_lot'
+import { DateTime } from 'luxon';
+import type { HasMany, BelongsTo } from '@adonisjs/lucid/types/relations';
+import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm';
+import User from '#models/user';
+import CampaignLot from '#models/campaign_lot';
 
 export default class Campaign extends BaseModel {
   //declare static connection = 'pg'
 
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column()
-  declare name: string
+  declare name: string;
 
   @column()
-  declare num_whatsapp: string
+  declare numWhatsapp: string;
 
   @column.date()
-  declare date: DateTime
+  declare date: DateTime;
 
   @column()
-  declare message: string
+  declare message: string;
 
   @column()
-  declare user_id: number
+  declare userId: number;
 
   @belongsTo(() => User, {
-    foreignKey: 'user_id',
+    foreignKey: 'userId',
   })
-  declare user: BelongsTo<typeof User>
+  declare user: BelongsTo<typeof User>;
 
   @column()
-  declare file_name: string
+  declare fileName: string;
 
   @column()
-  declare single_send: boolean
+  declare singleSend: boolean;
 
   @hasMany(() => CampaignLot, {
-    foreignKey: 'campaign_id',
+    foreignKey: 'campaignId',
   })
-  declare lots: HasMany<typeof CampaignLot>
+  declare lots: HasMany<typeof CampaignLot>;
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare createdAt: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  declare updatedAt: DateTime;
 
   @column()
-  declare type: string
+  declare type: string;
 
   @column()
-  declare subject: string
+  declare subject: string;
 
   @column()
-  declare email: string
+  declare email: string;
 
   @column()
-  declare template_external_id: number
+  declare templateExternalId: number;
 }

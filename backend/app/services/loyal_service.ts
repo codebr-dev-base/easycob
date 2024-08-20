@@ -1,6 +1,6 @@
 import db from "@adonisjs/lucid/services/db";
 import { DatabaseQueryBuilderContract } from "@adonisjs/lucid/types/querybuilder";
-
+import string from '@adonisjs/core/helpers/string';
 
 export default class LoyalService {
 
@@ -8,45 +8,47 @@ export default class LoyalService {
         return db.from('recupera.redistribuicao_carteira_base as b')
             .distinctOn('b.des_contr')
             .select('b.*')
-            .where('b.user_id', userId)
+            .where('b.user_id', 15)
             .as('l');
     }
 
     generateWherePaginate(q: DatabaseQueryBuilderContract<any>, qs: any) {
 
-        if (qs.keyword && qs.keyword.length > 4) {
-            q.whereILike(`l.${qs.keyword_column}`, `%${qs.keyword}%`);
-        }
-
-        if (qs.faixa_tempos) {
-            if (Array.isArray(qs.faixa_tempos)) {
-                q.whereIn('l.faixa_tempo', qs.faixa_tempos);
-            } else {
-                q.where('l.faixa_tempo', qs.faixa_tempos);
+        if (qs.keyword && qs.keywordColumn) {
+            if (qs.keyword && qs.keyword.length > 4) {
+                q.whereILike(`l.${string.snakeCase(qs.keywordColumn)}`, `%${qs.keyword}%`);
             }
         }
 
-        if (qs.faixa_valores) {
-            if (Array.isArray(qs.faixa_valores)) {
-                q.whereIn('l.faixa_valor', qs.faixa_valores);
+        if (qs.faixaTempos) {
+            if (Array.isArray(qs.faixaTempos)) {
+                q.whereIn('l.faixa_tempo', qs.faixaTempos);
             } else {
-                q.where('l.faixa_valor', qs.faixa_valores);
+                q.where('l.faixa_tempo', qs.faixaTempos);
             }
         }
 
-        if (qs.faixa_titulos) {
-            if (Array.isArray(qs.faixa_titulos)) {
-                q.whereIn('l.faixa_titulos', qs.faixa_titulos);
+        if (qs.faixaValores) {
+            if (Array.isArray(qs.faixaValores)) {
+                q.whereIn('l.faixa_valor', qs.faixaValores.map((value: any) => decodeURIComponent(value)));
             } else {
-                q.where('l.faixa_titulos', qs.faixa_titulos);
+                q.where('l.faixa_valor', decodeURIComponent(qs.faixaValores));
             }
         }
 
-        if (qs.faixa_clusters) {
-            if (Array.isArray(qs.faixa_clusters)) {
-                q.whereIn('l.class_cluster', qs.faixa_clusters);
+        if (qs.faixaTitulos) {
+            if (Array.isArray(qs.faixaTitulos)) {
+                q.whereIn('l.faixa_titulos', qs.faixaTitulos);
             } else {
-                q.where('l.class_cluster', qs.faixa_clusters);
+                q.where('l.faixa_titulos', qs.faixaTitulos);
+            }
+        }
+
+        if (qs.faixaClusters) {
+            if (Array.isArray(qs.faixaClusters)) {
+                q.whereIn('l.class_cluster', qs.faixaClusters);
+            } else {
+                q.where('l.class_cluster', qs.faixaClusters);
             }
         }
 
@@ -71,25 +73,25 @@ export default class LoyalService {
             q.where('check', false);
         }
 
-        if (qs.type_actions) {
-            if (Array.isArray(qs.type_actions)) {
-                q.whereIn('ta.id', qs.type_actions);
-                if (qs.type_actions.includes('0')) {
+        if (qs.typeActions) {
+            if (Array.isArray(qs.typeActions)) {
+                q.whereIn('ta.id', qs.typeActions);
+                if (qs.typeActions.includes('0')) {
                     q.orWhereNull('ta.name');
                 }
             } else {
-                if (qs.type_actions === '0') {
+                if (qs.typeActions === '0') {
                     q.whereNull('ta.name');
                 } else {
-                    q.where('ta.id', qs.type_actions);
+                    q.where('ta.id', qs.typeActions);
                 }
             }
         }
 
-        if (qs.start_date && qs.end_date) {
-            q.whereRaw(`la.synced_at::date >= ?`, [qs.start_date]).andWhereRaw(
+        if (qs.startDate && qs.endDate) {
+            q.whereRaw(`la.synced_at::date >= ?`, [qs.startDate]).andWhereRaw(
                 `la.synced_at::date <= ?`,
-                [qs.end_date]
+                [qs.endDate]
             );
         }
 

@@ -1,26 +1,26 @@
-import { DateTime } from 'luxon'
-import type { BelongsTo, ManyToMany} from '@adonisjs/lucid/types/relations'
-import { BaseModel, column, belongsTo, manyToMany } from '@adonisjs/lucid/orm'
-import User from '#models/user'
-import Module from '#models/module'
+import { DateTime } from 'luxon';
+import type { BelongsTo, ManyToMany } from '@adonisjs/lucid/types/relations';
+import { BaseModel, column, belongsTo, manyToMany } from '@adonisjs/lucid/orm';
+import User from '#models/user';
+import Module from '#models/module';
 
 export default class Skill extends BaseModel {
   //declare static connection = 'pg'
 
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column()
-  declare moduleId: number
+  declare moduleId: number;
 
   @belongsTo(() => Module)
-  declare module: BelongsTo<typeof Module>
+  declare module: BelongsTo<typeof Module>;
 
   @column()
-  declare name: string
+  declare name: string;
 
   @column()
-  declare long_name: string
+  declare longName: string;
 
   @manyToMany(() => User, {
     pivotTable: 'skill_user',
@@ -29,11 +29,11 @@ export default class Skill extends BaseModel {
     relatedKey: 'id',
     pivotRelatedForeignKey: 'user_id',
   })
-  declare users: ManyToMany<typeof User>
+  declare users: ManyToMany<typeof User>;
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare createdAt: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  declare updatedAt: DateTime;
 }

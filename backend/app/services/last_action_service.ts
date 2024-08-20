@@ -1,9 +1,9 @@
 
 import db from '@adonisjs/lucid/services/db';
-import redis from '@adonisjs/redis/services/main'
-import { inject } from '@adonisjs/core'
-import { Logger } from '@adonisjs/core/logger'
-import fs from 'fs'
+import redis from '@adonisjs/redis/services/main';
+import { inject } from '@adonisjs/core';
+import { Logger } from '@adonisjs/core/logger';
+import fs from 'fs';
 import LastAction from '#models/last_action';
 
 @inject()
@@ -13,12 +13,12 @@ export default class LastActionService {
 
     async updateTableLastAction() {
         const sql = fs.readFileSync('app/sql/last_action/update.sql', 'utf8');
-        const trx = await db.transaction()
+        const trx = await db.transaction();
 
         try {
-            await trx.rawQuery(sql)
-            await trx.raw(sql)
-            await trx.commit()
+            await trx.rawQuery(sql);
+            await trx.raw(sql);
+            await trx.commit();
         } catch (error) {
             //await trx.rollback()
             throw new Error(error);
@@ -36,12 +36,12 @@ export default class LastActionService {
         }
 
         const sql = fs.readFileSync('app/sql/last_action/get.sql', 'utf8');
-        const res = await db.rawQuery(sql)
-        const rows: Array<LastAction> = res.rows
+        const res = await db.rawQuery(sql);
+        const rows: Array<any> = res.rows;
         // Itera sobre os resultados e alimenta o Redis
         const pipeline = redis.pipeline(); // Usa pipeline para otimizar o envio em massa
 
-        rows.forEach(la => {
+        rows.forEach(async (la) => {
             const des_contr = la.des_contr;
             const jsonString = JSON.stringify(la);
             pipeline.hset('last_actions', des_contr, jsonString);
@@ -50,7 +50,7 @@ export default class LastActionService {
         // Executa o pipeline para enviar todos os comandos de uma vez
         await pipeline.exec();
 
-        return true
+        return true;
     }
 
     async getAllCollectionLastAction() {
@@ -66,10 +66,10 @@ export default class LastActionService {
 
                     // Faça o que precisar com os dados da interação
                     console.log(`User ID: ${des_contr}, Last action:`, lastAction);
-                    list.push(lastAction)
+                    list.push(lastAction);
                 }
             }
-            return list
+            return list;
         } catch (error) {
             console.error('Erro ao iterar sobre last_actions:', error);
         }

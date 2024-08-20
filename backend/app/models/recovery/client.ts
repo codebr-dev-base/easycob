@@ -1,141 +1,131 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
-import type { HasMany } from '@adonisjs/lucid/types/relations'
-import Contract from '#models/recovery/contract'
-import Invoice from '#models/recovery/invoice'
-import Contact from '#models/recovery/contact'
+import { DateTime } from 'luxon';
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm';
+import type { HasMany } from '@adonisjs/lucid/types/relations';
+import Contract from '#models/recovery/contract';
+import Invoice from '#models/recovery/invoice';
+import Contact from '#models/recovery/contact';
 
 export default class Client extends BaseModel {
   //declare static connection = 'recover'
-  static table = 'recupera.tbl_arquivos_clientes'
+  static table = 'recupera.tbl_arquivos_clientes';
 
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column.dateTime()
-  declare dt_update: DateTime
+  declare dtUpdate: DateTime;
 
   @column.date()
-  declare dat_movto: DateTime
+  declare datMovto: DateTime;
 
   @column()
-  declare cod_credor_des_regis: number | string
+  declare codCredorDesRegis: number | string;
 
   @column()
-  declare cod_credor: string
+  declare codCredor: string;
 
   @column()
-  declare des_regis: string
+  declare desRegis: string;
 
   @column()
-  declare ind_alter: string
+  declare indAlter: string;
 
   @column()
-  declare des_cpf: string
+  declare desCpf: string;
 
   @column()
-  declare nom_clien: string
+  declare nomClien: string;
 
   @column.date()
-  declare dat_nasci: DateTime
+  declare datNasci: DateTime;
 
   @column()
-  declare des_ender_resid: string
+  declare desEnderResid: string;
 
   @column()
-  declare des_numer_resid: string
+  declare desNumerResid: string;
 
   @column()
-  declare des_compl_resid: string
+  declare desComplResid: string;
 
   @column()
-  declare des_bairr_resid: string
+  declare desBairrResid: string;
 
   @column()
-  declare des_cidad_resid: string
+  declare desCidadResid: string;
 
   @column()
-  declare des_estad_resid: string
+  declare desEstadResid: string;
 
   @column()
-  declare des_cep_resid: string
+  declare desCepResid: string;
 
   @column()
-  declare des_fones_resid: string
+  declare desFonesResid: string;
 
   @column()
-  declare des_fones_comer: string
+  declare desFonesComer: string;
 
   @column()
-  declare cod_ramal_comer: string
+  declare codRamalComer: string;
 
   @column.date()
-  declare dat_refer: DateTime
+  declare datRefer: DateTime;
 
   @column.date()
-  declare dat_expir_prazo: DateTime
+  declare datExpirPrazo: DateTime;
 
   @column.date()
-  declare dat_cadas_clien: DateTime
+  declare datCadasClien: DateTime;
 
   @column.date()
-  declare dat_admis: DateTime
+  declare datAdmis: DateTime;
 
   @column()
-  declare des_fones_celul: string
+  declare desFonesCelul: string;
 
   @column()
-  declare des_fones1: string
+  declare desFones1: string;
 
   @column()
-  declare des_fones2: string
+  declare desFones2: string;
 
   @column()
-  declare des_email: string
+  declare desEmail: string;
 
   @column()
-  declare desc_cod_movimento: string
+  declare descCodMovimento: string;
 
   @column()
-  declare status: string
+  declare status: string;
 
   @hasMany(() => Contract, {
-    foreignKey: 'cod_credor_des_regis',
-    localKey: 'cod_credor_des_regis',
+    foreignKey: 'codCredorDesRegis',
+    localKey: 'codCredorDesRegis',
   })
-  declare contracts: HasMany<typeof Contract>
+  declare contracts: HasMany<typeof Contract>;
 
   @hasMany(() => Invoice, {
-    foreignKey: 'cod_credor_des_regis',
-    localKey: 'cod_credor_des_regis',
+    foreignKey: 'codCredorDesRegis',
+    localKey: 'codCredorDesRegis',
   })
-  declare invoices: HasMany<typeof Invoice>
+  declare invoices: HasMany<typeof Invoice>;
 
   @hasMany(() => Contact, {
-    foreignKey: 'cod_credor_des_regis',
-    localKey: 'cod_credor_des_regis',
+    foreignKey: 'codCredorDesRegis',
+    localKey: 'codCredorDesRegis',
   })
-  declare contacts: HasMany<typeof Contact>
+  declare contacts: HasMany<typeof Contact>;
 
   @hasMany(() => Contact, {
-    foreignKey: 'cod_credor_des_regis',
-    localKey: 'cod_credor_des_regis',
+    foreignKey: 'codCredorDesRegis',
+    localKey: 'codCredorDesRegis',
   })
-  declare phones: HasMany<typeof Contact>
+  declare phones: HasMany<typeof Contact>;
 
   @hasMany(() => Contact, {
-    foreignKey: 'cod_credor_des_regis',
-    localKey: 'cod_credor_des_regis',
+    foreignKey: 'codCredorDesRegis',
+    localKey: 'codCredorDesRegis',
   })
-  declare emails: HasMany<typeof Contact>
-
-  serializeExtras() {
-    return {
-      val_princ: this.$extras.val_princ,
-      val_pago: this.$extras.val_pago,
-      count_princ: this.$extras.count_princ,
-      count_pago: this.$extras.count_pago,
-      dat_venci: this.$extras.dat_venci,
-    }
-  }
+  declare emails: HasMany<typeof Contact>;
 }

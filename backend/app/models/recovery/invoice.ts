@@ -1,87 +1,87 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import Client from '#models/recovery/client'
+import { DateTime } from 'luxon';
+import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm';
+import type { BelongsTo } from '@adonisjs/lucid/types/relations';
+import Client from '#models/recovery/client';
 
 export default class Invoice extends BaseModel {
   //declare static connection = 'recover'
-  static table = 'recupera.tbl_arquivos_prestacao'
+  static table = 'recupera.tbl_arquivos_prestacao';
 
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column.dateTime()
-  declare dt_update: DateTime
+  declare dtUpdate: DateTime;
 
   @column.date()
-  declare dat_movto: DateTime
+  declare datMovto: DateTime;
 
   @column()
-  declare cod_credor_des_regis: number | string
+  declare codCredorDesRegis: number | string;
 
   @column()
-  declare matricula_contrato: number
+  declare matriculaContrato: number;
 
   @column()
-  declare cod_credor: string
+  declare codCredor: string;
 
   @column()
-  declare des_regis: string
+  declare desRegis: string;
 
   @column()
-  declare des_contr: string
+  declare desContr: string;
 
   @column.date()
-  declare dat_venci: DateTime
+  declare datVenci: DateTime;
 
   @column.date()
-  declare dat_corre: DateTime
+  declare datCorre: DateTime;
 
   @column.date()
-  declare dat_pagam: DateTime
+  declare datPagam: DateTime;
 
   @column()
-  declare val_princ: number
+  declare valPrinc: number;
 
   @column()
-  declare val_corre: number
+  declare valCorre: number;
 
   @column()
-  declare val_encar: number
+  declare valEncar: number;
 
   @column()
-  declare val_minim: number
+  declare valMinim: number;
 
   @column()
-  declare val_pago: number
+  declare valPago: number;
 
   @column()
-  declare qtd_prest: string
+  declare qtdPrest: string;
 
   @column()
-  declare ind_alter: string
+  declare indAlter: string;
 
   @column()
-  declare ind_baixa: string
+  declare indBaixa: string;
 
   @column()
-  declare id_prest: number
+  declare idPrest: number;
 
   @column()
-  declare desc_cod_movimento: string
+  declare descCodMovimento: string;
 
   @column()
-  declare identificador_baixa: string
+  declare identificadorBaixa: string;
 
   @column()
-  declare status: string
+  declare status: string;
 
   @column()
-  declare matricula_antiga: string
+  declare matriculaAntiga: string;
 
   @belongsTo(() => Client, {
-    foreignKey: 'cod_credor_des_regis',
-    localKey: 'cod_credor_des_regis',
+    foreignKey: 'codCredorDesRegis',
+    localKey: 'codCredorDesRegis',
   })
-  declare client: BelongsTo<typeof Client>
+  declare client: BelongsTo<typeof Client>;
 }

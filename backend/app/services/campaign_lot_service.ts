@@ -20,7 +20,7 @@ export default class CampaignLotService {
                         .whereILike('contato', `%${keyword}%`)
                         .where('tipo_contato', 'TELEFONE');
 
-                    phones.forEach(result => resultArray.push(result.cod_credor_des_regis));
+                    phones.forEach(result => resultArray.push(result.codCredorDesRegis));
                     return resultArray;
                     break;
 
@@ -30,7 +30,7 @@ export default class CampaignLotService {
                         .whereILike('contato', `%${keyword}%`)
                         .where('tipo_contato', 'EMAIL');
 
-                    emails.forEach(result => resultArray.push(result.cod_credor_des_regis));
+                    emails.forEach(result => resultArray.push(result.codCredorDesRegis));
                     return resultArray;
                     break;
 
@@ -40,7 +40,7 @@ export default class CampaignLotService {
                         .whereILike('des_contr', `%${keyword}%`)
                         .where('status', 'ATIVO');
 
-                    contracts.forEach(result => resultArray.push(result.cod_credor_des_regis));
+                    contracts.forEach(result => resultArray.push(result.codCredorDesRegis));
                     return resultArray;
                     break;
 
@@ -49,7 +49,7 @@ export default class CampaignLotService {
                         .select('cod_credor_des_regis')
                         .whereILike('nom_clien', `%${keyword}%`)
                         .where('status', 'ATIVO');
-                    clients.forEach(result => resultArray.push(result.cod_credor_des_regis));
+                    clients.forEach(result => resultArray.push(result.codCredorDesRegis));
                     return resultArray;
                     break;
 
@@ -68,19 +68,19 @@ export default class CampaignLotService {
             | ModelQueryBuilderContract<typeof ErrorCampaignImport, ErrorCampaignImport>,
         qs: any) {
 
-        if (qs.start_date && qs.end_date) {
-            q.whereRaw(`created_at::date >= ?`, [qs.start_date]).andWhereRaw(
+        if (qs.startDate && qs.endDate) {
+            q.whereRaw(`created_at::date >= ?`, [qs.startDate]).andWhereRaw(
                 `created_at::date <= ?`,
-                [qs.end_date]
+                [qs.endDate]
             );
         }
 
-        if (qs.campaign_id) {
-            q.where('campaign_id', Number(qs.campaign_id));
+        if (qs.campaignId) {
+            q.where('campaign_id', Number(qs.campaignId));
         }
 
         const keyword = qs.keyword;
-        const keywordColumn = qs.keyword_column;
+        const keywordColumn = qs.keywordColumn;
 
         if (!keyword || !keywordColumn) {
             return q;

@@ -1,33 +1,33 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { DateTime } from 'luxon';
+import { BaseModel, column } from '@adonisjs/lucid/orm';
 
 export default class ErrorCampaignImport extends BaseModel {
   //declare static connection = 'pg'
 
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column()
-  declare cod_credor_des_regis: string
+  declare codCredorDesRegis: string;
 
   @column()
-  declare contato: string
+  declare contato: string;
 
   @column()
-  declare codigo_campanha: string
+  declare codigoCampanha: string;
 
   @column()
-  declare standardized: string
+  declare standardized: string;
 
   @column()
-  declare status: string
+  declare status: string;
 
   @column()
-  declare campaign_id: number
+  declare campaignId: number;
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare createdAt: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  declare updatedAt: DateTime;
 }

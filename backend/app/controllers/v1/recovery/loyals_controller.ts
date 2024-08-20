@@ -2,12 +2,13 @@ import Loyal from '#models/recovery/loyal';
 import type { HttpContext } from '@adonisjs/core/http';
 import db from '@adonisjs/lucid/services/db';
 import LoyalService from '#services/loyal_service';
+import SerializeService from '#services/serialize_service';
 import { inject } from '@adonisjs/core';
 
 @inject()
 export default class LoyalsController {
 
-    constructor(protected service: LoyalService) {
+    constructor(protected service: LoyalService, protected serialize: SerializeService) {
     }
 
     public async index({ request, auth }: HttpContext) {
@@ -15,8 +16,8 @@ export default class LoyalsController {
             const userId = auth.user.id;
             const qs = request.qs();
             const pageNumber = qs.page || '1';
-            const limit = qs.per_page || '20';
-            const orderBy = qs.order_by || 'id';
+            const limit = qs.perPage || '20';
+            const orderBy = qs.orderBy || 'id';
             const descending = qs.descending || 'true';
 
 
@@ -40,56 +41,66 @@ export default class LoyalsController {
                 .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
                 .paginate(pageNumber, limit);
 
-            return clients;
+            //return clients;
+            return this.serialize.serializeKeys(clients.toJSON());
         } else {
-            return [];
+            return {
+                meta: {},
+                data: []
+            };
         }
     }
 
     public async getFaixaTempos({ }: HttpContext) {
         const faixaTempos = await db.from('recupera.redistribuicao_carteira_base as l')
             .select('faixa_tempo')
-            .distinct('faixa_tempo');
+            .distinct('faixa_tempo')
+            .orderBy('faixa_tempo');
 
-        return faixaTempos;
+        return this.serialize.serializeKeys(faixaTempos);
     }
 
     public async getFaixaValores({ }: HttpContext) {
         const faixaValores = await db.from('recupera.redistribuicao_carteira_base as l')
             .select('faixa_valor')
-            .distinct('faixa_valor');
+            .distinct('faixa_valor')
+            .orderBy('faixa_valor');
 
-        return faixaValores;
+        return this.serialize.serializeKeys(faixaValores);
     }
 
     public async getFaixaTitulos({ }: HttpContext) {
         const faixaTitulos = await db.from('recupera.redistribuicao_carteira_base as l')
             .select('faixa_titulos')
-            .distinct('faixa_titulos');
+            .distinct('faixa_titulos')
+            .orderBy('faixa_titulos');
 
-        return faixaTitulos;
+        return this.serialize.serializeKeys(faixaTitulos);
     }
     public async getFaixaClusters({ }: HttpContext) {
         const faixaCluster = await db.from('recupera.redistribuicao_carteira_base as l')
             .select('class_cluster')
-            .distinct('class_cluster');
+            .distinct('class_cluster')
+            .orderBy('class_cluster');
 
-        return faixaCluster;
+        return this.serialize.serializeKeys(faixaCluster);
     }
     public async getUnidades({ }: HttpContext) {
         const unidades = await db.from('recupera.redistribuicao_carteira_base as l')
             .select('unidade')
-            .distinct('unidade');
+            .distinct('unidade')
+            .orderBy('unidade');
 
-        return unidades;
+        return this.serialize.serializeKeys(unidades);
     }
 
     public async getSituacoes({ }: HttpContext) {
         const situacoes = await db.from('recupera.redistribuicao_carteira_base as l')
             .select('class_sitcontr as situacao')
-            .distinct('class_sitcontr');
+            .distinct('class_sitcontr')
+            .orderBy('class_sitcontr');
 
-        return situacoes;
+        return this.serialize.serializeKeys(situacoes);
     }
 
     public async setCheck({ params, response }: HttpContext) {

@@ -15,8 +15,8 @@ export default class ErrorCampaignsController {
     public async index({ request }: HttpContext) {
         const qs = request.qs();
         const pageNumber = qs.page || '1';
-        const limit = qs.per_page || '10';
-        const orderBy = qs.order_by || 'id';
+        const limit = qs.perPage || '10';
+        const orderBy = qs.orderBy || 'id';
         const descending = qs.descending || 'true';
 
 

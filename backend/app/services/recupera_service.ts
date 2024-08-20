@@ -7,11 +7,17 @@ import queue from '@rlanz/bull-queue/services/main';
 import SendRecuperaJob from '#jobs/send_recupera_job';
 import db from "@adonisjs/lucid/services/db";
 import CampaignLot from "#models/campaign_lot";
+import SerializeService from "./serialize_service.js";
+import Campaign from "#models/campaign";
+import logger from '@adonisjs/core/services/logger';
 
-export default abstract class RecuperaService {
+export default abstract class RecuperaService extends SerializeService {
 
+    declare typeAction: TypeAction | null | undefined;
+    declare abbreviation: string | undefined;
+    declare tipoContato: string | undefined;
 
-    async handleSendingForRecupera(action: Action, queueName = 'Oparation') {
+    async handleSendingForRecupera(action: Action, queueName = 'ActionsOparation') {
         if (await this.isToSendToRecupera(action)) {
             action.retorno = 'Q';
             action.retornotexto = 'Em fila';
@@ -25,59 +31,66 @@ export default abstract class RecuperaService {
     }
 
     async isToSendToRecupera(action: Action) {
-        const typeAction = await TypeAction.find(action.type_action_id);
+        try {
+            const typeAction = await TypeAction.find(action.typeActionId);
 
-        // Recupera a string JSON do Redis
-        const jsonString = await redis.hget('last_actions', action.des_contr);
+            // Recupera a string JSON do Redis
+            const jsonString = await redis.hget('last_actions', action.desContr);
 
-        if (!jsonString) {
-            return true;
+            if (!jsonString) {
+                return true;
+            }
+
+            // Converte a string JSON de volta em um objeto
+            const lastAction = JSON.parse(jsonString);
+
+            lastAction.type_action = await TypeAction.find(lastAction.type_action_id);
+
+            if (!typeAction) {
+                return true;
+            }
+
+            if (typeAction.commissioned >= lastAction.type_action.commissioned) {
+                return true;
+            }
+
+            if (lastAction.type_action.timelife < 1) {
+                return true;
+            }
+
+            const dtNow = DateTime.now().set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+
+            const dtLimit = DateTime.fromISO(lastAction.synced_at).plus({ days: typeAction.timelife });
+
+            if (dtNow.startOf('day') > dtLimit.startOf('day')) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (error) {
+            logger.error(error);
         }
 
-        // Converte a string JSON de volta em um objeto
-        const lastAction = JSON.parse(jsonString);
-        lastAction.type_action = await TypeAction.find(lastAction.type_action_id);
-
-        if (!typeAction) {
-            return true;
-        }
-
-        if (typeAction.commissioned >= lastAction.type_action.commissioned) {
-            return true;
-        }
-
-        if (lastAction.type_action.timelife < 1) {
-            return true;
-        }
-
-        const dtNow = DateTime.now().set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-
-        const dtLimit = DateTime.fromISO(lastAction.synced_at).plus({ days: typeAction.timelife });
-
-        if (dtNow.startOf('day') > dtLimit.startOf('day')) {
-            return true;
-        } else {
-            return false;
-        }
 
 
 
     }
 
-    async dispatchToRecupera(action: Action, queueName = 'Oparation', delay: number = 1,) {
-        const contract = await Contract.findBy('des_contr', action.des_contr);
-        const typeAction = await TypeAction.find(action.type_action_id);
+    async dispatchToRecupera(action: Action, queueName = 'ActionsOparation', delay: number = 1,) {
+        const contract = await Contract.findBy('des_contr', action.desContr);
+        const typeAction = await TypeAction.find(action.typeActionId);
 
         const randoDelay = Math.floor(Math.random() * 10) + delay;
 
         const item = {
             action_id: action.id,
             codigo: <string>typeAction?.abbreviation,
-            credor: action.cod_credor,
-            regis: action.des_regis,
+            credor: action.codCredor,
+            regis: action.desRegis,
             complemento: action.description ? action.description : '',
             fonediscado: action.contato,
-            cocontratovincular: <string>contract?.des_contr,
+            cocontratovincular: <string>contract?.desContr,
         };
 
         await queue.dispatch(
@@ -174,8 +187,79 @@ export default abstract class RecuperaService {
             .leftJoin('public.type_actions as ta', 'la.type_action_id', 'ta.id')
             .leftJoin('public.subsidiaries as sb', 'c.nom_loja', '=', 'sb.nom_loja')
             .groupByRaw('1,2,3,4,5,6,7,8,9,10')
-            .havingRaw('sum(pt.val_princ) filter (?) is not null', [filterIndAlter]);
+            .havingRaw(`sum(pt.val_princ) filter ( WHERE ${filterIndAlter}) is not null`);
 
-        return clients;
+        return this.serializeKeys(clients);
+    }
+
+    async findClient(item: any, clients: Array<any>) {
+        return await clients.find((client) => {
+            return (
+                `${client.codCredorDesRegis}`.localeCompare(item.codCredorDesRegis) === 0
+            );
+        });
+    }
+
+    async getTypeAction() {
+        this.typeAction = await TypeAction.findBy('abbreviation', this.abbreviation);
+
+        if (!this.typeAction) {
+            throw new Error('Not find type action!');
+        }
+
+        return this.typeAction;
+    }
+
+    async createAction(item: CampaignLot, clientsGroups: { [key: string]: any[]; }, campaign: Campaign) {
+
+
+        try {
+            const typeAction: TypeAction = await this.getTypeAction();
+
+            Object.keys(clientsGroups).forEach(async (key: string) => {
+                if (key === item.contato.toUpperCase()) {
+                    const group = clientsGroups[key];
+
+                    for (const [i, client] of group.entries()) {
+
+                        const { codCredorDesRegis, desRegis, desContr, codCredor, matriculaContrato, contato, valPrinc, dayLate } = client;
+
+                        //TODO Melhorar este metodo
+                        const action = await Action.create({
+                            codCredorDesRegis,
+                            desRegis,
+                            desContr,
+                            codCredor,
+                            matriculaContrato,
+                            tipoContato: this.tipoContato,
+                            contato,
+                            typeActionId: typeAction.id,
+                            description: '',
+                            retorno: null,
+                            retornotexto: 'Acionamento Automatico envio em massa ',
+                            userId: campaign.userId,
+                            valPrinc,
+                            datVenci: DateTime.fromJSDate(client.datVenci),
+                            dayLate,
+                        });
+
+                        if (i === 0) {
+                            if (this.abbreviation = 'EME') {
+                                this.handleSendingForRecupera(action, `ActionsEmail`);
+                            }
+
+                            if (this.abbreviation = 'SMS') {
+                                this.handleSendingForRecupera(action, `ActionsSms`);
+                            }
+
+                        }
+                    }
+                }
+            });
+
+        } catch (error) {
+            throw error;
+        }
+
     }
 }

@@ -1,47 +1,47 @@
-import { DateTime } from 'luxon'
-import type { HasMany, BelongsTo } from '@adonisjs/lucid/types/relations'
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
-import CategoryAction from '#models/category_action'
-import Action from '#models/action'
+import { DateTime } from 'luxon';
+import type { HasMany, BelongsTo } from '@adonisjs/lucid/types/relations';
+import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm';
+import CategoryAction from '#models/category_action';
+import Action from '#models/action';
 
 export default class TypeAction extends BaseModel {
 
   //declare static connection = 'pg'
 
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column()
-  declare abbreviation: string
+  declare abbreviation: string;
 
   @column()
-  declare name: string
+  declare name: string;
 
   @column()
-  declare category_action_id: number
+  declare categoryActionId: number;
 
   @column()
-  declare commissioned: number
+  declare commissioned: number;
 
   @column()
-  declare type: string
+  declare type: string;
 
   @column()
-  declare timelife: number
+  declare timelife: number;
 
   @belongsTo(() => CategoryAction, {
-    foreignKey: 'category_action_id',
+    foreignKey: 'categoryActionId',
   })
-  declare category: BelongsTo<typeof CategoryAction>
+  declare category: BelongsTo<typeof CategoryAction>;
 
   @hasMany(() => Action, {
-    foreignKey: 'type_action_id',
+    foreignKey: 'typeActionId',
   })
-  declare actions: HasMany<typeof Action>
+  declare actions: HasMany<typeof Action>;
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare createdAt: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  declare updatedAt: DateTime;
 }

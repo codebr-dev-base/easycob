@@ -1,58 +1,58 @@
-import { DateTime } from 'luxon'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
-import Action from '#models/action'
+import { DateTime } from 'luxon';
+import type { BelongsTo } from '@adonisjs/lucid/types/relations';
+import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm';
+import Action from '#models/action';
 
 export default class PromiseOfPayment extends BaseModel {
   //declare static connection = 'pg'
 
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column.date()
-  declare dat_prev: DateTime
+  declare datPrev: DateTime;
 
   @column()
-  declare val_prest: number
+  declare valPrest: number;
 
   @column()
-  declare val_discount: number
+  declare valDiscount: number;
 
   @column()
-  declare perc_discount: number
+  declare percDiscount: number;
 
   @column()
-  declare val_original: number
+  declare valOriginal: number;
 
   @column.date()
-  declare dat_payment: DateTime
+  declare datPayment: DateTime;
 
   @column()
-  declare val_payment: number
+  declare valPayment: number;
 
   @column()
-  declare following_status: string
+  declare followingStatus: string;
 
   @column.date()
-  declare dat_breach: DateTime
+  declare datBreach: DateTime;
 
   @column()
-  declare action_id: number
+  declare actionId: number;
 
   @column()
-  declare discount: boolean
+  declare discount: boolean;
 
   @column()
-  declare status: boolean
+  declare status: boolean;
 
   @belongsTo(() => Action, {
-    localKey: 'action_id',
+    localKey: 'actionId',
   })
-  declare action: BelongsTo<typeof Action>
+  declare action: BelongsTo<typeof Action>;
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare createdAt: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  declare updatedAt: DateTime;
 }

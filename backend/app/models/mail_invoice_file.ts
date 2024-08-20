@@ -1,28 +1,28 @@
-import { DateTime } from 'luxon'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
-import MailInvoice from '#models/mail_invoice'
+import { DateTime } from 'luxon';
+import type { BelongsTo } from '@adonisjs/lucid/types/relations';
+import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm';
+import MailInvoice from '#models/mail_invoice';
 
 export default class MailInvoiceFile extends BaseModel {
   //declare static connection = 'pg'
 
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column()
-  declare file_name: string
+  declare fileName: string;
 
   @column()
-  declare mail_invoice_id: number
+  declare mailInvoiceId: number;
 
   @belongsTo(() => MailInvoice, {
-    foreignKey: 'mail_invoice_id',
+    foreignKey: 'mailInvoiceId',
   })
-  declare mailInvoice: BelongsTo<typeof MailInvoice>
+  declare mailInvoice: BelongsTo<typeof MailInvoice>;
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare createdAt: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  declare updatedAt: DateTime;
 }

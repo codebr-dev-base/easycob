@@ -2,8 +2,14 @@ import env from '#start/env';
 import { defineConfig, transports } from '@adonisjs/mail';
 
 function createMailTransport(suffix: string, domain: string = '') {
+
+  // Verifica se o domínio é ".br" para ajustar o host
+  const hostEnvVariable = domain === '.br'
+    ? `SMTP_HOST_COM_BR`
+    : `SMTP_HOST_COM`;
+
   return transports.smtp({
-    host: env.get(`SMTP_HOST_${suffix.toUpperCase()}`) || '',
+    host: env.get(hostEnvVariable) || '',
     port: env.get('SMTP_PORT'),
     secure: false,
 

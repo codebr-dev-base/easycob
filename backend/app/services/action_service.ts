@@ -10,6 +10,8 @@ import { DateTime } from "luxon";
 import NegotiationInvoice from "#models/negotiation_invoice";
 import db from "@adonisjs/lucid/services/db";
 import RecuperaService from "#services/recupera_service";
+import string from '@adonisjs/core/helpers/string';
+
 
 export default class ActionService extends RecuperaService {
 
@@ -38,7 +40,7 @@ export default class ActionService extends RecuperaService {
                 .select('cod_credor_des_regis')
                 .whereILike(column, `%${keyword}%`);
 
-            results.forEach(result => resultArray.push(result.cod_credor_des_regis));
+            results.forEach(result => resultArray.push(result.codCredorDesRegis));
         }
 
         return resultArray;
@@ -46,7 +48,7 @@ export default class ActionService extends RecuperaService {
 
     async generateWhereInPaginate(qs: any) {
         const keyword = qs.keyword;
-        const keywordColumn = qs.keyword_column;
+        const keywordColumn = string.snakeCase(qs.keywordColumn);
 
         if (!keyword || !keywordColumn) {
             return null;
@@ -77,44 +79,38 @@ export default class ActionService extends RecuperaService {
 
     }
 
-    async generateWherePaginate(q: ModelQueryBuilderContract<typeof Action, Action>, qs: any) {
-
-        const selected = await this.generateWhereInPaginate(qs);
+    generateWherePaginate(q: ModelQueryBuilderContract<typeof Action, Action>, qs: any) {
 
         if (qs.sync) {
             q.where('sync', `${qs.sync}`);
         }
 
-        if (selected) {
-            q.whereIn(selected.column, selected.list);
+        if (qs.userId) {
+            q.where('user_id', qs.userId);
         }
 
-        if (qs.user_id) {
-            q.where('user_id', qs.user_id);
-        }
-
-        if (qs.type_action_ids) {
-            if (Array.isArray(qs.type_action_ids)) {
-                if (qs.type_action_ids.length > 0) {
-                    q.whereIn('type_action_id', qs.type_action_ids);
+        if (qs.typeActionIds) {
+            if (Array.isArray(qs.typeActionIds)) {
+                if (qs.typeActionIds.length > 0) {
+                    q.whereIn('type_action_id', qs.typeActionIds);
                 }
             } else {
-                q.where('type_action_id', qs.type_action_ids);
+                q.where('type_action_id', qs.typeActionIds);
             }
         }
 
-        if (qs.start_date && qs.end_date) {
-            q.whereRaw(`created_at::date >= ?`, [qs.start_date]).andWhereRaw(
+        if (qs.startDate && qs.endDate) {
+            q.whereRaw(`created_at::date >= ?`, [qs.startDate]).andWhereRaw(
                 `created_at::date <= ?`,
-                [qs.end_date]
+                [qs.endDate]
             );
         }
 
-        if (qs.return_type) {
-            q.whereILike('retornotexto', `%${qs.return_type}%`);
+        if (qs.returnType) {
+            q.whereILike('retornotexto', `%${qs.returnType}%`);
         }
 
-        return q;
+        //return q;
     }
 
     async checkExisteContract(des_contr: string) {
@@ -132,8 +128,8 @@ export default class ActionService extends RecuperaService {
 
     async checkDuplicate(data: any) {
         const lastAction = await Action.query()
-            .where('type_action_id', data.type_action_id)
-            .where('des_contr', data.des_contr)
+            .where('type_action_id', data.typeActionId)
+            .where('des_contr', data.desContr)
             .whereRaw(`created_at >= current_timestamp - INTERVAL '30 minutes'`)
             .first();
 
@@ -154,14 +150,14 @@ export default class ActionService extends RecuperaService {
 
     async setIncrementAtender(action: Action) {
         const typeActionValid = [1, 2, 3];
-        if (typeActionValid.includes(action.type_action_id)) {
+        if (typeActionValid.includes(action.typeActionId)) {
             const contato = await Contact.query()
-                .where('cod_credor_des_regis', action.cod_credor_des_regis)
+                .where('cod_credor_des_regis', action.codCredor)
                 .where('contato', action.contato)
                 .first();
 
             if (contato) {
-                contato.count_atender = contato.count_atender + 1;
+                contato.countAtender = contato.countAtender + 1;
                 contato.save();
             }
         }
@@ -186,14 +182,14 @@ export default class ActionService extends RecuperaService {
         });
 
         let date = DateTime.fromSQL(dataNegotiation.dat_prest);
-        for (let index = 0; index < negotiation.num_vezes; index++) {
+        for (let index = 0; index < negotiation.numVezes; index++) {
             if (index > 0) {
                 date = date.plus({ months: 1 });
             }
             await NegotiationInvoice.create({
-                dat_prest: date,
-                val_prest: dataNegotiation.val_prest,
-                negotiation_of_payment_id: negotiation.id,
+                datPrest: date,
+                valPrest: dataNegotiation.val_prest,
+                negotiationOfPaymentId: negotiation.id,
             });
         }
 
@@ -249,23 +245,23 @@ export default class ActionService extends RecuperaService {
 
     async createActionAca(action: Action) {
 
-        await action.load('type_action');
-        const abbr = action.type_action.abbreviation;
+        await action.load('typeAction');
+        const abbr = action.typeAction.abbreviation;
         const abbreviations = ['ACP', 'ACV', 'ACA'];
 
         if (abbreviations.includes(abbr)) {
             const promiseTypeAction = await TypeAction.findBy('abbreviation', 'ACA');
 
             const contracts = await Contract.query()
-                .where('cod_credor_des_regis', action.cod_credor_des_regis)
-                .where('des_contr', '!=', action.des_contr)
+                .where('cod_credor_des_regis', action.codCredorDesRegis)
+                .where('des_contr', '!=', action.desContr)
                 .where('status', 'ATIVO');
 
             for (const contract of contracts) {
 
                 const a = new Action();
 
-                const aggregation = await this.getAggregationContract(contract.des_contr);
+                const aggregation = await this.getAggregationContract(contract.desContr);
 
                 const datVenci = new Date(aggregation.dat_venci);
                 const interval = DateTime.now().diff(
@@ -275,19 +271,19 @@ export default class ActionService extends RecuperaService {
                 const days = interval.as('days');
 
                 a.fill({
-                    cod_credor_des_regis: contract.cod_credor_des_regis,
-                    des_regis: contract.des_regis,
-                    cod_credor: contract.cod_credor,
-                    des_contr: contract.des_contr,
-                    matricula_contrato: contract.matricula_contrato,
-                    tipo_contato: action.tipo_contato,
+                    codCredorDesRegis: contract.codCredorDesRegis,
+                    desRegis: contract.desRegis,
+                    codCredor: contract.codCredor,
+                    desContr: contract.desContr,
+                    matriculaContrato: contract.matriculaContrato,
+                    tipoContato: action.tipoContato,
                     contato: action.contato,
-                    type_action_id: promiseTypeAction?.id,
+                    typeActionId: promiseTypeAction?.id,
                     description: '',
-                    user_id: action.user_id,
-                    dat_venci: DateTime.fromISO(datVenci.toISOString()),
-                    day_late: Math.floor(days),
-                    val_princ: aggregation.val_princ
+                    userId: action.userId,
+                    datVenci: DateTime.fromISO(datVenci.toISOString()),
+                    dayLate: Math.floor(days),
+                    valPrinc: aggregation.val_princ
                 });
 
                 await this.handleSendingForRecupera(a);

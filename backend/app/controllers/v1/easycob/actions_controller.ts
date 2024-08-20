@@ -19,26 +19,28 @@ export default class ActionsController {
 
     const qs = request.qs();
     const pageNumber = qs.page || '1';
-    const limit = qs.per_page || '10';
-    const orderBy = qs.order_by || 'id';
+    const limit = qs.perPage || '10';
+    const orderBy = qs.orderBy || 'id';
     const descending = qs.descending || 'true';
 
+    const selected = await this.service.generateWhereInPaginate(qs);
+
     const actions = await Action.query()
-      .preload('type_action')
+      .preload('typeAction')
       .preload('promises')
+      .preload('client')
       .preload('negotiations', (q) => {
         q.preload('invoices');
       })
       .preload('user')
       .where((q) => {
+        if (selected) {
+          q.whereIn(selected.column, selected.list);
+        }
         return this.service.generateWherePaginate(q, qs);
       })
       .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
       .paginate(pageNumber, limit);
-
-    for (const action of actions) {
-      await action.loadClient();
-    }
 
     return actions;
   }
@@ -48,11 +50,11 @@ export default class ActionsController {
 
     const actions = await Action.query()
       .where((q) => {
-        if (qs.cod_credor_des_regis) {
-          q.where('cod_credor_des_regis', `${qs.cod_credor_des_regis}`);
+        if (qs.codCredorDesRegis) {
+          q.where('cod_credor_des_regis', `${qs.codCredorDesRegis}`);
         }
       })
-      .preload('type_action')
+      .preload('typeAction')
       .preload('promises')
       .preload('negotiations', (negotiationQuery) => {
         negotiationQuery.preload('invoices');
@@ -82,7 +84,7 @@ export default class ActionsController {
             const action = await Action.create({
               ...payload,
               ...aggregation,
-              user_id: user.id,
+              userId: user.id,
             });
 
             return this.service.afterCreate(action, data);
@@ -129,7 +131,7 @@ export default class ActionsController {
     try {
       const { id } = params;
       const action = await Action.findOrFail(id);
-      action.unification_check = !action.unification_check;
+      action.unificationCheck = !action.unificationCheck;
       action.save();
       return action;
     } catch (error) {
