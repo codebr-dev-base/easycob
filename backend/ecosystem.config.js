@@ -87,18 +87,6 @@ module.exports = {
       name: 'queue',
       script: './build/ace',
       cwd: '/data/docker/backend/',
-      args: 'node ace queue:listen --queue=SendSms',
-      instances: 1,
-      exec_mode: 'cluster',
-      autorestart: true,
-      env: {
-        TZ: 'America/Fortaleza',
-      },
-    },
-    {
-      name: 'queue',
-      script: './build/ace',
-      cwd: '/data/docker/backend/',
       args: 'node ace queue:listen --queue=SendInvoice',
       instances: 1,
       exec_mode: 'cluster',
