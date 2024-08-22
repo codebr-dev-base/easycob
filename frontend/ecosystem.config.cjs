@@ -1,5 +1,5 @@
 //const severPath = "/Users/thiago/Projects/Yuan/easycob/frontend/";
-const severPath = "/data/app/easycob/frontend";
+const severPath = "/data/app/easycob/frontend/";
 
 require("dotenv").config({ path: `${severPath}.env` });
 
