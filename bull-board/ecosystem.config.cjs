@@ -1,16 +1,16 @@
-//const severPath = "/Users/thiago/Projects/Yuan/easycob/frontend/";
-const severPath = "/data/app/easycob/frontend";
+//const severPath = "/Users/thiago/Projects/Yuan/easycob/bull-board/";
+const severPath = "/data/app/easycob/bull-board";
 
 require("dotenv").config({ path: `${severPath}.env` });
 
 module.exports = {
   apps: [
     {
-      name: "front",
+      name: "dashboard",
       port: "4000",
-      script: "./.output/server/index.mjs",
+      script: "app.js",
       cwd: severPath,
-      instances: 4,
+      instances: 1,
       exec_mode: "cluster",
       autorestart: true,
     },

@@ -1,5 +1,5 @@
-// const severPath = '/data/docker/backend/';
-const severPath = '/Users/thiago/Projects/Yuan/easycob/backend/';
+const severPath = '/data/app/easycob/backend/';
+//const severPath = '/Users/thiago/Projects/Yuan/easycob/backend/';
 
 module.exports = {
   apps: [
