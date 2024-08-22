@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+require("dotenv").config();
 const { createBullBoard } = require("@bull-board/api");
 const { BullMQAdapter } = require("@bull-board/api/bullMQAdapter");
 const { ExpressAdapter } = require("@bull-board/express");
@@ -8,9 +9,9 @@ const { Queue: QueueMQ, Worker } = require("bullmq");
 const sleep = (t) => new Promise((resolve) => setTimeout(resolve, t * 1000));
 
 const redisOptions = {
-  port: 6379,
-  host: "localhost",
-  password: "",
+  port: process.env.QUEUE_REDIS_PORT,
+  host: process.env.QUEUE_REDIS_HOST,
+  password: process.env.QUEUE_REDIS_PASSWORD,
   //tls: false,
 };
 
