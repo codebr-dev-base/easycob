@@ -1,9 +1,12 @@
+// const severPath = '/data/docker/backend/';
+const severPath = '/Users/thiago/Projects/Yuan/easycob/backend/';
+
 module.exports = {
   apps: [
     {
       name: 'backend',
-      script: './build/server.js',
-      cwd: '/data/docker/backend/',
+      script: './build/bin/server.js',
+      cwd: severPath,
       instances: 4,
       exec_mode: 'cluster',
       autorestart: true,
@@ -13,8 +16,8 @@ module.exports = {
     },
     {
       name: 'queueLoadCsv',
-      script: './build/ace',
-      cwd: '/data/docker/backend/',
+      script: './build/ace.js',
+      cwd: severPath,
       args: 'queue:listen --queue=LoadCsv',
       instances: 1,
       exec_mode: 'cluster',
@@ -25,8 +28,8 @@ module.exports = {
     },
     {
       name: 'queueActionsOparation',
-      script: './build/ace',
-      cwd: '/data/docker/backend/',
+      script: './build/ace.js',
+      cwd: severPath,
       args: 'queue:listen --queue=ActionsOparation',
       instances: 8,
       exec_mode: 'cluster',
@@ -37,9 +40,9 @@ module.exports = {
     },
     {
       name: 'queueActionsEmail',
-      script: './build/ace',
-      cwd: '/data/docker/backend/',
-      args: 'node ace queue:listen --queue=ActionsEmail',
+      script: './build/ace.js',
+      cwd: severPath,
+      args: 'queue:listen --queue=ActionsEmail',
       instances: 16,
       exec_mode: 'cluster',
       autorestart: true,
@@ -49,9 +52,9 @@ module.exports = {
     },
     {
       name: 'queueActionsSms',
-      script: './build/ace',
-      cwd: '/data/docker/backend/',
-      args: 'node ace queue:listen --queue=ActionsSms',
+      script: './build/ace.js',
+      cwd: severPath,
+      args: 'queue:listen --queue=ActionsSms',
       instances: 16,
       exec_mode: 'cluster',
       autorestart: true,
@@ -61,9 +64,9 @@ module.exports = {
     },
     {
       name: 'queueSendEmail',
-      script: './build/ace',
-      cwd: '/data/docker/backend/',
-      args: 'node ace queue:listen --queue=SendEmail',
+      script: './build/ace.js',
+      cwd: severPath,
+      args: 'queue:listen --queue=SendEmail',
       instances: 1,
       exec_mode: 'cluster',
       autorestart: true,
@@ -73,9 +76,9 @@ module.exports = {
     },
     {
       name: 'queueSendSms',
-      script: './build/ace',
-      cwd: '/data/docker/backend/',
-      args: 'node ace queue:listen --queue=SendSms',
+      script: './build/ace.js',
+      cwd: severPath,
+      args: 'queue:listen --queue=SendSms',
       instances: 1,
       exec_mode: 'cluster',
       autorestart: true,
@@ -85,9 +88,9 @@ module.exports = {
     },
     {
       name: 'queueSendInvoice',
-      script: './build/ace',
-      cwd: '/data/docker/backend/',
-      args: 'node ace queue:listen --queue=SendInvoice',
+      script: './build/ace.js',
+      cwd: severPath,
+      args: 'queue:listen --queue=SendInvoice',
       instances: 1,
       exec_mode: 'cluster',
       autorestart: true,

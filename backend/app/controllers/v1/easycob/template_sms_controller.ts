@@ -14,7 +14,7 @@ export default class TemplateSmsController {
 
         const template = await TemplateSms.create({
             ...payload,
-            user_id: auth?.user?.id,
+            userId: auth?.user?.id,
         });
 
         return template;

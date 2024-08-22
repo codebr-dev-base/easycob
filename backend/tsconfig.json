@@ -1,9 +1,17 @@
 {
   "extends": "@adonisjs/tsconfig/tsconfig.app.json",
+  "include": [
+    "**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "build"
+  ],
   "compilerOptions": {
     "rootDir": "./",
     "outDir": "./build",
     "baseUrl": ".",
+    "sourceMap": true,
     "paths": {
       "#models/*": [
         "app/models/*"
@@ -34,6 +42,9 @@
       ],
       "#utils/*": [
         "app/utils/*"
+      ],
+      "#routes/*": [
+        "start/routes/*"
       ]
     }
   },

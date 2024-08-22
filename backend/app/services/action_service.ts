@@ -283,7 +283,8 @@ export default class ActionService extends RecuperaService {
                     userId: action.userId,
                     datVenci: DateTime.fromISO(datVenci.toISOString()),
                     dayLate: Math.floor(days),
-                    valPrinc: aggregation.val_princ
+                    valPrinc: aggregation.val_princ,
+                    pecld: aggregation.pecld
                 });
 
                 await this.handleSendingForRecupera(a);

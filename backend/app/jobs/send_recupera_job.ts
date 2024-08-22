@@ -6,9 +6,9 @@ import { $fetch } from 'ofetch';
 import { DateTime } from 'luxon';
 import Action from '#models/action';
 import env from '#start/env';
-import ActionService from '#services/action_service';
 import CatchLog from '#models/catch_log';
-
+import xmlParser from 'xml2json';
+import ActionService from '#services/action_service';
 
 interface SendRecuperaJobPayload {
   action_id: number;
@@ -20,6 +20,23 @@ interface SendRecuperaJobPayload {
   cocontratovincular: string;
 }
 
+interface SoapResponse {
+  'soap:Envelope'?: {
+    'soap:Body'?: {
+      IncluirOcorrenciaResponse?: {
+        IncluirOcorrenciaResult?: string; // ou o tipo apropriado
+      };
+    };
+  };
+}
+
+interface SoapBody {
+  XML?: {
+    RETORNO?: string,
+    RETORNOTEXTO?: string;
+  };
+}
+
 export default class SendRecuperaJob extends Job {
   // This is the path to the file that is used to create the job
   static get $$filepath() {
@@ -27,10 +44,9 @@ export default class SendRecuperaJob extends Job {
   }
 
   protected urlRecupera: string;
-
   protected optionsJson: object;
 
-  constructor(protected service: ActionService) {
+  constructor() {
     super();
     this.urlRecupera = env.get('RECUPERA_URL') || '';
 
@@ -56,18 +72,14 @@ export default class SendRecuperaJob extends Job {
    */
   async handle(payload: SendRecuperaJobPayload) {
 
-    const xmlParser = require('xml2json');
-
+    const actionService = new ActionService();
     const edge = Edge.create();
     edge.mount(app.viewsPath());
-    const xml = await edge.render('xml/action', { action: payload });
-    const envelop = await edge.render('xml/envelop', { xml: xml });
+    const envelop = await edge.render('xml/envelop', { action: payload });
 
     const action = await Action.find(payload.action_id);
     if (action) {
       //TODO: Remover o teste e verificar mensagem de erro (error: JSON.stringify(error))
-      console.log(envelop);
-
       try {
         const result = await $fetch(this.urlRecupera, {
           method: 'POST',
@@ -78,25 +90,25 @@ export default class SendRecuperaJob extends Job {
           timeout: 20000,
         });
 
-        const resultJson = xmlParser.toJson(result, this.optionsJson);
+        const resultJson = <SoapResponse>xmlParser.toJson(result, this.optionsJson);
 
-        const soapBody =
-          resultJson['soap:Envelope']['soap:Body'].IncluirOcorrenciaResponse.IncluirOcorrenciaResult;
+        const OcorrenciaResult = resultJson['soap:Envelope']?.['soap:Body']?.IncluirOcorrenciaResponse?.IncluirOcorrenciaResult;
 
-        const resultSync = xmlParser.toJson(soapBody, this.optionsJson);
+        const soapBody = OcorrenciaResult ? OcorrenciaResult : '';
 
+        const resultSync = <SoapBody>xmlParser.toJson(soapBody, this.optionsJson);
 
-        const retornotexto = <string>resultSync.XML.RETORNOTEXTO;
+        const retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
 
         if (this.checkResultSync(retornotexto)) {
           action.sync = false;
-          await this.service.handleSendingForRecupera(action);
+          await actionService.handleSendingForRecupera(action);
         } else {
           action.sync = true;
           action.resultSync = JSON.stringify(resultSync);
           action.syncedAt = DateTime.now();
-          action.retorno = resultSync.XML.RETORNO;
-          action.retornotexto = resultSync.XML.RETORNOTEXTO;
+          action.retorno = <string>resultSync.XML?.RETORNO;
+          action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
         }
         await action.save();
 
@@ -107,8 +119,8 @@ export default class SendRecuperaJob extends Job {
         }
 
       } catch (error) {
-        action.sync = false;
-        await this.service.handleSendingForRecupera(action);
+        //action.sync = false;
+        //await this.service.handleSendingForRecupera(action);
 
         await CatchLog.create({
           classJob: 'SendXmlRecupera',
@@ -125,6 +137,8 @@ export default class SendRecuperaJob extends Job {
    * This is an optional method that gets called when the retries has exceeded and is marked failed.
    */
   async rescue(payload: SendRecuperaJobPayload) {
+    const actionService = new ActionService();
+
     // Função que retorna uma Promise que é resolvida após 1 hora
     const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -134,7 +148,7 @@ export default class SendRecuperaJob extends Job {
     const action = await Action.find(payload.action_id);
     if (action) {
       action.sync = false;
-      await this.service.handleSendingForRecupera(action);
+      await actionService.handleSendingForRecupera(action);
     }
   }
 }

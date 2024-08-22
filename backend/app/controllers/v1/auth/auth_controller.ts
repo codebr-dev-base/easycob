@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http';
 import User from '#models/user';
+import Module from '#models/module';
 
 export default class AuthController {
     async login({ request, response }: HttpContext) {
@@ -82,5 +83,10 @@ export default class AuthController {
             skills.preload('module');
         });
         return user;
+    }
+
+    public async module({ }: HttpContext) {
+        const modules = Module.query().preload('skills');
+        return modules;
     }
 }

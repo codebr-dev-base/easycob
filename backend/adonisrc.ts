@@ -1,4 +1,4 @@
-import { defineConfig } from '@adonisjs/core/app'
+import { defineConfig } from '@adonisjs/core/app';
 
 export default defineConfig({
   /*
@@ -78,13 +78,18 @@ export default defineConfig({
     ],
     forceExit: false,
   },
-  metaFiles: [{
-    pattern: 'resources/views/**/*.edge',
-    reloadServer: false,
-  },
-  {
-    pattern: 'public/**',
-    reloadServer: false,
-  }
+  metaFiles: [
+    {
+      pattern: '.env',
+      reloadServer: false,
+    },
+    {
+      pattern: 'resources/views/**/*.edge',
+      reloadServer: false,
+    },
+    {
+      pattern: 'public/**',
+      reloadServer: false,
+    }
   ]
-})
+});

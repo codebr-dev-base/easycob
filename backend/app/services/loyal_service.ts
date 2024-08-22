@@ -8,7 +8,7 @@ export default class LoyalService {
         return db.from('recupera.redistribuicao_carteira_base as b')
             .distinctOn('b.des_contr')
             .select('b.*')
-            .where('b.user_id', 15)
+            .where('b.user_id', userId)
             .as('l');
     }
 

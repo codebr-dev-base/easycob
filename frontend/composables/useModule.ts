@@ -4,7 +4,7 @@ const useModule = () => {
   // const Auth = useAuth();
   const apiBase = useRuntimeConfig().public.apiBase;
   const pending = ref(false);
-  const urn = "/v1/user/module/";
+  const urn = "/v1/auth/module/";
   const url = `${apiBase}${urn}`;
 
   const auth = useAuth();

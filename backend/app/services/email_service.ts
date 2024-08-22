@@ -3,12 +3,8 @@ import CampaignLot from "#models/campaign_lot";
 import lodash from 'lodash';
 import { chunks } from '#utils/array';
 import mail from '@adonisjs/mail/services/main';
-import Action from "#models/action";
-import TypeAction from "#models/type_action";
-import { DateTime } from "luxon";
 import CatchLog from "#models/catch_log";
 import RecuperaService from "#services/recupera_service";
-import logger from '@adonisjs/core/services/logger';
 
 type MailerConfig =
     | 'manaus_com'

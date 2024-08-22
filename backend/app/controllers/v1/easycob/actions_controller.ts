@@ -71,19 +71,19 @@ export default class ActionsController {
     try {
       const data = request.all();
 
-      const payload = await createActionValidator.validate(data);
+      const payload = await request.validateUsing(createActionValidator);
 
       if (user.id) {
 
         if (await this.service.checkDuplicate(data)) {
 
-          if (await this.service.checkExisteContract(payload.des_contr)) {
+          if (await this.service.checkExisteContract(payload.desContr)) {
 
-            const aggregation = await this.service.getAggregationContract(payload.des_contr);
+            const aggregation = await this.service.getAggregationContract(payload.desContr);
 
             const action = await Action.create({
-              ...payload,
               ...aggregation,
+              ...payload,
               userId: user.id,
             });
 

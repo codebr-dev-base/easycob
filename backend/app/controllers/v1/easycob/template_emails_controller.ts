@@ -17,7 +17,7 @@ export default class TemplateEmailsController {
 
         const template = await TemplateEmail.create({
             ...payload,
-            user_id: user.id,
+            userId: user.id,
         });
 
         return template;

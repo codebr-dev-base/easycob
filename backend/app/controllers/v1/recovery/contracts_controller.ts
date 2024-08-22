@@ -30,7 +30,7 @@ export default class ContractsController {
 
 
         const contracts = await db.from('recupera.tbl_arquivos_contratos as c')
-            .select('c.des_contr')
+            .select('c.des_contr', 'c.matricula_contrato')
             .select(raw(`sum(pt.val_princ) filter ( WHERE ${filterIndAlter}) as val_princ`))
             .select(raw(`count(pt.val_princ) filter ( WHERE ${filterIndAlter}) as count_princ`))
             .select(raw(`sum(pt.val_pago) as val_pago`))
@@ -49,7 +49,7 @@ export default class ContractsController {
                     .andOn('c.des_contr', '=', 'pt.des_contr')
                     .andOnVal('c.status', '=', `${status}`.toUpperCase());
             })
-            .groupByRaw('1')
+            .groupByRaw('1,2')
             .orderBy(`c.${orderBy}`, descending === 'true' ? 'desc' : 'asc')
             .paginate(pageNumber, limit);
 

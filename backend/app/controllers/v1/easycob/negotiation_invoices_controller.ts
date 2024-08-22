@@ -94,9 +94,9 @@ export default class NegotiationInvoicesController {
 
             if (body.comments) {
                 const negotiationInvoiceHistory = await NegotiationInvoiceHistory.create({
-                    negotiation_invoice_id: negotiationInvoice.id,
+                    negotiationInvoiceId: negotiationInvoice.id,
                     comments: body.comments,
-                    user_id: user.id,
+                    userId: user.id,
                 });
                 return negotiationInvoiceHistory;
             }

@@ -9,20 +9,19 @@
 
 import router from '@adonisjs/core/services/router';
 //Routes CRM
-import './routes/action.ts';
-import './routes/auth.ts';
-import './routes/campaign.ts';
-import './routes/invoice.ts';
-import './routes/promise.js';
-import './routes/negotiation.js';
-import './routes/templates.ts';
+import action from '#routes/action';
+import auth from '#routes/auth';
+import campaign from '#routes/campaign';
+import invoice from '#routes/invoice';
+import promise from '#routes/promise';
+import negotiation from '#routes/negotiation';
+import templates from '#routes/templates';
+import client from '#routes/recovery/client';
+import contact from '#routes/recovery/contact';
+import contract from '#routes/recovery/contract';
+import recoveryinvoice from '#routes/recovery/invoice';
+import loyal from '#routes/recovery/loyal';
 
-//Routes Recupera
-import './routes/recovery/client.ts';
-import './routes/recovery/contact.ts';
-import './routes/recovery/contract.ts';
-import './routes/recovery/invoice.ts';
-import './routes/recovery/loyal.ts';
 
 
 
@@ -31,3 +30,19 @@ router.get('/', async () => {
     hello: 'world',
   };
 });
+
+router
+  .group(() => {
+    action;
+    auth;
+    campaign;
+    invoice;
+    promise;
+    negotiation;
+    templates;
+    client;
+    contact;
+    contract;
+    recoveryinvoice;
+    loyal;
+  });

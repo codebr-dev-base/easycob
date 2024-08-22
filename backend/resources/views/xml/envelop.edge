@@ -1,13 +1,31 @@
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-    xmlns:web="http://localhost/recupera/webservice/">
-    <soapenv:Header />
-    <soapenv:Body>
-        <web:IncluirOcorrencia>
-            <web:strXML>
-                <![CDATA[
-                  {{ xml }}
-                ]]>
-            </web:strXML>
-        </web:IncluirOcorrencia>
-    </soapenv:Body>
+  xmlns:web="http://localhost/recupera/webservice/">
+  <soapenv:Header />
+  <soapenv:Body>
+    <web:IncluirOcorrencia>
+      <web:strXML>
+        <![CDATA[
+            <XML>
+              <OCORRENCIA>
+                  <CODIGO>{{action.codigo}}</CODIGO>
+                  <CREDOR>{{action.credor}}</CREDOR>
+                  <REGIS>{{action.regis}}</REGIS>
+                  <OPERADOR>WSYUAN</OPERADOR>
+                  <COMPLEMENTO>{{action.complemento}}</COMPLEMENTO>
+                  <DATAAGENDA />
+                  <FONEDISCADO>{{action.fonediscado}}</FONEDISCADO>
+                  <CODCONTRATOVINCULAR>{{action.cocontratovincular}}</CODCONTRATOVINCULAR>
+                  <CODPRODUVINCULAR>1</CODPRODUVINCULAR>
+                  <BLOQUEIOCONTRATO>FALSE</BLOQUEIOCONTRATO>
+              </OCORRENCIA>
+              <login>
+                  <UID>WSYUAN</UID>
+                  <PWD>wsyuan1234</PWD>
+                  <EMPRESA>AEGEA</EMPRESA>
+              </login>
+            </XML>
+          ]]>
+      </web:strXML>
+    </web:IncluirOcorrencia>
+  </soapenv:Body>
 </soapenv:Envelope>

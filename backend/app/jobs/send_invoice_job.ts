@@ -24,7 +24,7 @@ export default class SendInvoiceJob extends Job {
     const paths: any[] = [];
     if (mailInvoice) {
       const contract = await Contract.query()
-        .where('cod_credor_des_regis', mailInvoice.cod_credor_des_regis)
+        .where('cod_credor_des_regis', mailInvoice.codCredorDesRegis)
         .first();
 
       if (!contract) {
@@ -34,7 +34,7 @@ export default class SendInvoiceJob extends Job {
       let subsidiaryName = 'AEGEA';
 
       const subsidiary = await Subsidiary.query()
-        .whereILike('nom_loja', `${contract.nom_loja}`)
+        .whereILike('nom_loja', `${contract.nomLoja}`)
         .first();
 
       if (!subsidiary) {
@@ -50,7 +50,7 @@ export default class SendInvoiceJob extends Job {
       await mailInvoice?.load('files');
       for (const file of mailInvoice?.files) {
         paths.push({
-          path: `${app.makePath('uploads/invoices')}${file.file_name}`,
+          path: `${app.makePath('uploads/invoices')}${file.fileName}`,
         });
       }
 

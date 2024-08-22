@@ -4,7 +4,6 @@ import redis from '@adonisjs/redis/services/main';
 import { inject } from '@adonisjs/core';
 import { Logger } from '@adonisjs/core/logger';
 import fs from 'fs';
-import LastAction from '#models/last_action';
 
 @inject()
 export default class LastActionService {
@@ -39,16 +38,17 @@ export default class LastActionService {
         const res = await db.rawQuery(sql);
         const rows: Array<any> = res.rows;
         // Itera sobre os resultados e alimenta o Redis
-        const pipeline = redis.pipeline(); // Usa pipeline para otimizar o envio em massa
+        //const pipeline = redis.pipeline(); // Usa pipeline para otimizar o envio em massa
 
-        rows.forEach(async (la) => {
+        for (const la of rows) {
             const des_contr = la.des_contr;
             const jsonString = JSON.stringify(la);
-            pipeline.hset('last_actions', des_contr, jsonString);
-        });
+            //pipeline.hset('last_actions', des_contr, jsonString);
+            redis.hset('last_actions', des_contr, jsonString);
+        }
 
         // Executa o pipeline para enviar todos os comandos de uma vez
-        await pipeline.exec();
+        //await pipeline.exec();
 
         return true;
     }
