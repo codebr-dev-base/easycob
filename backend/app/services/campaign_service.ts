@@ -95,11 +95,12 @@ export default class CampaignService {
   async readCsvFile(filePath: string) {
     try {
 
-      const contacts = await csvtojsonV2({
+      const rows = await csvtojsonV2({
         trim: true,
         delimiter: ';',
       }).fromFile(`${app.makePath('uploads')}${filePath}`);
-      return contacts;
+      return rows;
+
     } catch (error) {
       console.error('Erro ao ler o arquivo CSV:', error);
       throw error;
@@ -141,8 +142,8 @@ export default class CampaignService {
 
   }
 
-  async findClient(contact: any, clients: Array<any>) {
-    return await clients.find((item) => {
+  findClient(contact: any, clients: Array<any>) {
+    return clients.find((item) => {
       return (
         item.cod_credor_des_regis
           .toLowerCase()

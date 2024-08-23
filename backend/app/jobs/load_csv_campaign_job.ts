@@ -32,11 +32,9 @@ export default class LoadCsvCampaignJob extends Job {
     if (campaign) {
       const dateTime = new Date().getTime();
       const blockContacts = await this.service.getBlockedContacts();
-      logger.info(blockContacts);
       const contacts = await this.service.readCsvFile(campaign.fileName);
-      logger.info(contacts);
       const chunksContacs = chunks(contacts, 500);
-      logger.info(chunksContacs);
+
       const handleInvalidContact = this.service.handleInvalidContact;
       const handleValidContact = this.service.handleValidContact;
 
@@ -48,7 +46,7 @@ export default class LoadCsvCampaignJob extends Job {
 
         for (const contact of chunkContacs) {
 
-          const client = await this.service.findClient(contact, clients);
+          const client = this.service.findClient(contact, clients);
 
           if (this.service.isUniversalBlock(contact, blockContacts.universalBlock)) {
             contactInvalids.push(handleInvalidContact('Contato bloqueado', contact, campaign, dateTime));
