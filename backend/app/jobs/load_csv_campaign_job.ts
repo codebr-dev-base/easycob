@@ -8,6 +8,8 @@ import ErrorCampaignImport from '#models/error_campaign_import';
 import SendEmailJob from '#jobs/send_email_job';
 import queue from '@rlanz/bull-queue/services/main';
 import SendSmsJob from '#jobs/send_sms_job';
+import logger from '@adonisjs/core/services/logger';
+import { log } from 'console';
 
 interface LoadCsvCampaignJobPayload { newFileName: string; campaign_id: number; user_id: any; }
 
@@ -31,9 +33,11 @@ export default class LoadCsvCampaignJob extends Job {
     if (campaign) {
       const dateTime = new Date().getTime();
       const blockContacts = await this.service.getBlockedContacts();
+      logger.info(blockContacts);
       const contacts = await this.service.readCsvFile(campaign.fileName);
+      logger.info(contacts);
       const chunksContacs = chunks(contacts, 500);
-
+      logger.info(chunksContacs);
       const handleInvalidContact = this.service.handleInvalidContact;
       const handleValidContact = this.service.handleValidContact;
 
