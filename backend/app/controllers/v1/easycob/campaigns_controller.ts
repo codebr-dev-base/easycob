@@ -98,7 +98,7 @@ export default class CampaignsController {
       if (campaign) {
 
         const lots = await CampaignLot.query()
-          .where('campaign_id', campaign.id)
+          .where('campaignId', campaign.id)
           .whereNotNull('contato')
           .whereNull('messageid')
           .where('valid', true);
