@@ -44,7 +44,11 @@ export default abstract class RecuperaService extends SerializeService {
             // Converte a string JSON de volta em um objeto
             const lastAction = JSON.parse(jsonString);
 
-            lastAction.type_action = await TypeAction.find(lastAction.type_action_id);
+            if (lastAction.type_action_id) {
+                lastAction.type_action = await TypeAction.find(lastAction.type_action_id);
+            } else {
+                lastAction.type_action = await TypeAction.find(lastAction.typeActionId);
+            }
 
             if (!typeAction) {
                 return true;

@@ -9,6 +9,7 @@ import env from '#start/env';
 import CatchLog from '#models/catch_log';
 import xmlParser from 'xml2json';
 import ActionService from '#services/action_service';
+import string from '@adonisjs/core/helpers/string';
 
 interface SendRecuperaJobPayload {
   action_id: number;
@@ -67,6 +68,36 @@ export default class SendRecuperaJob extends Job {
     return keywords.some(keyword => retornotexto.toUpperCase().includes(keyword));
   }
 
+
+  serializeKeys(data: any[] | { meta: any, data: any[]; } | any) {
+
+    const serializeObject = (obj: any) => {
+      const serialized = {};
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          const camelKey = string.snakeCase(key);
+          (serialized as any)[camelKey] = obj[key];
+        }
+      }
+      return serialized;
+    };
+
+
+    if (Array.isArray(data)) {
+      return data.map(serializeObject);
+    }
+    if (data.meta && data.data) {
+      const paginator = data;
+      const serializedData = paginator.data.map(serializeObject);
+      return {
+        ...paginator,
+        data: serializedData,
+      };
+    }
+    return serializeObject(data);
+
+  }
+
   /**
    * Base Entry point
    */
@@ -114,7 +145,7 @@ export default class SendRecuperaJob extends Job {
 
         if (action.retorno === '00') {
           const des_contr = action.desContr;
-          const jsonString = JSON.stringify(action.toJSON());
+          const jsonString = JSON.stringify(this.serializeKeys(action.toJSON()));
           redis.hset('last_actions', des_contr, jsonString);
         }
 

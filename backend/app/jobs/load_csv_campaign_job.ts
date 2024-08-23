@@ -29,8 +29,6 @@ export default class LoadCsvCampaignJob extends Job {
   async handle(payload: LoadCsvCampaignJobPayload) {
     const campaign = await Campaign.find(payload.campaign_id);
 
-    logger.info(campaign);
-
     if (campaign) {
       const dateTime = new Date().getTime();
       const blockContacts = await this.service.getBlockedContacts();
