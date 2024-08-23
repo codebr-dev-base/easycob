@@ -1,5 +1,5 @@
-import env from '#start/env'
-import { defineConfig } from '@rlanz/bull-queue'
+import env from '#start/env';
+import { defineConfig } from '@rlanz/bull-queue';
 
 export default defineConfig({
   defaultConnection: {
@@ -11,9 +11,9 @@ export default defineConfig({
   queue: {},
 
   worker: {
-    limiter: { 
+    limiter: {
       max: 1,
-      duration: 1000,
+      duration: 180000,
     },
   },
 
@@ -48,7 +48,7 @@ export default defineConfig({
       type: 'exponential',
       delay: 1000,
     },
-    removeOnComplete: 1,
-    removeOnFail: 1,
+    removeOnComplete: 1000,
+    removeOnFail: 1000,
   },
-})
+});
