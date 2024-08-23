@@ -13,7 +13,6 @@ import fs from 'fs';
 import SendEmailJob from '#jobs/send_email_job';
 import SendSmsJob from '#jobs/send_sms_job';
 import SerializeService from '#services/serialize_service';
-import logger from '@adonisjs/core/services/logger';
 
 @inject()
 export default class CampaignsController {
@@ -64,7 +63,6 @@ export default class CampaignsController {
       await queue.dispatch(
         LoadCsvCampaignJob,
         {
-          newFileName,
           campaign_id: campaign.id,
           user_id: user.id,
         },
@@ -96,14 +94,11 @@ export default class CampaignsController {
       const { id } = params;
       const campaign = await Campaign.find(id);
       if (campaign) {
-
         const lots = await CampaignLot.query()
-          .where('campaignId', campaign.id)
+          .where('campaign_id', campaign.id)
           .whereNotNull('contato')
           .whereNull('messageid')
           .where('valid', true);
-
-        logger.info(lots);
 
 
         //Criar class para enviar as campanhas

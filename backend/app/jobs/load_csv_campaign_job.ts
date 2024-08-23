@@ -10,7 +10,7 @@ import queue from '@rlanz/bull-queue/services/main';
 import SendSmsJob from '#jobs/send_sms_job';
 import logger from '@adonisjs/core/services/logger';
 
-interface LoadCsvCampaignJobPayload { newFileName: string; campaign_id: number; user_id: any; }
+interface LoadCsvCampaignJobPayload { campaign_id: number; user_id: any; }
 
 @inject()
 export default class LoadCsvCampaignJob extends Job {

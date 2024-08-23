@@ -8,12 +8,13 @@ export default defineConfig({
     password: env.get('QUEUE_REDIS_PASSWORD'),
   },
 
-  queue: {},
+  queue: {
+  },
 
   worker: {
     limiter: {
       max: 1,
-      duration: 180000,
+      duration: 500,
     },
   },
 
@@ -30,7 +31,7 @@ export default defineConfig({
     | @see https://docs.bullmq.io/guide/retrying-failing-jobs
     |
     */
-    attempts: 3,
+    attempts: 5,
 
     /*
     |--------------------------------------------------------------------------
@@ -46,9 +47,13 @@ export default defineConfig({
     */
     backoff: {
       type: 'exponential',
-      delay: 1000,
+      delay: 5000,
     },
-    removeOnComplete: 1000,
-    removeOnFail: 1000,
+    removeOnComplete: {
+      age: 24 * 3600, // keep up to 1 hour
+    },
+    removeOnFail: {
+      age: 24 * 3600, // keep up to 24 hours
+    }
   },
 });
