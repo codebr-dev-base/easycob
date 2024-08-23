@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http';
 import User from '#models/user';
 import Module from '#models/module';
+import logger from '@adonisjs/core/services/logger';
 
 export default class AuthController {
     async login({ request, response }: HttpContext) {
@@ -8,6 +9,7 @@ export default class AuthController {
 
         try {
             const user = await User.verifyCredentials(email, password);
+            logger.info(user);
             if (!user.isActived) {
                 return response.unauthorized('Invalid credentials');
             }
