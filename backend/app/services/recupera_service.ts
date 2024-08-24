@@ -279,11 +279,11 @@ export default abstract class RecuperaService extends SerializeService {
                         });
 
                         if (i === 0) {
-                            if (this.abbreviation = 'EME') {
+                            if (this.abbreviation === 'EME') {
                                 this.handleSendingForRecupera(action, `ActionsEmail`);
                             }
 
-                            if (this.abbreviation = 'SMS') {
+                            if (this.abbreviation === 'SMS') {
                                 this.handleSendingForRecupera(action, `ActionsSms`);
                             }
 
