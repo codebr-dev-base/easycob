@@ -10,6 +10,8 @@ import CampaignLot from "#models/campaign_lot";
 import SerializeService from "./serialize_service.js";
 import Campaign from "#models/campaign";
 import logger from '@adonisjs/core/services/logger';
+import SendSmsRecuperaJob from "#jobs/send_sms_recupera_job";
+import SendEmailRecuperaJob from "#jobs/send_email_recupera_job";
 
 export default abstract class RecuperaService extends SerializeService {
 
@@ -97,18 +99,51 @@ export default abstract class RecuperaService extends SerializeService {
             cocontratovincular: <string>contract?.desContr,
         };
 
-        await queue.dispatch(
-            SendRecuperaJob,
-            item,
-            {
-                queueName,
-                attempts: 5,
-                backoff: {
-                    type: 'exponential',
-                    delay: randoDelay,
-                }
-            },
-        );
+        if (queueName === 'ActionsOparation') {
+            await queue.dispatch(
+                SendRecuperaJob,
+                item,
+                {
+                    queueName,
+                    attempts: 5,
+                    backoff: {
+                        type: 'exponential',
+                        delay: randoDelay,
+                    }
+                },
+            );
+        }
+
+        if (queueName === 'ActionsSms') {
+            await queue.dispatch(
+                SendSmsRecuperaJob,
+                item,
+                {
+                    queueName,
+                    attempts: 5,
+                    backoff: {
+                        type: 'exponential',
+                        delay: randoDelay,
+                    }
+                },
+            );
+        }
+
+        if (queueName === 'ActionsEmail') {
+            await queue.dispatch(
+                SendEmailRecuperaJob,
+                item,
+                {
+                    queueName,
+                    attempts: 5,
+                    backoff: {
+                        type: 'exponential',
+                        delay: randoDelay,
+                    }
+                },
+            );
+        }
+
     }
 
     async getClients(lots: Array<CampaignLot>) {

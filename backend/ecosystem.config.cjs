@@ -31,7 +31,7 @@ module.exports = {
       script: './build/ace.js',
       cwd: severPath,
       args: 'queue:listen --queue=ActionsOparation',
-      instances: 8,
+      instances: 4,
       exec_mode: 'cluster',
       autorestart: true,
       env: {
@@ -43,7 +43,7 @@ module.exports = {
       script: './build/ace.js',
       cwd: severPath,
       args: 'queue:listen --queue=ActionsEmail',
-      instances: 16,
+      instances: 8,
       exec_mode: 'cluster',
       autorestart: true,
       env: {
@@ -55,7 +55,7 @@ module.exports = {
       script: './build/ace.js',
       cwd: severPath,
       args: 'queue:listen --queue=ActionsSms',
-      instances: 16,
+      instances: 8,
       exec_mode: 'cluster',
       autorestart: true,
       env: {
