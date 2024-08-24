@@ -6,4 +6,9 @@ export default class SendSmsRecuperaJob extends SendRecuperaJob {
     return import.meta.url;
   }
 
+  constructor() {
+    super();
+    this.queueName = 'ActionsSms';
+  }
+
 }

@@ -112,9 +112,7 @@ export default abstract class RecuperaService extends SerializeService {
                     }
                 },
             );
-        }
-
-        if (queueName === 'ActionsSms') {
+        } else if (queueName === 'ActionsSms') {
             await queue.dispatch(
                 SendSmsRecuperaJob,
                 item,
@@ -127,9 +125,7 @@ export default abstract class RecuperaService extends SerializeService {
                     }
                 },
             );
-        }
-
-        if (queueName === 'ActionsEmail') {
+        } else if (queueName === 'ActionsEmail') {
             await queue.dispatch(
                 SendEmailRecuperaJob,
                 item,

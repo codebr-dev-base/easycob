@@ -6,4 +6,9 @@ export default class SendEmailRecuperaJob extends SendRecuperaJob {
     return import.meta.url;
   }
 
+  constructor() {
+    super();
+    this.queueName = 'ActionsEmail';
+  }
+
 }

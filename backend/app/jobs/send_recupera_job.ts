@@ -10,6 +10,7 @@ import CatchLog from '#models/catch_log';
 import xmlParser from 'xml2json';
 import ActionService from '#services/action_service';
 import string from '@adonisjs/core/helpers/string';
+import queue from '@rlanz/bull-queue/services/main';
 
 interface SendRecuperaJobPayload {
   action_id: number;
@@ -46,6 +47,7 @@ export default class SendRecuperaJob extends Job {
 
   protected urlRecupera: string;
   protected optionsJson: object;
+  queueName: string | undefined;
 
   constructor() {
     super();
@@ -60,6 +62,7 @@ export default class SendRecuperaJob extends Job {
       arrayNotation: false,
       alternateTextNode: false,
     };
+    this.queueName = 'ActionsOparation';
   }
 
   protected checkResultSync(retornotexto: string): boolean {
@@ -133,7 +136,7 @@ export default class SendRecuperaJob extends Job {
 
         if (this.checkResultSync(retornotexto)) {
           action.sync = false;
-          await actionService.handleSendingForRecupera(action);
+          await actionService.handleSendingForRecupera(action, this.queueName);
         } else {
           action.sync = true;
           action.resultSync = JSON.stringify(resultSync);
@@ -179,7 +182,7 @@ export default class SendRecuperaJob extends Job {
     const action = await Action.find(payload.action_id);
     if (action) {
       action.sync = false;
-      await actionService.handleSendingForRecupera(action);
+      await actionService.handleSendingForRecupera(action, this.queueName);
     }
   }
 }
