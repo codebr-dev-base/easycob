@@ -99,45 +99,26 @@ export default abstract class RecuperaService extends SerializeService {
             cocontratovincular: <string>contract?.desContr,
         };
 
-        if (queueName === 'ActionsOparation') {
-            await queue.dispatch(
-                SendRecuperaJob,
-                item,
-                {
-                    queueName,
-                    attempts: 5,
-                    backoff: {
-                        type: 'exponential',
-                        delay: randoDelay,
-                    }
+        const jobMapping: any = {
+            ActionsOparation: SendRecuperaJob,
+            ActionsSms: SendSmsRecuperaJob,
+            ActionsEmail: SendEmailRecuperaJob,
+        };
+
+        const job = jobMapping[queueName];
+
+        if (job) {
+            await queue.dispatch(job, item, {
+                queueName,
+                attempts: 5,
+                backoff: {
+                    type: 'exponential',
+                    delay: randoDelay,
                 },
-            );
-        } else if (queueName === 'ActionsSms') {
-            await queue.dispatch(
-                SendSmsRecuperaJob,
-                item,
-                {
-                    queueName,
-                    attempts: 5,
-                    backoff: {
-                        type: 'exponential',
-                        delay: randoDelay,
-                    }
-                },
-            );
-        } else if (queueName === 'ActionsEmail') {
-            await queue.dispatch(
-                SendEmailRecuperaJob,
-                item,
-                {
-                    queueName,
-                    attempts: 5,
-                    backoff: {
-                        type: 'exponential',
-                        delay: randoDelay,
-                    }
-                },
-            );
+            });
+        } else {
+            // Opcional: Tratamento para filas não reconhecidas
+            logger.warn(`Queue name "${queueName}" is not recognized.`);
         }
 
     }
