@@ -4,7 +4,7 @@ import { DateTime } from 'luxon';
 export const createCampaignValidator = vine.compile(
   vine.object({
     date: vine.date({ formats: { utc: true } }).transform((value) => {
-      return DateTime.fromJSDate(value);
+      return DateTime.fromJSDate(value).toLocal();
     }),
     name: vine.string(),
     message: vine.string().optional(),
