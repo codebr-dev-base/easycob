@@ -119,14 +119,17 @@ export default class ClientsController {
 
             await mailInvoice.load('files');
 
+            const randoDelay = Math.floor(Math.random() * 10) + 1;
+
             await queue.dispatch(
                 SendInvoiceJob,
                 { mail_invoice_id: mailInvoice.id },
                 {
                     queueName: 'SendInvoice',
-                    attempts: 5,
+                    attempts: 10,
                     backoff: {
-                        type: 'exponential'
+                        type: 'exponential',
+                        delay: randoDelay,
                     }
                 },
             );

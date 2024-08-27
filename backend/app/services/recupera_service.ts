@@ -110,7 +110,7 @@ export default abstract class RecuperaService extends SerializeService {
         if (job) {
             await queue.dispatch(job, item, {
                 queueName,
-                attempts: 5,
+                attempts: 10,
                 backoff: {
                     type: 'exponential',
                     delay: randoDelay,

@@ -13,7 +13,7 @@ export default defineConfig({
 
   worker: {
     limiter: {
-      max: 1,
+      max: 8,
       duration: 500,
     },
   },
@@ -31,7 +31,7 @@ export default defineConfig({
     | @see https://docs.bullmq.io/guide/retrying-failing-jobs
     |
     */
-    attempts: 5,
+    attempts: 10,
 
     /*
     |--------------------------------------------------------------------------

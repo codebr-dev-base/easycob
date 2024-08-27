@@ -93,6 +93,8 @@ export default class LoadCsvCampaignJob extends Job {
         await ErrorCampaignImport.createMany(contactInvalids);
       }
 
+      const randoDelay = Math.floor(Math.random() * 10) + 1;
+
       if (campaign.type === 'SMS') {
         await queue.dispatch(
           SendSmsJob,
@@ -102,9 +104,10 @@ export default class LoadCsvCampaignJob extends Job {
           },
           {
             queueName: 'SendSms',
-            attempts: 5,
+            attempts: 10,
             backoff: {
-              type: 'exponential'
+              type: 'exponential',
+              delay: randoDelay,
             }
           },
         );
@@ -119,9 +122,10 @@ export default class LoadCsvCampaignJob extends Job {
           },
           {
             queueName: 'SendEmail',
-            attempts: 5,
+            attempts: 10,
             backoff: {
-              type: 'exponential'
+              type: 'exponential',
+              delay: randoDelay,
             }
           },
         );
@@ -134,6 +138,27 @@ export default class LoadCsvCampaignJob extends Job {
    * This is an optional method that gets called when the retries has exceeded and is marked failed.
    */
   async rescue(payload: LoadCsvCampaignJobPayload) {
+
+    // Função que retorna uma Promise que é resolvida após 1 hora
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // Aguardar 1 hora (3600000 ms) antes de executar o código
+    await delay(3600000);
+
+    const randoDelay = Math.floor(Math.random() * 10) + 1;
+
+    await queue.dispatch(
+      LoadCsvCampaignJob,
+      payload,
+      {
+        queueName: 'LoadCsv',
+        attempts: 10,
+        backoff: {
+          type: 'exponential',
+          delay: randoDelay,
+        }
+      },
+    );
     throw new Error(`Rescue method not implemented LoadCsvCampaignJob. payload: ${JSON.stringify(payload)}`);
 
   }
