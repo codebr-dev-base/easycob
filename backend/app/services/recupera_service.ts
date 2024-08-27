@@ -12,6 +12,7 @@ import Campaign from "#models/campaign";
 import logger from '@adonisjs/core/services/logger';
 import SendSmsRecuperaJob from "#jobs/send_sms_recupera_job";
 import SendEmailRecuperaJob from "#jobs/send_email_recupera_job";
+import lodash from 'lodash';
 
 export default abstract class RecuperaService extends SerializeService {
 
@@ -234,42 +235,53 @@ export default abstract class RecuperaService extends SerializeService {
 
             Object.keys(clientsGroups).forEach(async (key: string) => {
                 if (key === item.contato.toUpperCase()) {
-                    const group = clientsGroups[key];
+                    const groupContato = clientsGroups[key];
 
-                    for (const [i, client] of group.entries()) {
+                    const groupDesContr: { [key: string]: any[]; } = lodash.groupBy(groupContato, 'des_contr');
 
-                        const { codCredorDesRegis, desRegis, desContr, codCredor, matriculaContrato, contato, valPrinc, dayLate } = client;
+                    Object.keys(groupDesContr).forEach(async (k: string) => {
 
-                        //TODO Melhorar este metodo
-                        const action = await Action.create({
-                            codCredorDesRegis,
-                            desRegis,
-                            desContr,
-                            codCredor,
-                            matriculaContrato,
-                            tipoContato: this.tipoContato,
-                            contato,
-                            typeActionId: typeAction.id,
-                            description: '',
-                            retorno: null,
-                            retornotexto: 'Acionamento Automatico envio em massa ',
-                            userId: campaign.userId,
-                            valPrinc,
-                            datVenci: DateTime.fromJSDate(client.datVenci),
-                            dayLate,
-                        });
+                        const group = groupDesContr[k];
 
-                        if (i === 0) {
-                            if (this.abbreviation === 'EME') {
-                                this.handleSendingForRecupera(action, `ActionsEmail`);
+                        for (const [i, client] of group.entries()) {
+
+                            const { codCredorDesRegis, desRegis, desContr, codCredor, matriculaContrato, contato, valPrinc, dayLate } = client;
+
+                            //TODO Melhorar este metodo
+                            const action = await Action.create({
+                                codCredorDesRegis,
+                                desRegis,
+                                desContr,
+                                codCredor,
+                                matriculaContrato,
+                                tipoContato: this.tipoContato,
+                                contato,
+                                typeActionId: typeAction.id,
+                                description: '',
+                                retorno: null,
+                                retornotexto: 'Acionamento Automatico envio em massa ',
+                                userId: campaign.userId,
+                                valPrinc,
+                                datVenci: DateTime.fromJSDate(client.datVenci),
+                                dayLate,
+                            });
+
+                            if (i === 0) {
+                                if (this.abbreviation === 'EME') {
+                                    this.handleSendingForRecupera(action, `ActionsEmail`);
+                                }
+
+                                if (this.abbreviation === 'SMS') {
+                                    this.handleSendingForRecupera(action, `ActionsSms`);
+                                }
+
                             }
-
-                            if (this.abbreviation === 'SMS') {
-                                this.handleSendingForRecupera(action, `ActionsSms`);
-                            }
-
                         }
-                    }
+
+                    });
+
+
+
                 }
             });
 
