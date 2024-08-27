@@ -12,10 +12,6 @@ export default defineConfig({
   },
 
   worker: {
-    limiter: {
-      max: 8,
-      duration: 500,
-    },
   },
 
   jobs: {
@@ -57,3 +53,8 @@ export default defineConfig({
     }
   },
 });
+
+/* limiter: {
+  max: 8,
+  duration: 500,
+}, */
