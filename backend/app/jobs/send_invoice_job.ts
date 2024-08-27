@@ -5,6 +5,8 @@ import Contract from '#models/recovery/contract';
 import Subsidiary from '#models/subsidiary';
 import TemplateEmail from '#models/template_email';
 import app from '@adonisjs/core/services/app';
+import logger from '@adonisjs/core/services/logger';
+
 
 
 interface SendInvoiceJobPayload { mail_invoice_id: number; }
@@ -20,74 +22,81 @@ export default class SendInvoiceJob extends Job {
    */
   async handle(payload: SendInvoiceJobPayload) {
 
-    const mailInvoice = await MailInvoice.find(payload.mail_invoice_id);
-    const paths: any[] = [];
-    if (mailInvoice) {
-      const contract = await Contract.query()
-        .where('cod_credor_des_regis', mailInvoice.codCredorDesRegis)
-        .first();
+    try {
+      const mailInvoice = await MailInvoice.find(payload.mail_invoice_id);
+      const paths: any[] = [];
+      if (mailInvoice) {
+        const contract = await Contract.query()
+          .where('cod_credor_des_regis', mailInvoice.codCredorDesRegis)
+          .first();
 
-      if (!contract) {
-        return;
-      }
+        if (!contract) {
+          return;
+        }
 
-      let subsidiaryName = 'AEGEA';
+        let subsidiaryName = 'AEGEA';
 
-      const subsidiary = await Subsidiary.query()
-        .whereILike('nom_loja', `${contract.nomLoja}`)
-        .first();
+        const subsidiary = await Subsidiary.query()
+          .whereILike('nom_loja', `${contract.nomLoja}`)
+          .first();
 
-      if (!subsidiary) {
-        return;
-      }
+        if (!subsidiary) {
+          return;
+        }
 
-      subsidiaryName = subsidiary.name;
+        subsidiaryName = subsidiary.name;
 
-      const template = await TemplateEmail.query()
-        .whereILike('name', `${subsidiaryName}`)
-        .first();
+        const template = await TemplateEmail.query()
+          .whereILike('name', `${subsidiaryName}`)
+          .first();
 
-      await mailInvoice?.load('files');
-      for (const file of mailInvoice?.files) {
-        paths.push({
-          path: `${app.makePath('uploads/invoices')}${file.fileName}`,
+        await mailInvoice?.load('files');
+        for (const file of mailInvoice?.files) {
+          paths.push({
+            path: `${app.makePath('uploads/invoices')}${file.fileName}`,
+          });
+        }
+
+        const subject =
+          mailInvoice.type === 'entry'
+            ? `Entrada do Acordo – ${template?.name}`
+            : `Segunda Via – ${template?.name}`;
+
+        const bodyEmail = template?.template ? template?.template : '';
+
+        const response = await mail.send((message) => {
+          message
+            .to(mailInvoice.contact)
+            .from(
+              'contato@yuansolucoes.com.br',
+              'Cobrança AEGEA'
+            )
+            .subject(subject)
+            .text(bodyEmail)
+            .listHelp(`contato@yuansolucoes.com.br?subject=help`)
+            .listUnsubscribe({
+              url: `https://www.yuansolucoes.com.br/unsubscribe?id=${mailInvoice.contact}`,
+              comment: 'Comment'
+            })
+            .listSubscribe(`contato@yuansolucoes.com.br?subject=subscribe`)
+            .listSubscribe({
+              url: `https://www.yuansolucoes.com.br/subscribe?id=${mailInvoice.contact}`,
+              comment: 'Subscribe'
+            })
+            .addListHeader('post', `https://www.yuansolucoes.com.br/subscribe?id=${mailInvoice.contact}`);
         });
+
+        mailInvoice.messageid = response.messageId;
+        await mailInvoice.save();
+
+
       }
-
-      const subject =
-        mailInvoice.type === 'entry'
-          ? `Entrada do Acordo – ${template?.name}`
-          : `Segunda Via – ${template?.name}`;
-
-      const bodyEmail = template?.template ? template?.template : '';
-
-      const response = await mail.send((message) => {
-        message
-          .to(mailInvoice.contact)
-          .from(
-            'contato@yuansolucoes.com.br',
-            'Cobrança AEGEA'
-          )
-          .subject(subject)
-          .text(bodyEmail)
-          .listHelp(`contato@yuansolucoes.com.br?subject=help`)
-          .listUnsubscribe({
-            url: `https://www.yuansolucoes.com.br/unsubscribe?id=${mailInvoice.contact}`,
-            comment: 'Comment'
-          })
-          .listSubscribe(`contato@yuansolucoes.com.br?subject=subscribe`)
-          .listSubscribe({
-            url: `https://www.yuansolucoes.com.br/subscribe?id=${mailInvoice.contact}`,
-            comment: 'Subscribe'
-          })
-          .addListHeader('post', `https://www.yuansolucoes.com.br/subscribe?id=${mailInvoice.contact}`);
-      });
-
-      mailInvoice.messageid = response.messageId;
-      await mailInvoice.save();
-
-
+    } catch (error) {
+      logger.error(payload);
+      logger.error(error);
+      throw error;
     }
+
   }
 
   /**

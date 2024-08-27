@@ -10,6 +10,7 @@ import CatchLog from '#models/catch_log';
 import xmlParser from 'xml2json';
 import ActionService from '#services/action_service';
 import string from '@adonisjs/core/helpers/string';
+import logger from '@adonisjs/core/services/logger';
 
 interface SendRecuperaJobPayload {
   action_id: number;
@@ -160,6 +161,8 @@ export default class SendRecuperaJob extends Job {
           payload: JSON.stringify(payload),
           error: JSON.stringify(error),
         });
+        logger.error(payload);
+        logger.error(error);
         throw error;
       }
 
@@ -172,16 +175,12 @@ export default class SendRecuperaJob extends Job {
   async rescue(payload: SendRecuperaJobPayload) {
     const actionService = new ActionService();
 
-    // Função que retorna uma Promise que é resolvida após 1 hora
-    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-    // Aguardar 1 hora (3600000 ms) antes de executar o código
-    await delay(3600000);
-
     const action = await Action.find(payload.action_id);
     if (action) {
       action.sync = false;
       await actionService.handleSendingForRecupera(action, this.queueName);
     }
+
+    logger.error(payload);
   }
 }

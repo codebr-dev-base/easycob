@@ -4,6 +4,7 @@ import SmsService from '#services/sms_service';
 import CampaignLot from '#models/campaign_lot';
 import { Job } from '@rlanz/bull-queue';
 import queue from '@rlanz/bull-queue/services/main';
+import logger from '@adonisjs/core/services/logger';
 
 
 interface SendSmsJobPayload { campaign_id: number; user_id: any; }
@@ -25,29 +26,31 @@ export default class SendSmsJob extends Job {
   async handle(payload: SendSmsJobPayload) {
     const campaign = await Campaign.find(payload.campaign_id);
 
-    if (campaign) {
-      const lots = await CampaignLot.query()
-        .where('campaign_id', campaign.id)
-        .whereNotNull('contato')
-        .whereNull('messageid')
-        .where('valid', true)
-        .limit(500);
+    try {
+      if (campaign) {
+        const lots = await CampaignLot.query()
+          .where('campaign_id', campaign.id)
+          .whereNotNull('contato')
+          .whereNull('messageid')
+          .where('valid', true)
+          .limit(500);
 
-      await this.service.works(campaign, lots);
+        await this.service.works(campaign, lots);
+      }
+    } catch (error) {
+      logger.error(payload);
+      logger.error(error);
+      throw error;
     }
+
   }
 
   /**
    * This is an optional method that gets called when the retries has exceeded and is marked failed.
    */
   async rescue(payload: SendSmsJobPayload) {
-    // Função que retorna uma Promise que é resolvida após 1 hora
-    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-    // Aguardar 1 hora (3600000 ms) antes de executar o código
-    await delay(3600000);
-
-    const randoDelay = Math.floor(Math.random() * 10) + 1;
+    const randoDelay = Math.floor(Math.random() * 10) + 6000;
 
     await queue.dispatch(
       SendSmsJob,
@@ -61,6 +64,8 @@ export default class SendSmsJob extends Job {
         }
       },
     );
+
+    logger.error(payload);
     throw new Error(`Rescue method not implemented SendEmailJob. payload: ${JSON.stringify(payload)}`);
 
   }

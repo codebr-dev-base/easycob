@@ -28,110 +28,118 @@ export default class LoadCsvCampaignJob extends Job {
    */
   async handle(payload: LoadCsvCampaignJobPayload) {
     const campaign = await Campaign.find(payload.campaign_id);
+    try {
 
-    if (campaign) {
-      const dateTime = new Date().getTime();
-      const blockContacts = await this.service.getBlockedContacts();
-      const contacts = await this.service.readCsvFile(campaign.fileName);
-      const chunksContacs = chunks(contacts, 500);
+      if (campaign) {
+        const dateTime = new Date().getTime();
+        const blockContacts = await this.service.getBlockedContacts();
+        const contacts = await this.service.readCsvFile(campaign.fileName);
+        const chunksContacs = chunks(contacts, 500);
 
-      if (contacts.length === 0) {
-        logger.info("Contacts is empty");
-      }
-
-      if (chunksContacs.length === 0) {
-        logger.info("Contacts is empty");
-      }
-
-      const handleInvalidContact = this.service.handleInvalidContact;
-      const handleValidContact = this.service.handleValidContact;
-
-      for (const chunkContacs of chunksContacs) {
-        const contactsValids: any[] = [];
-        const contactInvalids: any[] = [];
-
-        const clients = await this.service.getClients(chunkContacs);
-
-        for (const contact of chunkContacs) {
-
-          const client = this.service.findClient(contact, clients);
-
-          if (this.service.isUniversalBlock(contact, blockContacts.universalBlock)) {
-            contactInvalids.push(handleInvalidContact('Contato bloqueado', contact, campaign, dateTime));
-            continue;
-          }
-
-          if (this.service.isSpecificBlock(contact, blockContacts.specificBlock)) {
-            contactInvalids.push(handleInvalidContact('Contato bloqueado para este cliente', contact, campaign, dateTime));
-            continue;
-          }
-
-          if (!client) {
-            contactInvalids.push(handleInvalidContact('Cliente não encontrado', contact, campaign, dateTime));
-            continue;
-          }
-
-          if (!client.is_active) {
-            contactInvalids.push(handleInvalidContact('Cliente INATIVO', contact, campaign, dateTime));
-            continue;
-          }
-
-          if (!client.is_contracts) {
-            contactInvalids.push(handleInvalidContact('Cliente ATIVO, mas não possui contrato ATIVO', contact, campaign, dateTime));
-            continue;
-          }
-
-          if (!client.is_invoices) {
-            contactInvalids.push(handleInvalidContact('Cliente ATIVO, mas não possui dívidas', contact, campaign, dateTime));
-            continue;
-          }
-
-          contactsValids.push(handleValidContact(contact, campaign, dateTime));
+        if (contacts.length === 0) {
+          logger.info("Contacts is empty");
         }
 
-        await CampaignLot.createMany(contactsValids);
-        await ErrorCampaignImport.createMany(contactInvalids);
-      }
+        if (chunksContacs.length === 0) {
+          logger.info("Contacts is empty");
+        }
 
-      const randoDelay = Math.floor(Math.random() * 10) + 1;
+        const handleInvalidContact = this.service.handleInvalidContact;
+        const handleValidContact = this.service.handleValidContact;
 
-      if (campaign.type === 'SMS') {
-        await queue.dispatch(
-          SendSmsJob,
-          {
-            campaign_id: payload.campaign_id,
-            user_id: payload.user_id,
-          },
-          {
-            queueName: 'SendSms',
-            attempts: 10,
-            backoff: {
-              type: 'exponential',
-              delay: randoDelay,
+        for (const chunkContacs of chunksContacs) {
+          const contactsValids: any[] = [];
+          const contactInvalids: any[] = [];
+
+          const clients = await this.service.getClients(chunkContacs);
+
+          for (const contact of chunkContacs) {
+
+            const client = this.service.findClient(contact, clients);
+
+            if (this.service.isUniversalBlock(contact, blockContacts.universalBlock)) {
+              contactInvalids.push(handleInvalidContact('Contato bloqueado', contact, campaign, dateTime));
+              continue;
             }
-          },
-        );
-      }
 
-      if (campaign.type === 'EMAIL') {
-        await queue.dispatch(
-          SendEmailJob,
-          {
-            campaign_id: payload.campaign_id,
-            user_id: payload.user_id,
-          },
-          {
-            queueName: 'SendEmail',
-            attempts: 10,
-            backoff: {
-              type: 'exponential',
-              delay: randoDelay,
+            if (this.service.isSpecificBlock(contact, blockContacts.specificBlock)) {
+              contactInvalids.push(handleInvalidContact('Contato bloqueado para este cliente', contact, campaign, dateTime));
+              continue;
             }
-          },
-        );
+
+            if (!client) {
+              contactInvalids.push(handleInvalidContact('Cliente não encontrado', contact, campaign, dateTime));
+              continue;
+            }
+
+            if (!client.is_active) {
+              contactInvalids.push(handleInvalidContact('Cliente INATIVO', contact, campaign, dateTime));
+              continue;
+            }
+
+            if (!client.is_contracts) {
+              contactInvalids.push(handleInvalidContact('Cliente ATIVO, mas não possui contrato ATIVO', contact, campaign, dateTime));
+              continue;
+            }
+
+            if (!client.is_invoices) {
+              contactInvalids.push(handleInvalidContact('Cliente ATIVO, mas não possui dívidas', contact, campaign, dateTime));
+              continue;
+            }
+
+            contactsValids.push(handleValidContact(contact, campaign, dateTime));
+          }
+
+          await CampaignLot.createMany(contactsValids);
+          await ErrorCampaignImport.createMany(contactInvalids);
+        }
+
+        const randoDelay = Math.floor(Math.random() * 10) + 1;
+
+        if (campaign.type === 'SMS') {
+          await queue.dispatch(
+            SendSmsJob,
+            {
+              campaign_id: payload.campaign_id,
+              user_id: payload.user_id,
+            },
+            {
+              queueName: 'SendSms',
+              attempts: 10,
+              backoff: {
+                type: 'exponential',
+                delay: randoDelay,
+              }
+            },
+          );
+        }
+
+        if (campaign.type === 'EMAIL') {
+          await queue.dispatch(
+            SendEmailJob,
+            {
+              campaign_id: payload.campaign_id,
+              user_id: payload.user_id,
+            },
+            {
+              queueName: 'SendEmail',
+              attempts: 10,
+              backoff: {
+                type: 'exponential',
+                delay: randoDelay,
+              }
+            },
+          );
+        }
+
       }
 
+    } catch (error) {
+      logger.error(payload);
+      logger.error(error);
+      throw error;
     }
+
   }
 
   /**
@@ -139,13 +147,7 @@ export default class LoadCsvCampaignJob extends Job {
    */
   async rescue(payload: LoadCsvCampaignJobPayload) {
 
-    // Função que retorna uma Promise que é resolvida após 1 hora
-    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-    // Aguardar 1 hora (3600000 ms) antes de executar o código
-    await delay(3600000);
-
-    const randoDelay = Math.floor(Math.random() * 10) + 1;
+    const randoDelay = Math.floor(Math.random() * 10) + 6000;
 
     await queue.dispatch(
       LoadCsvCampaignJob,
@@ -159,6 +161,8 @@ export default class LoadCsvCampaignJob extends Job {
         }
       },
     );
+
+    logger.error(payload);
     throw new Error(`Rescue method not implemented LoadCsvCampaignJob. payload: ${JSON.stringify(payload)}`);
 
   }

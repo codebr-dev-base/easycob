@@ -4,6 +4,7 @@ import { Job } from '@rlanz/bull-queue';
 import Campaign from '#models/campaign';
 import CampaignLot from '#models/campaign_lot';
 import queue from '@rlanz/bull-queue/services/main';
+import logger from '@adonisjs/core/services/logger';
 
 interface SendEmailJobPayload { campaign_id: number; user_id: any; }
 
@@ -24,28 +25,33 @@ export default class SendEmailJob extends Job {
   async handle(payload: SendEmailJobPayload) {
     const campaign = await Campaign.find(payload.campaign_id);
 
-    if (campaign) {
-      const lots = await CampaignLot.query()
-        .where('campaign_id', campaign.id)
-        .whereNotNull('contato')
-        .whereNull('messageid')
-        .where('valid', true)
-        .limit(500);
-      await this.service.works(campaign, lots);
+    try {
+
+      if (campaign) {
+        const lots = await CampaignLot.query()
+          .where('campaign_id', campaign.id)
+          .whereNotNull('contato')
+          .whereNull('messageid')
+          .where('valid', true)
+          .limit(500);
+        await this.service.works(campaign, lots);
+      }
+
+    } catch (error) {
+      logger.error(payload);
+      logger.error(error);
+      throw error;
     }
+
+
   }
 
   /**
    * This is an optional method that gets called when the retries has exceeded and is marked failed.
    */
   async rescue(payload: SendEmailJobPayload) {
-    // Função que retorna uma Promise que é resolvida após 1 hora
-    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-    // Aguardar 1 hora (3600000 ms) antes de executar o código
-    await delay(3600000);
-
-    const randoDelay = Math.floor(Math.random() * 10) + 1;
+    const randoDelay = Math.floor(Math.random() * 10) + 6000;
 
     await queue.dispatch(
       SendEmailJob,
@@ -59,6 +65,7 @@ export default class SendEmailJob extends Job {
         }
       },
     );
+    logger.error(payload);
     throw new Error(`Rescue method not implemented SendEmailJob. payload: ${JSON.stringify(payload)}`);
 
   }

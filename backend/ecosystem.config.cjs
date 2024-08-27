@@ -67,7 +67,7 @@ module.exports = {
       script: './build/ace.js',
       cwd: severPath,
       args: 'queue:listen --queue=SendEmail',
-      instances: 1,
+      instances: 4,
       exec_mode: 'cluster',
       autorestart: true,
       env: {
