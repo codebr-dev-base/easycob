@@ -3,6 +3,8 @@ import Campaign from '#models/campaign';
 import SmsService from '#services/sms_service';
 import CampaignLot from '#models/campaign_lot';
 import { Job } from '@rlanz/bull-queue';
+import queue from '@rlanz/bull-queue/services/main';
+
 
 interface SendSmsJobPayload { campaign_id: number; user_id: any; }
 
@@ -39,7 +41,27 @@ export default class SendSmsJob extends Job {
    * This is an optional method that gets called when the retries has exceeded and is marked failed.
    */
   async rescue(payload: SendSmsJobPayload) {
-    throw new Error(`Rescue method not implemented SendSmsJob. payload: ${JSON.stringify(payload)}`);
+    // Função que retorna uma Promise que é resolvida após 1 hora
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // Aguardar 1 hora (3600000 ms) antes de executar o código
+    await delay(3600000);
+
+    const randoDelay = Math.floor(Math.random() * 10) + 1;
+
+    await queue.dispatch(
+      SendSmsJob,
+      payload,
+      {
+        queueName: 'SendEmail',
+        attempts: 10,
+        backoff: {
+          type: 'exponential',
+          delay: randoDelay,
+        }
+      },
+    );
+    throw new Error(`Rescue method not implemented SendEmailJob. payload: ${JSON.stringify(payload)}`);
 
   }
 }
