@@ -34,6 +34,10 @@ export default class LoadCsvCampaignJob extends Job {
         const dateTime = new Date().getTime();
         const blockContacts = await this.service.getBlockedContacts();
         const contacts = await this.service.readCsvFile(campaign.fileName);
+
+        logger.info(blockContacts);
+        logger.info(contacts);
+
         const chunksContacs = chunks(contacts, 500);
 
         if (contacts.length === 0) {
