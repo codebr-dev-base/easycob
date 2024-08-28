@@ -226,68 +226,128 @@ export default abstract class RecuperaService extends SerializeService {
 
         return this.typeAction;
     }
-
+    /* 
+        async createAction(item: CampaignLot, clientsGroups: { [key: string]: any[]; }, campaign: Campaign) {
+    
+    
+            try {
+                const typeAction: TypeAction = await this.getTypeAction();
+    
+                Object.keys(clientsGroups).forEach(async (key: string) => {
+                    if (key === item.contato.toUpperCase()) {
+                        const groupContato = clientsGroups[key];
+    
+                        const groupDesContr: { [key: string]: any[]; } = lodash.groupBy(groupContato, 'des_contr');
+    
+                        Object.keys(groupDesContr).forEach(async (k: string) => {
+    
+                            const group = groupDesContr[k];
+    
+                            for (const [i, client] of group.entries()) {
+    
+                                const { codCredorDesRegis, desRegis, desContr, codCredor, matriculaContrato, contato, valPrinc, dayLate } = client;
+    
+                                //TODO Melhorar este metodo
+                                const action = await Action.create({
+                                    codCredorDesRegis,
+                                    desRegis,
+                                    desContr,
+                                    codCredor,
+                                    matriculaContrato,
+                                    tipoContato: this.tipoContato,
+                                    contato,
+                                    typeActionId: typeAction.id,
+                                    description: '',
+                                    retorno: null,
+                                    retornotexto: 'Acionamento Automatico envio em massa ',
+                                    userId: campaign.userId,
+                                    valPrinc,
+                                    datVenci: DateTime.fromJSDate(client.datVenci),
+                                    dayLate,
+                                });
+    
+                                if (i === 0) {
+                                    if (this.abbreviation === 'EME') {
+                                        this.handleSendingForRecupera(action, `ActionsEmail`);
+                                    }
+    
+                                    if (this.abbreviation === 'SMS') {
+                                        this.handleSendingForRecupera(action, `ActionsSms`);
+                                    }
+    
+                                }
+                            }
+    
+                        });
+    
+    
+    
+                    }
+                });
+    
+            } catch (error) {
+                throw error;
+            }
+    
+        }
+     */
     async createAction(item: CampaignLot, clientsGroups: { [key: string]: any[]; }, campaign: Campaign) {
-
-
         try {
             const typeAction: TypeAction = await this.getTypeAction();
 
-            Object.keys(clientsGroups).forEach(async (key: string) => {
-                if (key === item.contato.toUpperCase()) {
-                    const groupContato = clientsGroups[key];
+            // Utilize `Promise.all` para evitar múltiplas Promises pendentes
+            await Promise.all(Object.keys(clientsGroups).map(async (key: string) => {
+                if (key !== item.contato.toUpperCase()) return;
 
-                    const groupDesContr: { [key: string]: any[]; } = lodash.groupBy(groupContato, 'des_contr');
+                const groupContato = clientsGroups[key];
+                const groupDesContr: { [key: string]: any[]; } = lodash.groupBy(groupContato, 'desContr');
 
-                    Object.keys(groupDesContr).forEach(async (k: string) => {
+                // Mapeia as chaves de `groupDesContr` e processa cada grupo
+                await Promise.all(Object.keys(groupDesContr).map(async (k: string) => {
+                    const group = groupDesContr[k];
 
-                        const group = groupDesContr[k];
+                    // Usa `for...of` com `Promise.all` para criar todas as ações em paralelo
+                    await Promise.all(group.map(async (client, i) => {
+                        const action = await this.createActionForClient(client, typeAction, campaign);
 
-                        for (const [i, client] of group.entries()) {
-
-                            const { codCredorDesRegis, desRegis, desContr, codCredor, matriculaContrato, contato, valPrinc, dayLate } = client;
-
-                            //TODO Melhorar este metodo
-                            const action = await Action.create({
-                                codCredorDesRegis,
-                                desRegis,
-                                desContr,
-                                codCredor,
-                                matriculaContrato,
-                                tipoContato: this.tipoContato,
-                                contato,
-                                typeActionId: typeAction.id,
-                                description: '',
-                                retorno: null,
-                                retornotexto: 'Acionamento Automatico envio em massa ',
-                                userId: campaign.userId,
-                                valPrinc,
-                                datVenci: DateTime.fromJSDate(client.datVenci),
-                                dayLate,
-                            });
-
-                            if (i === 0) {
-                                if (this.abbreviation === 'EME') {
-                                    this.handleSendingForRecupera(action, `ActionsEmail`);
-                                }
-
-                                if (this.abbreviation === 'SMS') {
-                                    this.handleSendingForRecupera(action, `ActionsSms`);
-                                }
-
-                            }
+                        if (i === 0) {
+                            this.handleActionSending(action);
                         }
-
-                    });
-
-
-
-                }
-            });
-
+                    }));
+                }));
+            }));
         } catch (error) {
             throw error;
         }
+    }
 
+    async createActionForClient(client: any, typeAction: TypeAction, campaign: Campaign): Promise<Action> {
+        const { codCredorDesRegis, desRegis, desContr, codCredor, matriculaContrato, contato, valPrinc, dayLate } = client;
+
+        return await Action.create({
+            codCredorDesRegis,
+            desRegis,
+            desContr,
+            codCredor,
+            matriculaContrato,
+            tipoContato: this.tipoContato,
+            contato,
+            typeActionId: typeAction.id,
+            description: '',
+            retorno: null,
+            retornotexto: 'Acionamento Automático envio em massa',
+            userId: campaign.userId,
+            valPrinc,
+            datVenci: DateTime.fromJSDate(client.datVenci),
+            dayLate,
+        });
+    }
+
+    handleActionSending(action: Action): void {
+        if (this.abbreviation === 'EME') {
+            this.handleSendingForRecupera(action, `ActionsEmail`);
+        } else if (this.abbreviation === 'SMS') {
+            this.handleSendingForRecupera(action, `ActionsSms`);
+        }
     }
 }
