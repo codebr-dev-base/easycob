@@ -35,17 +35,14 @@ export default class LoadCsvCampaignJob extends Job {
         const blockContacts = await this.service.getBlockedContacts();
         const contacts = await this.service.readCsvFile(campaign.fileName);
 
-        logger.info(blockContacts);
-        logger.info(contacts);
-
         const chunksContacs = chunks(contacts, 500);
 
         if (contacts.length === 0) {
-          logger.info("Contacts is empty");
+          logger.error("Contacts is empty");
         }
 
         if (chunksContacs.length === 0) {
-          logger.info("Contacts is empty");
+          logger.error("Contacts is empty");
         }
 
         const handleInvalidContact = this.service.handleInvalidContact;
