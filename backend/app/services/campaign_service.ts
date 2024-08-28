@@ -28,7 +28,6 @@ export default class CampaignService {
   async handlerFile(request: Request): Promise<string> {
 
     const file = request.file('file', {
-      size: '10mb',
       extnames: ['csv']
     });
 
@@ -45,7 +44,12 @@ export default class CampaignService {
 
     const dateTime = new Date().getTime();
     const newFileName = `${dateTime}.${file.extname}`;
-    await file.move(app.makePath('uploads/csv'), { name: newFileName });
+
+    try {
+      await file.move(app.makePath('uploads/csv'), { name: newFileName });
+    } catch (error) {
+      throw new Error(`File could not be moved: ${error.message}`);
+    }
 
     return newFileName;
   }

@@ -296,20 +296,12 @@ export default abstract class RecuperaService extends SerializeService {
     async createAction(item: CampaignLot, clientsGroups: { [key: string]: any[]; }, campaign: Campaign) {
         try {
             const typeAction: TypeAction = await this.getTypeAction();
-            logger.info("Item:");
-            logger.info(item);
 
             // Utilize `Promise.all` para evitar múltiplas Promises pendentes
             await Promise.all(Object.keys(clientsGroups).map(async (key: string) => {
                 if (key !== item.contato.toUpperCase()) return;
 
-                logger.info("Key:");
-                logger.info(key);
-
                 const groupContato = clientsGroups[key];
-
-                logger.warn("Grupo por contato:");
-                logger.warn(groupContato);
 
                 const groupDesContr: { [key: string]: any[]; } = lodash.groupBy(groupContato, 'desContr');
 
