@@ -8,7 +8,6 @@ import ErrorCampaignImport from '#models/error_campaign_import';
 import SendEmailJob from '#jobs/send_email_job';
 import queue from '@rlanz/bull-queue/services/main';
 import SendSmsJob from '#jobs/send_sms_job';
-import logger from '@adonisjs/core/services/logger';
 
 interface LoadCsvCampaignJobPayload { campaign_id: number; user_id: any; }
 

@@ -4,7 +4,6 @@ import { Job } from '@rlanz/bull-queue';
 import Campaign from '#models/campaign';
 import CampaignLot from '#models/campaign_lot';
 import queue from '@rlanz/bull-queue/services/main';
-import logger from '@adonisjs/core/services/logger';
 
 interface SendEmailJobPayload { campaign_id: number; user_id: any; }
 

@@ -9,7 +9,6 @@ import db from "@adonisjs/lucid/services/db";
 import CampaignLot from "#models/campaign_lot";
 import SerializeService from "./serialize_service.js";
 import Campaign from "#models/campaign";
-import logger from '@adonisjs/core/services/logger';
 import SendSmsRecuperaJob from "#jobs/send_sms_recupera_job";
 import SendEmailRecuperaJob from "#jobs/send_email_recupera_job";
 import lodash from 'lodash';

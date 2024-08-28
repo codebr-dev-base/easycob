@@ -5,8 +5,6 @@ import Contract from '#models/recovery/contract';
 import Subsidiary from '#models/subsidiary';
 import TemplateEmail from '#models/template_email';
 import app from '@adonisjs/core/services/app';
-import logger from '@adonisjs/core/services/logger';
-
 
 
 interface SendInvoiceJobPayload { mail_invoice_id: number; }

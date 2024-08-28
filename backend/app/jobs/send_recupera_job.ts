@@ -10,7 +10,6 @@ import CatchLog from '#models/catch_log';
 import xmlParser from 'xml2json';
 import ActionService from '#services/action_service';
 import string from '@adonisjs/core/helpers/string';
-import logger from '@adonisjs/core/services/logger';
 
 interface SendRecuperaJobPayload {
   action_id: number;
