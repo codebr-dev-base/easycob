@@ -5,6 +5,8 @@ import app from '@adonisjs/core/services/app';
 import Contact from '#models/recovery/contact';
 import db from '@adonisjs/lucid/services/db';
 import csvtojsonV2 from "csvtojson";
+import { promises as fs } from 'fs';
+import path from 'path';
 
 export default class CampaignService {
 
@@ -44,11 +46,26 @@ export default class CampaignService {
 
     const dateTime = new Date().getTime();
     const newFileName = `${dateTime}.${file.extname}`;
+    const destinationPath = app.makePath('uploads/csv');
+    const fullPath = path.join(destinationPath, newFileName);
 
+    // Tentar mover o arquivo uma vez
     try {
-      await file.move(app.makePath('uploads/csv'), { name: newFileName });
+      await file.move(destinationPath, { name: newFileName });
     } catch (error) {
       throw new Error(`File could not be moved: ${error.message}`);
+    }
+
+    // Verificar se o arquivo foi salvo corretamente
+    try {
+      await fs.access(fullPath);
+    } catch (error) {
+      // Se o arquivo não for encontrado, tentar mover novamente
+      try {
+        await file.move(destinationPath, { name: newFileName });
+      } catch (secondError) {
+        throw new Error(`Second attempt to move file failed: ${secondError.message}`);
+      }
     }
 
     return newFileName;
