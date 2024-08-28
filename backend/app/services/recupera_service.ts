@@ -302,10 +302,15 @@ export default abstract class RecuperaService extends SerializeService {
                 if (key !== item.contato.toUpperCase()) return;
 
                 const groupContato = clientsGroups[key];
+
                 const groupDesContr: { [key: string]: any[]; } = lodash.groupBy(groupContato, 'desContr');
 
                 // Mapeia as chaves de `groupDesContr` e processa cada grupo
                 await Promise.all(Object.keys(groupDesContr).map(async (k: string) => {
+
+                    logger.warn("Grupo por contrato:");
+                    logger.warn(groupContato);
+
                     const group = groupDesContr[k];
 
                     // Usa `for...of` com `Promise.all` para criar todas as ações em paralelo
