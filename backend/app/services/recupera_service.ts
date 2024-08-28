@@ -226,6 +226,7 @@ export default abstract class RecuperaService extends SerializeService {
 
         return this.typeAction;
     }
+
     /* 
         async createAction(item: CampaignLot, clientsGroups: { [key: string]: any[]; }, campaign: Campaign) {
     
@@ -291,6 +292,7 @@ export default abstract class RecuperaService extends SerializeService {
     
         }
      */
+
     async createAction(item: CampaignLot, clientsGroups: { [key: string]: any[]; }, campaign: Campaign) {
         try {
             const typeAction: TypeAction = await this.getTypeAction();
