@@ -161,8 +161,8 @@ export default class SendRecuperaJob extends Job {
           payload: JSON.stringify(payload),
           error: JSON.stringify(error),
         });
-        logger.error(payload);
-        logger.error(error);
+        console.error(payload);
+        console.error(error);
         throw error;
       }
 
@@ -181,6 +181,6 @@ export default class SendRecuperaJob extends Job {
       await actionService.handleSendingForRecupera(action, this.queueName);
     }
 
-    logger.error(payload);
+    console.error(payload);
   }
 }

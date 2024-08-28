@@ -76,7 +76,7 @@ export default abstract class RecuperaService extends SerializeService {
             }
 
         } catch (error) {
-            logger.error(error);
+            console.error(error);
         }
 
 
@@ -119,7 +119,7 @@ export default abstract class RecuperaService extends SerializeService {
             });
         } else {
             // Opcional: Tratamento para filas não reconhecidas
-            logger.warn(`Queue name "${queueName}" is not recognized.`);
+            console.error(`Queue name "${queueName}" is not recognized.`);
         }
 
     }
@@ -289,8 +289,8 @@ export default abstract class RecuperaService extends SerializeService {
                 // Mapeia as chaves de `groupDesContr` e processa cada grupo
                 await Promise.all(Object.keys(groupDesContr).map(async (k: string) => {
 
-                    logger.warn("Grupo por contrato:");
-                    logger.warn(groupContato);
+                    console.error("Grupo por contrato:");
+                    console.error(groupContato);
 
                     const group = groupDesContr[k];
 

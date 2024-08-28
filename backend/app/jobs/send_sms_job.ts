@@ -38,8 +38,8 @@ export default class SendSmsJob extends Job {
         await this.service.works(campaign, lots);
       }
     } catch (error) {
-      logger.error(payload);
-      logger.error(error);
+      console.error(payload);
+      console.error(error);
       throw error;
     }
 
@@ -65,7 +65,7 @@ export default class SendSmsJob extends Job {
       },
     );
 
-    logger.error(payload);
+    console.error(payload);
     throw new Error(`Rescue method not implemented SendEmailJob. payload: ${JSON.stringify(payload)}`);
 
   }

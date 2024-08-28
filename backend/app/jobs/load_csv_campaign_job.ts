@@ -38,11 +38,11 @@ export default class LoadCsvCampaignJob extends Job {
         const chunksContacs = chunks(contacts, 500);
 
         if (contacts.length === 0) {
-          logger.error("Contacts is empty");
+          console.error("Contacts is empty");
         }
 
         if (chunksContacs.length === 0) {
-          logger.error("Contacts is empty");
+          console.error("Contacts is empty");
         }
 
         const handleInvalidContact = this.service.handleInvalidContact;
@@ -136,8 +136,8 @@ export default class LoadCsvCampaignJob extends Job {
       }
 
     } catch (error) {
-      logger.error(payload);
-      logger.error(error);
+      console.error(payload);
+      console.error(error);
       throw error;
     }
 
@@ -163,7 +163,7 @@ export default class LoadCsvCampaignJob extends Job {
       },
     );
 
-    logger.error(payload);
+    console.error(payload);
     throw new Error(`Rescue method not implemented LoadCsvCampaignJob. payload: ${JSON.stringify(payload)}`);
 
   }

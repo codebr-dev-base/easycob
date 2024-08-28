@@ -31,7 +31,7 @@ export default class LastActionService {
 
         if (exists) {
             await redis.del('last_actions');
-            this.logger.info('A coleção last_actions foi limpa.');
+            console.log('A coleção last_actions foi limpa.');
         }
 
         const sql = fs.readFileSync('app/sql/last_action/get.sql', 'utf8');

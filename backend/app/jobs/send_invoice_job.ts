@@ -92,8 +92,8 @@ export default class SendInvoiceJob extends Job {
 
       }
     } catch (error) {
-      logger.error(payload);
-      logger.error(error);
+      console.error(payload);
+      console.error(error);
       throw error;
     }
 
