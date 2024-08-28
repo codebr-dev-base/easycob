@@ -157,17 +157,6 @@ export default abstract class RecuperaService extends SerializeService {
                   ELSE 0
               END) AS pecld`)
             )
-            .select(db.raw('max(la.synced_at) last_action'))
-            .select(
-                db.raw(
-                    "(max(la.synced_at)::date + (max(ta.timelife) || ' days')::interval) as dt_expira"
-                )
-            )
-            .select(
-                db.raw(
-                    "case when (max(la.synced_at)::date + (max(ta.timelife) || ' days')::interval)<=current_date  then true else false end is_send_recupera"
-                )
-            )
             .select(db.raw(`min(pt.dat_venci) filter ( WHERE ${filterIndAlter}) as dat_venci`))
             .select(
                 db.raw(
@@ -194,14 +183,6 @@ export default abstract class RecuperaService extends SerializeService {
                     .andOn('c.des_contr', '=', 'pt.des_contr')
                     .andOnVal('c.status', '=', 'ATIVO');
             })
-            .leftJoin('public.last_actions as la', (q) => {
-                q.on('c.cod_credor_des_regis', '=', 'la.cod_credor_des_regis').andOn(
-                    'c.des_contr',
-                    '=',
-                    'la.des_contr'
-                );
-            })
-            .leftJoin('public.type_actions as ta', 'la.type_action_id', 'ta.id')
             .leftJoin('public.subsidiaries as sb', 'c.nom_loja', '=', 'sb.nom_loja')
             .groupByRaw('1,2,3,4,5,6,7,8,9,10')
             .havingRaw(`sum(pt.val_princ) filter ( WHERE ${filterIndAlter}) is not null`);
