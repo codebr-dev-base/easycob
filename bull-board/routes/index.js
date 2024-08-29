@@ -36,18 +36,18 @@ async function setupBullMQProcessor(queueName) {
 }
 
 const run = async () => {
-  const ActionsOparationBullMq = createQueueMQ("ActionsOparation");
+  const SendRecuperaBullMq = createQueueMQ("SendRecupera");
   const LoadCsvBullMq = createQueueMQ("LoadCsv");
-  const ActionsEmailBullMq = createQueueMQ("ActionsEmail");
-  const ActionsSmsBullMq = createQueueMQ("ActionsSms");
+  const SendEmailRecuperaBullMq = createQueueMQ("SendEmailRecupera");
+  const SendSmsRecuperaBullMq = createQueueMQ("SendSmsRecupera");
   const SendEmailBullMq = createQueueMQ("SendEmail");
   const SendSmsBullMq = createQueueMQ("SendSms");
   const SendInvoiceBullMq = createQueueMQ("SendInvoice");
 
-  await setupBullMQProcessor(ActionsOparationBullMq.name);
+  await setupBullMQProcessor(SendRecuperaBullMq.name);
   await setupBullMQProcessor(LoadCsvBullMq.name);
-  await setupBullMQProcessor(ActionsEmailBullMq.name);
-  await setupBullMQProcessor(ActionsSmsBullMq.name);
+  await setupBullMQProcessor(SendEmailRecuperaBullMq.name);
+  await setupBullMQProcessor(SendSmsRecuperaBullMq.name);
   await setupBullMQProcessor(SendEmailBullMq.name);
   await setupBullMQProcessor(SendSmsBullMq.name);
   await setupBullMQProcessor(SendInvoiceBullMq.name);
@@ -57,10 +57,10 @@ const run = async () => {
 
   createBullBoard({
     queues: [
-      new BullMQAdapter(ActionsOparationBullMq),
+      new BullMQAdapter(SendRecuperaBullMq),
       new BullMQAdapter(LoadCsvBullMq),
-      new BullMQAdapter(ActionsEmailBullMq),
-      new BullMQAdapter(ActionsSmsBullMq),
+      new BullMQAdapter(SendEmailRecuperaBullMq),
+      new BullMQAdapter(SendSmsRecuperaBullMq),
       new BullMQAdapter(SendEmailBullMq),
       new BullMQAdapter(SendSmsBullMq),
       new BullMQAdapter(SendInvoiceBullMq),
