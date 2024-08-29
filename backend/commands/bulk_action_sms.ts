@@ -17,8 +17,8 @@ export default class BulkActionSms extends BaseCommand {
     if (typeAction) {
       const actions = await Action.query().where('retornotexto', 'Em fila').where('typeActionId', typeAction.id).whereRaw('created_at::date = CURRENT_DATE');
 
-      for (let index = 0; index < 1; index++) {
-        await handleSendingForRecupera(actions[index]);
+      for (const action of actions) {
+        await handleSendingForRecupera(action);
       }
       console.log(actions.length);
 

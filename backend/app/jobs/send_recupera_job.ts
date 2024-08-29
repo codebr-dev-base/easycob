@@ -107,11 +107,7 @@ export default class SendRecuperaJob extends Job {
 
         const resultSync = <SoapBody>xmlParser.toJson(soapBody, this.optionsJson);
 
-        console.log(resultSync);
-
         const retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
-
-        console.log(retornotexto);
 
         if (this.checkResultSync(retornotexto)) {
           console.log('sync false');
