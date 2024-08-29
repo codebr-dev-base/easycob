@@ -10,7 +10,6 @@ module.exports = {
       instances: 4,
       exec_mode: 'cluster',
       autorestart: true,
-      node_args: '--max-old-space-size=4096', // Ajuste para 4GB
       env: {
         TZ: 'America/Fortaleza',
       },
@@ -23,7 +22,6 @@ module.exports = {
       instances: 1,
       exec_mode: 'cluster',
       autorestart: true,
-      node_args: '--max-old-space-size=4096', // Ajuste para 4GB
       env: {
         TZ: 'America/Fortaleza',
       },
@@ -36,7 +34,6 @@ module.exports = {
       instances: 1,
       exec_mode: 'cluster',
       autorestart: true,
-      node_args: '--max-old-space-size=4096', // Ajuste para 4GB
       env: {
         TZ: 'America/Fortaleza',
       },
@@ -49,7 +46,6 @@ module.exports = {
       instances: 1,
       exec_mode: 'cluster',
       autorestart: true,
-      node_args: '--max-old-space-size=4096', // Ajuste para 4GB
       env: {
         TZ: 'America/Fortaleza',
       },
@@ -62,7 +58,6 @@ module.exports = {
       instances: 1,
       exec_mode: 'cluster',
       autorestart: true,
-      node_args: '--max-old-space-size=4096', // Ajuste para 4GB
       env: {
         TZ: 'America/Fortaleza',
       },
@@ -75,7 +70,6 @@ module.exports = {
       instances: 1,
       exec_mode: 'cluster',
       autorestart: true,
-      node_args: '--max-old-space-size=4096', // Ajuste para 4GB
       env: {
         TZ: 'America/Fortaleza',
       },
@@ -88,7 +82,6 @@ module.exports = {
       instances: 1,
       exec_mode: 'cluster',
       autorestart: true,
-      node_args: '--max-old-space-size=4096', // Ajuste para 4GB
       env: {
         TZ: 'America/Fortaleza',
       },
@@ -101,7 +94,6 @@ module.exports = {
       instances: 1,
       exec_mode: 'cluster',
       autorestart: true,
-      node_args: '--max-old-space-size=4096', // Ajuste para 4GB
       env: {
         TZ: 'America/Fortaleza',
       },
