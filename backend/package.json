@@ -69,6 +69,7 @@
     "@adonisjs/static": "^1.1.1",
     "@rlanz/bull-queue": "^3.0.0",
     "@vinejs/vine": "^2.1.0",
+    "adonis-resque": "^2.0.0-alpha.0",
     "csvtojson": "^2.0.10",
     "edge.js": "^6.0.2",
     "lodash": "^4.17.21",

@@ -14,7 +14,8 @@ export default defineConfig({
     () => import('@adonisjs/core/commands'),
     () => import('@adonisjs/lucid/commands'),
     () => import('@rlanz/bull-queue/commands'),
-    () => import('@adonisjs/mail/commands')
+    () => import('@adonisjs/mail/commands'),
+    () => import('adonis-resque/commands')
   ],
 
   /*
@@ -41,7 +42,8 @@ export default defineConfig({
     () => import('@adonisjs/core/providers/edge_provider'),
     () => import('@rlanz/bull-queue/queue_provider'),
     () => import('@adonisjs/static/static_provider'),
-    () => import('@adonisjs/mail/mail_provider')
+    () => import('@adonisjs/mail/mail_provider'),
+    () => import('adonis-resque/providers/resque_provider')
   ],
 
   /*

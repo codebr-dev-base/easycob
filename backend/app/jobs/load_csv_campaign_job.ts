@@ -1,38 +1,38 @@
-import { Job } from '@rlanz/bull-queue';
+import { BaseJob, Plugin } from 'adonis-resque';
 import CampaignService from '#services/campaign_service';
 import Campaign from '#models/campaign';
-import { inject } from '@adonisjs/core';
 import { chunks } from '#utils/array';
 import CampaignLot from '#models/campaign_lot';
 import ErrorCampaignImport from '#models/error_campaign_import';
 import SendEmailJob from '#jobs/send_email_job';
-import queue from '@rlanz/bull-queue/services/main';
 import SendSmsJob from '#jobs/send_sms_job';
 
 interface LoadCsvCampaignJobPayload { campaign_id: number; user_id: any; }
 
-@inject()
-export default class LoadCsvCampaignJob extends Job {
-  // This is the path to the file that is used to create the job
-  static get $$filepath() {
-    return import.meta.url;
-  }
+export default class LoadCsvCampaignJob extends BaseJob {
 
-  constructor(protected service: CampaignService) {
-    super();
-  }
+  plugins = [
+    Plugin.delayQueueLock(),
+    Plugin.retry({
+      retryLimit: 10,
+      backoffStrategy: [1000, 3000, 8000]
+    })
+  ];
+
+  queueName = 'LoadCsv';
 
   /**
    * Base Entry point
    */
-  async handle(payload: LoadCsvCampaignJobPayload) {
+  async perform(payload: LoadCsvCampaignJobPayload) {
+    const service = new CampaignService();
     const campaign = await Campaign.find(payload.campaign_id);
     try {
 
       if (campaign) {
         const dateTime = new Date().getTime();
-        const blockContacts = await this.service.getBlockedContacts();
-        const contacts = await this.service.readCsvFile(campaign.fileName);
+        const blockContacts = await service.getBlockedContacts();
+        const contacts = await service.readCsvFile(campaign.fileName);
 
         const chunksContacs = chunks(contacts, 500);
 
@@ -44,25 +44,25 @@ export default class LoadCsvCampaignJob extends Job {
           console.error("Contacts is empty");
         }
 
-        const handleInvalidContact = this.service.handleInvalidContact;
-        const handleValidContact = this.service.handleValidContact;
+        const handleInvalidContact = service.handleInvalidContact;
+        const handleValidContact = service.handleValidContact;
 
         for (const chunkContacs of chunksContacs) {
           const contactsValids: any[] = [];
           const contactInvalids: any[] = [];
 
-          const clients = await this.service.getClients(chunkContacs);
+          const clients = await service.getClients(chunkContacs);
 
           for (const contact of chunkContacs) {
 
-            const client = this.service.findClient(contact, clients);
+            const client = service.findClient(contact, clients);
 
-            if (this.service.isUniversalBlock(contact, blockContacts.universalBlock)) {
+            if (service.isUniversalBlock(contact, blockContacts.universalBlock)) {
               contactInvalids.push(handleInvalidContact('Contato bloqueado', contact, campaign, dateTime));
               continue;
             }
 
-            if (this.service.isSpecificBlock(contact, blockContacts.specificBlock)) {
+            if (service.isSpecificBlock(contact, blockContacts.specificBlock)) {
               contactInvalids.push(handleInvalidContact('Contato bloqueado para este cliente', contact, campaign, dateTime));
               continue;
             }
@@ -94,42 +94,20 @@ export default class LoadCsvCampaignJob extends Job {
           await ErrorCampaignImport.createMany(contactInvalids);
         }
 
-        const randoDelay = Math.floor(Math.random() * 10) + 1;
-
         if (campaign.type === 'SMS') {
-          await queue.dispatch(
-            SendSmsJob,
-            {
-              campaign_id: payload.campaign_id,
-              user_id: payload.user_id,
-            },
-            {
-              queueName: 'SendSms',
-              attempts: 10,
-              backoff: {
-                type: 'exponential',
-                delay: randoDelay,
-              }
-            },
-          );
+
+          await SendSmsJob.enqueue({
+            campaign_id: payload.campaign_id,
+            user_id: payload.user_id,
+          });
         }
 
         if (campaign.type === 'EMAIL') {
-          await queue.dispatch(
-            SendEmailJob,
-            {
-              campaign_id: payload.campaign_id,
-              user_id: payload.user_id,
-            },
-            {
-              queueName: 'SendEmail',
-              attempts: 10,
-              backoff: {
-                type: 'exponential',
-                delay: randoDelay,
-              }
-            },
-          );
+
+          await SendEmailJob.enqueue({
+            campaign_id: payload.campaign_id,
+            user_id: payload.user_id,
+          });
         }
 
       }
@@ -139,32 +117,6 @@ export default class LoadCsvCampaignJob extends Job {
       console.error(error);
       throw error;
     }
-
-  }
-
-  /**
-   * This is an optional method that gets called when the retries has exceeded and is marked failed.
-   */
-  async rescue(payload: LoadCsvCampaignJobPayload) {
-
-    /*     const randoDelay = Math.floor(Math.random() * 10) + 6000;
-    
-        await queue.dispatch(
-          LoadCsvCampaignJob,
-          payload,
-          {
-            queueName: 'LoadCsv',
-            attempts: 10,
-            backoff: {
-              type: 'exponential',
-              delay: randoDelay,
-            }
-          },
-        );
-    
-        console.error(payload);
-    */
-    throw new Error(`Rescue method not implemented LoadCsvCampaignJob. payload: ${JSON.stringify(payload)}`);
 
   }
 }

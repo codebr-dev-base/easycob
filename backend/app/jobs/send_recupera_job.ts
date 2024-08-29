@@ -1,5 +1,4 @@
 import app from '@adonisjs/core/services/app';
-import { Job } from '@rlanz/bull-queue';
 import redis from '@adonisjs/redis/services/main';
 import { Edge } from 'edge.js';
 import { $fetch } from 'ofetch';
@@ -9,7 +8,9 @@ import env from '#start/env';
 import CatchLog from '#models/catch_log';
 import xmlParser from 'xml2json';
 import ActionService from '#services/action_service';
-import string from '@adonisjs/core/helpers/string';
+import { BaseJob, Plugin } from 'adonis-resque';
+import { serializeKeysSnakeCase } from '#utils/serialize';
+import { handleSendingForRecupera } from '#services/utils/recupera';
 
 interface SendRecuperaJobPayload {
   action_id: number;
@@ -38,72 +39,39 @@ interface SoapBody {
   };
 }
 
-export default class SendRecuperaJob extends Job {
-  // This is the path to the file that is used to create the job
-  static get $$filepath() {
-    return import.meta.url;
-  }
+const urlRecupera = env.get('RECUPERA_URL') || '';
 
-  protected urlRecupera: string;
-  protected optionsJson: object;
-  queueName: string | undefined;
+const optionsJson = {
+  reversible: false,
+  coerce: false,
+  sanitize: true,
+  trim: true,
+  arrayNotation: false,
+  alternateTextNode: false,
+};
 
-  constructor() {
-    super();
-    this.urlRecupera = env.get('RECUPERA_URL') || '';
+const checkResultSync = (retornotexto: string): boolean => {
+  const keywords = ['PRIMARY', 'DEADLOCK', 'TIMEOUT'];
 
-    this.optionsJson = {
-      object: true,
-      reversible: false,
-      coerce: false,
-      sanitize: true,
-      trim: true,
-      arrayNotation: false,
-      alternateTextNode: false,
-    };
-    this.queueName = 'ActionsOparation';
-  }
+  return keywords.some(keyword => retornotexto.toUpperCase().includes(keyword));
+};
 
-  protected checkResultSync(retornotexto: string): boolean {
-    const keywords = ['PRIMARY', 'DEADLOCK', 'TIMEOUT'];
+export default class SendRecuperaJob extends BaseJob {
 
-    return keywords.some(keyword => retornotexto.toUpperCase().includes(keyword));
-  }
+  plugins = [
+    Plugin.delayQueueLock(),
+    Plugin.retry({
+      retryLimit: 10,
+      backoffStrategy: [1000, 3000, 8000]
+    })
+  ];
 
-
-  serializeKeys(data: any[] | { meta: any, data: any[]; } | any) {
-
-    const serializeObject = (obj: any) => {
-      const serialized = {};
-      for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-          const camelKey = string.snakeCase(key);
-          (serialized as any)[camelKey] = obj[key];
-        }
-      }
-      return serialized;
-    };
-
-
-    if (Array.isArray(data)) {
-      return data.map(serializeObject);
-    }
-    if (data.meta && data.data) {
-      const paginator = data;
-      const serializedData = paginator.data.map(serializeObject);
-      return {
-        ...paginator,
-        data: serializedData,
-      };
-    }
-    return serializeObject(data);
-
-  }
+  queueName = 'SendRecupera';
 
   /**
    * Base Entry point
    */
-  async handle(payload: SendRecuperaJobPayload) {
+  async perform(payload: SendRecuperaJobPayload) {
 
     const actionService = new ActionService();
     const edge = Edge.create();
@@ -114,7 +82,7 @@ export default class SendRecuperaJob extends Job {
     if (action) {
       //TODO: Remover o teste e verificar mensagem de erro (error: JSON.stringify(error))
       try {
-        const result = await $fetch(this.urlRecupera, {
+        const result = await $fetch(urlRecupera, {
           method: 'POST',
           headers: {
             'Content-Type': 'text/xml;charset=UTF-8',
@@ -123,19 +91,19 @@ export default class SendRecuperaJob extends Job {
           timeout: 20000,
         });
 
-        const resultJson = <SoapResponse>xmlParser.toJson(result, this.optionsJson);
+        const resultJson = <SoapResponse>xmlParser.toJson(result, optionsJson);
 
         const OcorrenciaResult = resultJson['soap:Envelope']?.['soap:Body']?.IncluirOcorrenciaResponse?.IncluirOcorrenciaResult;
 
         const soapBody = OcorrenciaResult ? OcorrenciaResult : '';
 
-        const resultSync = <SoapBody>xmlParser.toJson(soapBody, this.optionsJson);
+        const resultSync = <SoapBody>xmlParser.toJson(soapBody, optionsJson);
 
         const retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
 
-        if (this.checkResultSync(retornotexto)) {
+        if (checkResultSync(retornotexto)) {
           action.sync = false;
-          await actionService.handleSendingForRecupera(action, this.queueName);
+          await handleSendingForRecupera(action, this.queueName);
         } else {
           action.sync = true;
           action.resultSync = JSON.stringify(resultSync);
@@ -147,7 +115,7 @@ export default class SendRecuperaJob extends Job {
 
         if (action.retorno === '00') {
           const des_contr = action.desContr;
-          const jsonString = JSON.stringify(this.serializeKeys(action.toJSON()));
+          const jsonString = JSON.stringify(serializeKeysSnakeCase(action.toJSON()));
           redis.hset('last_actions', des_contr, jsonString);
         }
 
@@ -166,22 +134,5 @@ export default class SendRecuperaJob extends Job {
       }
 
     }
-  }
-
-  /**
-   * This is an optional method that gets called when the retries has exceeded and is marked failed.
-   */
-  async rescue(payload: SendRecuperaJobPayload) {
-    /*     const actionService = new ActionService();
-    
-        const action = await Action.find(payload.action_id);
-        if (action) {
-          action.sync = false;
-          await actionService.handleSendingForRecupera(action, this.queueName);
-        }
-    
-        console.error(payload); */
-
-    throw new Error(`Rescue method not implemented LoadCsvCampaignJob. payload: ${JSON.stringify(payload)}`);
   }
 }

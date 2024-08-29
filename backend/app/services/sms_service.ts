@@ -1,24 +1,88 @@
-import Campaign from "#models/campaign";
+import Campaign from '#models/campaign';
 import CampaignLot from "#models/campaign_lot";
-import RecuperaService from "#services/recupera_service";
 import lodash from 'lodash';
 import { chunks } from '#utils/array';
-import env from '#start/env';
-import { $fetch } from 'ofetch';
 import CatchLog from "#models/catch_log";
+import TypeAction from '#models/type_action';
+import Action from '#models/action';
+import redis from '@adonisjs/redis/services/main';
+import { DateTime } from 'luxon';
+import Contract from '#models/recovery/contract';
+import SendRecuperaJob from '#jobs/send_recupera_job';
+import SendEmailRecuperaJob from '#jobs/send_email_recupera_job';
+import SendSmsRecuperaJob from '#jobs/send_sms_recupera_job';
+import db from '@adonisjs/lucid/services/db';
+import { serializeKeysCamelCase } from '#utils/serialize';
+import { $fetch } from 'ofetch';
+import env from '#start/env';
+import { createActionForClient, findClient, getClients, handleSendingForRecupera } from './utils/recupera.js';
 
-
-
-export default class SmsService extends RecuperaService {
+export default class SmsService {
 
     private blacklist: string[];
 
     constructor() {
-        super();
         this.blacklist = [];
         this.typeAction = null;
         this.abbreviation = 'SMS';
         this.tipoContato = 'TELEFONE';
+    }
+
+    declare typeAction: TypeAction | null | undefined;
+    declare abbreviation: string | undefined;
+    declare tipoContato: string | undefined;
+
+    async getTypeAction() {
+        this.typeAction = await TypeAction.findBy('abbreviation', this.abbreviation);
+
+        if (!this.typeAction) {
+            throw new Error('Not find type action!');
+        }
+
+        return this.typeAction;
+    }
+
+    async createAction(item: CampaignLot, clientsGroups: { [key: string]: any[]; }, campaign: Campaign) {
+        try {
+            const typeAction: TypeAction = await this.getTypeAction();
+
+            // Utilize `Promise.all` para evitar múltiplas Promises pendentes
+            await Promise.all(Object.keys(clientsGroups).map(async (key: string) => {
+                if (key !== item.contato.toUpperCase()) return;
+
+                const groupContato = clientsGroups[key];
+
+                const groupDesContr: { [key: string]: any[]; } = lodash.groupBy(groupContato, 'desContr');
+
+                // Mapeia as chaves de `groupDesContr` e processa cada grupo
+                await Promise.all(Object.keys(groupDesContr).map(async (k: string) => {
+
+                    console.error("Grupo por contrato:");
+                    console.error(groupContato);
+
+                    const group = groupDesContr[k];
+
+                    // Usa `for...of` com `Promise.all` para criar todas as ações em paralelo
+                    await Promise.all(group.map(async (client, i) => {
+                        const action = await createActionForClient(client, typeAction, campaign, this.tipoContato);
+
+                        if (i === 0) {
+                            this.handleActionSending(action);
+                        }
+                    }));
+                }));
+            }));
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    handleActionSending(action: Action): void {
+        if (this.abbreviation === 'EME') {
+            handleSendingForRecupera(action, `SendMailRecupera`);
+        } else if (this.abbreviation === 'SMS') {
+            handleSendingForRecupera(action, `SendSmsRecupera`);
+        }
     }
 
     private buildMessage(message: string, params: object) {
@@ -66,7 +130,7 @@ export default class SmsService extends RecuperaService {
     private async prepareSend(item: CampaignLot, campaign: Campaign, clients: any[]) {
         if (await this.checkContactValid(campaign, item)) {
 
-            const client = await this.findClient(item, clients);
+            const client = await findClient(item, clients);
 
             if (!client) {
                 item.status = 'Inativo';
@@ -101,7 +165,7 @@ export default class SmsService extends RecuperaService {
 
     private async send(lots: any[], campaign: Campaign) {
 
-        const clients = await this.getClients(lots);
+        const clients = await getClients(lots);
 
         const clientsGroups = lodash.groupBy(clients, 'contato');
 

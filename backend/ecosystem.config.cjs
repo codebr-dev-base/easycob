@@ -29,10 +29,10 @@ module.exports = {
       },
     },
     {
-      name: 'queueActionsOparation',
+      name: 'queueSendRecupera',
       script: './build/ace.js',
       cwd: severPath,
-      args: 'queue:listen --queue=ActionsOparation',
+      args: 'queue:listen --queue=SendRecupera',
       instances: 4,
       exec_mode: 'cluster',
       autorestart: true,

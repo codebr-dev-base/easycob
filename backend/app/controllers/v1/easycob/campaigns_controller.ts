@@ -6,18 +6,17 @@ import app from '@adonisjs/core/services/app';
 import Campaign from '#models/campaign';
 import User from '#models/user';
 import CampaignLot from '#models/campaign_lot';
-import queue from '@rlanz/bull-queue/services/main';
 import LoadCsvCampaignJob from '#jobs/load_csv_campaign_job';
 import { sep, normalize } from 'node:path';
 import fs from 'fs';
 import SendEmailJob from '#jobs/send_email_job';
 import SendSmsJob from '#jobs/send_sms_job';
-import SerializeService from '#services/serialize_service';
+import { serializeKeysCamelCase } from '#utils/serialize';
 
 @inject()
 export default class CampaignsController {
 
-  constructor(protected service: CampaignService, protected serialize: SerializeService) {
+  constructor(protected service: CampaignService) {
   }
   public async index({ request }: HttpContext) {
     const sql = fs.readFileSync('app/sql/campaign/exists_pendencies.sql', 'utf8');
@@ -40,7 +39,7 @@ export default class CampaignsController {
       .orderBy(`c.${orderBy}`, descending === 'true' ? 'desc' : 'asc')
       .paginate(pageNumber, limit);
 
-    return this.serialize.serializeKeys(campaigns.toJSON());
+    return serializeKeysCamelCase(campaigns.toJSON());
 
   }
 
@@ -60,23 +59,10 @@ export default class CampaignsController {
         userId: user.id,
       });
 
-      const randoDelay = Math.floor(Math.random() * 10) + 1;
-
-      await queue.dispatch(
-        LoadCsvCampaignJob,
-        {
-          campaign_id: campaign.id,
-          user_id: user.id,
-        },
-        {
-          queueName: 'LoadCsv',
-          attempts: 10,
-          backoff: {
-            type: 'exponential',
-            delay: randoDelay,
-          }
-        },
-      );
+      await LoadCsvCampaignJob.enqueue({
+        campaign_id: campaign.id,
+        user_id: user.id,
+      });
 
       return {
         ...campaign.serialize(),
@@ -108,42 +94,19 @@ export default class CampaignsController {
 
         if (lots.length > 0) {
 
-          const randoDelay = Math.floor(Math.random() * 10) + 1;
-
           if (campaign.type === 'SMS') {
-            await queue.dispatch(
-              SendSmsJob,
-              {
-                campaign_id: id,
-                user_id: user.id,
-              },
-              {
-                queueName: 'SendSms',
-                attempts: 10,
-                backoff: {
-                  type: 'exponential',
-                  delay: randoDelay,
-                }
-              },
-            );
+            await SendSmsJob.enqueue({
+              campaign_id: id,
+              user_id: user.id,
+            });
           }
 
           if (campaign.type === 'EMAIL') {
-            await queue.dispatch(
-              SendEmailJob,
-              {
-                campaign_id: id,
-                user_id: user.id,
-              },
-              {
-                queueName: 'SendEmail',
-                attempts: 10,
-                backoff: {
-                  type: 'exponential',
-                  delay: randoDelay,
-                }
-              },
-            );
+
+            await SendEmailJob.enqueue({
+              campaign_id: id,
+              user_id: user.id,
+            });
           }
           return true;
 

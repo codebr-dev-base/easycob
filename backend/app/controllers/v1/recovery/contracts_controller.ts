@@ -1,14 +1,8 @@
+import { serializeKeysCamelCase } from '#utils/serialize';
 import type { HttpContext } from '@adonisjs/core/http';
 import db from '@adonisjs/lucid/services/db';
-import SerializeService from '#services/serialize_service';
-import { inject } from '@adonisjs/core';
 
-@inject()
 export default class ContractsController {
-
-
-    constructor(protected serialize: SerializeService) {
-    }
 
     public async index({ request, response }: HttpContext) {
         const raw = db.raw;
@@ -53,6 +47,6 @@ export default class ContractsController {
             .orderBy(`c.${orderBy}`, descending === 'true' ? 'desc' : 'asc')
             .paginate(pageNumber, limit);
 
-        return this.serialize.serializeKeys(contracts.toJSON());
+        return serializeKeysCamelCase(contracts.toJSON());
     }
 }

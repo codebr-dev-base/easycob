@@ -1,24 +1,28 @@
-import { Job } from '@rlanz/bull-queue';
 import mail from '@adonisjs/mail/services/main';
 import MailInvoice from '#models/mail_invoice';
 import Contract from '#models/recovery/contract';
 import Subsidiary from '#models/subsidiary';
 import TemplateEmail from '#models/template_email';
 import app from '@adonisjs/core/services/app';
+import { BaseJob, Plugin } from 'adonis-resque';
+
 
 
 interface SendInvoiceJobPayload { mail_invoice_id: number; }
 
-export default class SendInvoiceJob extends Job {
-  // This is the path to the file that is used to create the job
-  static get $$filepath() {
-    return import.meta.url;
-  }
+export default class SendInvoiceJob extends BaseJob {
 
-  /**
-   * Base Entry point
-   */
-  async handle(payload: SendInvoiceJobPayload) {
+  plugins = [
+    Plugin.delayQueueLock(),
+    Plugin.retry({
+      retryLimit: 10,
+      backoffStrategy: [1000, 3000, 8000]
+    })
+  ];
+
+  queueName = 'SendInvoice';
+
+  async perform(payload: SendInvoiceJobPayload) {
 
     try {
       const mailInvoice = await MailInvoice.find(payload.mail_invoice_id);
@@ -94,14 +98,6 @@ export default class SendInvoiceJob extends Job {
       console.error(error);
       throw error;
     }
-
-  }
-
-  /**
-   * This is an optional method that gets called when the retries has exceeded and is marked failed.
-   */
-  async rescue(payload: SendInvoiceJobPayload) {
-    throw new Error(`Rescue method not implemented SendInvoiceJob. payload: ${JSON.stringify(payload)}`);
 
   }
 }
