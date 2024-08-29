@@ -40,10 +40,10 @@ export default defineConfig({
     |
     */
     removeOnComplete: {
-      age: 12 * 3600, // keep up to 1 hour
+      age: 12 * 3600, // keep up to 12 hour
     },
     removeOnFail: {
-      age: 12 * 3600, // keep up to 24 hours
+      age: 12 * 3600, // keep up to 12 hours
     }
   },
 });
