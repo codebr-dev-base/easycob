@@ -12,7 +12,7 @@ mkdir -p "$logDir"
 # Função para iniciar uma fila com nohup
 start_queue() {
     queueName=$1
-    command="$severPath/build/ace.js jobs:listen --queue=$queueName"
+    command="node $severPath/build/ace jobs:listen --queue=$queueName"
     outLog="$logDir/$queueName.out.log"
     errLog="$logDir/$queueName.err.log"
     pidFile="$logDir/$queueName.pid"
