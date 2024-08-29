@@ -1,5 +1,5 @@
 import EmailService from '#services/email_service';
-import { Job } from '@rlanz/bull-queue';
+import { Job } from 'adonisjs-jobs';
 import Campaign from '#models/campaign';
 import CampaignLot from '#models/campaign_lot';
 //import queue from '@rlanz/bull-queue/services/main';

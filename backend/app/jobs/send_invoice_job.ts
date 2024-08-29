@@ -1,4 +1,4 @@
-import { Job } from '@rlanz/bull-queue';
+import { Job } from 'adonisjs-jobs';
 import mail from '@adonisjs/mail/services/main';
 import MailInvoice from '#models/mail_invoice';
 import Contract from '#models/recovery/contract';

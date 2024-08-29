@@ -6,7 +6,6 @@ import app from '@adonisjs/core/services/app';
 import Campaign from '#models/campaign';
 import User from '#models/user';
 import CampaignLot from '#models/campaign_lot';
-import queue from '@rlanz/bull-queue/services/main';
 import LoadCsvCampaignJob from '#jobs/load_csv_campaign_job';
 import { sep, normalize } from 'node:path';
 import fs from 'fs';
@@ -61,8 +60,7 @@ export default class CampaignsController {
       });
 
 
-      await queue.dispatch(
-        LoadCsvCampaignJob,
+      await LoadCsvCampaignJob.dispatch(
         {
           campaign_id: campaign.id,
           user_id: user.id,
@@ -102,11 +100,8 @@ export default class CampaignsController {
 
         if (lots.length > 0) {
 
-          const randoDelay = Math.floor(Math.random() * 10) + 1;
-
           if (campaign.type === 'SMS') {
-            await queue.dispatch(
-              SendSmsJob,
+            await SendSmsJob.dispatch(
               {
                 campaign_id: id,
                 user_id: user.id,
@@ -118,8 +113,7 @@ export default class CampaignsController {
           }
 
           if (campaign.type === 'EMAIL') {
-            await queue.dispatch(
-              SendEmailJob,
+            await SendEmailJob.dispatch(
               {
                 campaign_id: id,
                 user_id: user.id,

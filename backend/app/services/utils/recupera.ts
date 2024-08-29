@@ -10,7 +10,6 @@ import CampaignLot from "#models/campaign_lot";
 import db from "@adonisjs/lucid/services/db";
 import { serializeKeysCamelCase } from "#utils/serialize";
 import Campaign from "#models/campaign";
-import queue from "@rlanz/bull-queue/services/main";
 
 
 export async function handleSendingForRecupera(action: Action, queueName = 'SendRecupera') {
@@ -74,7 +73,7 @@ export async function isToSendToRecupera(action: Action) {
 
 }
 
-export async function dispatchToRecupera(action: Action, queueName = 'SendRecupera', delay: number = 1,) {
+export async function dispatchToRecupera(action: Action, queueName = 'SendRecupera') {
   const contract = await Contract.findBy('des_contr', action.desContr);
   const typeAction = await TypeAction.find(action.typeActionId);
 
@@ -97,7 +96,7 @@ export async function dispatchToRecupera(action: Action, queueName = 'SendRecupe
   const job = jobMapping[queueName];
 
   if (job) {
-    await queue.dispatch(job, item, {
+    await job.dispatch(item, {
       queueName
     });
   } else {

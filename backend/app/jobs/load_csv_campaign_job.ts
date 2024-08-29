@@ -1,11 +1,10 @@
-import { Job } from '@rlanz/bull-queue';
+import { Job } from 'adonisjs-jobs';
 import CampaignService from '#services/campaign_service';
 import Campaign from '#models/campaign';
 import { chunks } from '#utils/array';
 import CampaignLot from '#models/campaign_lot';
 import ErrorCampaignImport from '#models/error_campaign_import';
 import SendEmailJob from '#jobs/send_email_job';
-import queue from '@rlanz/bull-queue/services/main';
 import SendSmsJob from '#jobs/send_sms_job';
 
 interface LoadCsvCampaignJobPayload { campaign_id: number; user_id: any; }
@@ -91,8 +90,7 @@ export default class LoadCsvCampaignJob extends Job {
         }
 
         if (campaign.type === 'SMS') {
-          await queue.dispatch(
-            SendSmsJob,
+          await SendSmsJob.dispatch(
             {
               campaign_id: payload.campaign_id,
               user_id: payload.user_id,
@@ -104,8 +102,7 @@ export default class LoadCsvCampaignJob extends Job {
         }
 
         if (campaign.type === 'EMAIL') {
-          await queue.dispatch(
-            SendEmailJob,
+          await SendEmailJob.dispatch(
             {
               campaign_id: payload.campaign_id,
               user_id: payload.user_id,

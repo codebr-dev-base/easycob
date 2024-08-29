@@ -8,7 +8,6 @@ import { updateClientValidator } from '#validators/recovery/client_validator';
 import { inject } from '@adonisjs/core';
 import type { HttpContext } from '@adonisjs/core/http';
 import app from '@adonisjs/core/services/app';
-import queue from '@rlanz/bull-queue/services/main';
 
 @inject()
 export default class ClientsController {
@@ -119,8 +118,7 @@ export default class ClientsController {
 
             await mailInvoice.load('files');
 
-            await queue.dispatch(
-                SendInvoiceJob,
+            await SendInvoiceJob.dispatch(
                 { mail_invoice_id: mailInvoice.id },
                 {
                     queueName: 'SendInvoice'

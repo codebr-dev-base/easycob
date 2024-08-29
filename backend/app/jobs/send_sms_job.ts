@@ -1,8 +1,7 @@
 import Campaign from '#models/campaign';
 import SmsService from '#services/sms_service';
 import CampaignLot from '#models/campaign_lot';
-import { Job } from '@rlanz/bull-queue';
-//import queue from '@rlanz/bull-queue/services/main';
+import { Job } from 'adonisjs-jobs';
 
 interface SendSmsJobPayload { campaign_id: number; user_id: any; }
 

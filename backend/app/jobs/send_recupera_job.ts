@@ -1,5 +1,5 @@
 import app from '@adonisjs/core/services/app';
-import { Job } from '@rlanz/bull-queue';
+import { Job } from 'adonisjs-jobs';
 import redis from '@adonisjs/redis/services/main';
 import { Edge } from 'edge.js';
 import { $fetch } from 'ofetch';
