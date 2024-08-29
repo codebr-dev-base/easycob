@@ -87,7 +87,6 @@ export default class SendRecuperaJob extends Job {
     const envelop = await edge.render('xml/envelop', { action: payload });
 
     const action = await Action.find(payload.action_id);
-    console.log(action);
     if (action) {
       //TODO: Remover o teste e verificar mensagem de erro (error: JSON.stringify(error))
       try {
@@ -102,15 +101,13 @@ export default class SendRecuperaJob extends Job {
 
         const resultJson = <SoapResponse>xmlParser.toJson(result, this.optionsJson);
 
-        console.log(resultJson);
-
         const OcorrenciaResult = resultJson['soap:Envelope']?.['soap:Body']?.IncluirOcorrenciaResponse?.IncluirOcorrenciaResult;
-
-        console.log(OcorrenciaResult);
 
         const soapBody = OcorrenciaResult ? OcorrenciaResult : '';
 
         const resultSync = <SoapBody>xmlParser.toJson(soapBody, this.optionsJson);
+
+        console.log(resultSync);
 
         const retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
 
