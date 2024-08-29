@@ -21,6 +21,7 @@ export default class BulkActionEme extends BaseCommand {
         console.log(action);
         //await handleSendingForRecupera(action);
       }
+      console.log(actions.length);
 
     }
   }

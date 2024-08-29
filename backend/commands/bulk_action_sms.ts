@@ -19,8 +19,11 @@ export default class BulkActionSms extends BaseCommand {
 
       for (const action of actions) {
         console.log(action);
+
         //await handleSendingForRecupera(action);
       }
+
+      console.log(actions.length);
 
     }
   }
