@@ -111,7 +111,10 @@ export default class SendRecuperaJob extends Job {
 
         const retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
 
+        console.log(retornotexto);
+
         if (this.checkResultSync(retornotexto)) {
+          console.log('sync false');
           action.sync = false;
           await handleSendingForRecupera(action, this.queueName);
         } else {
