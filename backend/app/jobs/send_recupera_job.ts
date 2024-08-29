@@ -102,7 +102,11 @@ export default class SendRecuperaJob extends Job {
 
         const resultJson = <SoapResponse>xmlParser.toJson(result, this.optionsJson);
 
+        console.log(resultJson);
+
         const OcorrenciaResult = resultJson['soap:Envelope']?.['soap:Body']?.IncluirOcorrenciaResponse?.IncluirOcorrenciaResult;
+
+        console.log(OcorrenciaResult);
 
         const soapBody = OcorrenciaResult ? OcorrenciaResult : '';
 
