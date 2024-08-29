@@ -47,9 +47,9 @@ export default class SmsService {
 
     handleActionSending(action: Action): void {
         if (this.abbreviation === 'EME') {
-            handleSendingForRecupera(action, `ActionsEmail`);
+            handleSendingForRecupera(action, `SendEmailRecupera`);
         } else if (this.abbreviation === 'SMS') {
-            handleSendingForRecupera(action, `ActionsSms`);
+            handleSendingForRecupera(action, `SendSmsRecupera`);
         }
     }
 
