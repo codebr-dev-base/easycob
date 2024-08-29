@@ -147,22 +147,23 @@ export default class LoadCsvCampaignJob extends Job {
    */
   async rescue(payload: LoadCsvCampaignJobPayload) {
 
-    const randoDelay = Math.floor(Math.random() * 10) + 6000;
-
-    await queue.dispatch(
-      LoadCsvCampaignJob,
-      payload,
-      {
-        queueName: 'LoadCsv',
-        attempts: 10,
-        backoff: {
-          type: 'exponential',
-          delay: randoDelay,
-        }
-      },
-    );
-
-    console.error(payload);
+    /*     const randoDelay = Math.floor(Math.random() * 10) + 6000;
+    
+        await queue.dispatch(
+          LoadCsvCampaignJob,
+          payload,
+          {
+            queueName: 'LoadCsv',
+            attempts: 10,
+            backoff: {
+              type: 'exponential',
+              delay: randoDelay,
+            }
+          },
+        );
+    
+        console.error(payload);
+    */
     throw new Error(`Rescue method not implemented LoadCsvCampaignJob. payload: ${JSON.stringify(payload)}`);
 
   }

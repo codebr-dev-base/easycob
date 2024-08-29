@@ -48,22 +48,22 @@ export default class SendSmsJob extends Job {
    */
   async rescue(payload: SendSmsJobPayload) {
 
-    const randoDelay = Math.floor(Math.random() * 10) + 6000;
-
-    await queue.dispatch(
-      SendSmsJob,
-      payload,
-      {
-        queueName: 'SendEmail',
-        attempts: 10,
-        backoff: {
-          type: 'exponential',
-          delay: randoDelay,
-        }
-      },
-    );
-
-    console.error(payload);
+    /*     const randoDelay = Math.floor(Math.random() * 10) + 6000;
+    
+        await queue.dispatch(
+          SendSmsJob,
+          payload,
+          {
+            queueName: 'SendEmail',
+            attempts: 10,
+            backoff: {
+              type: 'exponential',
+              delay: randoDelay,
+            }
+          },
+        );
+    
+        console.error(payload); */
     throw new Error(`Rescue method not implemented SendEmailJob. payload: ${JSON.stringify(payload)}`);
 
   }

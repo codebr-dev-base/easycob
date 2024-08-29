@@ -172,14 +172,16 @@ export default class SendRecuperaJob extends Job {
    * This is an optional method that gets called when the retries has exceeded and is marked failed.
    */
   async rescue(payload: SendRecuperaJobPayload) {
-    const actionService = new ActionService();
+    /*     const actionService = new ActionService();
+    
+        const action = await Action.find(payload.action_id);
+        if (action) {
+          action.sync = false;
+          await actionService.handleSendingForRecupera(action, this.queueName);
+        }
+    
+        console.error(payload); */
 
-    const action = await Action.find(payload.action_id);
-    if (action) {
-      action.sync = false;
-      await actionService.handleSendingForRecupera(action, this.queueName);
-    }
-
-    console.error(payload);
+    throw new Error(`Rescue method not implemented LoadCsvCampaignJob. payload: ${JSON.stringify(payload)}`);
   }
 }
