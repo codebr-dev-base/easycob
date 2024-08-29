@@ -60,7 +60,6 @@ export default class CampaignsController {
         userId: user.id,
       });
 
-      const randoDelay = Math.floor(Math.random() * 10) + 1;
 
       await queue.dispatch(
         LoadCsvCampaignJob,
@@ -69,12 +68,7 @@ export default class CampaignsController {
           user_id: user.id,
         },
         {
-          queueName: 'LoadCsv',
-          attempts: 10,
-          backoff: {
-            type: 'exponential',
-            delay: randoDelay,
-          }
+          queueName: 'LoadCsv'
         },
       );
 
@@ -118,12 +112,7 @@ export default class CampaignsController {
                 user_id: user.id,
               },
               {
-                queueName: 'SendSms',
-                attempts: 10,
-                backoff: {
-                  type: 'exponential',
-                  delay: randoDelay,
-                }
+                queueName: 'SendSms'
               },
             );
           }
@@ -136,12 +125,7 @@ export default class CampaignsController {
                 user_id: user.id,
               },
               {
-                queueName: 'SendEmail',
-                attempts: 10,
-                backoff: {
-                  type: 'exponential',
-                  delay: randoDelay,
-                }
+                queueName: 'SendEmail'
               },
             );
           }

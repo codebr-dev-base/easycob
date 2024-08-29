@@ -90,8 +90,6 @@ export default class LoadCsvCampaignJob extends Job {
           await ErrorCampaignImport.createMany(contactInvalids);
         }
 
-        const randoDelay = Math.floor(Math.random() * 10) + 1;
-
         if (campaign.type === 'SMS') {
           await queue.dispatch(
             SendSmsJob,
@@ -100,12 +98,7 @@ export default class LoadCsvCampaignJob extends Job {
               user_id: payload.user_id,
             },
             {
-              queueName: 'SendSms',
-              attempts: 10,
-              backoff: {
-                type: 'exponential',
-                delay: randoDelay,
-              }
+              queueName: 'SendSms'
             },
           );
         }
@@ -118,12 +111,7 @@ export default class LoadCsvCampaignJob extends Job {
               user_id: payload.user_id,
             },
             {
-              queueName: 'SendEmail',
-              attempts: 10,
-              backoff: {
-                type: 'exponential',
-                delay: randoDelay,
-              }
+              queueName: 'SendEmail'
             },
           );
         }

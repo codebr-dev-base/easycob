@@ -94,18 +94,11 @@ export async function dispatchToRecupera(action: Action, queueName = 'SendRecupe
     SendEmailRecupera: SendEmailRecuperaJob,
   };
 
-  const randoDelay = Math.floor(Math.random() * 10) + delay;
-
   const job = jobMapping[queueName];
 
   if (job) {
     await queue.dispatch(job, item, {
-      queueName,
-      attempts: 10,
-      backoff: {
-        type: 'exponential',
-        delay: randoDelay,
-      },
+      queueName
     });
   } else {
     // Opcional: Tratamento para filas não reconhecidas
