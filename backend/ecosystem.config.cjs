@@ -59,7 +59,7 @@ module.exports = {
       script: './build/ace.js',
       cwd: severPath,
       args: 'jobs:listen --queue=SendSmsRecupera',
-      instances: 8,
+      instances: 1,
       exec_mode: 'cluster',
       autorestart: true,
       node_args: '--max-old-space-size=4096', // Ajuste para 4GB
