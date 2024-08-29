@@ -17,7 +17,7 @@ module.exports = {
     },
     {
       name: 'queue:LoadCsv',
-      script: 'ace',
+      script: './build/ace.js',
       cwd: severPath,
       args: 'jobs:listen --queue=LoadCsv',
       instances: 1,
@@ -30,7 +30,7 @@ module.exports = {
     },
     {
       name: 'queue:SendRecupera',
-      script: 'ace',
+      script: './build/ace.js',
       cwd: severPath,
       args: 'jobs:listen --queue=SendRecupera',
       instances: 1,
@@ -43,7 +43,7 @@ module.exports = {
     },
     {
       name: 'queue:SendEmailRecupera',
-      script: 'ace',
+      script: './build/ace.js',
       cwd: severPath,
       args: 'jobs:listen --queue=SendEmailRecupera',
       instances: 1,
@@ -55,8 +55,8 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendSmslRecupera',
-      script: 'ace',
+      name: 'queue:SendSmsRecupera',
+      script: './build/ace.js',
       cwd: severPath,
       args: 'jobs:listen --queue=SendSmsRecupera',
       instances: 1,
@@ -69,7 +69,7 @@ module.exports = {
     },
     {
       name: 'queue:SendEmail',
-      script: 'ace',
+      script: './build/ace.js',
       cwd: severPath,
       args: 'jobs:listen --queue=SendEmail',
       instances: 1,
@@ -82,7 +82,7 @@ module.exports = {
     },
     {
       name: 'queue:SendSms',
-      script: 'ace',
+      script: './build/ace.js',
       cwd: severPath,
       args: 'jobs:listen --queue=SendSms',
       instances: 1,
@@ -95,7 +95,7 @@ module.exports = {
     },
     {
       name: 'queue:SendInvoice',
-      script: 'ace',
+      script: './build/ace.js',
       cwd: severPath,
       args: 'jobs:listen --queue=SendInvoice',
       instances: 1,
