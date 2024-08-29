@@ -87,6 +87,7 @@ export default class SendRecuperaJob extends Job {
     const envelop = await edge.render('xml/envelop', { action: payload });
 
     const action = await Action.find(payload.action_id);
+    console.log(action);
     if (action) {
       //TODO: Remover o teste e verificar mensagem de erro (error: JSON.stringify(error))
       try {
