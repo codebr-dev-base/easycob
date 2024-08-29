@@ -10,7 +10,7 @@ const jobsConfig = defineConfig({
 
   queue: env.get('REDIS_QUEUE', 'default'),
 
-  queues: ['default'],
+  queues: ['LoadCsv', 'SendEmail', 'SendSms', 'SendRecupera', 'SendEmailRecupera', 'SendSmsRecupera', 'SendInvoice'],
 
   options: {
     /**
