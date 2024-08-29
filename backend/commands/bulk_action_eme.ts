@@ -8,10 +8,12 @@ export default class BulkActionEme extends BaseCommand {
   static commandName = 'bulk:action-eme';
   static description = '';
 
-  static options: CommandOptions = {};
+  static options: CommandOptions = {
+    startApp: true,
+  };
 
   async run() {
-    const typeAction = await TypeAction.query().where('abbreviation', 'EME').first();
+    const typeAction = await TypeAction.findBy('abbreviation', 'EME');
     if (typeAction) {
       const actions = await Action.query().where('retornotexto', 'Em fila').where('typeActionId', typeAction.id).whereRaw('created_at::date = CURRENT_DATE');
 
