@@ -1,6 +1,6 @@
 import PromiseOfPayment from '#models/promise_of_payment';
 import PromiseOfPaymentHistory from '#models/promise_of_payment_history';
-import SerializeService from '#services/serialize_service';
+import { serializeKeysCamelCase } from '#utils/serialize';
 import { updatePromiseOfPaymentValidator } from '#validators/promise_of_payment_validator';
 import { inject } from '@adonisjs/core';
 import type { HttpContext } from '@adonisjs/core/http';
@@ -8,9 +8,6 @@ import db from '@adonisjs/lucid/services/db';
 
 @inject()
 export default class PromiseOfPaymentsController {
-
-    constructor(protected serialize: SerializeService) {
-    }
 
     public async index({ request }: HttpContext) {
         const qs = request.qs();
@@ -66,7 +63,7 @@ export default class PromiseOfPaymentsController {
             .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
             .paginate(pageNumber, limit);
 
-        return this.serialize.serializeKeys(actions.toJSON());
+        return serializeKeysCamelCase(actions.toJSON());
     }
 
     public async update({ auth, params, request, response }: HttpContext) {
@@ -112,6 +109,6 @@ export default class PromiseOfPaymentsController {
             })
             .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc');
 
-        return this.serialize.serializeKeys(actions);
+        return serializeKeysCamelCase(actions);
     }
 }

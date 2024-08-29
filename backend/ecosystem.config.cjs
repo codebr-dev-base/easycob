@@ -16,7 +16,7 @@ module.exports = {
       },
     },
     {
-      name: 'queueLoadCsv',
+      name: 'queue:LoadCsv',
       script: './build/ace.js',
       cwd: severPath,
       args: 'queue:listen --queue=LoadCsv',
@@ -29,11 +29,11 @@ module.exports = {
       },
     },
     {
-      name: 'queueActionsOparation',
+      name: 'queue:SendRecupera',
       script: './build/ace.js',
       cwd: severPath,
-      args: 'queue:listen --queue=ActionsOparation',
-      instances: 4,
+      args: 'queue:listen --queue=SendRecupera',
+      instances: 1,
       exec_mode: 'cluster',
       autorestart: true,
       node_args: '--max-old-space-size=4096', // Ajuste para 4GB
@@ -42,10 +42,23 @@ module.exports = {
       },
     },
     {
-      name: 'queueActionsEmail',
+      name: 'queue:SendEmailRecupera',
       script: './build/ace.js',
       cwd: severPath,
-      args: 'queue:listen --queue=ActionsEmail',
+      args: 'queue:listen --queue=SendEmailRecupera',
+      instances: 1,
+      exec_mode: 'cluster',
+      autorestart: true,
+      node_args: '--max-old-space-size=4096', // Ajuste para 4GB
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendSmslRecupera',
+      script: './build/ace.js',
+      cwd: severPath,
+      args: 'queue:listen --queue=SendSmsRecupera',
       instances: 8,
       exec_mode: 'cluster',
       autorestart: true,
@@ -55,20 +68,7 @@ module.exports = {
       },
     },
     {
-      name: 'queueActionsSms',
-      script: './build/ace.js',
-      cwd: severPath,
-      args: 'queue:listen --queue=ActionsSms',
-      instances: 8,
-      exec_mode: 'cluster',
-      autorestart: true,
-      node_args: '--max-old-space-size=4096', // Ajuste para 4GB
-      env: {
-        TZ: 'America/Fortaleza',
-      },
-    },
-    {
-      name: 'queueSendEmail',
+      name: 'queue:SendEmail',
       script: './build/ace.js',
       cwd: severPath,
       args: 'queue:listen --queue=SendEmail',
@@ -81,7 +81,7 @@ module.exports = {
       },
     },
     {
-      name: 'queueSendSms',
+      name: 'queue:SendSms',
       script: './build/ace.js',
       cwd: severPath,
       args: 'queue:listen --queue=SendSms',
@@ -94,7 +94,7 @@ module.exports = {
       },
     },
     {
-      name: 'queueSendInvoice',
+      name: 'queue:SendInvoice',
       script: './build/ace.js',
       cwd: severPath,
       args: 'queue:listen --queue=SendInvoice',

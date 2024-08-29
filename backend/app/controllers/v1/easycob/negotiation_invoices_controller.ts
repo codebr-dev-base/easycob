@@ -1,7 +1,7 @@
 import NegotiationInvoice from '#models/negotiation_invoice';
 import NegotiationInvoiceHistory from '#models/negotiation_invoice_history';
 import User from '#models/user';
-import SerializeService from '#services/serialize_service';
+import { serializeKeysCamelCase } from '#utils/serialize';
 import { updateNegotiationInvoiceValidator } from '#validators/negotiation_invoice_validator';
 import { inject } from '@adonisjs/core';
 import type { HttpContext } from '@adonisjs/core/http';
@@ -9,9 +9,6 @@ import db from '@adonisjs/lucid/services/db';
 
 @inject()
 export default class NegotiationInvoicesController {
-
-    constructor(protected serialize: SerializeService) {
-    }
 
     public async index({ request }: HttpContext) {
         const qs = request.qs();
@@ -75,8 +72,7 @@ export default class NegotiationInvoicesController {
             .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
             .paginate(pageNumber, limit);
 
-        return this.serialize.serializeKeys(actions.toJSON());
-
+        return serializeKeysCamelCase(actions.toJSON());
     }
 
     public async update({ auth, params, request, response }: HttpContext) {
@@ -124,6 +120,6 @@ export default class NegotiationInvoicesController {
             })
             .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc');
 
-        return this.serialize.serializeKeys(actions);
+        return serializeKeysCamelCase(actions);
     }
 }

@@ -12,12 +12,12 @@ import { sep, normalize } from 'node:path';
 import fs from 'fs';
 import SendEmailJob from '#jobs/send_email_job';
 import SendSmsJob from '#jobs/send_sms_job';
-import SerializeService from '#services/serialize_service';
+import { serializeKeysCamelCase } from '#utils/serialize';
 
 @inject()
 export default class CampaignsController {
 
-  constructor(protected service: CampaignService, protected serialize: SerializeService) {
+  constructor(protected service: CampaignService) {
   }
   public async index({ request }: HttpContext) {
     const sql = fs.readFileSync('app/sql/campaign/exists_pendencies.sql', 'utf8');
@@ -40,7 +40,7 @@ export default class CampaignsController {
       .orderBy(`c.${orderBy}`, descending === 'true' ? 'desc' : 'asc')
       .paginate(pageNumber, limit);
 
-    return this.serialize.serializeKeys(campaigns.toJSON());
+    return serializeKeysCamelCase(campaigns.toJSON());
 
   }
 

@@ -1,27 +1,22 @@
-import { inject } from '@adonisjs/core';
 import EmailService from '#services/email_service';
 import { Job } from '@rlanz/bull-queue';
 import Campaign from '#models/campaign';
 import CampaignLot from '#models/campaign_lot';
-import queue from '@rlanz/bull-queue/services/main';
+//import queue from '@rlanz/bull-queue/services/main';
 
 interface SendEmailJobPayload { campaign_id: number; user_id: any; }
 
-@inject()
 export default class SendEmailJob extends Job {
   // This is the path to the file that is used to create the job
   static get $$filepath() {
     return import.meta.url;
   }
 
-  constructor(protected service: EmailService) {
-    super();
-  }
-
   /**
    * Base Entry point
    */
   async handle(payload: SendEmailJobPayload) {
+    const service = new EmailService();
     const campaign = await Campaign.find(payload.campaign_id);
 
     try {
@@ -33,7 +28,7 @@ export default class SendEmailJob extends Job {
           .whereNull('messageid')
           .where('valid', true)
           .limit(500);
-        await this.service.works(campaign, lots);
+        await service.works(campaign, lots);
       }
 
     } catch (error) {

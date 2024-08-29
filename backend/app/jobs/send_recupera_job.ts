@@ -8,8 +8,8 @@ import Action from '#models/action';
 import env from '#start/env';
 import CatchLog from '#models/catch_log';
 import xmlParser from 'xml2json';
-import ActionService from '#services/action_service';
-import string from '@adonisjs/core/helpers/string';
+import { handleSendingForRecupera } from '#services/utils/recupera';
+import { serializeKeysSnakeCase } from '#utils/serialize';
 
 interface SendRecuperaJobPayload {
   action_id: number;
@@ -44,9 +44,17 @@ export default class SendRecuperaJob extends Job {
     return import.meta.url;
   }
 
-  protected urlRecupera: string;
-  protected optionsJson: object;
-  queueName: string | undefined;
+  declare urlRecupera: string;
+  declare optionsJson: {
+    object: true,
+    reversible: false,
+    coerce: false,
+    sanitize: true,
+    trim: true,
+    arrayNotation: false,
+    alternateTextNode: false,
+  };
+  queueName = 'SendRecupera';
 
   constructor() {
     super();
@@ -61,43 +69,12 @@ export default class SendRecuperaJob extends Job {
       arrayNotation: false,
       alternateTextNode: false,
     };
-    this.queueName = 'ActionsOparation';
   }
 
-  protected checkResultSync(retornotexto: string): boolean {
+  checkResultSync(retornotexto: string): boolean {
     const keywords = ['PRIMARY', 'DEADLOCK', 'TIMEOUT'];
 
     return keywords.some(keyword => retornotexto.toUpperCase().includes(keyword));
-  }
-
-
-  serializeKeys(data: any[] | { meta: any, data: any[]; } | any) {
-
-    const serializeObject = (obj: any) => {
-      const serialized = {};
-      for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-          const camelKey = string.snakeCase(key);
-          (serialized as any)[camelKey] = obj[key];
-        }
-      }
-      return serialized;
-    };
-
-
-    if (Array.isArray(data)) {
-      return data.map(serializeObject);
-    }
-    if (data.meta && data.data) {
-      const paginator = data;
-      const serializedData = paginator.data.map(serializeObject);
-      return {
-        ...paginator,
-        data: serializedData,
-      };
-    }
-    return serializeObject(data);
-
   }
 
   /**
@@ -105,7 +82,6 @@ export default class SendRecuperaJob extends Job {
    */
   async handle(payload: SendRecuperaJobPayload) {
 
-    const actionService = new ActionService();
     const edge = Edge.create();
     edge.mount(app.viewsPath());
     const envelop = await edge.render('xml/envelop', { action: payload });
@@ -135,7 +111,7 @@ export default class SendRecuperaJob extends Job {
 
         if (this.checkResultSync(retornotexto)) {
           action.sync = false;
-          await actionService.handleSendingForRecupera(action, this.queueName);
+          await handleSendingForRecupera(action, this.queueName);
         } else {
           action.sync = true;
           action.resultSync = JSON.stringify(resultSync);
@@ -147,7 +123,7 @@ export default class SendRecuperaJob extends Job {
 
         if (action.retorno === '00') {
           const des_contr = action.desContr;
-          const jsonString = JSON.stringify(this.serializeKeys(action.toJSON()));
+          const jsonString = JSON.stringify(serializeKeysSnakeCase(action.toJSON()));
           redis.hset('last_actions', des_contr, jsonString);
         }
 

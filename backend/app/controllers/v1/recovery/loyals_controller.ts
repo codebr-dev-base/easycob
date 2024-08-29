@@ -2,13 +2,13 @@ import Loyal from '#models/recovery/loyal';
 import type { HttpContext } from '@adonisjs/core/http';
 import db from '@adonisjs/lucid/services/db';
 import LoyalService from '#services/loyal_service';
-import SerializeService from '#services/serialize_service';
 import { inject } from '@adonisjs/core';
+import { serializeKeysCamelCase } from '#utils/serialize';
 
 @inject()
 export default class LoyalsController {
 
-    constructor(protected service: LoyalService, protected serialize: SerializeService) {
+    constructor(protected service: LoyalService) {
     }
 
     public async index({ request, auth }: HttpContext) {
@@ -42,7 +42,7 @@ export default class LoyalsController {
                 .paginate(pageNumber, limit);
 
             //return clients;
-            return this.serialize.serializeKeys(clients.toJSON());
+            return serializeKeysCamelCase(clients.toJSON());
         } else {
             return {
                 meta: {},
@@ -57,7 +57,7 @@ export default class LoyalsController {
             .distinct('faixa_tempo')
             .orderBy('faixa_tempo');
 
-        return this.serialize.serializeKeys(faixaTempos);
+        return serializeKeysCamelCase(faixaTempos);
     }
 
     public async getFaixaValores({ }: HttpContext) {
@@ -66,7 +66,7 @@ export default class LoyalsController {
             .distinct('faixa_valor')
             .orderBy('faixa_valor');
 
-        return this.serialize.serializeKeys(faixaValores);
+        return serializeKeysCamelCase(faixaValores);
     }
 
     public async getFaixaTitulos({ }: HttpContext) {
@@ -75,7 +75,7 @@ export default class LoyalsController {
             .distinct('faixa_titulos')
             .orderBy('faixa_titulos');
 
-        return this.serialize.serializeKeys(faixaTitulos);
+        return serializeKeysCamelCase(faixaTitulos);
     }
     public async getFaixaClusters({ }: HttpContext) {
         const faixaCluster = await db.from('recupera.redistribuicao_carteira_base as l')
@@ -83,7 +83,7 @@ export default class LoyalsController {
             .distinct('class_cluster')
             .orderBy('class_cluster');
 
-        return this.serialize.serializeKeys(faixaCluster);
+        return serializeKeysCamelCase(faixaCluster);
     }
     public async getUnidades({ }: HttpContext) {
         const unidades = await db.from('recupera.redistribuicao_carteira_base as l')
@@ -91,7 +91,7 @@ export default class LoyalsController {
             .distinct('unidade')
             .orderBy('unidade');
 
-        return this.serialize.serializeKeys(unidades);
+        return serializeKeysCamelCase(unidades);
     }
 
     public async getSituacoes({ }: HttpContext) {
@@ -100,7 +100,7 @@ export default class LoyalsController {
             .distinct('class_sitcontr')
             .orderBy('class_sitcontr');
 
-        return this.serialize.serializeKeys(situacoes);
+        return serializeKeysCamelCase(situacoes);
     }
 
     public async setCheck({ params, response }: HttpContext) {

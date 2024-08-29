@@ -7,6 +7,7 @@ import User from '#models/user';
 import db from '@adonisjs/lucid/services/db';
 import fs from 'fs';
 import TypeAction from '#models/type_action';
+import { dispatchToRecupera } from '#services/utils/recupera';
 
 
 @inject()
@@ -112,7 +113,7 @@ export default class ActionsController {
       const { id } = params;
       const action = await Action.find(id);
       if (action) {
-        await this.service.dispatchToRecupera(action);
+        await dispatchToRecupera(action);
         return true;
       }
     } catch (error) {

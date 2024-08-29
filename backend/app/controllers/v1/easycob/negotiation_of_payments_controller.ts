@@ -1,6 +1,6 @@
 import NegotiationOfPayment from '#models/negotiation_of_payment';
 import NegotiationOfPaymentHistory from '#models/negotiation_of_payment_history';
-import SerializeService from '#services/serialize_service';
+import { serializeKeysCamelCase } from '#utils/serialize';
 import { confirmationNegotiationInvoiceValidator } from '#validators/negotiation_invoice_validator';
 import { updateNegotiationOfPaymentValidator } from '#validators/negotiation_of_payment_validator';
 import { inject } from '@adonisjs/core';
@@ -9,9 +9,6 @@ import db from '@adonisjs/lucid/services/db';
 
 @inject()
 export default class NegotiationOfPaymentsController {
-
-    constructor(protected serialize: SerializeService) {
-    }
 
     public async index({ request }: HttpContext) {
         const qs = request.qs();
@@ -67,7 +64,7 @@ export default class NegotiationOfPaymentsController {
             .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
             .paginate(pageNumber, limit);
 
-        return this.serialize.serializeKeys(actions.toJSON());
+        return serializeKeysCamelCase(actions.toJSON());
 
     }
 
@@ -129,7 +126,7 @@ export default class NegotiationOfPaymentsController {
             })
             .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc');
 
-        return this.serialize.serializeKeys(actions);
+        return serializeKeysCamelCase(actions);
 
     }
 }

@@ -4,7 +4,9 @@ import lodash from 'lodash';
 import { chunks } from '#utils/array';
 import mail from '@adonisjs/mail/services/main';
 import CatchLog from "#models/catch_log";
-import RecuperaService from "#services/recupera_service";
+import TypeAction from '#models/type_action';
+import { createActionForClient, findClient, getClients, handleSendingForRecupera } from './utils/recupera.js';
+import Action from '#models/action';
 
 type MailerConfig =
     | 'manaus_com'
@@ -29,12 +31,14 @@ type MailerConfig =
     | 'rolimDeMoura_com_br';
 
 
-export default class EmailService extends RecuperaService {
+export default class EmailService {
 
     private blacklist: string[];
+    declare typeAction: TypeAction | null | undefined;
+    declare abbreviation: string | undefined;
+    declare tipoContato: string | undefined;
 
     constructor() {
-        super();
         this.blacklist = [];
         this.typeAction = null;
         this.abbreviation = 'EME';
@@ -50,7 +54,58 @@ export default class EmailService extends RecuperaService {
         return config;
     }
 
+    async getTypeAction() {
+        this.typeAction = await TypeAction.findBy('abbreviation', this.abbreviation);
 
+        if (!this.typeAction) {
+            throw new Error('Not find type action!');
+        }
+
+        return this.typeAction;
+    }
+
+    handleActionSending(action: Action): void {
+        if (this.abbreviation === 'EME') {
+            handleSendingForRecupera(action, `SendEmailRecupera`);
+        } else if (this.abbreviation === 'SMS') {
+            handleSendingForRecupera(action, `SendSmsRecupera`);
+        }
+    }
+
+    async createAction(item: CampaignLot, clientsGroups: { [key: string]: any[]; }, campaign: Campaign) {
+        try {
+            const typeAction: TypeAction = await this.getTypeAction();
+
+            // Utilize `Promise.all` para evitar múltiplas Promises pendentes
+            await Promise.all(Object.keys(clientsGroups).map(async (key: string) => {
+                if (key !== item.contato.toUpperCase()) return;
+
+                const groupContato = clientsGroups[key];
+
+                const groupDesContr: { [key: string]: any[]; } = lodash.groupBy(groupContato, 'desContr');
+
+                // Mapeia as chaves de `groupDesContr` e processa cada grupo
+                await Promise.all(Object.keys(groupDesContr).map(async (k: string) => {
+
+                    console.error("Grupo por contrato:");
+                    console.error(groupContato);
+
+                    const group = groupDesContr[k];
+
+                    // Usa `for...of` com `Promise.all` para criar todas as ações em paralelo
+                    await Promise.all(group.map(async (client, i) => {
+                        const action = await createActionForClient(client, typeAction, campaign, this.tipoContato);
+
+                        if (i === 0) {
+                            this.handleActionSending(action);
+                        }
+                    }));
+                }));
+            }));
+        } catch (error) {
+            throw error;
+        }
+    }
 
     async checkContactValid(campaign: Campaign, item: CampaignLot) {
         const regex =
@@ -94,7 +149,7 @@ export default class EmailService extends RecuperaService {
     private async prepareSend(item: CampaignLot, campaign: Campaign, clients: any[]) {
         if (await this.checkContactValid(campaign, item)) {
 
-            const client = await this.findClient(item, clients);
+            const client = await findClient(item, clients);
 
             if (!client) {
                 item.status = 'Inativo';
@@ -126,7 +181,7 @@ export default class EmailService extends RecuperaService {
 
     private async send(lots: any[], campaign: Campaign) {
 
-        const clients = await this.getClients(lots);
+        const clients = await getClients(lots);
 
         const clientsGroups = lodash.groupBy(clients, 'contato');
 
@@ -265,3 +320,4 @@ export default class EmailService extends RecuperaService {
 
 
 }
+

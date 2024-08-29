@@ -9,11 +9,11 @@ import NegotiationOfPayment from "#models/negotiation_of_payment";
 import { DateTime } from "luxon";
 import NegotiationInvoice from "#models/negotiation_invoice";
 import db from "@adonisjs/lucid/services/db";
-import RecuperaService from "#services/recupera_service";
 import string from '@adonisjs/core/helpers/string';
+import { handleSendingForRecupera } from "./utils/recupera.js";
 
 
-export default class ActionService extends RecuperaService {
+export default class ActionService {
 
     // Define a helper function for querying and pushing IDs
     protected async getListTypeActionId(column: string, keyword: string, minLength: number,) {
@@ -217,7 +217,7 @@ export default class ActionService extends RecuperaService {
     async afterCreate(action: Action, data: any) {
         await this.setIncrementAtender(action);
 
-        await this.handleSendingForRecupera(action);
+        await handleSendingForRecupera(action);
 
         return this.handlerData(action, data);
     }
@@ -287,7 +287,7 @@ export default class ActionService extends RecuperaService {
                     pecld: aggregation.pecld
                 });
 
-                await this.handleSendingForRecupera(a);
+                await handleSendingForRecupera(a);
             }
         }
     }
