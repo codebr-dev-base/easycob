@@ -46,3 +46,5 @@ router
     recoveryinvoice;
     loyal;
   });
+
+router.jobs();
