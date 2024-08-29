@@ -11,7 +11,7 @@ export default class BulkActionEme extends BaseCommand {
   static options: CommandOptions = {};
 
   async run() {
-    const typeAction = await TypeAction.findBy('abbreviation', 'SMS');
+    const typeAction = await TypeAction.query().where('abbreviation', 'EME').first();
     if (typeAction) {
       const actions = await Action.query().where('retornotexto', 'Em fila').where('typeActionId', typeAction.id).whereRaw('created_at::date = CURRENT_DATE');
 
