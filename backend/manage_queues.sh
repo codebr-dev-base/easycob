@@ -73,9 +73,9 @@ stop_queue_LoadCsv() {
 stop_queue_SendRecupera() {
     pidFile="$logDir/SendRecupera.pid"
 
-    if [ -f "$pidFile" ]; então
+    if [ -f "$pidFile" ]; then
         pid=$(cat "$pidFile")
-        if kill -0 $pid > /dev/null 2>&1; então
+        if kill -0 $pid > /dev/null 2>&1; then
             kill $pid
             echo "SendRecupera parado. PID: $pid"
         else
@@ -90,9 +90,9 @@ stop_queue_SendRecupera() {
 stop_queue_SendEmailRecupera() {
     pidFile="$logDir/SendEmailRecupera.pid"
 
-    if [ -f "$pidFile" ]; então
+    if [ -f "$pidFile" ]; then
         pid=$(cat "$pidFile")
-        if kill -0 $pid > /dev/null 2>&1; então
+        if kill -0 $pid > /dev/null 2>&1; then
             kill $pid
             echo "SendEmailRecupera parado. PID: $pid"
         else
@@ -107,9 +107,9 @@ stop_queue_SendEmailRecupera() {
 stop_queue_SendSmsRecupera() {
     pidFile="$logDir/SendSmsRecupera.pid"
 
-    if [ -f "$pidFile" ]; então
+    if [ -f "$pidFile" ]; then
         pid=$(cat "$pidFile")
-        if kill -0 $pid > /dev/null 2>&1; então
+        if kill -0 $pid > /dev/null 2>&1; then
             kill $pid
             echo "SendSmsRecupera parado. PID: $pid"
         else
@@ -124,9 +124,9 @@ stop_queue_SendSmsRecupera() {
 stop_queue_SendEmail() {
     pidFile="$logDir/SendEmail.pid"
 
-    if [ -f "$pidFile" ]; então
+    if [ -f "$pidFile" ]; then
         pid=$(cat "$pidFile")
-        if kill -0 $pid > /dev/null 2>&1; então
+        if kill -0 $pid > /dev/null 2>&1; then
             kill $pid
             echo "SendEmail parado. PID: $pid"
         else
@@ -141,9 +141,9 @@ stop_queue_SendEmail() {
 stop_queue_SendSms() {
     pidFile="$logDir/SendSms.pid"
 
-    if [ -f "$pidFile" ]; então
+    if [ -f "$pidFile" ]; then
         pid=$(cat "$pidFile")
-        if kill -0 $pid > /dev/null 2>&1; então
+        if kill -0 $pid > /dev/null 2>&1; then
             kill $pid
             echo "SendSms parado. PID: $pid"
         else
@@ -158,9 +158,9 @@ stop_queue_SendSms() {
 stop_queue_SendInvoice() {
     pidFile="$logDir/SendInvoice.pid"
 
-    if [ -f "$pidFile" ]; então
+    if [ -f "$pidFile" ]; then
         pid=$(cat "$pidFile")
-        if kill -0 $pid > /dev/null 2>&1; então
+        if kill -0 $pid > /dev/null 2>&1; then
             kill $pid
             echo "SendInvoice parado. PID: $pid"
         else
