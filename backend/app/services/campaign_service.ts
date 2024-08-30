@@ -46,7 +46,7 @@ export default class CampaignService {
 
     const dateTime = new Date().getTime();
     const newFileName = `${dateTime}.${file.extname}`;
-    const destinationPath = app.makePath('uploads/csv');
+    const destinationPath = app.makePath('../uploads/csv');
     const fullPath = path.join(destinationPath, newFileName);
 
     // Tentar mover o arquivo uma vez

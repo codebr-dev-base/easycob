@@ -24,7 +24,7 @@ export async function handleSendingForRecupera(action: Action, queueName = 'Send
     await action.save();
   }
 }
-/* 
+
 export async function isToSendToRecupera(action: Action) {
   try {
     const typeAction = await TypeAction.find(action.typeActionId);
@@ -72,7 +72,7 @@ export async function isToSendToRecupera(action: Action) {
   }
 
 }
- */
+
 
 export async function dispatchToRecupera(action: Action, queueName = 'SendRecupera') {
   const contract = await Contract.findBy('des_contr', action.desContr);
