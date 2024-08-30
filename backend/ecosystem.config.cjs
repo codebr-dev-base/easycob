@@ -20,7 +20,6 @@ module.exports = {
       cwd: severPath,
       args: 'jobs:listen --queue=LoadCsv',
       instances: 1,
-      exec_mode: 'cluster',
       autorestart: true,
       env: {
         TZ: 'America/Fortaleza',
@@ -32,7 +31,6 @@ module.exports = {
       cwd: severPath,
       args: 'jobs:listen --queue=SendRecupera',
       instances: 1,
-      exec_mode: 'cluster',
       autorestart: true,
       env: {
         TZ: 'America/Fortaleza',
@@ -44,7 +42,6 @@ module.exports = {
       cwd: severPath,
       args: 'jobs:listen --queue=SendEmailRecupera',
       instances: 1,
-      exec_mode: 'cluster',
       autorestart: true,
       env: {
         TZ: 'America/Fortaleza',
@@ -56,7 +53,6 @@ module.exports = {
       cwd: severPath,
       args: 'jobs:listen --queue=SendSmsRecupera',
       instances: 1,
-      exec_mode: 'cluster',
       autorestart: true,
       env: {
         TZ: 'America/Fortaleza',
@@ -68,7 +64,6 @@ module.exports = {
       cwd: severPath,
       args: 'jobs:listen --queue=SendEmail',
       instances: 1,
-      exec_mode: 'cluster',
       autorestart: true,
       env: {
         TZ: 'America/Fortaleza',
@@ -80,7 +75,6 @@ module.exports = {
       cwd: severPath,
       args: 'jobs:listen --queue=SendSms',
       instances: 1,
-      exec_mode: 'cluster',
       autorestart: true,
       env: {
         TZ: 'America/Fortaleza',
@@ -92,7 +86,6 @@ module.exports = {
       cwd: severPath,
       args: 'jobs:listen --queue=SendInvoice',
       instances: 1,
-      exec_mode: 'cluster',
       autorestart: true,
       env: {
         TZ: 'America/Fortaleza',
