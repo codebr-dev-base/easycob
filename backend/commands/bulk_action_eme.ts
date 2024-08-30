@@ -15,7 +15,7 @@ export default class BulkActionEme extends BaseCommand {
   async run() {
     const typeAction = await TypeAction.findBy('abbreviation', 'EME');
     if (typeAction) {
-      const actions = await Action.query().where('retornotexto', 'Em fila').where('typeActionId', typeAction.id).whereRaw('created_at::date = CURRENT_DATE');
+      const actions = await Action.query().where('retornotexto', 'Em fila').where('typeActionId', typeAction.id).whereRaw("created_at::date = '2024-08-29'");
 
       for (const action of actions) {
         await handleSendingForRecupera(action);
