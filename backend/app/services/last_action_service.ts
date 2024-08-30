@@ -41,10 +41,10 @@ export default class LastActionService {
         //const pipeline = redis.pipeline(); // Usa pipeline para otimizar o envio em massa
 
         for (const la of rows) {
-            const des_contr = la.des_contr;
+            const cod_credor_des_regis = `${la.cod_credor_des_regis}`;
             const jsonString = JSON.stringify(la);
             //pipeline.hset('last_actions', des_contr, jsonString);
-            redis.hset('last_actions', des_contr, jsonString);
+            redis.hset('last_actions', cod_credor_des_regis, jsonString);
         }
 
         // Executa o pipeline para enviar todos os comandos de uma vez
@@ -59,13 +59,13 @@ export default class LastActionService {
             const lastActions = await redis.hgetall('last_actions');
             const list = [];
             // Itera sobre os resultados
-            for (const des_contr in lastActions) {
-                if (lastActions.hasOwnProperty(des_contr)) {
+            for (const cod_credor_des_regis in lastActions) {
+                if (lastActions.hasOwnProperty(cod_credor_des_regis)) {
                     // Obtém o valor do campo, que é um JSON stringificado
-                    const lastAction = JSON.parse(lastActions[des_contr]);
+                    const lastAction = JSON.parse(lastActions[cod_credor_des_regis]);
 
                     // Faça o que precisar com os dados da interação
-                    console.log(`User ID: ${des_contr}, Last action:`, lastAction);
+                    console.log(`User ID: ${cod_credor_des_regis}, Last action:`, lastAction);
                     list.push(lastAction);
                 }
             }

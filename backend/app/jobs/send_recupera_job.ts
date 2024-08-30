@@ -123,9 +123,9 @@ export default class SendRecuperaJob extends Job {
         await action.save();
 
         if (action.retorno === '00') {
-          const des_contr = action.desContr;
+          const cod_credor_des_regis = `${action.codCredorDesRegis}`;
           const jsonString = JSON.stringify(serializeKeysSnakeCase(action.toJSON()));
-          redis.hset('last_actions', des_contr, jsonString);
+          redis.hset('last_actions', cod_credor_des_regis, jsonString);
         }
 
       } catch (error) {

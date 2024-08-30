@@ -24,13 +24,13 @@ export async function handleSendingForRecupera(action: Action, queueName = 'Send
     await action.save();
   }
 }
-
+/* 
 export async function isToSendToRecupera(action: Action) {
   try {
     const typeAction = await TypeAction.find(action.typeActionId);
 
     // Recupera a string JSON do Redis
-    const jsonString = await redis.hget('last_actions', action.desContr);
+    const jsonString = await redis.hget('cod_credor_des_regis', `${action.codCredorDesRegis}`);
 
     if (!jsonString) {
       return true;
@@ -40,9 +40,9 @@ export async function isToSendToRecupera(action: Action) {
     const lastAction = JSON.parse(jsonString);
 
     if (lastAction.type_action_id) {
-      lastAction.type_action = await TypeAction.find(lastAction.type_action_id);
+      lastAction.type_action = await TypeAction.find(lastAction.cod_credor_des_regis);
     } else {
-      lastAction.type_action = await TypeAction.find(lastAction.typeActionId);
+      lastAction.type_action = await TypeAction.find(lastAction.codCredorDesRegis);
     }
 
     if (!typeAction) {
@@ -72,6 +72,7 @@ export async function isToSendToRecupera(action: Action) {
   }
 
 }
+ */
 
 export async function dispatchToRecupera(action: Action, queueName = 'SendRecupera') {
   const contract = await Contract.findBy('des_contr', action.desContr);

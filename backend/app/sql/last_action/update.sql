@@ -68,7 +68,6 @@ WHERE
             (
                 SELECT DISTINCT
                     cod_credor_des_regis,
-                    des_contr,
                     MAX(id) AS max_id
                 FROM
                     (
@@ -85,8 +84,6 @@ WHERE
                 WHERE
                     retornotexto = 'RETORNO OK'
                 GROUP BY
-                    cod_credor_des_regis,
-                    des_contr
+                    cod_credor_des_regis
             ) AS subquery
     );
-
