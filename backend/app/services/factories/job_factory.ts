@@ -14,13 +14,6 @@ export class JobFactory {
   }
 
   getJob<K extends keyof typeof this.kindToJobMap>(kind: K) {
-    const { className: jobClass, queueName } = this.kindToJobMap[kind]
-    return {
-      dispatch: (dispatchOptions: { campaign_id: number; user_id: number }) => {
-        return jobClass.dispatch(dispatchOptions, {
-          queueName,
-        })
-      },
-    }
+    return this.kindToJobMap[kind]
   }
 }

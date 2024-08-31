@@ -10,7 +10,7 @@ import LoadCsvCampaignJob from '#jobs/load_csv_campaign_job'
 import { sep, normalize } from 'node:path'
 import fs from 'fs'
 import { serializeKeysCamelCase } from '#utils/serialize'
-import { JobFactory } from '#services/factories/JobFactory'
+import { JobFactory } from '#services/factories/job_factory'
 import { InvalidArgumentsException } from '@adonisjs/core/exceptions'
 
 @inject()
@@ -94,11 +94,16 @@ export default class CampaignsController {
             throw new InvalidArgumentsException('Invalid campaign type')
           }
 
-          const job = jobFactory.getJob(campaign.type)
-          await job.dispatch({
-            campaign_id: id,
-            user_id: user.id,
-          })
+          const { className: job, queueName } = jobFactory.getJob(campaign.type)
+          job.dispatch(
+            {
+              campaign_id: id,
+              user_id: user.id,
+            },
+            {
+              queueName,
+            }
+          )
 
           return true
         }
