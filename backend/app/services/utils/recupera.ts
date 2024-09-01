@@ -30,7 +30,7 @@ export async function isToSendToRecupera(action: Action) {
     const typeAction = await TypeAction.find(action.typeActionId);
 
     // Recupera a string JSON do Redis
-    const jsonString = await redis.hget('cod_credor_des_regis', `${action.codCredorDesRegis}`);
+    const jsonString = await redis.hget('last_actions', `${action.codCredorDesRegis}`);
 
     if (!jsonString) {
       return true;
