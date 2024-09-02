@@ -5,7 +5,7 @@ import { chunks } from '#utils/array';
 import mail from '@adonisjs/mail/services/main';
 import CatchLog from "#models/catch_log";
 import TypeAction from '#models/type_action';
-import { createActionForClient, findClient, getClients, handleSendingForRecupera } from './utils/recupera.js';
+import { createActionForClient, findClient, getClients, handleSendingForRecupera, makeNameQueue } from './utils/recupera.js';
 import Action from '#models/action';
 
 type MailerConfig =
@@ -33,16 +33,13 @@ type MailerConfig =
 
 export default class EmailService {
 
-    private blacklist: string[];
+    private blacklist: string[] = [];
     declare typeAction: TypeAction | null | undefined;
-    declare abbreviation: string | undefined;
-    declare tipoContato: string | undefined;
+    declare abbreviation: 'EME';
+    declare tipoContato: 'EMAIL';
 
     constructor() {
-        this.blacklist = [];
         this.typeAction = null;
-        this.abbreviation = 'EME';
-        this.tipoContato = 'EMAIL';
     }
 
     protected getMailerConfig(
@@ -64,12 +61,9 @@ export default class EmailService {
         return this.typeAction;
     }
 
-    handleActionSending(action: Action): void {
-        if (this.abbreviation === 'EME') {
-            handleSendingForRecupera(action, `SendEmailRecupera`);
-        } else if (this.abbreviation === 'SMS') {
-            handleSendingForRecupera(action, `SendSmsRecupera`);
-        }
+    handleActionSending(action: Action, subsidiary: string = ''): void {
+        const queueName = makeNameQueue(this.abbreviation, subsidiary);
+        handleSendingForRecupera(action, queueName);
     }
 
     async createAction(item: CampaignLot, clientsGroups: { [key: string]: any[]; }, campaign: Campaign) {
@@ -97,7 +91,7 @@ export default class EmailService {
                         const action = await createActionForClient(client, typeAction, campaign, this.tipoContato);
 
                         if (i === 0) {
-                            this.handleActionSending(action);
+                            this.handleActionSending(action, client.subsidiary_mail);
                         }
                     }));
                 }));

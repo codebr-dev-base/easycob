@@ -4,13 +4,13 @@ import TypeAction from "#models/type_action";
 import redis from "@adonisjs/redis/services/main";
 import { DateTime } from "luxon";
 import SendRecuperaJob from "#jobs/send_recupera_job";
-import SendEmailRecuperaJob from '#jobs/send_email_recupera_job';
-import SendSmsRecuperaJob from "#jobs/send_sms_recupera_job";
+//import SendEmailRecuperaJob from '#jobs/send_email_recupera_job';
+//import SendSmsRecuperaJob from "#jobs/send_sms_recupera_job";
 import CampaignLot from "#models/campaign_lot";
 import db from "@adonisjs/lucid/services/db";
 import { serializeKeysCamelCase } from "#utils/serialize";
 import Campaign from "#models/campaign";
-
+import string from '@adonisjs/core/helpers/string';
 
 export async function handleSendingForRecupera(action: Action, queueName = 'SendRecupera') {
   if (await isToSendToRecupera(action)) {
@@ -73,7 +73,6 @@ export async function isToSendToRecupera(action: Action) {
 
 }
 
-
 export async function dispatchToRecupera(action: Action, queueName = 'SendRecupera') {
   const contract = await Contract.findBy('des_contr', action.desContr);
   const typeAction = await TypeAction.find(action.typeActionId);
@@ -88,16 +87,25 @@ export async function dispatchToRecupera(action: Action, queueName = 'SendRecupe
     cocontratovincular: <string>contract?.desContr,
   };
 
-  const jobMapping: any = {
-    SendRecupera: SendRecuperaJob,
-    SendSmsRecupera: SendSmsRecuperaJob,
-    SendEmailRecupera: SendEmailRecuperaJob,
-  };
+  /*   const jobMapping: any = {
+      SendRecupera: SendRecuperaJob,
+      SendSmsRecupera: SendSmsRecuperaJob,
+      SendEmailRecupera: SendEmailRecuperaJob,
+    };
+  
+    const job = jobMapping[queueName];
+  
+    if (job) {
+      await job.dispatch(item, {
+        queueName
+      });
+    } else {
+      // Opcional: Tratamento para filas não reconhecidas
+      console.error(`Queue name "${queueName}" is not recognized.`);
+    } */
 
-  const job = jobMapping[queueName];
-
-  if (job) {
-    await job.dispatch(item, {
+  if (queueName) {
+    await SendRecuperaJob.dispatch(item, {
       queueName
     });
   } else {
@@ -201,4 +209,10 @@ export async function createActionForClient(client: any, typeAction: TypeAction,
     datVenci: DateTime.fromJSDate(client.datVenci),
     dayLate,
   });
+}
+
+export function makeNameQueue(type: string, subsidiary: string) {
+  const local = string.pascalCase(string.camelCase(subsidiary).replace('aguasDe', ''));
+  return `SendRecupera:${type}:${local}`;
+
 }

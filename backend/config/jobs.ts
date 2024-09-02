@@ -10,7 +10,32 @@ const jobsConfig = defineConfig({
 
   queue: env.get('REDIS_QUEUE', 'default'),
 
-  queues: ['LoadCsv', 'SendEmail', 'SendSms', 'SendRecupera', 'SendEmailRecupera', 'SendSmsRecupera', 'SendInvoice'],
+  queues: [
+    'LoadCsv',
+    'SendEmail',
+    'SendSms',
+    'SendRecupera',
+    'ResendRecupera',
+    'SendRecupera:EME:RolimDeMoura',
+    'SendRecupera:EME:Ariquemes',
+    'SendRecupera:EME:PimentaBueno',
+    'SendRecupera:EME:Buritis',
+    'SendRecupera:EME:Teresina',
+    'SendRecupera:EME:Timon',
+    'SendRecupera:EME:SaoFrancisco',
+    'SendRecupera:EME:Manaus',
+    'SendRecupera:EME:Prolagos',
+    'SendRecupera:SMS:RolimDeMoura',
+    'SendRecupera:SMS:Ariquemes',
+    'SendRecupera:SMS:PimentaBueno',
+    'SendRecupera:SMS:Buritis',
+    'SendRecupera:SMS:Teresina',
+    'SendRecupera:SMS:Timon',
+    'SendRecupera:SMS:SaoFrancisco',
+    'SendRecupera:SMS:Manaus',
+    'SendRecupera:SMS:Prolagos',
+    'SendInvoice'
+  ],
 
   options: {
     /**

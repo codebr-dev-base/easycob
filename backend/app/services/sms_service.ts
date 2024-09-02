@@ -6,7 +6,7 @@ import env from '#start/env';
 import { $fetch } from 'ofetch';
 import CatchLog from "#models/catch_log";
 import TypeAction from "#models/type_action";
-import { createActionForClient, findClient, getClients, handleSendingForRecupera } from "./utils/recupera.js";
+import { createActionForClient, findClient, getClients, handleSendingForRecupera, makeNameQueue } from "./utils/recupera.js";
 import Action from "#models/action";
 import { MailerConfig } from "@adonisjs/mail/types";
 
@@ -14,16 +14,13 @@ import { MailerConfig } from "@adonisjs/mail/types";
 
 export default class SmsService {
 
-    private blacklist: string[];
+    private blacklist: string[] = [];
     declare typeAction: TypeAction | null | undefined;
-    declare abbreviation: string | undefined;
-    declare tipoContato: string | undefined;
+    declare abbreviation: 'SMS';
+    declare tipoContato: 'TELEFONE';
 
     constructor() {
-        this.blacklist = [];
         this.typeAction = null;
-        this.abbreviation = 'SMS';
-        this.tipoContato = 'TELEFONE';
     }
 
     protected getMailerConfig(
@@ -45,12 +42,9 @@ export default class SmsService {
         return this.typeAction;
     }
 
-    handleActionSending(action: Action): void {
-        if (this.abbreviation === 'EME') {
-            handleSendingForRecupera(action, `SendEmailRecupera`);
-        } else if (this.abbreviation === 'SMS') {
-            handleSendingForRecupera(action, `SendSmsRecupera`);
-        }
+    handleActionSending(action: Action, subsidiary: string = ''): void {
+        const queueName = makeNameQueue(this.abbreviation, subsidiary);
+        handleSendingForRecupera(action, queueName);
     }
 
     async createAction(item: CampaignLot, clientsGroups: { [key: string]: any[]; }, campaign: Campaign) {
