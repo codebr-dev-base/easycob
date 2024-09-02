@@ -10,7 +10,7 @@ import LoadCsvCampaignJob from '#jobs/load_csv_campaign_job'
 import { sep, normalize } from 'node:path'
 import fs from 'fs'
 import { serializeKeysCamelCase } from '#utils/serialize'
-import { JobFactory } from '#services/factories/job_factory'
+import { jobFactory } from '#services/factories/job_factory'
 import { InvalidArgumentsException } from '@adonisjs/core/exceptions'
 
 @inject()
@@ -89,7 +89,6 @@ export default class CampaignsController {
         //Criar class para enviar as campanhas
 
         if (lots.length > 0) {
-          const jobFactory = new JobFactory()
           if (campaign.type !== 'SMS' && campaign.type !== 'EMAIL') {
             throw new InvalidArgumentsException('Invalid campaign type')
           }
