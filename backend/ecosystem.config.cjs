@@ -25,36 +25,6 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera',
-      script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera',
-      instances: 1,
-      autorestart: true,
-      env: {
-        TZ: 'America/Fortaleza',
-      },
-    },
-    {
-      name: 'queue:SendEmailRecupera',
-      script: 'ace.js',
-      args: 'jobs:listen --queue=SendEmailRecupera',
-      instances: 1,
-      autorestart: true,
-      env: {
-        TZ: 'America/Fortaleza',
-      },
-    },
-    {
-      name: 'queue:SendSmsRecupera',
-      script: 'ace.js',
-      args: 'jobs:listen --queue=SendSmsRecupera',
-      instances: 1,
-      autorestart: true,
-      env: {
-        TZ: 'America/Fortaleza',
-      },
-    },
-    {
       name: 'queue:SendEmail',
       script: 'ace.js',
       args: 'jobs:listen --queue=SendEmail',
@@ -68,6 +38,208 @@ module.exports = {
       name: 'queue:SendSms',
       script: 'ace.js',
       args: 'jobs:listen --queue=SendSms',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:ResendRecupera',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=ResendRecupera',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    // Filas SendRecupera:EME
+    {
+      name: 'queue:SendRecupera:EME:RolimDeMoura',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:EME:RolimDeMoura',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:EME:Ariquemes',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:EME:Ariquemes',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:EME:PimentaBueno',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:EME:PimentaBueno',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:EME:Buritis',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:EME:Buritis',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:EME:Teresina',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:EME:Teresina',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:EME:Timon',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:EME:Timon',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:EME:SaoFrancisco',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:EME:SaoFrancisco',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:EME:Manaus',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:EME:Manaus',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:EME:Prolagos',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:EME:Prolagos',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    // Filas SendRecupera:SMS
+    {
+      name: 'queue:SendRecupera:SMS:RolimDeMoura',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:SMS:RolimDeMoura',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:SMS:Ariquemes',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:SMS:Ariquemes',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:SMS:PimentaBueno',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:SMS:PimentaBueno',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:SMS:Buritis',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:SMS:Buritis',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:SMS:Teresina',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:SMS:Teresina',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:SMS:Timon',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:SMS:Timon',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:SMS:SaoFrancisco',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:SMS:SaoFrancisco',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:SMS:Manaus',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:SMS:Manaus',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:SMS:Prolagos',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:SMS:Prolagos',
       instances: 1,
       autorestart: true,
       env: {
