@@ -40,9 +40,9 @@ export async function isToSendToRecupera(action: Action) {
     const lastAction = JSON.parse(jsonString);
 
     if (lastAction.type_action_id) {
-      lastAction.type_action = await TypeAction.find(lastAction.cod_credor_des_regis);
+      lastAction.type_action = await TypeAction.find(lastAction.type_action_id);
     } else {
-      lastAction.type_action = await TypeAction.find(lastAction.codCredorDesRegis);
+      lastAction.type_action = await TypeAction.find(lastAction.typeActionId);
     }
 
     if (!typeAction) {
