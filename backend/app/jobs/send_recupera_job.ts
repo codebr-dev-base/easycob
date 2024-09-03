@@ -8,8 +8,11 @@ import Action from '#models/action';
 import env from '#start/env';
 import CatchLog from '#models/catch_log';
 import xmlParser from 'xml2json';
-import { handleSendingForRecupera } from '#services/utils/recupera';
+import { isToSendToRecupera } from '#services/utils/recupera';
 import { serializeKeysSnakeCase } from '#utils/serialize';
+import Contract from '#models/recovery/contract';
+import TypeAction from '#models/type_action';
+import ResendRecuperaJob from '#jobs/resend_recupera_job.js';
 
 interface SendRecuperaJobPayload {
   action_id: number;
@@ -39,10 +42,6 @@ interface SoapBody {
 }
 
 export default class SendRecuperaJob extends Job {
-  // This is the path to the file that is used to create the job
-  static get $$filepath() {
-    return import.meta.url;
-  }
 
   declare urlRecupera: string;
   declare optionsJson: {
@@ -110,9 +109,38 @@ export default class SendRecuperaJob extends Job {
         const retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
 
         if (this.checkResultSync(retornotexto)) {
-          console.log('sync false');
           action.sync = false;
-          await handleSendingForRecupera(action, 'ResendRecupera');
+
+          if (await isToSendToRecupera(action)) {
+            action.retorno = 'Q';
+            action.retornotexto = 'Em fila';
+            await action.save();
+
+            const contract = await Contract.findBy('des_contr', action.desContr);
+            const typeAction = await TypeAction.find(action.typeActionId);
+
+            const item = {
+              action_id: action.id,
+              codigo: <string>typeAction?.abbreviation,
+              credor: action.codCredor,
+              regis: action.desRegis,
+              complemento: action.description ? action.description : '',
+              fonediscado: action.contato,
+              cocontratovincular: <string>contract?.desContr,
+              error: retornotexto
+            };
+
+
+            await ResendRecuperaJob.dispatch(item, {
+              queueName: 'ResendRecupera'
+            });
+
+          } else {
+            action.retorno = null;
+            action.retornotexto = 'Já existe um acionamento válido de prioridade igual ou maior';
+            await action.save();
+          }
+
         } else {
           action.sync = true;
           action.resultSync = JSON.stringify(resultSync);
@@ -145,20 +173,4 @@ export default class SendRecuperaJob extends Job {
     }
   }
 
-  /**
-   * This is an optional method that gets called when the retries has exceeded and is marked failed.
-   */
-  async rescue(payload: SendRecuperaJobPayload) {
-    /*     const actionService = new ActionService();
-    
-        const action = await Action.find(payload.action_id);
-        if (action) {
-          action.sync = false;
-          await actionService.handleSendingForRecupera(action, this.queueName);
-        }
-    
-        console.error(payload); */
-
-    throw new Error(`Rescue method not implemented LoadCsvCampaignJob. payload: ${JSON.stringify(payload)}`);
-  }
 }
