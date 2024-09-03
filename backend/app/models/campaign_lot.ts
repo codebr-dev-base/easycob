@@ -53,6 +53,9 @@ export default class CampaignLot extends BaseModel {
   @column()
   declare valid: boolean;
 
+  @column()
+  declare shipping: number;
+
   @column.date()
   declare dataRetorno: DateTime;
 
