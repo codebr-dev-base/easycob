@@ -16,7 +16,7 @@ export default class SendLot extends BaseCommand {
 
   async run() {
 
-    //const service = new EmailService();
+    const service = new EmailService();
 
     const campaigns = await Campaign.query().whereRaw('created_at::date = CURRENT_DATE');
 
@@ -35,11 +35,8 @@ export default class SendLot extends BaseCommand {
 
       const clientsGroups = lodash.groupBy(clients, 'contato');
 
-      console.log(clientsGroups);
-
       for (const item of lots) {
-        console.log(item.toJSON());
-        //await service.createAction(item, clientsGroups, campaign);
+        await service.createAction(item, clientsGroups, campaign);
       }
     }
 
