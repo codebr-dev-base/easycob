@@ -209,6 +209,7 @@ export default class SmsService {
 
                     if (returnBatch[i].messageid) {
                         this.blacklist.push(item.standardized);
+                        await item.refresh();
                         item.status = 'Enviado';
                         item.descricao = returnBatch[i].descricao;
                         item.messageid = returnBatch[i].messageid;
