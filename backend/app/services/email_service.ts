@@ -67,9 +67,9 @@ export default class EmailService {
         return config;
     }
 
-    handleActionSending(action: Action, subsidiary: string = ''): void {
+    async handleActionSending(action: Action, subsidiary: string = '') {
         const queueName = makeNameQueue(this.abbreviation, subsidiary);
-        handleSendingForRecupera(action, queueName);
+        await handleSendingForRecupera(action, queueName);
     }
 
     async createAction(item: CampaignLot, clientsGroups: { [key: string]: any[]; }, campaign: Campaign) {
@@ -85,23 +85,22 @@ export default class EmailService {
 
                 const groupDesContr: { [key: string]: any[]; } = lodash.groupBy(groupContato, 'desContr');
 
+                // Mapeia as chaves de `groupDesContr` e processa cada grupo
                 for (const k of Object.keys(groupDesContr)) {
 
                     const group = groupDesContr[k];
 
+                    // Usa `for...of` com `Promise.all` para criar todas as ações em paralelo
                     for (const [i, client] of group.entries()) {
                         const action = await createActionForClient(client, typeAction, campaign, this.tipoContato);
 
                         if (i === 0) {
-                            this.handleActionSending(action, client.subsidiary);
+                            await this.handleActionSending(action, client.subsidiary);
                         }
                     };
                 }
             }
         }
-
-
-
     }
 
     async checkContactValid(campaign: Campaign, item: CampaignLot) {

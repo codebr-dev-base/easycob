@@ -49,9 +49,9 @@ export default class SmsService {
     }
 
 
-    handleActionSending(action: Action, subsidiary: string = ''): void {
+    async handleActionSending(action: Action, subsidiary: string = '') {
         const queueName = makeNameQueue(this.abbreviation, subsidiary);
-        handleSendingForRecupera(action, queueName);
+        await handleSendingForRecupera(action, queueName);
     }
 
     async createAction(item: CampaignLot, clientsGroups: { [key: string]: any[]; }, campaign: Campaign) {
@@ -77,7 +77,7 @@ export default class SmsService {
                         const action = await createActionForClient(client, typeAction, campaign, this.tipoContato);
 
                         if (i === 0) {
-                            this.handleActionSending(action, client.subsidiary);
+                            await this.handleActionSending(action, client.subsidiary);
                         }
                     };
                 }
