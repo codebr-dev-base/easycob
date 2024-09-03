@@ -66,9 +66,9 @@ module.exports = {
     },
     // Filas SendRecupera:EME
     {
-      name: 'queue:SendRecupera:EME:RolimDeMoura',
+      name: 'queue:SendRecupera_SMS_RolimDeMoura',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:EME:RolimDeMoura',
+      args: 'jobs:listen --queue=SendRecupera_SMS_RolimDeMoura',
       instances: 1,
       autorestart: true,
       env: {
@@ -76,9 +76,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:EME:Ariquemes',
+      name: 'queue:SendRecupera_SMS_Ariquemes',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:EME:Ariquemes',
+      args: 'jobs:listen --queue=SendRecupera_SMS_Ariquemes',
       instances: 1,
       autorestart: true,
       env: {
@@ -86,9 +86,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:EME:PimentaBueno',
+      name: 'queue:SendRecupera_SMS_PimentaBueno',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:EME:PimentaBueno',
+      args: 'jobs:listen --queue=SendRecupera_SMS_PimentaBueno',
       instances: 1,
       autorestart: true,
       env: {
@@ -96,9 +96,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:EME:Buritis',
+      name: 'queue:SendRecupera_SMS_Buritis',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:EME:Buritis',
+      args: 'jobs:listen --queue=SendRecupera_SMS_Buritis',
       instances: 1,
       autorestart: true,
       env: {
@@ -106,9 +106,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:EME:Teresina',
+      name: 'queue:SendRecupera_SMS_Teresina',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:EME:Teresina',
+      args: 'jobs:listen --queue=SendRecupera_SMS_Teresina',
       instances: 1,
       autorestart: true,
       env: {
@@ -116,9 +116,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:EME:Timon',
+      name: 'queue:SendRecupera_SMS_Timon',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:EME:Timon',
+      args: 'jobs:listen --queue=SendRecupera_SMS_Timon',
       instances: 1,
       autorestart: true,
       env: {
@@ -126,9 +126,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:EME:SaoFrancisco',
+      name: 'queue:SendRecupera_SMS_SaoFrancisco',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:EME:SaoFrancisco',
+      args: 'jobs:listen --queue=SendRecupera_SMS_SaoFrancisco',
       instances: 1,
       autorestart: true,
       env: {
@@ -136,9 +136,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:EME:Manaus',
+      name: 'queue:SendRecupera_SMS_Manaus',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:EME:Manaus',
+      args: 'jobs:listen --queue=SendRecupera_SMS_Manaus',
       instances: 1,
       autorestart: true,
       env: {
@@ -146,9 +146,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:EME:Prolagos',
+      name: 'queue:SendRecupera_SMS_Prolagos',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:EME:Prolagos',
+      args: 'jobs:listen --queue=SendRecupera_SMS_Prolagos',
       instances: 1,
       autorestart: true,
       env: {
@@ -157,9 +157,9 @@ module.exports = {
     },
     // Filas SendRecupera:SMS
     {
-      name: 'queue:SendRecupera:SMS:RolimDeMoura',
+      name: 'queue:SendRecupera_SMS_RolimDeMoura',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:SMS:RolimDeMoura',
+      args: 'jobs:listen --queue=SendRecupera_SMS_RolimDeMoura',
       instances: 1,
       autorestart: true,
       env: {
@@ -167,9 +167,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:SMS:Ariquemes',
+      name: 'queue:SendRecupera_SMS_Ariquemes',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:SMS:Ariquemes',
+      args: 'jobs:listen --queue=SendRecupera_SMS_Ariquemes',
       instances: 1,
       autorestart: true,
       env: {
@@ -177,9 +177,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:SMS:PimentaBueno',
+      name: 'queue:SendRecupera_SMS_PimentaBueno',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:SMS:PimentaBueno',
+      args: 'jobs:listen --queue=SendRecupera_SMS_PimentaBueno',
       instances: 1,
       autorestart: true,
       env: {
@@ -187,9 +187,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:SMS:Buritis',
+      name: 'queue:SendRecupera_SMS_Buritis',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:SMS:Buritis',
+      args: 'jobs:listen --queue=SendRecupera_SMS_Buritis',
       instances: 1,
       autorestart: true,
       env: {
@@ -197,9 +197,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:SMS:Teresina',
+      name: 'queue:SendRecupera_SMS_Teresina',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:SMS:Teresina',
+      args: 'jobs:listen --queue=SendRecupera_SMS_Teresina',
       instances: 1,
       autorestart: true,
       env: {
@@ -207,9 +207,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:SMS:Timon',
+      name: 'queue:SendRecupera_SMS_Timon',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:SMS:Timon',
+      args: 'jobs:listen --queue=SendRecupera_SMS_Timon',
       instances: 1,
       autorestart: true,
       env: {
@@ -217,9 +217,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:SMS:SaoFrancisco',
+      name: 'queue:SendRecupera_SMS_SaoFrancisco',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:SMS:SaoFrancisco',
+      args: 'jobs:listen --queue=SendRecupera_SMS_SaoFrancisco',
       instances: 1,
       autorestart: true,
       env: {
@@ -227,9 +227,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:SMS:Manaus',
+      name: 'queue:SendRecupera_SMS_Manaus',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:SMS:Manaus',
+      args: 'jobs:listen --queue=SendRecupera_SMS_Manaus',
       instances: 1,
       autorestart: true,
       env: {
@@ -237,9 +237,9 @@ module.exports = {
       },
     },
     {
-      name: 'queue:SendRecupera:SMS:Prolagos',
+      name: 'queue:SendRecupera_SMS_Prolagos',
       script: 'ace.js',
-      args: 'jobs:listen --queue=SendRecupera:SMS:Prolagos',
+      args: 'jobs:listen --queue=SendRecupera_SMS_Prolagos',
       instances: 1,
       autorestart: true,
       env: {
