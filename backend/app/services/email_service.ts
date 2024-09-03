@@ -86,11 +86,9 @@ export default class EmailService {
                 const groupDesContr: { [key: string]: any[]; } = lodash.groupBy(groupContato, 'desContr');
 
                 // Mapeia as chaves de `groupDesContr` e processa cada grupo
-                for (const k of Object.keys(groupDesContr)) {
+                for (const [index, k] of Object.keys(groupDesContr).entries()) {
 
                     const group = groupDesContr[k];
-
-                    console.log(group);
 
                     for (const [i, client] of group.entries()) {
 
@@ -99,7 +97,7 @@ export default class EmailService {
 
                         const action = await createActionForClient(client, typeAction, campaign, this.tipoContato);
 
-                        if (i === 0) {
+                        if (i === 0 && index == 0) {
                             await this.handleActionSending(action, client.subsidiary);
                         }
 
