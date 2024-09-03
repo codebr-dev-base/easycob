@@ -35,11 +35,27 @@ export default class EmailService {
 
     private blacklist: string[] = [];
     declare typeAction: TypeAction | null | undefined;
-    declare abbreviation: 'EME';
-    declare tipoContato: 'EMAIL';
+    declare abbreviation: string;
+    declare tipoContato: string;
 
     constructor() {
         this.typeAction = null;
+        this.abbreviation = 'EME';
+        this.tipoContato = 'EMAIL';
+        this.blacklist = [];
+    }
+
+    async getTypeAction() {
+
+        if (!this.typeAction) {
+            this.typeAction = await TypeAction.findBy('abbreviation', this.abbreviation);
+        }
+
+        if (!this.typeAction) {
+            throw new Error('Not find type action!');
+        }
+
+        return this.typeAction;
     }
 
     protected getMailerConfig(
@@ -51,54 +67,41 @@ export default class EmailService {
         return config;
     }
 
-    async getTypeAction() {
-        this.typeAction = await TypeAction.findBy('abbreviation', this.abbreviation);
-
-        if (!this.typeAction) {
-            throw new Error('Not find type action!');
-        }
-
-        return this.typeAction;
-    }
-
     handleActionSending(action: Action, subsidiary: string = ''): void {
         const queueName = makeNameQueue(this.abbreviation, subsidiary);
         handleSendingForRecupera(action, queueName);
     }
 
     async createAction(item: CampaignLot, clientsGroups: { [key: string]: any[]; }, campaign: Campaign) {
-        try {
-            const typeAction: TypeAction = await this.getTypeAction();
 
-            // Utilize `Promise.all` para evitar múltiplas Promises pendentes
-            await Promise.all(Object.keys(clientsGroups).map(async (key: string) => {
+        const typeAction = await TypeAction.findBy('abbreviation', this.abbreviation);
+
+        if (typeAction) {
+            for (const key of Object.keys(clientsGroups)) {
+
                 if (key !== item.contato.toUpperCase()) return;
 
                 const groupContato = clientsGroups[key];
 
                 const groupDesContr: { [key: string]: any[]; } = lodash.groupBy(groupContato, 'desContr');
 
-                // Mapeia as chaves de `groupDesContr` e processa cada grupo
-                await Promise.all(Object.keys(groupDesContr).map(async (k: string) => {
-
-                    console.error("Grupo por contrato:");
-                    console.error(groupContato);
+                for (const k of Object.keys(groupDesContr)) {
 
                     const group = groupDesContr[k];
 
-                    // Usa `for...of` com `Promise.all` para criar todas as ações em paralelo
-                    await Promise.all(group.map(async (client, i) => {
+                    for (const [i, client] of group.entries()) {
                         const action = await createActionForClient(client, typeAction, campaign, this.tipoContato);
 
                         if (i === 0) {
-                            this.handleActionSending(action, client.subsidiary_mail);
+                            this.handleActionSending(action, client.subsidiary);
                         }
-                    }));
-                }));
-            }));
-        } catch (error) {
-            throw error;
+                    };
+                }
+            }
         }
+
+
+
     }
 
     async checkContactValid(campaign: Campaign, item: CampaignLot) {
@@ -251,6 +254,7 @@ export default class EmailService {
                                 item.descricao = 'Envio inserido para processamento';
                                 item.messageid = response.messageId;
                                 item.codigo_status = '13';
+                                item.shipping = item.shipping + 1;
                                 await item.save();
                                 await this.createAction(item, clientsGroups, campaign);
                             } else {
@@ -258,6 +262,10 @@ export default class EmailService {
                             }
 
                         } catch (error) {
+                            const item = itemsChunks[i][j];
+                            await item.refresh();
+                            item.shipping = item.shipping + 1;
+                            await item.save();
                             throw new Error(error);
                         }
                     } catch (error) {

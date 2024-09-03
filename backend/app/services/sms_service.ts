@@ -16,11 +16,27 @@ export default class SmsService {
 
     private blacklist: string[] = [];
     declare typeAction: TypeAction | null | undefined;
-    declare abbreviation: 'SMS';
-    declare tipoContato: 'TELEFONE';
+    declare abbreviation: string;
+    declare tipoContato: string;
 
     constructor() {
         this.typeAction = null;
+        this.abbreviation = 'SMS';
+        this.tipoContato = 'TELEFONE';
+        this.blacklist = [];
+    }
+
+    async getTypeAction() {
+
+        if (!this.typeAction) {
+            this.typeAction = await TypeAction.findBy('abbreviation', this.abbreviation);
+        }
+
+        if (!this.typeAction) {
+            throw new Error('Not find type action!');
+        }
+
+        return this.typeAction;
     }
 
     protected getMailerConfig(
@@ -32,15 +48,6 @@ export default class SmsService {
         return config;
     }
 
-    async getTypeAction() {
-        this.typeAction = await TypeAction.findBy('abbreviation', this.abbreviation);
-
-        if (!this.typeAction) {
-            throw new Error('Not find type action!');
-        }
-
-        return this.typeAction;
-    }
 
     handleActionSending(action: Action, subsidiary: string = ''): void {
         const queueName = makeNameQueue(this.abbreviation, subsidiary);
@@ -48,11 +55,12 @@ export default class SmsService {
     }
 
     async createAction(item: CampaignLot, clientsGroups: { [key: string]: any[]; }, campaign: Campaign) {
-        try {
-            const typeAction: TypeAction = await this.getTypeAction();
 
-            // Utilize `Promise.all` para evitar múltiplas Promises pendentes
-            await Promise.all(Object.keys(clientsGroups).map(async (key: string) => {
+        const typeAction = await TypeAction.findBy('abbreviation', this.abbreviation);
+
+        if (typeAction) {
+            for (const key of Object.keys(clientsGroups)) {
+
                 if (key !== item.contato.toUpperCase()) return;
 
                 const groupContato = clientsGroups[key];
@@ -60,26 +68,23 @@ export default class SmsService {
                 const groupDesContr: { [key: string]: any[]; } = lodash.groupBy(groupContato, 'desContr');
 
                 // Mapeia as chaves de `groupDesContr` e processa cada grupo
-                await Promise.all(Object.keys(groupDesContr).map(async (k: string) => {
-
-                    console.error("Grupo por contrato:");
-                    console.error(groupContato);
+                for (const k of Object.keys(groupDesContr)) {
 
                     const group = groupDesContr[k];
 
                     // Usa `for...of` com `Promise.all` para criar todas as ações em paralelo
-                    await Promise.all(group.map(async (client, i) => {
+                    for (const [i, client] of group.entries()) {
                         const action = await createActionForClient(client, typeAction, campaign, this.tipoContato);
 
                         if (i === 0) {
-                            this.handleActionSending(action);
+                            this.handleActionSending(action, client.subsidiary);
                         }
-                    }));
-                }));
-            }));
-        } catch (error) {
-            throw error;
+                    };
+                }
+            }
         }
+
+
     }
 
     private buildMessage(message: string, params: object) {
@@ -189,7 +194,7 @@ export default class SmsService {
             };
 
             try {
-                let returnBatch = await $fetch(`${env.get('SMS_URL_API')}/send.php`, {
+                const result = await $fetch(`${env.get('SMS_URL_API')}/send.php`, {
                     method: 'POST',
                     body: batch,
                     headers: {
@@ -198,18 +203,22 @@ export default class SmsService {
                     },
                 });
 
-                returnBatch = JSON.parse(returnBatch);
+                const returnBatch = JSON.parse(result);
 
                 for (const [i, item] of chunkLots[index].entries()) {
+
                     if (returnBatch[i].messageid) {
                         this.blacklist.push(item.standardized);
                         item.status = 'Enviado';
                         item.descricao = returnBatch[i].descricao;
                         item.messageid = returnBatch[i].messageid;
                         item.codigo_status = returnBatch[i].codigo_status;
+                        item.shipping = item.shipping + 1;
                         await item.save();
+
                         await this.createAction(item, clientsGroups, campaign);
                     } else {
+                        item.shipping = item.shipping + 1;
                         item.status = 'Error';
                         item.valid = true;
                         await item.save();
