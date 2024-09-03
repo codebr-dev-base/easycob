@@ -4,7 +4,6 @@ import type { CommandOptions } from '@adonisjs/core/types/ace';
 import EmailService from '#services/email_service.js';
 import lodash from 'lodash';
 import { getClients } from '#services/utils/recupera';
-import campaign from '#routes/campaign';
 import Campaign from '#models/campaign';
 
 export default class SendLot extends BaseCommand {
