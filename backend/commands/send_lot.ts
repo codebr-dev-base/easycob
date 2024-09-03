@@ -18,7 +18,7 @@ export default class SendLot extends BaseCommand {
 
     const service = new EmailService();
 
-    const campaigns = await Campaign.query().whereRaw('created_at::date = CURRENT_DATE');
+    const campaigns = await Campaign.query().where('type', 'EMAIL').whereRaw('created_at::date = CURRENT_DATE');
 
     for (const campaign of campaigns) {
       const lots = await CampaignLot.query()
