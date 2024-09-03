@@ -1,7 +1,7 @@
 import CampaignLot from '#models/campaign_lot';
 import { BaseCommand } from '@adonisjs/core/ace';
 import type { CommandOptions } from '@adonisjs/core/types/ace';
-import EmailService from '#services/email_service.js';
+import EmailService from '#services/email_service';
 import lodash from 'lodash';
 import { getClients } from '#services/utils/recupera';
 import Campaign from '#models/campaign';
