@@ -61,7 +61,7 @@ export default class SmsService {
         if (typeAction) {
             for (const key of Object.keys(clientsGroups)) {
 
-                if (key !== item.contato.toUpperCase()) return;
+                if (key !== item.contato.toUpperCase()) continue;
 
                 const groupContato = clientsGroups[key];
 

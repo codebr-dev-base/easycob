@@ -33,16 +33,6 @@ export default class SendLot extends BaseCommand {
 
       const clientsGroups = lodash.groupBy(clients, 'contato');
 
-      for (const key of Object.keys(clientsGroups)) {
-
-        console.log('Key:');
-        console.log(key);
-
-        console.log('Grupo:');
-        console.log(clientsGroups[key]);
-
-      }
-      return;
       for (const item of lots) {
         await service.createAction(item, clientsGroups, campaign);
       }
