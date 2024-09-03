@@ -29,8 +29,6 @@ export default class SendLot extends BaseCommand {
         .whereRaw('created_at::date = CURRENT_DATE')
         .limit(500);
 
-      console.log(lots);
-
       const clients = await getClients(lots);
 
       const clientsGroups = lodash.groupBy(clients, 'contato');
