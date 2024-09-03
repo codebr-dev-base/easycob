@@ -92,18 +92,17 @@ export default class EmailService {
 
                     console.log(group);
 
-                    // Usa `for...of` com `Promise.all` para criar todas as ações em paralelo
                     for (const [i, client] of group.entries()) {
 
                         console.log(i);
                         console.log(client);
-                        /*
+
                         const action = await createActionForClient(client, typeAction, campaign, this.tipoContato);
 
                         if (i === 0) {
                             await this.handleActionSending(action, client.subsidiary);
                         }
-                            */
+
                     };
                 }
             }
