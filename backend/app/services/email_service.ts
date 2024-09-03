@@ -92,9 +92,6 @@ export default class EmailService {
 
                     for (const [i, client] of group.entries()) {
 
-                        console.log(i);
-                        console.log(client);
-
                         const action = await createActionForClient(client, typeAction, campaign, this.tipoContato);
 
                         if (i === 0 && index == 0) {
@@ -313,6 +310,7 @@ export default class EmailService {
             .whereNotNull('contato')
             .whereNull('messageid')
             .where('valid', true)
+            .where('shipping', '<', 4)
             .limit(limit);
 
         if (newLots.length > 0) {

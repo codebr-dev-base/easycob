@@ -253,6 +253,7 @@ export default class SmsService {
             .whereNotNull('contato')
             .whereNull('messageid')
             .where('valid', true)
+            .where('shipping', '<', 4)
             .limit(limit);
 
         if (newLots.length > 0) {
