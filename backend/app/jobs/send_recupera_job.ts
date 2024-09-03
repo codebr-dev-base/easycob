@@ -12,7 +12,7 @@ import { isToSendToRecupera } from '#services/utils/recupera';
 import { serializeKeysSnakeCase } from '#utils/serialize';
 import Contract from '#models/recovery/contract';
 import TypeAction from '#models/type_action';
-import ResendRecuperaJob from '#jobs/resend_recupera_job.js';
+import ResendRecuperaJob from '#jobs/resend_recupera_job';
 
 interface SendRecuperaJobPayload {
   action_id: number;
