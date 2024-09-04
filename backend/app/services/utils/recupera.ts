@@ -4,8 +4,6 @@ import TypeAction from "#models/type_action";
 import redis from "@adonisjs/redis/services/main";
 import { DateTime } from "luxon";
 import SendRecuperaJob from "#jobs/send_recupera_job";
-//import SendEmailRecuperaJob from '#jobs/send_email_recupera_job';
-//import SendSmsRecuperaJob from "#jobs/send_sms_recupera_job";
 import CampaignLot from "#models/campaign_lot";
 import db from "@adonisjs/lucid/services/db";
 import { serializeKeysCamelCase } from "#utils/serialize";

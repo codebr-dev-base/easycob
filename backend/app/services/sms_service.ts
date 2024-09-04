@@ -65,18 +65,17 @@ export default class SmsService {
 
                 const groupContato = clientsGroups[key];
 
-                const groupDesContr: { [key: string]: any[]; } = lodash.groupBy(groupContato, 'desContr');
+                const groupCodCredorDesRegis: { [key: string]: any[]; } = lodash.groupBy(groupContato, 'codCredorDesRegis');
 
-                // Mapeia as chaves de `groupDesContr` e processa cada grupo
-                for (const [index, k] of Object.keys(groupDesContr).entries()) {
+                for (const k of Object.keys(groupCodCredorDesRegis)) {
 
-                    const group = groupDesContr[k];
+                    const group = groupCodCredorDesRegis[k];
 
                     for (const [i, client] of group.entries()) {
 
                         const action = await createActionForClient(client, typeAction, campaign, this.tipoContato);
 
-                        if (i === 0 && index == 0) {
+                        if (i === 0) {
                             await this.handleActionSending(action, client.subsidiary);
                         }
 
