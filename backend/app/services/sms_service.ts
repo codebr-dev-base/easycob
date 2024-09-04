@@ -201,6 +201,7 @@ export default class SmsService {
                         'Authorization': `Basic ${env.get('SMS_API_KEY')}`,
                         'Content-Type': 'application/json',
                     },
+                    timeout: 120000
                 });
 
                 const returnBatch = JSON.parse(result);
