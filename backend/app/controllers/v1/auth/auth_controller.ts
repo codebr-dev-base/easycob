@@ -39,7 +39,8 @@ export default class AuthController {
     }
 
     async logout({ auth }: HttpContext) {
-        const tokens = await User.accessTokens.all(auth.user!);
+        const user: User = auth.user!;
+        const tokens = await User.accessTokens.all(user);
         for (const token of tokens) {
             await User.accessTokens.delete(auth.user!, token.identifier);
         }

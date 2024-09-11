@@ -1,0 +1,7 @@
+.btn-primary {
+  @apply bg-blue-600 text-white font-normal py-2 px-4 rounded-lg hover:bg-blue-700;
+}
+
+.btn-ghost {
+    @apply bg-gray-50 text-blue-600 font-normal py-2 px-4 rounded-lg hover:bg-gray-200;
+  }
