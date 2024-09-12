@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import FormProfile from "./components/FormProfile";
 import { decrypt, encrypt } from "@/app/lib/crypto";
-import { AccessToken } from '../../types/auth';
+import {SessionCookie} from '../../types/auth';
 
 export default function Home() {
 

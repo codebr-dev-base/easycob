@@ -1,42 +1,33 @@
-import { decrypt } from "@/app/lib/crypto";
-import Cookies from "js-cookie";
-import { getCookies } from "next-client-cookies/server";
+import { getAccessToken } from "./auth";
 
-interface FetchOptions extends RequestInit {
-  headers?: Record<string, string>;
+// Definição de tipos para headers e query
+interface Headers {
+  [key: string]: string;
 }
 
-function getAccessToken(): string | null {
-  // Se estiver no lado do cliente
-  if (typeof window !== "undefined") {
-    const easycobSession = Cookies.get("easycob_session");
-    if (!easycobSession) return null;
+interface QueryParams {
+  [key: string]: string | number | boolean | null | undefined;
+}
 
-    const decryptedSession = decrypt(easycobSession);
-    return decryptedSession?.token || null;
-  }
+interface FetchOptions extends RequestInit {
+  headers?: Headers;
+  query?: QueryParams; // Novo campo para query params com tipo definido
+}
 
-  // Se estiver no lado do servidor
-  if (typeof global !== "undefined") {
-    const cookies = getCookies();
-    const easycobSession = cookies.get("easycob_session");
-    if (!easycobSession) return null;
-
-    const decryptedSession = decrypt(easycobSession);
-    return decryptedSession?.token || null;
-  }
-
-  return null;
+interface FetchResponse<T> {
+  success: boolean;
+  data: T | null;
+  error?: string;
 }
 
 export async function fetchAuth<T = any>(
   url: string,
   options: FetchOptions = {}
-): Promise<T | null> {
+): Promise<FetchResponse<T>> {
   // Obtém o token de acordo com o ambiente
   const token = getAccessToken();
 
-  const headers: Record<string, string> = {
+  const headers: Headers = {
     "Content-Type": "application/json",
     ...options.headers,
   };
@@ -46,15 +37,47 @@ export async function fetchAuth<T = any>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  // Converte o objeto query para query string, se existir
+  let finalUrl = url;
+  if (options.query) {
+    // Limpa os valores nulos ou indefinidos
+    const cleanedQuery = Object.fromEntries(
+      Object.entries(options.query).filter(([_, value]) => value !== null && value !== undefined)
+    );
 
-  if (!response.ok) {
-    throw new Error(`Erro HTTP! Status: ${response.status}`);
+    // Converte o objeto query para uma string de consulta
+    const queryString = new URLSearchParams(cleanedQuery as Record<string, string>).toString();
+
+    // Anexa a string de consulta à URL
+    finalUrl = `${url}?${queryString}`;
   }
 
-  // Retorna a resposta como JSON
-  return response.json() as Promise<T>;
+  try {
+    const response = await fetch(finalUrl, {
+      ...options,
+      headers,
+    });
+
+    if (!response.ok) {
+      // Verifica status para tratamento específico
+      if (response.status === 401) {
+        // Tratar caso de autenticação inválida (e.g., redirecionar para login)
+        return { success: false, data: null, error: 'Unauthorized' };
+      }
+
+      if (response.status === 403) {
+        // Tratar caso de acesso proibido
+        return { success: false, data: null, error: 'Forbidden' };
+      }
+
+      // Para outros erros
+      return { success: false, data: null, error: `Erro HTTP! Status: ${response.status}` };
+    }
+
+    const data = await response.json() as T;
+    return { success: true, data };
+  } catch (error) {
+    // Captura qualquer erro de rede ou de execução
+    return { success: false, data: null, error: (error as Error).message };
+  }
 }

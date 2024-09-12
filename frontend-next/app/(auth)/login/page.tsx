@@ -9,7 +9,7 @@ export default function Home() {
     <main className="bg-gray-100 flex justify-center items-center h-screen">
       <div className="w-full h-full md:h-full md:max-h-screen p-0 shadow-md grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
         {/* Coluna Esquerda - Formulário de Login */}
-        <div className="card w-4/6  ">
+        <div className="card max-md  ">
           <div className="flex flex-col justify-center order-2 md:order-1 h-full w-full py-12">
             <FormLogin />
           </div>

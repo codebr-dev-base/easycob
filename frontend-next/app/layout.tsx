@@ -4,7 +4,7 @@ import "@/app/assets/css/globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { CookiesProvider } from "next-client-cookies/server";
 import AuthProvider from "./providers/AuthContext";
-import { getAccessTokenFromCookie } from "./lib/serverAuth";
+import { getAccessToken } from "./lib/auth";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,11 +18,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let token = getAccessTokenFromCookie();
+  let token = getAccessToken();
 
   return (
     <html lang="pt-BR">
-      <body className={`${inter.className} bg-gradient-to-r from-blue-500`}>
+      <body className={`${inter.className} bg-gray-100`}>
         <CookiesProvider>
           <AuthProvider token={token}>
             {children}

@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
-import { FormLoginValues } from "@/app/interfaces/auth";
+import { IFormLoginValues } from "@/app/interfaces/auth";
 import { error } from "console";
 import { State } from "@/app/types/auth";
 import { Button } from "@/components/ui/button";
@@ -27,10 +27,9 @@ export default function FormLogin() {
 
   const { pending } = useFormStatus();
 
-  const form = useForm<FormLoginValues>({ mode: "all" });
+  const form = useForm<IFormLoginValues>({ mode: "all" });
 
   useEffect(() => {
-
     if (state?.status === "error") {
       toast({
         title: "Error",
@@ -42,13 +41,14 @@ export default function FormLogin() {
 
   return (
     <>
-      <div className="mb-4">
-        <Image src={easycob} alt="alt" width={400} height={600} />
+      <div className="flex items-center justify-center mb-4">
+          <Image src={easycob} alt="alt" width={400} height={600} />
       </div>
+
       <Form {...form}>
         <form
           action={actionSignin}
-          className="flex flex-col flex-grow justify-center m-auto p-2 w-11/12"
+          className="flex flex-col flex-grow justify-center m-auto p-2 w-11/12 "
         >
           <FormField
             control={form.control}
@@ -96,8 +96,12 @@ export default function FormLogin() {
               </FormItem>
             )}
           />
-          <div className="flex items-center justify-center">
-            <Button type="submit" className="btn-primary" disabled={!form.formState.isValid && pending}>
+          <div className="flex items-center justify-center pt-4">
+            <Button
+              type="submit"
+              className="btn-primary"
+              disabled={!form.formState.isValid && pending}
+            >
               Entrar
             </Button>
           </div>

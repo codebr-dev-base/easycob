@@ -1,11 +1,11 @@
 import "server-only";
-import { AccessToken } from "@/app/types/auth";
+import {SessionCookie} from "@/app/types/auth";
 import { redirect } from "next/navigation";
 import { decrypt, encrypt } from "@/app/lib/crypto";
 import { getCookies } from "next-client-cookies/server";
 const cookies = getCookies();
 
-export async function createSession(accessToken: AccessToken) {
+export async function createSession(accessToken: SessionCookie) {
   const cookies = getCookies();
   const expiresAt = new Date(accessToken.expiresAt);
 
@@ -63,7 +63,7 @@ export async function updateSession() {
   //setTimeout(updateSession, refreshBeforeExpiration);
 }
 
-export async function refresh(accessToken: AccessToken) {
+export async function refresh(accessToken: SessionCookie) {
   const url = process.env.API_URL ? process.env.API_URL : "";
   const response = await fetch(`${url}/v1/auth/refresh`, {
     method: "POST",
@@ -78,7 +78,7 @@ export async function refresh(accessToken: AccessToken) {
     redirect("/login");
   }
 
-  const payload: AccessToken = (await response.json()) as AccessToken;
+  const payload:SessionCookie= (await response.json()) as SessionCookie;
   return payload;
 }
 

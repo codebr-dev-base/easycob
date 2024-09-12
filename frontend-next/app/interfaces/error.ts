@@ -1,4 +1,4 @@
-export interface HttpError extends Error {
+export interface IHttpError extends Error {
     status: number;
     statusText: string;
   }
