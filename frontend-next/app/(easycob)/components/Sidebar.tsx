@@ -5,12 +5,20 @@ import logo from "@/app/assets/img/logo.svg";
 import React, { useState } from "react";
 import { FaHome, FaUser, FaCog, FaBars } from "react-icons/fa"; // Exemplo de ícones
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
+import { LuListTodo, LuLock } from "react-icons/lu";
+import { HiOutlinePhone } from "react-icons/hi";
 import { FaXmark } from "react-icons/fa6"; // Ícones para expandir/recolher
 import Header from "@/app/(easycob)/components/Header";
 import Link from "next/link";
 import { getUser, getUserInitials } from "@/app/lib/auth";
 import { logout } from "@/app/(auth)/login/actions";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { AccordionContent } from "@radix-ui/react-accordion";
 
 export default function Sidebar({ children }: { children: React.ReactNode }) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -31,7 +39,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
     <div>
       {/* Botão para abrir sidebar no mobile */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-blue-600 text-white rounded-md"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-primary text-white rounded-md"
         onClick={toggleMobileSidebar}
       >
         {isMobileOpen ? <FaXmark size={24} /> : <FaBars size={24} />}
@@ -39,12 +47,12 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar no mobile (ocupa a tela inteira) */}
       <div
-        className={`fixed inset-0 bg-blue-600 text-white z-40 transform ${
+        className={`fixed inset-0 bg-primary text-white z-40 transform ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out lg:hidden`}
       >
         <button
-          className="absolute top-4 right-4 p-2 bg-blue-600 text-white rounded-md"
+          className="absolute top-4 right-4 p-2 bg-primary text-white rounded-md"
           onClick={toggleMobileSidebar}
         >
           Fechar
@@ -63,9 +71,9 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Sidebar para telas médias e maiores */}
-      <div className="flex">
+      <div className="flex ">
         <aside
-          className={`bg-blue-600 text-white h-screen hidden lg:flex flex-col items-center justify-between transition-all duration-300 ease-in-out relative px-2 ${
+          className={`bg-primary text-white h-screen hidden lg:flex flex-col items-center justify-between transition-all duration-300 ease-in-out relative px-5 ${
             isExpanded ? "w-[15%]" : "w-[5%]"
           }`}
         >
@@ -82,24 +90,73 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
               </div>
             ) : (
               <div className="justify-center items-center hidden md:flex transition-all duration-300 ease-in-out">
-                <Image src={logo} alt="Easycob wwhite" width={64} height={64} />
+                <Image src={logo} alt="Easycob white" width={64} height={64} />
               </div>
             )}
           </header>
-          <main className="h-full">
+          <main className="h-full w-full">
             <nav className="flex flex-col items-center space-y-6">
-              <a href="#" className="text-2xl">
-                <FaHome />
-              </a>
-              <a href="#" className="text-2xl">
-                <FaUser />
-              </a>
-              <a href="#" className="text-2xl">
-                <FaCog />
-              </a>
+              <Accordion type="multiple" className="w-full min-w-fit">
+                <AccordionItem value="operator-menu" className="border-none">
+                  <AccordionTrigger>
+                    <div className="w-full flex gap-2 items-center">
+                      <HiOutlinePhone size={24} />
+                      <span className={`${!isExpanded ? "hidden" : ""} `}>
+                        Operador
+                      </span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
+                    <Link href={"/operator/clients"}>Clientes</Link>
+                    <Link href={"/operator/followup"}>Acompanhamento</Link>
+                    <Link href={"/operator/loyal"}>Fidelizados</Link>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="supervisor-menu" className="border-none">
+                  <AccordionTrigger>
+                    <div className="w-full flex gap-2 items-center">
+                      <LuListTodo size={24} />
+                      <span className={`${!isExpanded ? "hidden" : ""} `}>
+                        Supervisão
+                      </span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
+                    <Link href={"/supervisor/actions"}>Acionamentos</Link>
+                    <Link href={"/supervisor/discounts"}>Descontos</Link>
+                    <Accordion type="multiple">
+                      <AccordionItem
+                        value="submenu-campaings"
+                        className="border-none"
+                      >
+                        <AccordionTrigger>Campanhas</AccordionTrigger>
+                        <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
+                          <Link href={"/supervisor/campaings/sms"}>SMS</Link>
+                          <Link href={"/supervisor/campaings/sms"}>Email</Link>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="admin-menu" className="border-none">
+                  <AccordionTrigger>
+                    <div className="w-full flex gap-2 items-center">
+                      <LuLock size={24} />
+                      <span className={`${!isExpanded ? "hidden" : ""} `}>
+                        Admin
+                      </span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
+                    <Link href={"/admin"}>Usuários</Link>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </nav>
           </main>
-          <footer className={`flex items-center justify-between w-full p-3 ${isExpanded ? "flex-row" : "flex-col"}`}>
+          <footer
+            className={`flex items-center justify-between w-full p-3 ${isExpanded ? "flex-row" : "flex-col"}`}
+          >
             <Link href="/profile" className="p-1">
               <div className="p-1 bg-slate-300 rounded-3xl justify-start items-center gap-2 flex text-blue-600">
                 <div className="w-10 h-10 bg-slate-200 rounded-full flex justify-center">
@@ -107,15 +164,24 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
             </Link>
-            <form action={logout} className="p-1 flex items-center justify-center">
-              <Button variant="destructive" type="submit" className="max-w-[80%]">Sair</Button>
+            <form
+              action={logout}
+              className="p-1 flex items-center justify-center"
+            >
+              <Button
+                variant="destructive"
+                type="submit"
+                className="max-w-[80%]"
+              >
+                Sair
+              </Button>
             </form>
           </footer>
         </aside>
 
         {/* Botão para expandir/recolher sidebar, posicionado na borda da tela */}
         <button
-          className={`absolute top-1/2 transform -translate-y-1/2 bg-blue-600 text-white rounded-r-lg py-2 px-0 transition-all duration-300 hidden lg:flex ${
+          className={`absolute top-1/2 transform -translate-y-1/2 bg-primary text-white rounded-r-lg py-2 px-0 transition-all duration-300 hidden lg:flex ${
             isExpanded ? "left-[15%]" : "left-[5%]"
           }`}
           onClick={toggleSidebar}

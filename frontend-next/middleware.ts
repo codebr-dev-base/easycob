@@ -3,7 +3,7 @@ import { decrypt } from "./app/lib/crypto";
 
 // 1. Specify protected and public routes
 const protectedRoutes = ["/"];
-const publicRoutes = ["/login"];
+const publicRoutes = ["/login", "/supervision"];
 
 export default async function middleware(req: NextRequest) {
   // 2. Check if the current route is protected or public
