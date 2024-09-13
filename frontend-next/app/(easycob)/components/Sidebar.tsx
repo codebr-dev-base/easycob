@@ -6,7 +6,6 @@ import React, { useState } from "react";
 import { FaHome, FaUser, FaCog, FaBars } from "react-icons/fa"; // Exemplo de ícones
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import { FaXmark } from "react-icons/fa6"; // Ícones para expandir/recolher
-import Header from "@/app/(easycob)/components/Header";
 import Link from "next/link";
 import { getUser, getUserInitials } from "@/app/lib/auth";
 import { logout } from "@/app/(auth)/login/actions";
@@ -31,7 +30,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
     <div>
       {/* Botão para abrir sidebar no mobile */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-blue-600 text-white rounded-md"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-priamry text-white rounded-md"
         onClick={toggleMobileSidebar}
       >
         {isMobileOpen ? <FaXmark size={24} /> : <FaBars size={24} />}
@@ -39,12 +38,12 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar no mobile (ocupa a tela inteira) */}
       <div
-        className={`fixed inset-0 bg-blue-600 text-white z-40 transform ${
+        className={`fixed inset-0 bg-primary text-white z-40 transform ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out lg:hidden`}
       >
         <button
-          className="absolute top-4 right-4 p-2 bg-blue-600 text-white rounded-md"
+          className="absolute top-4 right-4 p-2 bg-primary text-white rounded-md"
           onClick={toggleMobileSidebar}
         >
           Fechar
@@ -65,7 +64,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
       {/* Sidebar para telas médias e maiores */}
       <div className="flex">
         <aside
-          className={`bg-blue-600 text-white h-screen hidden lg:flex flex-col items-center justify-between transition-all duration-300 ease-in-out relative px-2 ${
+          className={`bg-primary text-white h-screen hidden lg:flex flex-col items-center justify-between transition-all duration-300 ease-in-out relative px-2 shadow-foreground/50 shadow-[2px_0px_4px] ${
             isExpanded ? "w-[15%]" : "w-[5%]"
           }`}
         >
@@ -75,7 +74,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
               <div className="justify-center items-center hidden md:flex transition-all duration-300 ease-in-out">
                 <Image
                   src={easycobWhite}
-                  alt="Easycob wwhite"
+                  alt="Easycob white"
                   width={256}
                   height={128}
                 />
@@ -99,23 +98,34 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
               </a>
             </nav>
           </main>
-          <footer className={`flex items-center justify-between w-full p-3 ${isExpanded ? "flex-row" : "flex-col"}`}>
+          <footer
+            className={`flex items-center justify-between w-full p-3 ${isExpanded ? "flex-row" : "flex-col"}`}
+          >
             <Link href="/profile" className="p-1">
               <div className="p-1 bg-slate-300 rounded-3xl justify-start items-center gap-2 flex text-blue-600">
                 <div className="w-10 h-10 bg-slate-200 rounded-full flex justify-center">
-                  <div className="m-auto">{initials}</div>
+                  <div className="m-auto font-medium">{initials ?? "U"}</div>
                 </div>
               </div>
             </Link>
-            <form action={logout} className="p-1 flex items-center justify-center">
-              <Button variant="destructive" type="submit" className="max-w-[80%]">Sair</Button>
+            <form
+              action={logout}
+              className="p-1 flex items-center justify-center"
+            >
+              <Button
+                variant="destructive"
+                type="submit"
+                className="max-w-[80%]"
+              >
+                Sair
+              </Button>
             </form>
           </footer>
         </aside>
 
         {/* Botão para expandir/recolher sidebar, posicionado na borda da tela */}
         <button
-          className={`absolute top-1/2 transform -translate-y-1/2 bg-blue-600 text-white rounded-r-lg py-2 px-0 transition-all duration-300 hidden lg:flex ${
+          className={`absolute top-1/2 transform -translate-y-1/2 bg-primary text-white rounded-r-lg py-2 px-0 transition-all duration-300 hidden lg:flex shadow-foreground shadow-[2px_0px_4px] ${
             isExpanded ? "left-[15%]" : "left-[5%]"
           }`}
           onClick={toggleSidebar}
@@ -128,10 +138,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
         </button>
 
         {/* Conteúdo principal */}
-        <div className="w-full flex-1">
-          <Header />
-          {children}
-        </div>
+        <div className="w-full flex-1">{children}</div>
       </div>
     </div>
   );
