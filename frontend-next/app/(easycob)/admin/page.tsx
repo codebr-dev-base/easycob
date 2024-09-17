@@ -12,6 +12,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { FaEllipsis, FaPencil, FaUserXmark } from "react-icons/fa6";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { UserForm } from "./user-form";
 
 const dummyData = [
   {
@@ -53,10 +55,29 @@ export default function Admin() {
               autoComplete="username"
             />
           </div>
-          <Button variant="ghost" className="bg-white space-x-2">
-            <FaUserPlus className="text-foreground" />
-            <span className="text-foreground">Novo usuário</span>
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" className="bg-white space-x-2">
+                <FaUserPlus className="text-foreground" />
+                <span className="text-foreground">Novo usuário</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="p-0 overflow-hidden border-0">
+              <UserForm
+                initialValue={{
+                  email: "",
+                  name: "",
+                  passwordConfirmation: "",
+                  password: "",
+                  action: "create",
+                  skills: [],
+                  isActive: true,
+                  phone: "",
+                  cpf: "",
+                }}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
       </Header>
       <div className="bg-white min-h-[calc(100%-80px)] p-6">
@@ -105,9 +126,23 @@ export default function Admin() {
                     <TableCell>{data.level}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button className="p-1 size-8">
-                          <FaPencil />
-                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button className="p-1 size-8">
+                              <FaPencil />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="p-0 overflow-hidden border-0">
+                            <UserForm
+                              initialValue={{
+                                action: "edit",
+                                email: data.email,
+                                isActive: data.active,
+                                skills: [],
+                              }}
+                            />
+                          </DialogContent>
+                        </Dialog>
                         <Button variant="muted" className="p-1 size-8">
                           <FaEllipsis />
                         </Button>

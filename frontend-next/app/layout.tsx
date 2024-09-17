@@ -8,7 +8,7 @@ import { getAccessToken } from "./lib/auth";
 
 const inter = Ubuntu({
   weight: ["300", "400", "500", "700"],
-  subsets: ["latin-ext"],
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
