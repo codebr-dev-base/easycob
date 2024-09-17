@@ -2,8 +2,8 @@
 import Image from "next/image";
 import easycobWhite from "@/app/assets/img/easycob_white.svg";
 import logo from "@/app/assets/img/logo.svg";
-import React, { useState } from "react";
-import { FaHome, FaUser, FaCog, FaBars } from "react-icons/fa"; // Exemplo de ícones
+import { useState } from "react";
+import { FaBars } from "react-icons/fa"; // Exemplo de ícones
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import { LuListTodo, LuLock } from "react-icons/lu";
 import { HiOutlinePhone } from "react-icons/hi";
@@ -17,14 +17,19 @@ import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
+  AccordionContent,
 } from "@/components/ui/accordion";
-import { AccordionContent } from "@radix-ui/react-accordion";
 
 export default function Sidebar({ children }: { children: React.ReactNode }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [accordionSections, setAccordionSections] = useState<string[]>([]);
 
   const toggleSidebar = () => {
+    if (isExpanded) {
+      // collapse all sidebar sections when toggling to not Expanded state
+      setAccordionSections([]);
+    }
     setIsExpanded(!isExpanded);
   };
 
@@ -71,9 +76,9 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Sidebar para telas médias e maiores */}
-      <div className="flex ">
+      <div className="flex">
         <aside
-          className={`bg-primary text-white h-screen hidden lg:flex flex-col items-center justify-between transition-all duration-300 ease-in-out relative px-5 ${
+          className={`bg-primary text-white h-screen hidden lg:flex flex-col items-center justify-between transition-all duration-300 ease-in-out relative px-5 shadow ${
             isExpanded ? "w-[15%]" : "w-[5%]"
           }`}
         >
@@ -96,7 +101,13 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
           </header>
           <main className="h-full w-full">
             <nav className="flex flex-col items-center space-y-6">
-              <Accordion type="multiple" className="w-full min-w-fit">
+              <Accordion
+                type="multiple"
+                className={`w-full min-w-fit data-[disabled]:w-0 transition-all`}
+                disabled={!isExpanded}
+                value={accordionSections}
+                onValueChange={setAccordionSections}
+              >
                 <AccordionItem value="operator-menu" className="border-none">
                   <AccordionTrigger>
                     <div className="w-full flex gap-2 items-center">
@@ -124,7 +135,11 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                   <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
                     <Link href={"/supervisor/actions"}>Acionamentos</Link>
                     <Link href={"/supervisor/discounts"}>Descontos</Link>
-                    <Accordion type="multiple">
+                    <Accordion
+                      type="multiple"
+                      value={accordionSections}
+                      onValueChange={setAccordionSections}
+                    >
                       <AccordionItem
                         value="submenu-campaings"
                         className="border-none"
