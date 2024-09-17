@@ -7,7 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ type UserFormProps = {
   initialValue: Partial<z.infer<typeof userSchema>>;
 };
 
+// WARN: Dummy Data. Remove when integrating to the backend
 const accessLevels = [
   {
     id: 4,
@@ -42,42 +43,42 @@ const accessLevels = [
     label: "Atualizar dados",
   },
   {
-    id: 4,
+    id: 5,
     module: "supervisor",
     label: "Acesso total",
   },
   {
-    id: 2,
+    id: 6,
     module: "supervisor",
     label: "Inserir Dados",
   },
   {
-    id: 1,
+    id: 7,
     module: "supervisor",
     label: "Listar dados",
   },
   {
-    id: 3,
+    id: 8,
     module: "supervisor",
     label: "Atualizar dados",
   },
   {
-    id: 4,
+    id: 9,
     module: "operator",
     label: "Acesso total",
   },
   {
-    id: 2,
+    id: 10,
     module: "operator",
     label: "Inserir Dados",
   },
   {
-    id: 1,
+    id: 11,
     module: "operator",
     label: "Listar dados",
   },
   {
-    id: 3,
+    id: 12,
     module: "operator",
     label: "Atualizar dados",
   },
@@ -259,15 +260,10 @@ export function UserForm(props: UserFormProps) {
             </div>
             <div>
               <h4 className="text-black font-medium">Permissões</h4>
-              <FormField
-                name="skills"
-                control={form.control}
-                render={({ field }) => {
-                  return <div>
-                    {modules.map((module)=>(
-                    ))}
-                  </div>;
-                }}
+              <PermissionsForm
+                form={form}
+                accessLevels={accessLevels}
+                modules={modules}
               />
             </div>
           </div>
@@ -285,5 +281,69 @@ export function UserForm(props: UserFormProps) {
         </form>
       </Form>
     </>
+  );
+}
+
+type PermissionsFormProps = {
+  form: UseFormReturn<z.infer<typeof userSchema>>;
+  modules: { module: string; label: string }[];
+  accessLevels: { id: number; module: string; label: string }[];
+};
+
+function PermissionsForm({
+  form,
+  modules,
+  accessLevels,
+}: PermissionsFormProps) {
+  return (
+    <FormField
+      name="skills"
+      control={form.control}
+      render={({ field }) => {
+        return (
+          <div>
+            {modules.map((module) => (
+              <>
+                <h4 className="text-black font-medium">{module.label}</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {accessLevels
+                    .filter((l) => l.module === module.module)
+                    .map((l) => {
+                      return (
+                        <FormItem key={l.id + "_" + l.module}>
+                          <FormControl>
+                            <div className="flex gap-1">
+                              <Input
+                                type="checkbox"
+                                className="w-4"
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    form.setValue("skills", [
+                                      ...field.value,
+                                      l.id,
+                                    ]);
+                                  } else {
+                                    form.setValue(
+                                      "skills",
+                                      field.value.filter((it) => l.id !== it),
+                                    );
+                                  }
+                                }}
+                              />
+                              <Label className="text-black font-normal mb-0">
+                                {l.label}
+                              </Label>
+                            </div>
+                          </FormControl>
+                        </FormItem>
+                      );
+                    })}
+                </div>
+              </>
+            ))}
+          </div>
+        );
+      }}
+    />
   );
 }
