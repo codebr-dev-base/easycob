@@ -26,6 +26,13 @@ export default class CampaignsController {
     const orderBy = qs.orderBy || 'id';
     const descending = qs.descending || 'true';
 
+    const listOutColumn = ['user'];
+
+    let selected = null;
+    if (listOutColumn.includes(qs.keywordColumn)) {
+      selected = await this.service.generateWhereInPaginate(qs);
+    }
+
     const campaigns = await db.from('public.campaigns as c')
       .select('c.*')
       .select(
@@ -34,6 +41,9 @@ export default class CampaignsController {
       .select('users.name as user')
       .innerJoin('users', 'users.id', '=', 'c.user_id')
       .where((q) => {
+        if (selected) {
+          q.whereIn(selected.column, selected.list);
+        }
         return this.service.generateWherePaginate(q, qs);
       })
       .orderBy(`c.${orderBy}`, descending === 'true' ? 'desc' : 'asc')

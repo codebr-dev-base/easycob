@@ -8,7 +8,6 @@ import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import { LuListTodo, LuLock } from "react-icons/lu";
 import { HiOutlinePhone } from "react-icons/hi";
 import { FaXmark } from "react-icons/fa6"; // Ícones para expandir/recolher
-import Header from "@/app/(easycob)/components/Header";
 import Link from "next/link";
 import { getUser, getUserInitials } from "@/app/lib/auth";
 import { logout } from "@/app/(auth)/login/actions";
@@ -88,7 +87,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
               <div className="justify-center items-center hidden md:flex transition-all duration-300 ease-in-out">
                 <Image
                   src={easycobWhite}
-                  alt="Easycob wwhite"
+                  alt="Easycob white"
                   width={256}
                   height={128}
                 />
@@ -175,7 +174,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             <Link href="/profile" className="p-1">
               <div className="p-1 bg-slate-300 rounded-3xl justify-start items-center gap-2 flex text-blue-600">
                 <div className="w-10 h-10 bg-slate-200 rounded-full flex justify-center">
-                  <div className="m-auto">{initials}</div>
+                  <div className="m-auto font-medium">{initials ?? "U"}</div>
                 </div>
               </div>
             </Link>
@@ -209,10 +208,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
         </button>
 
         {/* Conteúdo principal */}
-        <div className="w-full flex-1">
-          <Header />
-          {children}
-        </div>
+        <div className="w-full flex-1">{children}</div>
       </div>
     </div>
   );
