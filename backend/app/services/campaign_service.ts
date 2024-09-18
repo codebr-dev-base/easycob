@@ -7,6 +7,8 @@ import db from '@adonisjs/lucid/services/db';
 import csvtojsonV2 from "csvtojson";
 import { promises as fs } from 'fs';
 import path from 'path';
+import User from '#models/user';
+import string from '@adonisjs/core/helpers/string';
 
 export default class CampaignService {
 
@@ -209,5 +211,45 @@ export default class CampaignService {
       `${item.cod_credor_des_regis}` === contact.cod_credor_des_regis
     );
   }
+
+  async generateWhereInPaginate(qs: any) {
+    const keyword = qs.keyword;
+    const keywordColumn = string.snakeCase(qs.keywordColumn);
+
+    if (!keyword || !keywordColumn) {
+      return null;
+    }
+
+    return {
+      column: 'user_id',
+      list: await this.getListIds(keywordColumn, keyword, 4)
+    };
+
+  }
+
+  protected async getListIds(column: string, keyword: string, minLength: number,) {
+
+    const resultArray: any[] = [];
+
+    if (keyword.length > minLength) {
+      switch (column) {
+        case 'user':
+          const users = await User.query()
+            .select('id')
+            .whereILike('name', `%${keyword}%`);
+
+          users.forEach(result => resultArray.push(result.id));
+          return resultArray;
+          break;
+
+        default:
+          return resultArray;
+          break;
+      }
+    }
+
+    return resultArray;
+
+  };
 
 }
