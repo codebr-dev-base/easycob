@@ -7,9 +7,8 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
-import { IFormLoginValues } from "@/app/interfaces/auth";
+import { IFormLoginValues, IState } from "@/app/interfaces/auth";
 import { error } from "console";
-import { State } from "@/app/types/auth";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -23,7 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 export default function FormLogin() {
-  const [state, actionSignin] = useFormState<State, FormData>(signin, null);
+  const [state, actionSignin] = useFormState<IState, FormData>(signin, null);
 
   const { pending } = useFormStatus();
 

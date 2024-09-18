@@ -1,5 +1,5 @@
 import CryptoJS from "crypto-js";
-import { SessionCookie } from "@/app/types/auth";
+import { ISessionCookie } from "../interfaces/auth";
 
 // Sua chave secreta (deve ser uma chave segura e secreta!)
 const secretKey =
@@ -8,7 +8,7 @@ const secretKey =
   "default_secret_key";
 
 // Função para criptografar dados
-export function encrypt(data: SessionCookie): string {
+export function encrypt(data: ISessionCookie): string {
   // Converte o objeto para uma string JSON e o criptografa
   const ciphertext = CryptoJS.AES.encrypt(
     JSON.stringify(data),
@@ -18,11 +18,11 @@ export function encrypt(data: SessionCookie): string {
 }
 
 // Função para descriptografar dados
-export function decrypt(encryptedData: string): SessionCookie {
+export function decrypt(encryptedData: string): ISessionCookie {
   // Descriptografa o texto e converte de volta para JSON
   const bytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
   const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
 
   // Converte a string JSON de volta para um objeto
-  return JSON.parse(decryptedData) as SessionCookie;
+  return JSON.parse(decryptedData) as ISessionCookie;
 }

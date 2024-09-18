@@ -1,10 +1,10 @@
 import { decrypt } from "@/app/lib/crypto";
 import Cookies from "js-cookie";
 import { getCookies } from "next-client-cookies/server";
-import { SessionCookie, User } from "../types/auth";
 import { use } from "react";
+import { ISessionCookie, IUser } from "../interfaces/auth";
 
-export function getSession(): SessionCookie | null {
+export function getSession(): ISessionCookie | null {
   // Se estiver no lado do cliente
   if (typeof window !== "undefined") {
     const easycobSession = Cookies.get("easycob_session");
@@ -32,7 +32,7 @@ export function getAccessToken(): string | null {
   return decryptedSession?.token || null;
 }
 
-export function getUser(): User | null {
+export function getUser(): IUser | null {
   const decryptedSession = getSession();
   return decryptedSession?.user || null;
 }

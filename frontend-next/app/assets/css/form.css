@@ -5,3 +5,8 @@
 .label {
   @apply block text-sm font-bold mb-2;
 }
+
+.radio-button-bar {
+  color: #FFF !important;
+  border-color: #FFF !important;
+}

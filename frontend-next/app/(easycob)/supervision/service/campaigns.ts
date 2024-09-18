@@ -1,29 +1,31 @@
 "use client";
 import { fetchAuth } from "@/app/lib/fetchAuth";
-import { ICampaign } from "../interfaces/campaign";
-import { IMeta } from "@/app/interfaces/meta";
+import { ICampaign, IQueryCampaignParams } from "../interfaces/campaign";
+import { IMeta } from "@/app/interfaces/pagination";
 import { useState } from "react";
 
-export default function useCampaign() {
+export default function campaignService() {
   const apiUrl = process.env.API_URL
     ? process.env.API_URL
     : process.env.NEXT_PUBLIC_API_URL;
   const urn = "/v1/campaign";
   const url = `${apiUrl}${urn}`;
 
-  const query = {
+  const query: IQueryCampaignParams = {
     page: 1,
     perPage: 10,
     orderBy: "id",
     descending: true,
     keyword: "",
-    keywordColumn: null,
-    startDate: null,
-    endDate: null,
+    keywordColumn: 'name',
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0],
     type: "SMS",
   };
 
-  const getCampaigns = () => {
+  const useGetPagination = () => {
+
+    const [pending, setPending] = useState<boolean>(false);
     const [data, setData] = useState<ICampaign[]>([]);
     const [meta, setMeta] = useState<IMeta>();
 
@@ -33,29 +35,34 @@ export default function useCampaign() {
       });
 
       if (result.success) {
-        console.log("Dados recebidos:", result.data);
+        //console.log("Dados recebidos:", result.data);
         return result.data;
       } else {
-        console.error("Erro ao buscar dados:", result.error);
+        //console.error("Erro ao buscar dados:", result.error);
         throw new Error(result.error);
       }
     };
 
     const refresh = async () => {
+      if (!pending) {
+        setPending(true);
         const result = await fetch();
         setData(result.data);
         setMeta(result.meta);
-    }
-    
+        setPending(false);
+      }
+    };
+
     return {
       query,
       meta,
       data,
-      refresh
+      refresh,
+      pending,
     };
   };
 
   return {
-    getCampaigns,
+    useGetPagination,
   };
 }

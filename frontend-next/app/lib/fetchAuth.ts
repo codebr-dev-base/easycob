@@ -1,33 +1,14 @@
+import { IFetchOptions, IFetchResponse, IHeaders } from "../interfaces/fetch";
 import { getAccessToken } from "./auth";
-
-// Definição de tipos para headers e query
-interface Headers {
-  [key: string]: string;
-}
-
-interface QueryParams {
-  [key: string]: string | number | boolean | null | undefined;
-}
-
-interface FetchOptions extends RequestInit {
-  headers?: Headers;
-  query?: QueryParams; // Novo campo para query params com tipo definido
-}
-
-interface FetchResponse<T> {
-  success: boolean;
-  data: T | null;
-  error?: string;
-}
 
 export async function fetchAuth<T = any>(
   url: string,
-  options: FetchOptions = {}
-): Promise<FetchResponse<T>> {
+  options: IFetchOptions = {}
+): Promise<IFetchResponse<T>> {
   // Obtém o token de acordo com o ambiente
   const token = getAccessToken();
 
-  const headers: Headers = {
+  const headers: IHeaders = {
     "Content-Type": "application/json",
     ...options.headers,
   };

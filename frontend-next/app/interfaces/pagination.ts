@@ -1,3 +1,5 @@
+import { IQueryParams } from "./fetch";
+
 export interface IMeta {
     currentPage: number; // Página atual
     firstPage: number; // Primeira página
@@ -9,3 +11,10 @@ export interface IMeta {
     previousPageUrl: string | null; // URL da página anterior (pode ser null)
     total: number; // Total de itens
   }
+
+export interface IQueryPaginationParams extends IQueryParams {
+    page: number;            // Número da página
+    perPage: number;         // Número de itens por página
+    orderBy: string;         // Campo para ordenação
+    descending: boolean;     // Ordem decrescente ou não
+  };

@@ -1,6 +1,11 @@
 "use client";
 
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -9,85 +14,67 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import useCampaign from "../service/campaigns";
 import { useEffect, useState } from "react";
 import { formatDateToBR, formatarFone } from "@/app/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import Pagination from "@/app/(easycob)/components/Pagination";
+import { Skeleton } from "@/components/ui/skeleton";
+import Header from "../../components/Header";
+import { IUseCampaign } from "../interfaces/campaign";
 
-const { getCampaigns } = useCampaign();
-
-export default function TabSms() {
-  const { meta, data: campaigns, refresh, query } = getCampaigns();
-
+export default function TabSms({
+  query,
+  meta,
+  data,
+  refresh,
+  pending,
+}: IUseCampaign) {
   useEffect(() => {
     refresh();
   }, []);
 
-  const handlerNextPage = (e: Event) => {
-    e.preventDefault();
-    query.page = query.page + 1;
-    refresh();
-  };
-  const handlerPreviousPage = (e: Event) => {
-    e.preventDefault();
-    query.page = query.page - 1;
-    refresh();
-  };
+  const skeletons = [];
+  for (let i = 0; i < 12; i++) {
+    skeletons.push(<Skeleton key={i} className="h-10 w-full my-2" />);
+  }
 
-  const handlerChangePerPage = (velue: string) => {
-    query.perPage = Number(velue);
-    refresh();
-  };
   return (
     <Card>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Id</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead>Mensagem</TableHead>
-              <TableHead>Whatsapp</TableHead>
-              <TableHead>Usuário</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {campaigns.map((campaign) => (
-              <TableRow key={campaign.id}>
-                <TableCell>{campaign.id}</TableCell>
-                <TableCell>{formatDateToBR(campaign.date)}</TableCell>
-                <TableCell className="max-w-52 md:max-w-md lg:max-w-lg">
-                  <p className="truncate hover:text-clip">{campaign.message}</p>
-                </TableCell>
-                <TableCell>{formatarFone(campaign.numWhatsapp)}</TableCell>
-                <TableCell>{campaign.user}</TableCell>
+        {pending ? (
+          <div className="py-2">{skeletons}</div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Id</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Nome</TableHead>
+                <TableHead>Mensagem</TableHead>
+                <TableHead>Whatsapp</TableHead>
+                <TableHead>Usuário</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {data.map((campaign) => (
+                <TableRow key={campaign.id}>
+                  <TableCell>{campaign.id}</TableCell>
+                  <TableCell>{formatDateToBR(campaign.date)}</TableCell>
+                  <TableCell>{campaign.name}</TableCell>
+                  <TableCell className="max-w-52 md:max-w-md lg:max-w-lg">
+                    <p className="truncate hover:text-clip">
+                      {campaign.message}
+                    </p>
+                  </TableCell>
+                  <TableCell>{formatarFone(campaign.numWhatsapp)}</TableCell>
+                  <TableCell>{campaign.user}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
       <CardFooter className="flex justify-end">
-        <span className="px-2 text-sm">Mostrando</span>
-        <Select
-          onValueChange={handlerChangePerPage}
-          defaultValue={`${query.perPage}`}
-        >
-          <SelectTrigger className="w-16">
-            <SelectValue placeholder="Mostrando" />
-          </SelectTrigger>
-          <SelectContent className="w-36">
-            <SelectItem value="10">10</SelectItem>
-            <SelectItem value="50">50</SelectItem>
-            <SelectItem value="100">100</SelectItem>
-          </SelectContent>
-        </Select>
-        <span className="px-2 text-sm">de {meta?.total} resultados.</span>
+        <Pagination meta={meta} query={query} refresh={refresh} />
       </CardFooter>
     </Card>
   );
