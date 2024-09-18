@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { decrypt } from "./app/lib/crypto";
 
 // 1. Specify protected and public routes
-const protectedRoutes: string[] = [];
-const publicRoutes: string[] = ["/login", "/", "/admin", "/supervision"]; // TODO: ajustar isso antes de ir para prod
+const protectedRoutes = ["/"];
+const publicRoutes = ["/login", "/supervision"];
 
 export default async function middleware(req: NextRequest) {
   // 2. Check if the current route is protected or public
