@@ -22,6 +22,7 @@ label {
 @import "buttons.css";
 @import "card.css";
 @import "form.css";
+@import "tabs.css";
 @layer base {
   :root {
     --background: 0 0% 100%;

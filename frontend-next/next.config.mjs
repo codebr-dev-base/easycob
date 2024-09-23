@@ -5,7 +5,8 @@ const nextConfig = {
         fetches: {
             fullUrl: true
         }
-    }
+    },
+    reactStrictMode: false
 };
 
 export default nextConfig;

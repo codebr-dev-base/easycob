@@ -1,12 +1,12 @@
 "use server";
-import { SessionCookie, State } from "@/app/types/auth";
+import { ISessionCookie, IState } from "@/app/interfaces/auth";
 import { error } from "console";
 import { createSession, deleteSession } from "../lib/session";
 import { redirect } from "next/navigation";
 import { fetchAuth } from "@/app/lib/fetchAuth";
 const url = process.env.API_URL ? process.env.API_URL : "";
 
-async function getUser(accessToken: SessionCookie) {
+async function getUser(accessToken: ISessionCookie) {
   const response = await fetch(`${url}/v1/auth/me`, {
     method: "GET",
     headers: {
@@ -18,9 +18,9 @@ async function getUser(accessToken: SessionCookie) {
   return await response.json();
 }
 export async function signin(
-  prevState: State | null,
+  prevState: IState | null,
   formData: FormData
-): Promise<State> {
+): Promise<IState> {
   const credentials = Object.fromEntries(formData.entries());
   const { email, password } = credentials;
 
@@ -48,7 +48,7 @@ export async function signin(
     };
   }
 
-  const payload:SessionCookie= (await response.json()) as SessionCookie;
+  const payload:ISessionCookie= (await response.json()) as ISessionCookie;
 
   payload.user = await getUser(payload);
   await createSession(payload);

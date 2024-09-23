@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -9,13 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { formatDateToBR, formatarFone } from "@/app/lib/utils";
 import Pagination from "@/app/(easycob)/components/Pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IUseCampaign } from "../interfaces/campaign";
 
-export default function TabSms({
+export default function TabEmail({
   query,
   meta,
   data,
@@ -42,7 +43,6 @@ export default function TabSms({
         >
           <div className="py-2">{skeletons}</div>
         </div>
-
         {/* Tabela com transição de opacidade */}
         <div
           className={`transition-opacity duration-1000 ${
@@ -55,7 +55,6 @@ export default function TabSms({
                 <TableHead>Id</TableHead>
                 <TableHead>Data</TableHead>
                 <TableHead>Nome</TableHead>
-                <TableHead>Mensagem</TableHead>
                 <TableHead>Whatsapp</TableHead>
                 <TableHead>Usuário</TableHead>
               </TableRow>
@@ -66,11 +65,6 @@ export default function TabSms({
                   <TableCell>{campaign.id}</TableCell>
                   <TableCell>{formatDateToBR(campaign.date)}</TableCell>
                   <TableCell>{campaign.name}</TableCell>
-                  <TableCell className="max-w-52 md:max-w-md lg:max-w-lg">
-                    <p className="truncate hover:text-clip">
-                      {campaign.message}
-                    </p>
-                  </TableCell>
                   <TableCell>{formatarFone(campaign.numWhatsapp)}</TableCell>
                   <TableCell>{campaign.user}</TableCell>
                 </TableRow>

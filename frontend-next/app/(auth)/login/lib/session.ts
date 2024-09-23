@@ -1,18 +1,16 @@
 import "server-only";
-import {SessionCookie} from "@/app/types/auth";
+import {ISessionCookie} from "@/app/interfaces/auth";
 import { redirect } from "next/navigation";
 import { decrypt, encrypt } from "@/app/lib/crypto";
 import { getCookies } from "next-client-cookies/server";
-const cookies = getCookies();
 
-export async function createSession(accessToken: SessionCookie) {
+export async function createSession(accessToken: ISessionCookie) {
   const cookies = getCookies();
+  
   const expiresAt = new Date(accessToken.expiresAt);
 
   cookies.set("easycob_session", encrypt(accessToken), {
-    secure: true,
     expires: expiresAt,
-    sameSite: "lax",
     path: "/",
   });
 
@@ -28,6 +26,7 @@ export async function createSession(accessToken: SessionCookie) {
 }
 
 export async function updateSession() {
+  const cookies = getCookies();
   const easycobSession = cookies.get("easycob_session");
 
   if (!easycobSession) {
@@ -63,7 +62,7 @@ export async function updateSession() {
   //setTimeout(updateSession, refreshBeforeExpiration);
 }
 
-export async function refresh(accessToken: SessionCookie) {
+export async function refresh(accessToken: ISessionCookie) {
   const url = process.env.API_URL ? process.env.API_URL : "";
   const response = await fetch(`${url}/v1/auth/refresh`, {
     method: "POST",
@@ -78,10 +77,11 @@ export async function refresh(accessToken: SessionCookie) {
     redirect("/login");
   }
 
-  const payload:SessionCookie= (await response.json()) as SessionCookie;
+  const payload:ISessionCookie= (await response.json()) as ISessionCookie;
   return payload;
 }
 
 export function deleteSession() {
+  const cookies = getCookies();
   cookies.remove("easycob_session");
 }

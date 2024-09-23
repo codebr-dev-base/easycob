@@ -1,4 +1,9 @@
-import { IFetchOptions, IFetchResponse, IHeaders } from "../interfaces/fetch";
+import {
+  IError,
+  IFetchOptions,
+  IFetchResponse,
+  IHeaders,
+} from "../interfaces/fetch";
 import { getAccessToken } from "./auth";
 
 export async function fetchAuth<T = any>(
@@ -9,9 +14,13 @@ export async function fetchAuth<T = any>(
   const token = getAccessToken();
 
   const headers: IHeaders = {
-    "Content-Type": "application/json",
     ...options.headers,
   };
+
+  // Definir "Content-Type" somente se não for FormData
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
 
   // Adiciona o token no header apenas se ele existir
   if (token) {
@@ -23,11 +32,15 @@ export async function fetchAuth<T = any>(
   if (options.query) {
     // Limpa os valores nulos ou indefinidos
     const cleanedQuery = Object.fromEntries(
-      Object.entries(options.query).filter(([_, value]) => value !== null && value !== undefined)
+      Object.entries(options.query).filter(
+        ([_, value]) => value !== null && value !== undefined
+      )
     );
 
     // Converte o objeto query para uma string de consulta
-    const queryString = new URLSearchParams(cleanedQuery as Record<string, string>).toString();
+    const queryString = new URLSearchParams(
+      cleanedQuery as Record<string, string>
+    ).toString();
 
     // Anexa a string de consulta à URL
     finalUrl = `${url}?${queryString}`;
@@ -40,22 +53,34 @@ export async function fetchAuth<T = any>(
     });
 
     if (!response.ok) {
+      let errors: IError[] = [];
+      const listError = await response.json();
+
+      if (listError.errors) {
+        errors = listError.errors;
+      } else {
+        const textError = await response.text();
+        errors.push({ message: textError });
+      }
+
       // Verifica status para tratamento específico
       if (response.status === 401) {
-        // Tratar caso de autenticação inválida (e.g., redirecionar para login)
-        return { success: false, data: null, error: 'Unauthorized' };
+        return { success: false, data: null, error: "Unauthorized", errors };
       }
 
       if (response.status === 403) {
-        // Tratar caso de acesso proibido
-        return { success: false, data: null, error: 'Forbidden' };
+        return { success: false, data: null, error: "Forbidden", errors };
       }
 
-      // Para outros erros
-      return { success: false, data: null, error: `Erro HTTP! Status: ${response.status}` };
+      return {
+        success: false,
+        data: null,
+        error: `Erro HTTP! Status: ${response.status}`,
+        errors,
+      };
     }
 
-    const data = await response.json() as T;
+    const data = (await response.json()) as T;
     return { success: true, data };
   } catch (error) {
     // Captura qualquer erro de rede ou de execução

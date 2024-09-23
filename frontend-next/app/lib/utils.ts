@@ -30,3 +30,8 @@ export function formatarFone(fone: string): string {
         return 'Número de fone inválido!';
     }
 }
+
+export function onlyNumbers(input: string): string {
+  // Remove tudo que não for dígito numérico (0-9)
+  return input.replace(/\D/g, "");
+}

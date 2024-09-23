@@ -18,8 +18,14 @@ export interface IFetchOptions extends RequestInit {
   query?: IQueryParams; // Novo campo para query params com tipo definido
 }
 
+export interface IError {
+  field?: string;
+  message?: string;
+  rule?: string;
+}
 export interface IFetchResponse<T> {
   success: boolean;
   data: T | null;
   error?: string;
+  errors?: IError[];
 }

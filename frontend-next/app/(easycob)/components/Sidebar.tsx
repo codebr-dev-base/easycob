@@ -30,7 +30,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
     <div>
       {/* Botão para abrir sidebar no mobile */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-priamry text-white rounded-md"
+        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-priamry text-white rounded-md"
         onClick={toggleMobileSidebar}
       >
         {isMobileOpen ? <FaXmark size={24} /> : <FaBars size={24} />}

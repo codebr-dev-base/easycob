@@ -1,3 +1,4 @@
+"use client";
 import { IMeta, IQueryPaginationParams } from "@/app/interfaces/pagination";
 import {
   Select,

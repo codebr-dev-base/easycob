@@ -3,17 +3,14 @@ import Image from "next/image";
 import easycob from "@/app/assets/img/easycob.svg";
 import { useFormStatus, useFormState } from "react-dom";
 import { signin } from "../actions";
-import { useSearchParams } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { IFormLoginValues, IState } from "@/app/interfaces/auth";
-import { error } from "console";
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,

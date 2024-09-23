@@ -9,6 +9,7 @@ export default router
         router.group(() => {
             router.get('/', [TemplateSmsController, 'index']);
             router.post('/', [TemplateSmsController, 'create']);
+            router.put('/:id', [TemplateSmsController, 'update']);
             router.get('/:id', [TemplateSmsController, 'destroy']);
         })
             .prefix('/campaign/template/sms')

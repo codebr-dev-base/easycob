@@ -8,15 +8,15 @@ import { fetchAuth } from "@/app/lib/fetchAuth";
 import { useCookies } from "next-client-cookies";
 import { decrypt } from "@/app/lib/crypto";
 import { getSession, getUser } from "@/app/lib/auth";
-import { SessionCookie, User } from "@/app/types/auth";
+import { ISessionCookie, IUser } from "@/app/interfaces/auth";
 
 // Ajuste o caminho conforme necessário
 
 export default function FormProfile() {
   const cookies = useCookies();
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<SessionCookie | null>(null);
+  const [user, setUser] = useState<IUser | null>(null);
+  const [session, setSession] = useState<ISessionCookie | null>(null);
 
   const url = process.env.API_URL
     ? process.env.API_URL

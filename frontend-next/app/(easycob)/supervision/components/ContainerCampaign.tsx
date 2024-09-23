@@ -1,5 +1,4 @@
 "use client";
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -11,18 +10,39 @@ import {
 } from "@/components/ui/card";
 import TabSms from "@/app/(easycob)/supervision/components/TabSms";
 import Header from "../../components/Header";
-import { FaUserPlus, FaSearch, FaKey, FaCheck, FaUser } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { DatePicker } from "../../components/DatePicker";
-import campaignService from "../service/campaigns";
+import { fetchCampaign, query } from "../service/campaigns";
 import { DateRange } from "react-day-picker";
-const { useGetPagination } = campaignService();
+import { DialogCampaign } from "./DialogCampaign";
+import { IMeta } from "@/app/interfaces/pagination";
+import { ICampaign } from "../interfaces/campaign";
+import TabEmail from "./TabEmail";
+import "@/app/assets/css/tabs.css";
 
-export default function ContainerCampaign() {
-  const { meta, data, refresh, query, pending } = useGetPagination();
+export default function ContainerCampaign({
+  campaigns,
+}: {
+  campaigns: {
+    meta: IMeta;
+    data: ICampaign[];
+  };
+}) {
+  const meta = useRef<IMeta>(campaigns.meta);
+  const data = useRef<ICampaign[]>(campaigns.data ? campaigns.data : []);
+  const [pending, setPending] = useState<boolean>(false);
+  const [type, setType] = useState<string>("SMS");
+
+  const refresh = async () => {
+    setPending(true);
+    const result = await fetchCampaign();
+    meta.current = result.meta;
+    data.current = result.data;
+    setPending(false);
+  };
 
   const handleChangeKeyword = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.name == "keyword") {
@@ -32,12 +52,10 @@ export default function ContainerCampaign() {
   };
 
   const handleChangeKeywordColumn = (value: string) => {
-    console.log(value);
     query.keywordColumn = value;
   };
 
-  const handlerChangeDate = (range: DateRange) => {
-    console.log(range);
+  const handleChangeDate = (range: DateRange) => {
     if (range.from && range.to) {
       query.startDate = range.from?.toISOString().split("T")[0];
       query.endDate = range.to?.toISOString().split("T")[0];
@@ -45,11 +63,18 @@ export default function ContainerCampaign() {
     }
   };
 
+  const handleTabChange = (value: string) => {
+    query.type = value;
+    setType(value);
+    refresh();
+  };
+
   return (
     <article>
       <Header title="Campanhas">
-        <div className="flex justify-end items-center gap-4">
-          <DatePicker placeholder="Ínicio" onChange={handlerChangeDate} />
+        <div className="flex flex-col md:flex-row justify-end items-end gap-4">
+          <DatePicker placeholder="Ínicio" onChange={handleChangeDate} />
+
           <RadioGroup
             defaultValue={query.keywordColumn ? query.keywordColumn : "name"}
             className="flex"
@@ -76,40 +101,41 @@ export default function ContainerCampaign() {
               onChange={handleChangeKeyword}
             />
           </div>
-          <Button variant="ghost" className="bg-white space-x-2">
-            <FaUserPlus className="text-foreground" />
-            <span className="text-foreground">Novo usuário</span>
-          </Button>
+          <DialogCampaign refresh={refresh} query={query} type={type} />
         </div>
       </Header>
+
       <main>
-        <Tabs defaultValue="account" className="w-full">
+        <Tabs
+          defaultValue="SMS"
+          className="w-full"
+          onValueChange={handleTabChange}
+        >
           <TabsList className="flex justify-center bg-white">
-            <TabsTrigger value="account">Campanha SMS</TabsTrigger>
-            <TabsTrigger value="password">Campanha Email</TabsTrigger>
+            <TabsTrigger value="SMS" className="TabsTrigger">
+              Campanha SMS
+            </TabsTrigger>
+            <TabsTrigger value="EMAIL" className="TabsTrigger">
+              Campanha Email
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="account" className="px-4">
+          <TabsContent value="SMS" className="px-4">
             <TabSms
-              meta={meta}
-              data={data}
+              meta={meta.current}
+              data={data.current}
               refresh={refresh}
               query={query}
               pending={pending}
             />
           </TabsContent>
-          <TabsContent value="password" className="px-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Card Title</CardTitle>
-                <CardDescription>Card Description</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>Card Content</p>
-              </CardContent>
-              <CardFooter>
-                <p>Card Footer</p>
-              </CardFooter>
-            </Card>
+          <TabsContent value="EMAIL" className="px-4">
+            <TabEmail
+              meta={meta.current}
+              data={data.current}
+              refresh={refresh}
+              query={query}
+              pending={pending}
+            />
           </TabsContent>
         </Tabs>
       </main>

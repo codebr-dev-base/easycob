@@ -1,5 +1,7 @@
 import ContainerCampaign from "./components/ContainerCampaign";
+import { fetchCampaign } from "./service/campaigns";
 
-export default function Supervision() {
-  return <ContainerCampaign />;
+export default async function Supervision() {
+  const result = await fetchCampaign();
+  return <ContainerCampaign campaigns={result}/>;
 }

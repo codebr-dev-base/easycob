@@ -35,6 +35,8 @@ export default class CampaignService {
       extnames: ['csv']
     });
 
+    console.log(file);
+
     if (file && !file.isValid) {
       throw file.errors;
     } else if (!file) {
@@ -81,6 +83,8 @@ export default class CampaignService {
       const payload = await request.validateUsing(
         createCampaignValidator
       );
+
+      console.log(payload);
 
       return {
         name: payload.name,
