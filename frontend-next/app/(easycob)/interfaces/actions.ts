@@ -125,7 +125,7 @@ export interface IAction {
   promises?: IPromiseOfPayment[];
   negotiations?: INegotiationOfPayment[];
   syncedAt?: string; // ISO Date
-  createdAt?: string; // ISO Date
+  createdAt: string; // ISO Date
   updatedAt?: string; // ISO Date
   valPrinc?: number;
   datVenci?: string; // ISO Date

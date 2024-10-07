@@ -20,11 +20,10 @@ import {
   BsFillSendSlashFill,
   BsHourglassSplit,
 } from "react-icons/bs";
-import { formatToBRL } from "@/app/lib/utils";
+import { formatDateToBR, formatToBRL } from "@/app/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { FaUser } from "react-icons/fa";
-
 
 const selecIcon = (action: any) => {
   switch (action.retorno) {
@@ -85,6 +84,14 @@ export default function TabRecords({
                   <HeaderTable
                     columnName="Id"
                     fieldName="id"
+                    query={query}
+                    refresh={refresh}
+                  />
+                </TableHead>
+                <TableHead>
+                  <HeaderTable
+                    columnName="Data"
+                    fieldName="createdAt"
                     query={query}
                     refresh={refresh}
                   />
@@ -160,6 +167,8 @@ export default function TabRecords({
               {data.map((action) => (
                 <TableRow key={action.id}>
                   <TableCell>{action.id}</TableCell>
+                  <TableCell>{formatDateToBR(action.createdAt)}</TableCell>
+
                   <TableCell className="max-w-28 md:max-w-36 lg:max-w-48">
                     <Tooltips message={action.cliente ? action.cliente : ""}>
                       <p className="truncate hover:text-clip">
