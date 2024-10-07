@@ -27,7 +27,7 @@ export default router
         ]);
         router.get('/type-action', [ActionsController, 'getTypeAction']);
       })
-      .prefix('/action');
-    //.use(middleware.auth());
+      .prefix('/action')
+      .use(middleware.auth());
   })
   .prefix('/v1');
