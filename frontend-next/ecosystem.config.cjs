@@ -10,7 +10,7 @@ module.exports = {
       exec_mode: 'cluster',
       instances: 'max', // Or a number of instances
       script: 'node_modules/next/dist/bin/next',
-      args: 'start',
+      args: 'start -p 4000',
       env_local: {
         APP_ENV: 'local' // APP_ENV=local
       },
