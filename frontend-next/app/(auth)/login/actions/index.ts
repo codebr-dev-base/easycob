@@ -59,6 +59,6 @@ export async function logout() {
   const response = await fetchAuth(`${url}/v1/auth/logout`, {
     method: "POST",
   });
-  deleteSession();
+  await deleteSession();
   redirect("/login");
 }

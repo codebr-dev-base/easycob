@@ -1,9 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import { decrypt } from "./app/lib/crypto";
+import { getSession } from "./app/lib/auth";
+import { ISessionCookie } from "./app/interfaces/auth";
 
 // 1. Specify protected and public routes
 const protectedRoutes: string[] = [];
 const publicRoutes: string[] = ["/login"]; // TODO: ajustar isso antes de ir para prod
+
+
+// Função para verificar o status do token
+function checkTokenExpiration(tokenData: ISessionCookie) {
+  const now = new Date();
+  const expirationDate = new Date(tokenData.expiresAt);
+  const hoursBeforeExpiration = 12 * 60 * 60 * 1000; // 12 horas em milissegundos
+
+  // Verifica se o token já expirou
+  if (now > expirationDate) {
+    console.log("expire");
+    return 'expire';
+  }
+
+  // Verifica se está no período de 12 horas antes da expiração
+  const timeUntilExpiration = expirationDate.getTime() - now.getTime();
+  if (timeUntilExpiration <= hoursBeforeExpiration) {
+    console.log("refresh");
+    return 'refresh'
+  } else {
+    console.log("valid");
+    return 'valid'
+  }
+}
 
 export default async function middleware(req: NextRequest) {
   // 2. Check if the current route is protected or public
@@ -12,7 +38,19 @@ export default async function middleware(req: NextRequest) {
   const isPublicRoute = publicRoutes.includes(path);
 
   // 3. Decrypt the session from the cookie
-  const easycobSession = req.cookies.get("easycob_session")?.value;
+  const easycobSession = getSession();
+
+  if (easycobSession) {
+    const check = checkTokenExpiration(easycobSession);
+
+    switch (check) {
+      case 'expire':
+        return NextResponse.redirect(new URL("/login", req.url));
+        break;
+      default:
+        break;
+    }
+  }
 
   if (!easycobSession && !isPublicRoute) {
     return NextResponse.redirect(new URL("/login", req.url));

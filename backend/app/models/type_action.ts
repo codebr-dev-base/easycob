@@ -5,7 +5,6 @@ import CategoryAction from '#models/category_action';
 import Action from '#models/action';
 
 export default class TypeAction extends BaseModel {
-
   //declare static connection = 'pg'
 
   @column({ isPrimary: true })

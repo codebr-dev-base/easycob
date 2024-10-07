@@ -15,13 +15,15 @@ export default class BulkActionSms extends BaseCommand {
   async run() {
     const typeAction = await TypeAction.findBy('abbreviation', 'SMS');
     if (typeAction) {
-      const actions = await Action.query().where('retornotexto', 'Em fila').where('typeActionId', typeAction.id).whereRaw('created_at::date = CURRENT_DATE');
+      const actions = await Action.query()
+        .where('retornotexto', 'Em fila')
+        .where('typeActionId', typeAction.id)
+        .whereRaw('created_at::date = CURRENT_DATE');
 
       for (const action of actions) {
         await handleSendingForRecupera(action);
       }
       console.log(actions.length);
-
     }
   }
 }

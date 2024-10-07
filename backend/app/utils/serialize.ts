@@ -1,7 +1,8 @@
 import string from '@adonisjs/core/helpers/string';
 
-export function serializeKeysCamelCase(data: any[] | { meta: any, data: any[]; } | any) {
-
+export function serializeKeysCamelCase(
+  data: any[] | { meta: any; data: any[] } | any
+) {
   const serializeObject = (obj: any) => {
     const serialized = {};
     for (const key in obj) {
@@ -13,7 +14,6 @@ export function serializeKeysCamelCase(data: any[] | { meta: any, data: any[]; }
     return serialized;
   };
 
-
   if (Array.isArray(data)) {
     return data.map(serializeObject);
   }
@@ -26,11 +26,11 @@ export function serializeKeysCamelCase(data: any[] | { meta: any, data: any[]; }
     };
   }
   return serializeObject(data);
-
 }
 
-export function serializeKeysSnakeCase(data: any[] | { meta: any, data: any[]; } | any) {
-
+export function serializeKeysSnakeCase(
+  data: any[] | { meta: any; data: any[] } | any
+) {
   const serializeObject = (obj: any) => {
     const serialized = {};
     for (const key in obj) {
@@ -42,7 +42,6 @@ export function serializeKeysSnakeCase(data: any[] | { meta: any, data: any[]; }
     return serialized;
   };
 
-
   if (Array.isArray(data)) {
     return data.map(serializeObject);
   }
@@ -55,5 +54,4 @@ export function serializeKeysSnakeCase(data: any[] | { meta: any, data: any[]; }
     };
   }
   return serializeObject(data);
-
-};
+}

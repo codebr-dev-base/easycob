@@ -12,18 +12,27 @@ import fs from 'fs';
 import SendEmailJob from '#jobs/send_email_job';
 import SendSmsJob from '#jobs/send_sms_job';
 import { serializeKeysCamelCase } from '#utils/serialize';
+import string from '@adonisjs/core/helpers/string';
 
 @inject()
 export default class CampaignsController {
-
-  constructor(protected service: CampaignService) {
-  }
+  constructor(protected service: CampaignService) {}
   public async index({ request }: HttpContext) {
-    const sql = fs.readFileSync('app/sql/campaign/exists_pendencies.sql', 'utf8');
+    const sql = fs.readFileSync(
+      'app/sql/campaign/exists_pendencies.sql',
+      'utf8'
+    );
     const qs = request.qs();
     const pageNumber = qs.page || '1';
     const limit = qs.perPage || '10';
-    const orderBy = qs.orderBy || 'id';
+    let orderBy = 'c.id';
+    if (qs.orderBy) {
+      if (qs.orderBy === 'user') {
+        orderBy = `u.name`;
+      } else {
+        orderBy = `c.${string.snakeCase(qs.orderBy)}`;
+      }
+    }
     const descending = qs.descending || 'true';
 
     const listOutColumn = ['user'];
@@ -33,32 +42,28 @@ export default class CampaignsController {
       selected = await this.service.generateWhereInPaginate(qs);
     }
 
-    const campaigns = await db.from('public.campaigns as c')
+    const campaigns = await db
+      .from('public.campaigns as c')
       .select('c.*')
-      .select(
-        db.raw(sql)
-      )
-      .select('users.name as user')
-      .innerJoin('users', 'users.id', '=', 'c.user_id')
+      .select(db.raw(sql))
+      .select('u.name as user')
+      .innerJoin('users as u', 'u.id', '=', 'c.user_id')
       .where((q) => {
         if (selected) {
           q.whereIn(selected.column, selected.list);
         }
         return this.service.generateWherePaginate(q, qs);
       })
-      .orderBy(`c.${orderBy}`, descending === 'true' ? 'desc' : 'asc')
+      .orderBy(`${orderBy}`, descending === 'true' ? 'desc' : 'asc')
       .paginate(pageNumber, limit);
 
     return serializeKeysCamelCase(campaigns.toJSON());
-
   }
 
   public async create({ auth, request, response }: HttpContext) {
-
     const user: User = auth.user!;
 
     const payload = await this.service.createCampaignValidator(request);
-
 
     try {
       const newFileName = await this.service.handlerFile(request);
@@ -69,34 +74,51 @@ export default class CampaignsController {
         userId: user.id,
       });
 
-
       await LoadCsvCampaignJob.dispatch(
         {
           campaign_id: campaign.id,
           user_id: user.id,
         },
         {
-          queueName: 'LoadCsv'
-        },
+          queueName: 'LoadCsv',
+        }
       );
 
       return {
         ...campaign.serialize(),
         url_file: `${campaign.fileName}`,
       };
-
     } catch (error) {
       return response.badRequest({
-        errors: error
+        errors: error,
       });
     }
-
   }
 
-  public async send({ auth, params }: HttpContext) {
+  public async show({ params, response }: HttpContext) {
+    try {
+      const { id } = params;
+
+      const campaign = await Campaign.find(id);
+
+      return campaign;
+    } catch (error) {
+      return response.badRequest({
+        errors: [
+          {
+            status: 'error',
+            message: 'Não foi possivel renvia campanha!',
+          },
+        ],
+      });
+    }
+  }
+
+  public async send({ auth, params, response }: HttpContext) {
     try {
       const user: User = auth.user!;
       const { id } = params;
+
       const campaign = await Campaign.find(id);
       if (campaign) {
         const lots = await CampaignLot.query()
@@ -105,11 +127,9 @@ export default class CampaignsController {
           .whereNull('messageid')
           .where('valid', true);
 
-
         //Criar class para enviar as campanhas
 
         if (lots.length > 0) {
-
           if (campaign.type === 'SMS') {
             await SendSmsJob.dispatch(
               {
@@ -117,8 +137,8 @@ export default class CampaignsController {
                 user_id: user.id,
               },
               {
-                queueName: 'SendSms'
-              },
+                queueName: 'SendSms',
+              }
             );
           }
 
@@ -129,23 +149,34 @@ export default class CampaignsController {
                 user_id: user.id,
               },
               {
-                queueName: 'SendEmail'
-              },
+                queueName: 'SendEmail',
+              }
             );
           }
-          return true;
-
+          response.status(200).send({ status: true });
         }
-
       }
-      return false;
+      return response.badRequest({
+        errors: [
+          {
+            status: 'error',
+            message: 'Não foi possivel renvia campanha!',
+          },
+        ],
+      });
     } catch (error) {
-      return error;
+      return response.badRequest({
+        errors: [
+          {
+            status: 'error',
+            message: 'Não foi possivel renvia campanha!',
+          },
+        ],
+      });
     }
   }
 
   public getFile({ request, response }: HttpContext) {
-
     const PATH_TRAVERSAL_REGEX = /(?:^|[\\/])\.\.(?:[\\/]|$)/;
 
     const filePath = request.param('*').join(sep);

@@ -4,122 +4,141 @@ import User from '#models/user';
 import { serializeKeysCamelCase } from '#utils/serialize';
 import { updateNegotiationInvoiceValidator } from '#validators/negotiation_invoice_validator';
 import { inject } from '@adonisjs/core';
+import string from '@adonisjs/core/helpers/string';
 import type { HttpContext } from '@adonisjs/core/http';
 import db from '@adonisjs/lucid/services/db';
 
 @inject()
 export default class NegotiationInvoicesController {
-
-    public async index({ request }: HttpContext) {
-        const qs = request.qs();
-        const pageNumber = qs.page || '1';
-        const limit = qs.perPage || '10';
-        const orderBy = qs.orderBy || 'id';
-        const descending = qs.descending || 'true';
-
-        const actions = await db.from('negotiation_invoices')
-            .select('negotiation_invoices.*')
-            .select('negotiation_of_payments.id_negotiation')
-            .select('actions.user_id as user_id')
-            .select('users.name as user')
-            .select('clients.nom_clien as client')
-            .select('actions.contato as contato')
-            .select('actions.des_contr as des_contr')
-            .innerJoin(
-                'negotiation_of_payments',
-                'negotiation_of_payments.id',
-                '=',
-                'negotiation_invoices.negotiation_of_payment_id'
-            )
-            .innerJoin('actions', 'actions.id', '=', 'negotiation_of_payments.action_id')
-            .innerJoin('users', 'users.id', '=', 'actions.user_id')
-            .innerJoin(
-                'recupera.tbl_arquivos_clientes as clients',
-                'clients.cod_credor_des_regis',
-                '=',
-                'actions.cod_credor_des_regis'
-            )
-            .where((q) => {
-                /*
-                if (qs.startDate && qs.endDate) {
-                  q.whereBetween('negotiation_invoices.dat_prest', [qs.startDate, qs.endDate])
-                }
-                 */
-
-                if (qs.startDate && qs.endDate) {
-                    q.whereRaw(`negotiation_invoices.dat_prest::date >= ?`, [qs.startDate]).andWhereRaw(
-                        `negotiation_invoices.dat_prest::date <= ?`,
-                        [qs.endDate]
-                    );
-                }
-
-                if (qs.startDate_create && qs.endDateCreate) {
-                    q.whereRaw(`negotiation_invoices.created_at::date >= ?`, [
-                        qs.startDate_create,
-                    ]).andWhereRaw(`negotiation_invoices.created_at::date <= ?`, [qs.endDateCreate]);
-                }
-
-                if (qs.userId) {
-                    q.where('actions.user_id', qs.userId);
-                }
-
-                if (qs.status && qs.status === 'true') {
-                    q.where('negotiation_invoices.status', qs.status);
-                }
-
-                return q;
-            })
-            .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
-            .paginate(pageNumber, limit);
-
-        return serializeKeysCamelCase(actions.toJSON());
+  public async index({ request }: HttpContext) {
+    const qs = request.qs();
+    const pageNumber = qs.page || '1';
+    const limit = qs.perPage || '10';
+    let orderBy = 'i.id';
+    if (qs.orderBy) {
+      if (qs.orderBy === 'user') {
+        orderBy = `u.name`;
+      } else if (qs.orderBy === 'client') {
+        orderBy = `cls.nom_clien`;
+      } else if (qs.orderBy === 'contato') {
+        orderBy = `a.contato`;
+      } else if (qs.orderBy === 'desContr') {
+        orderBy = `a.des_contr`;
+      } else if (qs.orderBy === 'idNegotiation') {
+        orderBy = `n.id_negotiation`;
+      } else {
+        orderBy = `i.${string.snakeCase(qs.orderBy)}`;
+      }
     }
+    const descending = qs.descending || 'true';
 
-    public async update({ auth, params, request, response }: HttpContext) {
-        //TODO revisar validação e checar o metodo no front
-        const user: User = auth.user!;
-        try {
-            const { id } = params;
-            const negotiationInvoice = await NegotiationInvoice.findOrFail(id);
-
-            const body = request.body();
-
-            const payload = await request.validateUsing(updateNegotiationInvoiceValidator);
-
-            await negotiationInvoice.merge({ ...payload, status: true }).save();
-
-            if (body.comments) {
-                const negotiationInvoiceHistory = await NegotiationInvoiceHistory.create({
-                    negotiationInvoiceId: negotiationInvoice.id,
-                    comments: body.comments,
-                    userId: user.id,
-                });
-                return negotiationInvoiceHistory;
-            }
-            response.badRequest({ messages: 'error in body' });
-        } catch (error) {
-            response.badRequest({ messages: error.messages });
+    const actions = await db
+      .from('negotiation_invoices as i')
+      .select('i.*')
+      .select('n.id_negotiation')
+      .select('a.user_id as user_id')
+      .select('u.name as user')
+      .select('cls.nom_clien as client')
+      .select('a.contato as contato')
+      .select('a.des_contr as des_contr')
+      .innerJoin(
+        'negotiation_of_payments as n',
+        'n.id',
+        '=',
+        'i.negotiation_of_payment_id'
+      )
+      .innerJoin('actions as a', 'a.id', '=', 'n.action_id')
+      .innerJoin('users as u', 'u.id', '=', 'a.user_id')
+      .innerJoin(
+        'recupera.tbl_arquivos_clientes as cls',
+        'cls.cod_credor_des_regis',
+        '=',
+        'a.cod_credor_des_regis'
+      )
+      .where((q) => {
+        if (qs.startDate && qs.endDate) {
+          q.whereRaw(`i.dat_prest::date >= ?`, [qs.startDate]).andWhereRaw(
+            `i.dat_prest::date <= ?`,
+            [qs.endDate]
+          );
         }
+
+        if (qs.startDate_create && qs.endDateCreate) {
+          q.whereRaw(`i.created_at::date >= ?`, [
+            qs.startDate_create,
+          ]).andWhereRaw(`i.created_at::date <= ?`, [qs.endDateCreate]);
+        }
+
+        if (qs.userId) {
+          q.where('a.user_id', qs.userId);
+        }
+
+        if (qs.status && qs.status == 'true') {
+          q.where('i.status', qs.status);
+        }
+
+        return q;
+      })
+      .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
+      .paginate(pageNumber, limit);
+
+    return serializeKeysCamelCase(actions.toJSON());
+  }
+
+  public async update({ auth, params, request, response }: HttpContext) {
+    //TODO revisar validação e checar o metodo no front
+    const user: User = auth.user!;
+    try {
+      const { id } = params;
+      const negotiationInvoice = await NegotiationInvoice.findOrFail(id);
+
+      const body = request.body();
+
+      const payload = await request.validateUsing(
+        updateNegotiationInvoiceValidator
+      );
+
+      await negotiationInvoice.merge({ ...payload, status: true }).save();
+
+      if (body.comments) {
+        const negotiationInvoiceHistory =
+          await NegotiationInvoiceHistory.create({
+            negotiationInvoiceId: negotiationInvoice.id,
+            comments: body.comments,
+            userId: user.id,
+          });
+        return negotiationInvoiceHistory;
+      }
+      response.badRequest({ messages: 'error in body' });
+    } catch (error) {
+      response.badRequest({ messages: error.messages });
     }
+  }
 
-    public async getHistory({ params, request }: HttpContext) {
-        const qs = request.qs();
-        const orderBy = qs.orderBy || 'id';
-        const descending = qs.descending || 'true';
-        const { id } = params;
+  public async getHistory({ params, request }: HttpContext) {
+    const qs = request.qs();
+    const orderBy = qs.orderBy || 'id';
+    const descending = qs.descending || 'true';
+    const { id } = params;
 
-        const actions = await db.from('negotiation_invoice_histories')
-            .select('negotiation_invoice_histories.*')
-            .select('users.name as user')
-            .innerJoin('users', 'users.id', '=', 'negotiation_invoice_histories.user_id')
-            .where((q) => {
-                if (id) {
-                    q.where('negotiation_invoice_id', id);
-                }
-                return q;
-            })
-            .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc');
+    const actions = await db
+      .from('negotiation_invoice_histories')
+      .select('negotiation_invoice_histories.*')
+      .select('users.name as user')
+      .innerJoin(
+        'users',
+        'users.id',
+        '=',
+        'negotiation_invoice_histories.user_id'
+      )
+      .where((q) => {
+        if (id) {
+          q.where('negotiation_invoice_id', id);
+        }
+        return q;
+      })
+      .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc');
 
-        return serializeKeysCamelCase(actions);
-    }
+    return serializeKeysCamelCase(actions);
+  }
 }

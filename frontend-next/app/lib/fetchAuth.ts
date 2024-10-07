@@ -27,24 +27,40 @@ export async function fetchAuth<T = any>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  // Converte o objeto query para query string, se existir
-  let finalUrl = url;
-  if (options.query) {
-    // Limpa os valores nulos ou indefinidos
-    const cleanedQuery = Object.fromEntries(
-      Object.entries(options.query).filter(
-        ([_, value]) => value !== null && value !== undefined
-      )
-    );
+// Converte o objeto query para query string, se existir
+let finalUrl = url;
+if (options.query) {
+  // Limpa os valores nulos, indefinidos e strings vazias ou com espaços em branco
+  const cleanedQuery = Object.fromEntries(
+    Object.entries(options.query).filter(
+      ([_, value]) =>
+        value !== null &&
+        value !== undefined &&
+        (typeof value !== "string" || value.trim() !== "") // Se for string, remove strings vazias ou só com espaços
+    )
+  );
 
-    // Converte o objeto query para uma string de consulta
-    const queryString = new URLSearchParams(
-      cleanedQuery as Record<string, string>
-    ).toString();
+  // Converte arrays para múltiplos valores na query string
+  const queryString = new URLSearchParams(
+    Object.entries(cleanedQuery).reduce((acc, [key, value]) => {
+      if (Array.isArray(value)) {
+        // Para arrays, adiciona cada item individualmente no mesmo parâmetro
+        value.forEach((v) => {
+          if (v !== null && v !== undefined) {
+            acc.append(key, v.toString());
+          }
+        });
+      } else if (value !== null && value !== undefined) {
+        // Verifica se value não é null ou undefined antes de adicionar
+        acc.append(key, value.toString());
+      }
+      return acc;
+    }, new URLSearchParams())
+  ).toString();
 
-    // Anexa a string de consulta à URL
-    finalUrl = `${url}?${queryString}`;
-  }
+  // Anexa a string de consulta à URL
+  finalUrl = `${url}?${queryString}`;
+}
 
   try {
     const response = await fetch(finalUrl, {

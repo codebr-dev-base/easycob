@@ -1,49 +1,68 @@
 import type { HttpContext } from '@adonisjs/core/http';
 import CampaignLotService from '#services/campaign_lot_service';
-import ErrorCampaignImport from '#models/error_campaign_import';
 import { inject } from '@adonisjs/core';
+import db from '@adonisjs/lucid/services/db';
+import { serializeKeysCamelCase } from '#utils/serialize';
+import string from '@adonisjs/core/helpers/string';
 
 @inject()
 export default class ErrorCampaignsController {
+  constructor(protected service: CampaignLotService) {}
 
-    constructor(protected service: CampaignLotService) {
+  public async index({ params, request }: HttpContext) {
+    const { id } = params;
+    const qs = request.qs();
+    const pageNumber = qs.page || '1';
+    const limit = qs.perPage || '10';
+    let orderBy = 'lots.id';
+
+    if (qs.orderBy) {
+      if (qs.orderBy === 'user') {
+        orderBy = `u.name`;
+      } else if (qs.orderBy === 'cliente') {
+        orderBy = `cls.nom_clien `;
+      } else if (qs.orderBy === 'contrato') {
+        orderBy = `c.des_contr `;
+      } else if (qs.orderBy === 'filial') {
+        orderBy = `s.name`;
+      } else {
+        orderBy = `lots.${string.snakeCase(qs.orderBy)}`;
+      }
     }
+    const descending = qs.descending || 'true';
 
-    /**
-     * Display a list of resource
-     */
-    public async index({ request }: HttpContext) {
-        const qs = request.qs();
-        const pageNumber = qs.page || '1';
-        const limit = qs.perPage || '10';
-        const orderBy = qs.orderBy || 'id';
-        const descending = qs.descending || 'true';
+    const selected = await this.service.generateWhereInPaginate(qs);
 
+    const lots = await db
+      .from('public.error_campaign_imports AS lots')
+      .joinRaw(
+        `LEFT JOIN recupera.tbl_arquivos_clientes AS cls
+     ON lots.cod_credor_des_regis = cls.cod_credor_des_regis::VARCHAR`
+      )
+      .joinRaw(
+        `LEFT JOIN (
+        SELECT DISTINCT ON (cod_credor_des_regis) *
+        FROM recupera.tbl_arquivos_contratos
+        ORDER BY cod_credor_des_regis, des_contr DESC
+     ) AS c
+     ON lots.cod_credor_des_regis = c.cod_credor_des_regis::VARCHAR`
+      )
+      .leftJoin('public.subsidiaries as s', 'c.nom_loja', 's.nom_loja')
+      .select(
+        'lots.*',
+        'cls.nom_clien as cliente',
+        'c.des_contr as contrato',
+        's.name as filial'
+      )
+      .where((q) => {
+        if (selected) {
+          q.whereIn(`lots.${selected.column}`, selected.list);
+        }
+        q.where('campaign_id', Number(id));
+      })
+      .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
+      .paginate(pageNumber, limit);
 
-
-        const lots = await ErrorCampaignImport.query()
-            .joinRaw(
-                'LEFT JOIN recupera.tbl_arquivos_clientes AS clients ON error_campaign_imports.cod_credor_des_regis = CAST(clients.cod_credor_des_regis AS varchar)'
-            )
-            .joinRaw(
-                'LEFT JOIN recupera.tbl_arquivos_contratos AS contracts ON error_campaign_imports.cod_credor_des_regis = CAST(contracts.cod_credor_des_regis AS varchar)'
-            )
-            .leftJoin('public.subsidiaries as subsidiaries', 'contracts.nom_loja', 'subsidiaries.nom_loja')
-            .select(
-                'error_campaign_imports.*', // Seleciona todos os campos da tabela campaign_lots
-                'clients.nom_clien as cliente',
-                'contracts.des_contr as contrato',
-                'subsidiaries.name as filial'
-            )
-            .where((q) => {
-                return this.service.generateWherePaginate(q, qs);
-            })
-            .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
-            .paginate(pageNumber, limit);
-
-
-
-
-        return lots;
-    }
+    return serializeKeysCamelCase(lots.toJSON());
+  }
 }

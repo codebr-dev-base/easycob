@@ -1,4 +1,4 @@
-import { defineConfig } from '@adonisjs/core/app'
+import { defineConfig } from '@adonisjs/core/app';
 
 export default defineConfig({
   /*
@@ -14,7 +14,7 @@ export default defineConfig({
     () => import('@adonisjs/core/commands'),
     () => import('@adonisjs/lucid/commands'),
     () => import('@adonisjs/mail/commands'),
-    () => import('adonisjs-jobs/commands')
+    () => import('adonisjs-jobs/commands'),
   ],
 
   /*
@@ -41,7 +41,7 @@ export default defineConfig({
     () => import('@adonisjs/core/providers/edge_provider'),
     () => import('@adonisjs/static/static_provider'),
     () => import('@adonisjs/mail/mail_provider'),
-    () => import('adonisjs-jobs/jobs_provider')
+    () => import('adonisjs-jobs/jobs_provider'),
   ],
 
   /*
@@ -90,11 +90,10 @@ export default defineConfig({
     {
       pattern: 'public/**',
       reloadServer: false,
-    }
-    ,
+    },
     {
       pattern: 'app/sql/**',
       reloadServer: false,
-    }
-  ]
-})
+    },
+  ],
+});

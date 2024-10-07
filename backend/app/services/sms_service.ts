@@ -101,7 +101,7 @@ export default class SmsService {
 
         if (regex.test(item.standardized)) {
             if (campaign.singleSend) {
-                const isContato = await this.blacklist.includes(item.standardized);
+                const isContato = this.blacklist.includes(item.standardized);
                 await item.refresh();
 
                 if (!isContato) {
@@ -111,7 +111,7 @@ export default class SmsService {
                     return true;
                 } else {
                     if (item.messageid === null) {
-                        item.status = 'E-mail já utilizado';
+                        item.status = 'Telefone já utilizado';
                         item.descricao = null;
                         item.valid = false;
                         await item.save();

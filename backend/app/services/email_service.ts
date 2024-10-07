@@ -115,7 +115,7 @@ export default class EmailService {
         */
         if (regex.test(item.standardized)) {
             if (campaign.singleSend) {
-                const isContato = await this.blacklist.includes(item.standardized);
+                const isContato = this.blacklist.includes(item.standardized);
                 await item.refresh();
 
                 if (!isContato) {
@@ -130,7 +130,6 @@ export default class EmailService {
                         item.valid = false;
                         await item.save();
                     }
-
                     return false;
                 }
             }

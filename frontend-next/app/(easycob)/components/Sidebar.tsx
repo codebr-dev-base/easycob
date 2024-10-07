@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import easycobWhite from "@/app/assets/img/easycob_white.svg";
+import easycobWhite from "@/app/assets/img/easycob_white.png";
 import logo from "@/app/assets/img/logo.svg";
 import { useState } from "react";
 import { FaBars } from "react-icons/fa"; // Exemplo de ícones
@@ -18,6 +18,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
+import { Suspense } from "react";
 
 export default function Sidebar({ children }: { children: React.ReactNode }) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -26,7 +27,6 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
 
   const toggleSidebar = () => {
     if (isExpanded) {
-      // collapse all sidebar sections when toggling to not Expanded state
       setAccordionSections([]);
     }
     setIsExpanded(!isExpanded);
@@ -40,10 +40,10 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
   const initials = getUserInitials();
 
   return (
-    <div>
+    <div className="flex">
       {/* Botão para abrir sidebar no mobile */}
       <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-priamry text-white rounded-md"
+        className="md:hidden fixed top-2 left-2 z-50 p-2 bg-primary text-white rounded-md"
         onClick={toggleMobileSidebar}
       >
         {isMobileOpen ? <FaXmark size={24} /> : <FaBars size={24} />}
@@ -75,131 +75,14 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Sidebar para telas médias e maiores */}
-      <div className="flex">
-        <aside
-          className={`bg-primary text-white h-screen hidden lg:flex flex-col items-center justify-between transition-all duration-300 ease-in-out relative px-5 shadow ${
-            isExpanded ? "w-[15%]" : "w-[5%]"
-          }`}
-        >
-          {/* Ícones ou menu compacto */}
-          <header className="h-20 my-3">
-            {isExpanded ? (
-              <div className="justify-center items-center hidden md:flex transition-all duration-300 ease-in-out">
-                <Image
-                  src={easycobWhite}
-                  alt="Easycob white"
-                  width={256}
-                  height={128}
-                />
-              </div>
-            ) : (
-              <div className="justify-center items-center hidden md:flex transition-all duration-300 ease-in-out">
-                <Image src={logo} alt="Easycob white" width={64} height={64} />
-              </div>
-            )}
-          </header>
-          <main className="h-full w-full">
-            <nav className="flex flex-col items-center space-y-6">
-              <Accordion
-                type="multiple"
-                className={`w-full min-w-fit data-[disabled]:w-0 transition-all`}
-                disabled={!isExpanded}
-                value={accordionSections}
-                onValueChange={setAccordionSections}
-              >
-                <AccordionItem value="operator-menu" className="border-none">
-                  <AccordionTrigger>
-                    <div className="w-full flex gap-2 items-center">
-                      <HiOutlinePhone size={24} />
-                      <span className={`${!isExpanded ? "hidden" : ""} `}>
-                        Operador
-                      </span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
-                    <Link href={"/operator/clients"}>Clientes</Link>
-                    <Link href={"/operator/followup"}>Acompanhamento</Link>
-                    <Link href={"/operator/loyal"}>Fidelizados</Link>
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="supervisor-menu" className="border-none">
-                  <AccordionTrigger>
-                    <div className="w-full flex gap-2 items-center">
-                      <LuListTodo size={24} />
-                      <span className={`${!isExpanded ? "hidden" : ""} `}>
-                        Supervisão
-                      </span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
-                    <Link href={"/supervisor/actions"}>Acionamentos</Link>
-                    <Link href={"/supervisor/discounts"}>Descontos</Link>
-                    <Accordion
-                      type="multiple"
-                      value={accordionSections}
-                      onValueChange={setAccordionSections}
-                    >
-                      <AccordionItem
-                        value="submenu-campaings"
-                        className="border-none"
-                      >
-                        <AccordionTrigger>Campanhas</AccordionTrigger>
-                        <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
-                          <Link href={"/supervisor/campaings/sms"}>SMS</Link>
-                          <Link href={"/supervisor/campaings/sms"}>Email</Link>
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="admin-menu" className="border-none">
-                  <AccordionTrigger>
-                    <div className="w-full flex gap-2 items-center">
-                      <LuLock size={24} />
-                      <span className={`${!isExpanded ? "hidden" : ""} `}>
-                        Admin
-                      </span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
-                    <Link href={"/admin"}>Usuários</Link>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </nav>
-          </main>
-          <footer
-            className={`flex items-center justify-between w-full p-3 ${
-              isExpanded ? "flex-row" : "flex-col"
-            }`}
-          >
-            <Link href="/profile" className="p-1">
-              <div className="p-1 bg-slate-300 rounded-3xl justify-start items-center gap-2 flex text-blue-600">
-                <div className="w-10 h-10 bg-slate-200 rounded-full flex justify-center">
-                  <div className="m-auto font-medium">{initials ?? "U"}</div>
-                </div>
-              </div>
-            </Link>
-            <form
-              action={logout}
-              className="p-1 flex items-center justify-center"
-            >
-              <Button
-                variant="destructive"
-                type="submit"
-                className="max-w-[80%]"
-              >
-                Sair
-              </Button>
-            </form>
-          </footer>
-        </aside>
-
-        {/* Botão para expandir/recolher sidebar, posicionado na borda da tela */}
+      <aside
+        className={`fixed bg-primary text-white min-h-screen hidden md:flex flex-col items-center justify-between transition-all duration-300 ease-in-out  px-2 py-1  shadow ${
+          isExpanded ? "w-[15%]" : "w-[5%]"
+        }`}
+      >
+        {/* Botão para expandir/recolher sidebar */}
         <button
-          className={`absolute top-1/2 transform -translate-y-1/2 bg-primary text-white rounded-r-lg py-2 px-0 transition-all duration-300 hidden lg:flex ${
-            isExpanded ? "left-[15%]" : "left-[5%]"
-          }`}
+          className={`absolute top-1/2 left-[100%] transform -translate-y-1/2 bg-primary text-white rounded-r-xl transition-all duration-300 hidden md:flex h-12 w-6 justify-start items-center -50`}
           onClick={toggleSidebar}
         >
           {isExpanded ? (
@@ -208,9 +91,118 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             <FiChevronRight size={24} />
           )}
         </button>
+        {/* Conteúdo da sidebar */}
+        <header className="h-20 my-3">
+          {isExpanded ? (
+            <div className="justify-center items-center hidden md:flex transition-all duration-300 ease-in-out">
+              <Image
+                src={easycobWhite}
+                alt="Easycob white"
+                width={256}
+                height={128}
+              />
+            </div>
+          ) : (
+            <div className="justify-center items-center hidden md:flex transition-all duration-300 ease-in-out">
+              <Image
+                src={logo}
+                alt="Easycob white"
+                width={128}
+                height={128}
+                className="min-w-10"
+              />
+            </div>
+          )}
+        </header>
+        <main className="h-full w-full">
+          <nav
+            className={`flex flex-col items-center space-y-6 ${
+              !isExpanded ? "ml-1" : "ml-4"
+            }`}
+          >
+            <Accordion
+              type="multiple"
+              className={`w-full min-w-fit data-[disabled]:w-0 transition-all`}
+              disabled={!isExpanded}
+              value={accordionSections}
+              onValueChange={setAccordionSections}
+            >
+              <AccordionItem value="operator-menu" className="border-none">
+                <AccordionTrigger>
+                  <div className="w-full flex gap-2 items-center">
+                    <HiOutlinePhone size={24} />
+                    <span className={`${!isExpanded ? "hidden" : ""} `}>
+                      Operador
+                    </span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
+                  <Link href={"/operator/clients"}>Clientes</Link>
+                  <Link href={"/operator/followup"}>Acompanhamento</Link>
+                  <Link href={"/operator/loyal"}>Fidelizados</Link>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="supervisor-menu" className="border-none">
+                <AccordionTrigger>
+                  <div className="w-full flex gap-2 items-center">
+                    <LuListTodo size={24} />
+                    <span className={`${!isExpanded ? "hidden" : ""} `}>
+                      Supervisão
+                    </span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
+                  <Link href={"/supervision/actions"}>Acionamentos</Link>
+                  <Link href={"/supervision/campaigns"}>Campanhas</Link>
+                  <Link href={"/supervision/discounts"}>Descontos</Link>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="admin-menu" className="border-none">
+                <AccordionTrigger>
+                  <div className="w-full flex gap-2 items-center">
+                    <LuLock size={24} />
+                    <span className={`${!isExpanded ? "hidden" : ""} `}>
+                      Admin
+                    </span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
+                  <Link href={"/admin"}>Usuários</Link>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </nav>
+        </main>
+        <footer
+          className={`flex items-center justify-between w-full p-3 ${
+            isExpanded ? "flex-row" : "flex-col"
+          }`}
+        >
+          <Link href="/profile" className="p-1">
+            <div className="p-1 bg-slate-300 rounded-3xl justify-start items-center gap-2 flex text-blue-600">
+              <div className="w-10 h-10 bg-slate-200 rounded-full flex justify-center">
+                <div className="m-auto font-medium">{initials ?? "U"}</div>
+              </div>
+            </div>
+          </Link>
+          <form
+            action={logout}
+            className="p-1 flex items-center justify-center"
+          >
+            <Button variant="destructive" type="submit" className="max-w-[80%]" size={!isExpanded ? "sm" : "default"}>
+              Sair
+            </Button>
+          </form>
+        </footer>
+      </aside>
 
-        {/* Conteúdo principal */}
-        <div className="w-full flex-1">{children}</div>
+      {/* Conteúdo principal ajustável */}
+      <div
+        className={`transition-all duration-300 flex-1 w-full ${
+          isExpanded ? "md:ml-[15%] md:w-[85%]" : "md:ml-[5%] md:w-[95%]"
+        }`}
+      >
+        <Suspense fallback={<p>Loading feed...</p>}>{children}</Suspense>
       </div>
     </div>
   );

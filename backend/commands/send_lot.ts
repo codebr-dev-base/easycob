@@ -15,10 +15,11 @@ export default class SendLot extends BaseCommand {
   };
 
   async run() {
-
     const service = new EmailService();
 
-    const campaigns = await Campaign.query().where('type', 'EMAIL').whereRaw('created_at::date = CURRENT_DATE');
+    const campaigns = await Campaign.query()
+      .where('type', 'EMAIL')
+      .whereRaw('created_at::date = CURRENT_DATE');
 
     for (const campaign of campaigns) {
       const lots = await CampaignLot.query()
@@ -37,15 +38,6 @@ export default class SendLot extends BaseCommand {
         await service.createAction(item, clientsGroups, campaign);
       }
     }
-
-
-
-
-
-
-
-
-
 
     this.logger.info('Hello world from "SendLot"');
   }

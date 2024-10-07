@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const chunks = (items: Array<any>, max: number) => {
   return items.reduce((accumulator, item, index) => {
     const grupo = Math.floor(index / max);

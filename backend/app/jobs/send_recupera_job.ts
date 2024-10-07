@@ -36,22 +36,21 @@ interface SoapResponse {
 
 interface SoapBody {
   XML?: {
-    RETORNO?: string,
+    RETORNO?: string;
     RETORNOTEXTO?: string;
   };
 }
 
 export default class SendRecuperaJob extends Job {
-
   declare urlRecupera: string;
   declare optionsJson: {
-    object: true,
-    reversible: false,
-    coerce: false,
-    sanitize: true,
-    trim: true,
-    arrayNotation: false,
-    alternateTextNode: false,
+    object: true;
+    reversible: false;
+    coerce: false;
+    sanitize: true;
+    trim: true;
+    arrayNotation: false;
+    alternateTextNode: false;
   };
   queueName = 'SendRecupera';
 
@@ -73,14 +72,15 @@ export default class SendRecuperaJob extends Job {
   checkResultSync(retornotexto: string): boolean {
     const keywords = ['PRIMARY', 'DEADLOCK', 'TIMEOUT'];
 
-    return keywords.some(keyword => retornotexto.toUpperCase().includes(keyword));
+    return keywords.some((keyword) =>
+      retornotexto.toUpperCase().includes(keyword)
+    );
   }
 
   /**
    * Base Entry point
    */
   async handle(payload: SendRecuperaJobPayload) {
-
     const edge = Edge.create();
     edge.mount(app.viewsPath());
     const envelop = await edge.render('xml/envelop', { action: payload });
@@ -98,13 +98,19 @@ export default class SendRecuperaJob extends Job {
           timeout: 20000,
         });
 
-        const resultJson = <SoapResponse>xmlParser.toJson(result, this.optionsJson);
+        const resultJson = <SoapResponse>(
+          xmlParser.toJson(result, this.optionsJson)
+        );
 
-        const OcorrenciaResult = resultJson['soap:Envelope']?.['soap:Body']?.IncluirOcorrenciaResponse?.IncluirOcorrenciaResult;
+        const OcorrenciaResult =
+          resultJson['soap:Envelope']?.['soap:Body']?.IncluirOcorrenciaResponse
+            ?.IncluirOcorrenciaResult;
 
         const soapBody = OcorrenciaResult ? OcorrenciaResult : '';
 
-        const resultSync = <SoapBody>xmlParser.toJson(soapBody, this.optionsJson);
+        const resultSync = <SoapBody>(
+          xmlParser.toJson(soapBody, this.optionsJson)
+        );
 
         const retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
 
@@ -116,7 +122,10 @@ export default class SendRecuperaJob extends Job {
             action.retornotexto = 'Em fila';
             await action.save();
 
-            const contract = await Contract.findBy('des_contr', action.desContr);
+            const contract = await Contract.findBy(
+              'des_contr',
+              action.desContr
+            );
             const typeAction = await TypeAction.find(action.typeActionId);
 
             const item = {
@@ -127,20 +136,18 @@ export default class SendRecuperaJob extends Job {
               complemento: action.description ? action.description : '',
               fonediscado: action.contato,
               cocontratovincular: <string>contract?.desContr,
-              error: retornotexto
+              error: retornotexto,
             };
 
-
             await ResendRecuperaJob.dispatch(item, {
-              queueName: 'ResendRecupera'
+              queueName: 'ResendRecupera',
             });
-
           } else {
             action.retorno = null;
-            action.retornotexto = 'Já existe um acionamento válido de prioridade igual ou maior';
+            action.retornotexto =
+              'Já existe um acionamento válido de prioridade igual ou maior';
             await action.save();
           }
-
         } else {
           action.sync = true;
           action.resultSync = JSON.stringify(resultSync);
@@ -152,10 +159,11 @@ export default class SendRecuperaJob extends Job {
 
         if (action.retorno === '00') {
           const cod_credor_des_regis = `${action.codCredorDesRegis}`;
-          const jsonString = JSON.stringify(serializeKeysSnakeCase(action.toJSON()));
+          const jsonString = JSON.stringify(
+            serializeKeysSnakeCase(action.toJSON())
+          );
           redis.hset('last_actions', cod_credor_des_regis, jsonString);
         }
-
       } catch (error) {
         //action.sync = false;
         //await this.service.handleSendingForRecupera(action);
@@ -169,8 +177,6 @@ export default class SendRecuperaJob extends Job {
         console.error(error);
         throw error;
       }
-
     }
   }
-
 }

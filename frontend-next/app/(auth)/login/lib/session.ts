@@ -1,4 +1,5 @@
-import "server-only";
+'use server'
+//import "server-only";
 import {ISessionCookie} from "@/app/interfaces/auth";
 import { redirect } from "next/navigation";
 import { decrypt, encrypt } from "@/app/lib/crypto";
@@ -45,9 +46,7 @@ export async function updateSession() {
 
   // Definir o novo cookie com o token atualizado
   cookies.set("easycob_session", encrypt(accessToken), {
-    secure: true,
     expires: expiresAt,
-    sameSite: "lax",
     path: "/",
   });
 
@@ -81,7 +80,7 @@ export async function refresh(accessToken: ISessionCookie) {
   return payload;
 }
 
-export function deleteSession() {
+export async function deleteSession() {
   const cookies = getCookies();
   cookies.remove("easycob_session");
 }

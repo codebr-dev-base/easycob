@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div style="text-align: center;">
+        <svg id="goal-meter" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300" style="border: 1px solid #ccc;">
+          <!-- Montanha com três platôs -->
+          <path id="mountain" d="M 20 290 Q 50 250, 70 230 T 90 200 Q 110 180, 130 190 T 160 170 Q 180 160, 180 290 Z" fill="#7f8c8d" stroke="black" stroke-width="2" />
+      
+          <!-- Indicadores de Meta -->
+          <text x="30" y="260" font-size="12" fill="red">Baixo</text>
+          <text x="50" y="220" font-size="12" fill="orange">Regular</text>
+          <text x="130" y="180" font-size="12" fill="green">Ótimo</text>
+      
+          <!-- Boneco articulado -->
+          <g id="character">
+            <!-- Cabeça -->
+            <circle cx="20" cy="270" r="10" fill="#3498db" />
+            <!-- Corpo -->
+            <line x1="20" y1="280" x2="20" y2="300" stroke="#3498db" stroke-width="3" />
+            <!-- Braços -->
+            <line x1="20" y1="290" x2="10" y2="300" stroke="#3498db" stroke-width="3" />
+            <line x1="20" y1="290" x2="30" y2="300" stroke="#3498db" stroke-width="3" />
+            <!-- Pernas -->
+            <line x1="20" y1="300" x2="15" y2="320" stroke="#3498db" stroke-width="3" />
+            <line x1="20" y1="300" x2="25" y2="320" stroke="#3498db" stroke-width="3" />
+          </g>
+        </svg>
+      
+        <!-- Input de Range para controle da meta -->
+        <input type="range" id="goalRange" min="0" max="100" value="0" style="width: 200px;" />
+      </div>
+    <script type="text/javascript" src="main.js"></script>
+  </body>
+</html>

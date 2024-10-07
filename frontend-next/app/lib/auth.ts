@@ -1,7 +1,6 @@
 import { decrypt } from "@/app/lib/crypto";
 import Cookies from "js-cookie";
 import { getCookies } from "next-client-cookies/server";
-import { use } from "react";
 import { ISessionCookie, IUser } from "../interfaces/auth";
 
 export function getSession(): ISessionCookie | null {

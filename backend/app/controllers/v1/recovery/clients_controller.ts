@@ -11,122 +11,128 @@ import app from '@adonisjs/core/services/app';
 
 @inject()
 export default class ClientsController {
+  constructor(protected service: ClientService) {}
 
-    constructor(protected service: ClientService) {
+  public async index({ request }: HttpContext) {
+    //const raw = Database.raw
+    const qs = request.qs();
+    const pageNumber = qs.page || '1';
+    const limit = qs.perPage || '10';
+    const orderBy = qs.orderBy || 'id';
+    const descending = qs.descending || 'true';
+
+    const listOutColumn = ['phone', 'email', 'desContr'];
+
+    let selected = null;
+    if (listOutColumn.includes(qs.keywordColumn)) {
+      selected = await this.service.generateWhereInPaginate(qs);
     }
 
-    public async index({ request }: HttpContext) {
-        //const raw = Database.raw
-        const qs = request.qs();
-        const pageNumber = qs.page || '1';
-        const limit = qs.perPage || '10';
-        const orderBy = qs.orderBy || 'id';
-        const descending = qs.descending || 'true';
-
-        const listOutColumn = ['phone', 'email', 'desContr'];
-
-        let selected = null;
-        if (listOutColumn.includes(qs.keywordColumn)) {
-            selected = await this.service.generateWhereInPaginate(qs);
+    const clients = await Client.query()
+      .select(
+        'id',
+        'des_regis',
+        'nom_clien',
+        'des_cpf',
+        'cod_credor_des_regis',
+        'status'
+      )
+      .where((q) => {
+        if (selected) {
+          q.whereIn(selected.column, selected.list);
+        } else if (qs.keyword && qs.keyword.length > 4) {
+          q.whereILike(qs.keywordColumn, `%${qs.keyword}%`);
         }
 
-        const clients = await Client.query()
-            .select('id', 'des_regis', 'nom_clien', 'des_cpf', 'cod_credor_des_regis', 'status')
-            .where((q) => {
-
-                if (selected) {
-                    q.whereIn(selected.column, selected.list);
-                } else if (qs.keyword && qs.keyword.length > 4) {
-                    q.whereILike(qs.keywordColumn, `%${qs.keyword}%`);
-                }
-
-                if (qs.status) {
-                    q.where('status', `${qs.status}`.toUpperCase());
-                }
-            })
-            .preload('phones', (q) => {
-                q.select('contato', 'percentual_atender').where('tipo_contato', 'TELEFONE');
-            })
-            .preload('emails', (q) => {
-                q.select('contato').where('tipo_contato', 'EMAIL');
-            })
-            .preload('contracts', (q) => {
-                q.select('des_contr').where('status', 'ATIVO');
-            })
-            .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
-            .paginate(pageNumber, limit);
-
-        return clients;
-    }
-
-    public async show({ params }: HttpContext) {
-        const client = await Client.findBy('cod_credor_des_regis', params.id);
-
-        return client;
-    }
-
-    public async update({ params, request, response }: HttpContext) {
-        try {
-            const { id } = params;
-            const client = await Client.findOrFail(id);
-            const payload = await request.validateUsing(updateClientValidator);
-
-            await client.merge(payload).save();
-            return client;
-        } catch (error) {
-            response.badRequest({ messages: error.messages });
+        if (qs.status) {
+          q.where('status', `${qs.status}`.toUpperCase());
         }
+      })
+      .preload('phones', (q) => {
+        q.select('contato', 'percentual_atender').where(
+          'tipo_contato',
+          'TELEFONE'
+        );
+      })
+      .preload('emails', (q) => {
+        q.select('contato').where('tipo_contato', 'EMAIL');
+      })
+      .preload('contracts', (q) => {
+        q.select('des_contr').where('status', 'ATIVO');
+      })
+      .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
+      .paginate(pageNumber, limit);
+
+    return clients;
+  }
+
+  public async show({ params }: HttpContext) {
+    const client = await Client.findBy('cod_credor_des_regis', params.id);
+
+    return client;
+  }
+
+  public async update({ params, request, response }: HttpContext) {
+    try {
+      const { id } = params;
+      const client = await Client.findOrFail(id);
+      const payload = await request.validateUsing(updateClientValidator);
+
+      await client.merge(payload).save();
+      return client;
+    } catch (error) {
+      response.badRequest({ messages: error.messages });
     }
+  }
 
-    public async send({ auth, request }: HttpContext) {
-        const payload = await request.validateUsing(createClientMailValidator);
+  public async send({ auth, request }: HttpContext) {
+    const payload = await request.validateUsing(createClientMailValidator);
 
-        const mailInvoice = await MailInvoice.create({
-            codCredorDesRegis: payload.cod_credor_des_regis,
-            contact: payload.contact,
-            type: payload.type,
-            userId: auth?.user?.id,
-        });
+    const mailInvoice = await MailInvoice.create({
+      codCredorDesRegis: payload.cod_credor_des_regis,
+      contact: payload.contact,
+      type: payload.type,
+      userId: auth?.user?.id,
+    });
 
-        const files = request.files('file', {
-            size: '10mb',
-            extnames: ['pdf', 'PDF']
-        });
+    const files = request.files('file', {
+      size: '10mb',
+      extnames: ['pdf', 'PDF'],
+    });
 
+    for (const file of files) {
+      if (file && !file.isValid) {
+        throw file.errors;
+      } else if (!file) {
+        throw [
+          {
+            fieldName: 'Not file',
+            clientName: 'Not Client',
+            message: 'File is not present',
+            type: 'size',
+          },
+        ];
+      }
 
-        for (const file of files) {
+      const dateTime = new Date().getTime();
+      const newFileName = `${dateTime}.${file.extname}`;
+      await file.move(app.makePath('uploads/invoices'), { name: newFileName });
 
-            if (file && !file.isValid) {
-                throw file.errors;
-            } else if (!file) {
-                throw [{
-                    fieldName: 'Not file',
-                    clientName: 'Not Client',
-                    message: 'File is not present',
-                    type: 'size',
-                }];
-            }
+      await MailInvoiceFile.create({
+        fileName: `/invoices/${newFileName}`,
+        mailInvoiceId: mailInvoice.id,
+      });
 
-            const dateTime = new Date().getTime();
-            const newFileName = `${dateTime}.${file.extname}`;
-            await file.move(app.makePath('uploads/invoices'), { name: newFileName });
+      await mailInvoice.load('files');
 
-            await MailInvoiceFile.create({
-                fileName: `/invoices/${newFileName}`,
-                mailInvoiceId: mailInvoice.id,
-            });
-
-            await mailInvoice.load('files');
-
-            await SendInvoiceJob.dispatch(
-                { mail_invoice_id: mailInvoice.id },
-                {
-                    queueName: 'SendInvoice'
-                },
-            );
-
-            return mailInvoice;
+      await SendInvoiceJob.dispatch(
+        { mail_invoice_id: mailInvoice.id },
+        {
+          queueName: 'SendInvoice',
         }
+      );
 
+      return mailInvoice;
     }
+  }
 }

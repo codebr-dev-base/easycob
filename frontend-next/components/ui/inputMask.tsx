@@ -4,10 +4,11 @@ import { cn } from "@/lib/utils";
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   mask?: string; // Propriedade opcional para definir a máscara
+  autoValue?: string;
 }
 
 const InputMask = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type = "text", mask, ...props }, ref) => {
+  ({ className, type = "text", mask, autoValue, ...props }, ref) => {
     const [value, setValue] = React.useState("");
 
     // Função para aplicar a máscara à entrada
@@ -31,6 +32,14 @@ const InputMask = React.forwardRef<HTMLInputElement, InputProps>(
 
       return maskedValue;
     };
+
+    React.useEffect(() => {
+      if (autoValue) {
+        const rawValue = autoValue.replace(/\D/g, ""); // Remove tudo que não for número
+        const maskedValue = mask ? applyMask(rawValue, mask) : rawValue; // Aplica a máscara
+        setValue(maskedValue); // Atualiza o estado com o valor mascarado
+      }
+    }, [autoValue]);
 
     // Função que manipula a mudança de valor
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

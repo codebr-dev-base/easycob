@@ -10,7 +10,7 @@ export interface IHeaders extends IHeaderMethods {
 }
 
 export interface IQueryParams {
-  [key: string]: string | number | boolean | null | undefined;
+  [key: string]: string | number | boolean | null | undefined | string[] | number[];
 }
 
 export interface IFetchOptions extends RequestInit {

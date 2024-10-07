@@ -13,11 +13,7 @@ import {
 } from "@/components/ui/popover";
 import { ptBR } from "date-fns/locale";
 import { formatDateToBR } from "@/app/lib/utils";
-import {
-  ActiveModifiers,
-  DateRange,
-  SelectRangeEventHandler,
-} from "react-day-picker";
+import { ActiveModifiers, DateRange } from "react-day-picker";
 
 export function DatePicker({
   placeholder,
@@ -52,7 +48,7 @@ export function DatePicker({
         <Button
           variant={"outline"}
           className={cn(
-            "w-[280px] justify-start text-left font-normal text-muted-foreground"
+            "w-full justify-start text-left font-normal text-muted-foreground"
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />

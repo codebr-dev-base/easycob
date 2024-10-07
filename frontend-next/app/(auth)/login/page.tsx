@@ -1,5 +1,5 @@
 import Image from "next/image";
-import easycobWhite from "@/app/assets/img/easycob_white.svg";
+import easycobWhite from "@/app/assets/img/easycob_white.png";
 import FormLogin from "./components/FormLogin";
 
 

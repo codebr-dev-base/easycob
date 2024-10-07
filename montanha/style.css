@@ -1,0 +1,24 @@
+#goal-meter {
+    width: 200px;
+    height: 300px;
+    display: block;
+    margin: 20px auto;
+  }
+  
+  #character {
+    transform-origin: center;
+    transition: transform 0.5s ease-out; /* Transição mais suave */
+  }
+  
+  #mountain {
+    fill: #7f8c8d;
+  }
+  
+  #character circle {
+    fill: #3498db;
+  }
+  
+  #character line {
+    stroke: #3498db;
+    stroke-width: 3;
+  }

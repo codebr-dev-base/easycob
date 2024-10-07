@@ -11,6 +11,7 @@ export default router
         router.group(() => {
             router.get('/', [CampaignsController, 'index']);
             router.post('/', [CampaignsController, 'create']);
+            router.get('/:id', [CampaignsController, 'show']);
             router.get('/send/:id', [CampaignsController, 'send']);
             router.get('uploads/csv/*', [CampaignsController, 'getFile']);
         })
@@ -21,13 +22,13 @@ export default router
         router.group(() => {
             router.get('/', [CampaignLotsController, 'index']);
         })
-            .prefix('/campaign/lot')
+            .prefix('/campaign/lot/:id')
             .use(middleware.auth());
 
         router.group(() => {
             router.get('/', [ErrorCampaignsController, 'index']);
         })
-            .prefix('/campaign/error')
+            .prefix('/campaign/error/:id')
             .use(middleware.auth());
 
     })

@@ -1,16 +1,19 @@
-import Action from "#models/action";
-import Contract from "#models/recovery/contract";
-import TypeAction from "#models/type_action";
-import redis from "@adonisjs/redis/services/main";
-import { DateTime } from "luxon";
-import SendRecuperaJob from "#jobs/send_recupera_job";
-import CampaignLot from "#models/campaign_lot";
-import db from "@adonisjs/lucid/services/db";
-import { serializeKeysCamelCase } from "#utils/serialize";
-import Campaign from "#models/campaign";
+import Action from '#models/action';
+import Contract from '#models/recovery/contract';
+import TypeAction from '#models/type_action';
+import redis from '@adonisjs/redis/services/main';
+import { DateTime } from 'luxon';
+import SendRecuperaJob from '#jobs/send_recupera_job';
+import CampaignLot from '#models/campaign_lot';
+import db from '@adonisjs/lucid/services/db';
+import { serializeKeysCamelCase } from '#utils/serialize';
+import Campaign from '#models/campaign';
 import string from '@adonisjs/core/helpers/string';
 
-export async function handleSendingForRecupera(action: Action, queueName = 'SendRecupera') {
+export async function handleSendingForRecupera(
+  action: Action,
+  queueName = 'SendRecupera'
+) {
   if (await isToSendToRecupera(action)) {
     action.retorno = 'Q';
     action.retornotexto = 'Em fila';
@@ -18,7 +21,8 @@ export async function handleSendingForRecupera(action: Action, queueName = 'Send
     await dispatchToRecupera(action, queueName);
   } else {
     action.retorno = null;
-    action.retornotexto = 'Já existe um acionamento válido de prioridade igual ou maior';
+    action.retornotexto =
+      'Já existe um acionamento válido de prioridade igual ou maior';
     await action.save();
   }
 }
@@ -28,7 +32,10 @@ export async function isToSendToRecupera(action: Action) {
     const typeAction = await TypeAction.find(action.typeActionId);
 
     // Recupera a string JSON do Redis
-    const jsonString = await redis.hget('last_actions', `${action.codCredorDesRegis}`);
+    const jsonString = await redis.hget(
+      'last_actions',
+      `${action.codCredorDesRegis}`
+    );
 
     if (!jsonString) {
       return true;
@@ -55,23 +62,31 @@ export async function isToSendToRecupera(action: Action) {
       return true;
     }
 
-    const dtNow = DateTime.now().set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+    const dtNow = DateTime.now().set({
+      hour: 0,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    });
 
-    const dtLimit = DateTime.fromISO(lastAction.synced_at).plus({ days: typeAction.timelife });
+    const dtLimit = DateTime.fromISO(lastAction.synced_at).plus({
+      days: typeAction.timelife,
+    });
 
     if (dtNow.startOf('day') > dtLimit.startOf('day')) {
       return true;
     } else {
       return false;
     }
-
   } catch (error) {
     console.error(error);
   }
-
 }
 
-export async function dispatchToRecupera(action: Action, queueName = 'SendRecupera') {
+export async function dispatchToRecupera(
+  action: Action,
+  queueName = 'SendRecupera'
+) {
   const contract = await Contract.findBy('des_contr', action.desContr);
   const typeAction = await TypeAction.find(action.typeActionId);
 
@@ -90,9 +105,9 @@ export async function dispatchToRecupera(action: Action, queueName = 'SendRecupe
       SendSmsRecupera: SendSmsRecuperaJob,
       SendEmailRecupera: SendEmailRecuperaJob,
     };
-  
+
     const job = jobMapping[queueName];
-  
+
     if (job) {
       await job.dispatch(item, {
         queueName
@@ -104,13 +119,12 @@ export async function dispatchToRecupera(action: Action, queueName = 'SendRecupe
 
   if (queueName) {
     await SendRecuperaJob.dispatch(item, {
-      queueName
+      queueName,
     });
   } else {
     // Opcional: Tratamento para filas não reconhecidas
     console.error(`Queue name "${queueName}" is not recognized.`);
   }
-
 }
 
 export async function getClients(lots: Array<CampaignLot>) {
@@ -124,7 +138,8 @@ export async function getClients(lots: Array<CampaignLot>) {
 
   const oneYearAgo = "CURRENT_DATE - INTERVAL '1 year'";
 
-  const clients = await db.from('recupera.tbl_arquivos_cliente_numero as n')
+  const clients = await db
+    .from('recupera.tbl_arquivos_cliente_numero as n')
     .select(
       'cls.cod_credor_des_regis',
       'cls.nom_clien',
@@ -137,7 +152,9 @@ export async function getClients(lots: Array<CampaignLot>) {
       'sb.email as subsidiary_mail',
       'sb.config_email as subsidiary_config_email'
     )
-    .select(db.raw(`sum(pt.val_princ) filter ( WHERE ${filterIndAlter}) as val_princ`))
+    .select(
+      db.raw(`sum(pt.val_princ) filter ( WHERE ${filterIndAlter}) as val_princ`)
+    )
     .select(
       db.raw(`
         SUM(CASE
@@ -146,7 +163,9 @@ export async function getClients(lots: Array<CampaignLot>) {
             ELSE 0
         END) AS pecld`)
     )
-    .select(db.raw(`min(pt.dat_venci) filter ( WHERE ${filterIndAlter}) as dat_venci`))
+    .select(
+      db.raw(`min(pt.dat_venci) filter ( WHERE ${filterIndAlter}) as dat_venci`)
+    )
     .select(
       db.raw(
         `current_date - min(pt.dat_venci) filter ( WHERE ${filterIndAlter}) as day_late`
@@ -174,7 +193,9 @@ export async function getClients(lots: Array<CampaignLot>) {
     })
     .leftJoin('public.subsidiaries as sb', 'c.nom_loja', '=', 'sb.nom_loja')
     .groupByRaw('1,2,3,4,5,6,7,8,9,10')
-    .havingRaw(`sum(pt.val_princ) filter ( WHERE ${filterIndAlter}) is not null`);
+    .havingRaw(
+      `sum(pt.val_princ) filter ( WHERE ${filterIndAlter}) is not null`
+    );
 
   return serializeKeysCamelCase(clients);
 }
@@ -187,8 +208,22 @@ export async function findClient(item: any, clients: Array<any>) {
   });
 }
 
-export async function createActionForClient(client: any, typeAction: TypeAction, campaign: Campaign, tipoContato: string | undefined): Promise<Action> {
-  const { codCredorDesRegis, desRegis, desContr, codCredor, matriculaContrato, contato, valPrinc, dayLate } = client;
+export async function createActionForClient(
+  client: any,
+  typeAction: TypeAction,
+  campaign: Campaign,
+  tipoContato: string | undefined
+): Promise<Action> {
+  const {
+    codCredorDesRegis,
+    desRegis,
+    desContr,
+    codCredor,
+    matriculaContrato,
+    contato,
+    valPrinc,
+    dayLate,
+  } = client;
 
   return await Action.create({
     codCredorDesRegis,
@@ -201,7 +236,7 @@ export async function createActionForClient(client: any, typeAction: TypeAction,
     typeActionId: typeAction.id,
     description: '',
     retorno: null,
-    retornotexto: 'Acionamento Automático envio em massa',
+    retornotexto: 'Acionamento Automático, envio em massa!',
     userId: campaign.userId,
     valPrinc,
     datVenci: DateTime.fromJSDate(client.datVenci),
@@ -210,7 +245,9 @@ export async function createActionForClient(client: any, typeAction: TypeAction,
 }
 
 export function makeNameQueue(type: string, subsidiary: string) {
-  const local = string.pascalCase(string.camelCase(subsidiary).replace('aguasDe', ''));
+  const local = string.pascalCase(
+    string.camelCase(subsidiary).replace('aguasDe', '')
+  );
   return `SendRecupera_${type}_${local}`;
   //return `SendRecupera`;
 }
