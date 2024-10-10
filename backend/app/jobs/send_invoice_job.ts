@@ -6,8 +6,9 @@ import Subsidiary from '#models/subsidiary';
 import TemplateEmail from '#models/template_email';
 import app from '@adonisjs/core/services/app';
 
-
-interface SendInvoiceJobPayload { mail_invoice_id: number; }
+interface SendInvoiceJobPayload {
+  mail_invoice_id: number;
+}
 
 export default class SendInvoiceJob extends Job {
   // This is the path to the file that is used to create the job
@@ -19,10 +20,9 @@ export default class SendInvoiceJob extends Job {
    * Base Entry point
    */
   async handle(payload: SendInvoiceJobPayload) {
-
     try {
       const mailInvoice = await MailInvoice.find(payload.mail_invoice_id);
-      const paths: any[] = [];
+      const paths: { path: string }[] = [];
       if (mailInvoice) {
         const contract = await Contract.query()
           .where('cod_credor_des_regis', mailInvoice.codCredorDesRegis)
@@ -48,8 +48,8 @@ export default class SendInvoiceJob extends Job {
           .whereILike('name', `${subsidiaryName}`)
           .first();
 
-        await mailInvoice?.load('files');
-        for (const file of mailInvoice?.files) {
+        await mailInvoice.load('files');
+        for (const file of mailInvoice.files) {
           paths.push({
             path: `${app.makePath('uploads/invoices')}${file.fileName}`,
           });
@@ -65,43 +65,41 @@ export default class SendInvoiceJob extends Job {
         const response = await mail.send((message) => {
           message
             .to(mailInvoice.contact)
-            .from(
-              'contato@yuansolucoes.com.br',
-              'Cobrança AEGEA'
-            )
+            .from('contato@yuansolucoes.com.br', 'Cobrança AEGEA')
             .subject(subject)
             .text(bodyEmail)
             .listHelp(`contato@yuansolucoes.com.br?subject=help`)
             .listUnsubscribe({
               url: `https://www.yuansolucoes.com.br/unsubscribe?id=${mailInvoice.contact}`,
-              comment: 'Comment'
+              comment: 'Comment',
             })
             .listSubscribe(`contato@yuansolucoes.com.br?subject=subscribe`)
             .listSubscribe({
               url: `https://www.yuansolucoes.com.br/subscribe?id=${mailInvoice.contact}`,
-              comment: 'Subscribe'
+              comment: 'Subscribe',
             })
-            .addListHeader('post', `https://www.yuansolucoes.com.br/subscribe?id=${mailInvoice.contact}`);
+            .addListHeader(
+              'post',
+              `https://www.yuansolucoes.com.br/subscribe?id=${mailInvoice.contact}`
+            );
         });
 
         mailInvoice.messageid = response.messageId;
         await mailInvoice.save();
-
-
       }
     } catch (error) {
       console.error(payload);
       console.error(error);
       throw error;
     }
-
   }
 
   /**
    * This is an optional method that gets called when the retries has exceeded and is marked failed.
    */
   async rescue(payload: SendInvoiceJobPayload) {
-    throw new Error(`Rescue method not implemented SendInvoiceJob. payload: ${JSON.stringify(payload)}`);
-
+    throw new Error(
+      `Rescue method not implemented SendInvoiceJob. payload: ${JSON.stringify(payload)}`
+    );
   }
 }

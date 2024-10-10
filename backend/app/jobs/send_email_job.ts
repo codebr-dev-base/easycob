@@ -4,7 +4,10 @@ import Campaign from '#models/campaign';
 import CampaignLot from '#models/campaign_lot';
 //import queue from '@rlanz/bull-queue/services/main';
 
-interface SendEmailJobPayload { campaign_id: number; user_id: any; }
+interface SendEmailJobPayload {
+  campaign_id: number;
+  user_id: number | string;
+}
 
 export default class SendEmailJob extends Job {
   // This is the path to the file that is used to create the job
@@ -20,7 +23,6 @@ export default class SendEmailJob extends Job {
     const campaign = await Campaign.find(payload.campaign_id);
 
     try {
-
       if (campaign) {
         const lots = await CampaignLot.query()
           .where('campaign_id', campaign.id)
@@ -30,23 +32,19 @@ export default class SendEmailJob extends Job {
           .limit(500);
         await service.works(campaign, lots);
       }
-
     } catch (error) {
       console.error(payload);
       console.error(error);
       throw error;
     }
-
-
   }
 
   /**
    * This is an optional method that gets called when the retries has exceeded and is marked failed.
    */
   async rescue(payload: SendEmailJobPayload) {
-
     /*     const randoDelay = Math.floor(Math.random() * 10) + 6000;
-    
+
         await queue.dispatch(
           SendEmailJob,
           payload,
@@ -61,7 +59,8 @@ export default class SendEmailJob extends Job {
         );
         console.error(payload);
          */
-    throw new Error(`Rescue method not implemented LoadCsvCampaignJob. payload: ${JSON.stringify(payload)}`);
-
+    throw new Error(
+      `Rescue method not implemented LoadCsvCampaignJob. payload: ${JSON.stringify(payload)}`
+    );
   }
 }

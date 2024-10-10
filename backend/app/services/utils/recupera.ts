@@ -10,6 +10,24 @@ import { serializeKeysCamelCase } from '#utils/serialize';
 import Campaign from '#models/campaign';
 import string from '@adonisjs/core/helpers/string';
 
+// Interface para o resultado da função getClients
+export interface IClient {
+  codCredorDesRegis: string;
+  nomClien: string;
+  contato: string;
+  desRegis: string;
+  desContr: string;
+  codCredor: string;
+  matriculaContrato: string;
+  subsidiary: string;
+  subsidiaryMail: string;
+  subsidiaryConfigEmail: string;
+  valPrinc: number | null;
+  pecld: number | null;
+  datVenci: string | null; // assumindo que seja uma string no formato de data
+  dayLate: number | null; // quantidade de dias de atraso
+}
+
 export async function handleSendingForRecupera(
   action: Action,
   queueName = 'SendRecupera'
@@ -197,10 +215,10 @@ export async function getClients(lots: Array<CampaignLot>) {
       `sum(pt.val_princ) filter ( WHERE ${filterIndAlter}) is not null`
     );
 
-  return serializeKeysCamelCase(clients);
+  return serializeKeysCamelCase(clients) as IClient[];
 }
 
-export async function findClient(item: any, clients: Array<any>) {
+export async function findClient(item: CampaignLot, clients: Array<IClient>) {
   return await clients.find((client) => {
     return (
       `${client.codCredorDesRegis}`.localeCompare(item.codCredorDesRegis) === 0
@@ -209,7 +227,7 @@ export async function findClient(item: any, clients: Array<any>) {
 }
 
 export async function createActionForClient(
-  client: any,
+  client: IClient,
   typeAction: TypeAction,
   campaign: Campaign,
   tipoContato: string | undefined
@@ -230,7 +248,7 @@ export async function createActionForClient(
     desRegis,
     desContr,
     codCredor,
-    matriculaContrato,
+    matriculaContrato: Number(matriculaContrato),
     tipoContato,
     contato,
     typeActionId: typeAction.id,
@@ -238,9 +256,12 @@ export async function createActionForClient(
     retorno: null,
     retornotexto: 'Acionamento Automático, envio em massa!',
     userId: campaign.userId,
-    valPrinc,
-    datVenci: DateTime.fromJSDate(client.datVenci),
-    dayLate,
+    valPrinc: Number(valPrinc),
+    // Verifica se client.datVenci não é nulo e converte para DateTime, senão atribui null
+    datVenci: client.datVenci
+      ? DateTime.fromJSDate(new Date(client.datVenci))
+      : undefined,
+    dayLate: Number(dayLate),
   });
 }
 
@@ -248,6 +269,6 @@ export function makeNameQueue(type: string, subsidiary: string) {
   const local = string.pascalCase(
     string.camelCase(subsidiary).replace('aguasDe', '')
   );
-  return `SendRecupera_${type}_${local}`;
+  return `SendRecupera:${type}:${local}`;
   //return `SendRecupera`;
 }

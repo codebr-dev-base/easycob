@@ -7,7 +7,10 @@ import ErrorCampaignImport from '#models/error_campaign_import';
 import SendEmailJob from '#jobs/send_email_job';
 import SendSmsJob from '#jobs/send_sms_job';
 
-interface LoadCsvCampaignJobPayload { campaign_id: number; user_id: any; }
+interface LoadCsvCampaignJobPayload {
+  campaign_id: number;
+  user_id: number | string;
+}
 
 export default class LoadCsvCampaignJob extends Job {
   // This is the path to the file that is used to create the job
@@ -23,7 +26,6 @@ export default class LoadCsvCampaignJob extends Job {
 
     const campaign = await Campaign.find(payload.campaign_id);
     try {
-
       if (campaign) {
         const dateTime = new Date().getTime();
         const blockContacts = await service.getBlockedContacts();
@@ -32,57 +34,116 @@ export default class LoadCsvCampaignJob extends Job {
         const chunksContacs = chunks(contacts, 500);
 
         if (contacts.length === 0) {
-          console.error("Contacts is empty");
+          console.error('Contacts is empty');
         }
 
         if (chunksContacs.length === 0) {
-          console.error("Contacts is empty");
+          console.error('Contacts is empty');
         }
 
         const handleInvalidContact = service.handleInvalidContact;
         const handleValidContact = service.handleValidContact;
 
         for (const chunkContacs of chunksContacs) {
-          const contactsValids: any[] = [];
-          const contactInvalids: any[] = [];
+          const contactsValids: {
+            codCredorDesRegis: string;
+            contato: string;
+            standardized: string;
+            status: string;
+            codigoCampanha: string;
+            campaignId: number;
+          }[] = [];
+          const contactInvalids: {
+            codCredorDesRegis: string;
+            contato: string;
+            standardized: string;
+            status: string;
+            codigoCampanha: string;
+            campaignId: number;
+          }[] = [];
 
           const clients = await service.getClients(chunkContacs);
 
           for (const contact of chunkContacs) {
-
             const client = service.findClient(contact, clients);
 
-            if (service.isUniversalBlock(contact, blockContacts.universalBlock)) {
-              contactInvalids.push(handleInvalidContact('Contato bloqueado', contact, campaign, dateTime));
+            if (
+              service.isUniversalBlock(contact, blockContacts.universalBlock)
+            ) {
+              contactInvalids.push(
+                handleInvalidContact(
+                  'Contato bloqueado',
+                  contact,
+                  campaign,
+                  dateTime
+                )
+              );
               continue;
             }
 
             if (service.isSpecificBlock(contact, blockContacts.specificBlock)) {
-              contactInvalids.push(handleInvalidContact('Contato bloqueado para este cliente', contact, campaign, dateTime));
+              contactInvalids.push(
+                handleInvalidContact(
+                  'Contato bloqueado para este cliente',
+                  contact,
+                  campaign,
+                  dateTime
+                )
+              );
               continue;
             }
 
             if (!client) {
-              contactInvalids.push(handleInvalidContact('Cliente não encontrado', contact, campaign, dateTime));
+              contactInvalids.push(
+                handleInvalidContact(
+                  'Cliente não encontrado',
+                  contact,
+                  campaign,
+                  dateTime
+                )
+              );
               continue;
             }
 
             if (!client.is_active) {
-              contactInvalids.push(handleInvalidContact('Cliente INATIVO', contact, campaign, dateTime));
+              contactInvalids.push(
+                handleInvalidContact(
+                  'Cliente INATIVO',
+                  contact,
+                  campaign,
+                  dateTime
+                )
+              );
               continue;
             }
 
             if (!client.is_contracts) {
-              contactInvalids.push(handleInvalidContact('Cliente ATIVO, mas não possui contrato ATIVO', contact, campaign, dateTime));
+              contactInvalids.push(
+                handleInvalidContact(
+                  'Cliente ATIVO, mas não possui contrato ATIVO',
+                  contact,
+                  campaign,
+                  dateTime
+                )
+              );
               continue;
             }
 
             if (!client.is_invoices) {
-              contactInvalids.push(handleInvalidContact('Cliente ATIVO, mas não possui dívidas', contact, campaign, dateTime));
+              contactInvalids.push(
+                handleInvalidContact(
+                  'Cliente ATIVO, mas não possui dívidas',
+                  contact,
+                  campaign,
+                  dateTime
+                )
+              );
               continue;
             }
 
-            contactsValids.push(handleValidContact(contact, campaign, dateTime));
+            contactsValids.push(
+              handleValidContact(contact, campaign, dateTime)
+            );
           }
 
           await CampaignLot.createMany(contactsValids);
@@ -96,8 +157,8 @@ export default class LoadCsvCampaignJob extends Job {
               user_id: payload.user_id,
             },
             {
-              queueName: 'SendSms'
-            },
+              queueName: 'SendSms',
+            }
           );
         }
 
@@ -108,28 +169,24 @@ export default class LoadCsvCampaignJob extends Job {
               user_id: payload.user_id,
             },
             {
-              queueName: 'SendEmail'
-            },
+              queueName: 'SendEmail',
+            }
           );
         }
-
       }
-
     } catch (error) {
       console.error(payload);
       console.error(error);
       throw error;
     }
-
   }
 
   /**
    * This is an optional method that gets called when the retries has exceeded and is marked failed.
    */
   async rescue(payload: LoadCsvCampaignJobPayload) {
-
     /*     const randoDelay = Math.floor(Math.random() * 10) + 6000;
-    
+
         await queue.dispatch(
           LoadCsvCampaignJob,
           payload,
@@ -142,10 +199,11 @@ export default class LoadCsvCampaignJob extends Job {
             }
           },
         );
-    
+
         console.error(payload);
     */
-    throw new Error(`Rescue method not implemented LoadCsvCampaignJob. payload: ${JSON.stringify(payload)}`);
-
+    throw new Error(
+      `Rescue method not implemented LoadCsvCampaignJob. payload: ${JSON.stringify(payload)}`
+    );
   }
 }

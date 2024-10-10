@@ -16,25 +16,25 @@ const jobsConfig = defineConfig({
     'SendSms',
     'SendRecupera',
     'ResendRecupera',
-    'SendRecupera_EME_RolimDeMoura',
-    'SendRecupera_EME_Ariquemes',
-    'SendRecupera_EME_PimentaBueno',
-    'SendRecupera_EME_Buritis',
-    'SendRecupera_EME_Teresina',
-    'SendRecupera_EME_Timon',
-    'SendRecupera_EME_SaoFrancisco',
-    'SendRecupera_EME_Manaus',
-    'SendRecupera_EME_Prolagos',
-    'SendRecupera_SMS_RolimDeMoura',
-    'SendRecupera_SMS_Ariquemes',
-    'SendRecupera_SMS_PimentaBueno',
-    'SendRecupera_SMS_Buritis',
-    'SendRecupera_SMS_Teresina',
-    'SendRecupera_SMS_Timon',
-    'SendRecupera_SMS_SaoFrancisco',
-    'SendRecupera_SMS_Manaus',
-    'SendRecupera_SMS_Prolagos',
-    'SendInvoice'
+    'SendRecupera:EME:RolimDeMoura',
+    'SendRecupera:EME:Ariquemes',
+    'SendRecupera:EME:PimentaBueno',
+    'SendRecupera:EME:Buritis',
+    'SendRecupera:EME:Teresina',
+    'SendRecupera:EME:Timon',
+    'SendRecupera:EME:SaoFrancisco',
+    'SendRecupera:EME:Manaus',
+    'SendRecupera:EME:Prolagos',
+    'SendRecupera:SMS:RolimDeMoura',
+    'SendRecupera:SMS:Ariquemes',
+    'SendRecupera:SMS:PimentaBueno',
+    'SendRecupera:SMS:Buritis',
+    'SendRecupera:SMS:Teresina',
+    'SendRecupera:SMS:Timon',
+    'SendRecupera:SMS:SaoFrancisco',
+    'SendRecupera:SMS:Manaus',
+    'SendRecupera:SMS:Prolagos',
+    'SendInvoice',
   ],
 
   options: {
@@ -59,7 +59,7 @@ const jobsConfig = defineConfig({
      * Default behavior is to keep the job in the completed set.
      */
     removeOnComplete: {
-      age: 12 * 3600, // keep up to 12 hour
+      age: 8 * 3600, // keep up to 12 hour
     },
 
     /**
@@ -71,7 +71,7 @@ const jobsConfig = defineConfig({
      */
     removeOnFail: {
       age: 12 * 3600, // keep up to 12 hours
-    }
+    },
   },
 });
 

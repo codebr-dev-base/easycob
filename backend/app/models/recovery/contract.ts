@@ -5,7 +5,6 @@ import Action from '#models/action';
 import Client from '#models/recovery/client';
 
 export default class Contract extends BaseModel {
-
   //declare static connection = 'recover'
   static table = 'recupera.tbl_arquivos_contratos';
 
