@@ -5,14 +5,6 @@ import { useRef, useState } from "react";
 import { IMeta } from "@/app/interfaces/pagination";
 import "@/app/assets/css/tabs.css";
 import {
-  fetchInvoices,
-  fetchNegotiations,
-  fetchPromises,
-  queryInvoices,
-  queryNegotiations,
-  queryPromises,
-} from "../service/discounts";
-import {
   INegotiationInvoice,
   INegotiationOfPayment,
   IPromiseOfPayment,
@@ -21,6 +13,9 @@ import TabNegotiations from "./TabNegotiations";
 import TabPromises from "./TabPromises";
 import TabInvoices from "./TabInvoices";
 import FilterPus from "./FilterPus";
+import { fetchInvoices, queryInvoices } from "../service/invoices";
+import { fetchPromises, queryPromises } from "../service/promises";
+import { fetchNegotiations, queryNegotiations } from "../service/negotiations";
 export default function ContainerDiscount({
   negotiations,
   promises,

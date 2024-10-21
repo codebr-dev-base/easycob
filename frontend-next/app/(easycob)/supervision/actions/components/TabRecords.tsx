@@ -20,7 +20,7 @@ import {
   BsFillSendSlashFill,
   BsHourglassSplit,
 } from "react-icons/bs";
-import { formatDateToBR, formatToBRL } from "@/app/lib/utils";
+import { formatDateToBR, formatCurrencyToBRL } from "@/app/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { FaUser } from "react-icons/fa";
@@ -188,10 +188,10 @@ export default function TabRecords({
                   </TableCell>
                   <TableCell>{action.dayLate}</TableCell>
                   <TableCell>
-                    {action.valPrinc ? formatToBRL(action.valPrinc) : ""}
+                    {action.valPrinc ? formatCurrencyToBRL(action.valPrinc) : ""}
                   </TableCell>
                   <TableCell>
-                    {action.pecld ? formatToBRL(action.pecld) : ""}
+                    {action.pecld ? formatCurrencyToBRL(action.pecld) : ""}
                   </TableCell>
                   <TableCell className="max-w-32 md:max-w-40 lg:max-w-48">
                     <Tooltips message={`${action.typeAction}`}>

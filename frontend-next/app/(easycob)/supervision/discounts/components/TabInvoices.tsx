@@ -10,7 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDateToBR, formatToBRL, formatarFone } from "@/app/lib/utils";
+import {
+  formatDateToBR,
+  formatCurrencyToBRL,
+  formatarFone,
+  getFirstAndLastName,
+} from "@/app/lib/utils";
 import Pagination from "@/app/(easycob)/components/Pagination";
 import { Button } from "@/components/ui/button";
 import { FaRegEye } from "react-icons/fa";
@@ -22,6 +27,9 @@ import { IMeta } from "@/app/interfaces/pagination";
 import { INegotiationInvoice } from "../../../interfaces/actions";
 import { BsCheck, BsHourglassSplit } from "react-icons/bs";
 import { HeaderTable } from "@/app/(easycob)/components/HeaderTable";
+import { Switch } from "@/components/ui/switch";
+import { useState } from "react";
+import FormInvoiceHistories from "./FormInvoiceHistories";
 
 export default function TabInvoices({
   query,
@@ -36,6 +44,8 @@ export default function TabInvoices({
   refresh: () => Promise<void>;
   pending: boolean;
 }) {
+  const [selectRow, setSelectRow] = useState<INegotiationInvoice | null>(null);
+  const [openForm, setOpenForm] = useState(false);
   const selecIcon = (status: boolean) => {
     switch (status) {
       case true:
@@ -51,9 +61,31 @@ export default function TabInvoices({
     }
   };
 
+  const handleSelectRow = (invoice: INegotiationInvoice) => {
+    if (selectRow && selectRow.id === invoice.id) {
+      setSelectRow(null);
+      setOpenForm(false);
+    } else {
+      setSelectRow(invoice);
+      setOpenForm(true);
+    }
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setSelectRow(null);
+      setOpenForm(open);
+    }
+  };
+
   return (
     <Card>
       <CardContent>
+        <FormInvoiceHistories
+          open={openForm}
+          onOpenChange={handleOpenChange}
+          selectRow={selectRow}
+        />
         {/* Skeleton com transição de opacidade */}
         <div
           className={`inset-0 transition-opacity duration-1000 ${
@@ -74,6 +106,7 @@ export default function TabInvoices({
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead></TableHead>
                 <TableHead>
                   <HeaderTable
                     columnName="Status"
@@ -98,23 +131,7 @@ export default function TabInvoices({
                     refresh={refresh}
                   />
                 </TableHead>
-                <TableHead>
-                  <HeaderTable
-                    columnName="V. Prestação"
-                    fieldName="valPrest"
-                    query={query}
-                    refresh={refresh}
-                  />
-                </TableHead>
-                <TableHead>
-                  {" "}
-                  <HeaderTable
-                    columnName="N. da Negociação"
-                    fieldName="idNegotiation"
-                    query={query}
-                    refresh={refresh}
-                  />
-                </TableHead>
+                <TableHead>Contrato</TableHead>
                 <TableHead>
                   <HeaderTable
                     columnName="Cliente"
@@ -123,8 +140,16 @@ export default function TabInvoices({
                     refresh={refresh}
                   />
                 </TableHead>
+                <TableHead>
+                  <HeaderTable
+                    columnName="V. Prestação"
+                    fieldName="valPrest"
+                    query={query}
+                    refresh={refresh}
+                  />
+                </TableHead>
                 <TableHead>Contato</TableHead>
-                <TableHead>Contrato</TableHead>
+
                 <TableHead>
                   <HeaderTable
                     columnName="Operador"
@@ -139,11 +164,18 @@ export default function TabInvoices({
             <TableBody>
               {data.map((invoice) => (
                 <TableRow key={invoice.id}>
+                  <TableCell>
+                    <Switch
+                      checked={!!selectRow && selectRow.id === invoice.id}
+                      onCheckedChange={() => {
+                        handleSelectRow(invoice);
+                      }}
+                    />
+                  </TableCell>
                   <TableCell>{selecIcon(invoice.status)}</TableCell>
                   <TableCell>{formatDateToBR(invoice.datPrest)}</TableCell>
                   <TableCell>{formatDateToBR(invoice.createdAt)}</TableCell>
-                  <TableCell>{formatToBRL(invoice.valPrest)}</TableCell>
-                  <TableCell>{invoice.idNegotiation}</TableCell>
+                  <TableCell>{invoice.desContr}</TableCell>
                   <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
                     <Tooltips message={invoice.client ? invoice.client : ""}>
                       <p className="truncate hover:text-clip">
@@ -151,13 +183,15 @@ export default function TabInvoices({
                       </p>
                     </Tooltips>
                   </TableCell>
+                  <TableCell>{formatCurrencyToBRL(invoice.valPrest)}</TableCell>
                   <TableCell>
                     {formatarFone(invoice.contato ? invoice.contato : "")}
                   </TableCell>
-                  <TableCell>{invoice.desContr}</TableCell>
-                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
+                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip hover:cursor-pointer">
                     <Tooltips message={invoice.user ? invoice.user : ""}>
-                      <p className="truncate hover:text-clip">{invoice.user}</p>
+                      <p className="truncate hover:text-clip">
+                        {getFirstAndLastName(`${invoice.user}`)}
+                      </p>
                     </Tooltips>
                   </TableCell>
                   <TableCell className="flex">

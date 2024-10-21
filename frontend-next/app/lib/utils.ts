@@ -14,29 +14,39 @@ export function formatDateToBR(isoDateString: string): string {
   }).format(date);
 }
 
-export function formatarFone(fone: string): string {
+export function formatDateForInput(dateString: string): string {
+  const date = new Date(dateString);
+
+  // Extrai a data em UTC para evitar problemas de fuso horário
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // Mês em UTC
+  const day = String(date.getUTCDate()).padStart(2, "0"); // Dia em UTC
+
+  return `${year}-${month}-${day}`;
+}
+
+export function formatarFone(fone: string | null | undefined): string {
+  if (typeof fone !== 'string' || !fone.trim()) {
+    return ""; // Retorna string vazia se a variável não for uma string válida
+  }
+
   // Remove todos os caracteres que não são dígitos
   const numeros = fone.replace(/\D/g, "");
 
   // Verifica o comprimento do número
   if (numeros.length === 10) {
-    // Formato para números de fone de 10 dígitos (ex: (12) 3456-7890)
-    return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 6)}-${numeros.slice(
-      6
-    )}`;
-  } else if (numeros.length === 11) {
-    // Formato para números de fone de 11 dígitos (ex: (12) 9 1234-5678)
-    return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 3)} ${numeros.slice(
-      3,
-      7
-    )}-${numeros.slice(7)}`;
+    // Formato para números de telefone de 10 dígitos (ex: (92) 8246-1020)
+    return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 6)}-${numeros.slice(6)}`;
+  } else if (numeros.length === 11 && numeros[2] === '9') {
+    // Formato para números de telefone de 11 dígitos (ex: (92) 9 8246-1020)
+    return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 3)} ${numeros.slice(3, 7)}-${numeros.slice(7)}`;
   } else {
-    // Retorna uma mensagem de erro se o número não tem o comprimento esperado
-    return "Número de fone inválido!";
+    // Se o número não é compatível com o formato esperado
+    return `Número de fone inválido! ${fone}`;
   }
 }
 
-export function formatToBRL(value: number): string {
+export function formatCurrencyToBRL(value: number): string {
   return value.toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL",
@@ -46,6 +56,31 @@ export function formatToBRL(value: number): string {
 export function onlyNumbers(input: string): string {
   // Remove tudo que não for dígito numérico (0-9)
   return input.replace(/\D/g, "");
+}
+
+export function parseFromBRL(
+  value: string | number | null | undefined
+): number {
+  // Se o valor for null ou undefined, retornamos 0
+  if (value === null || value === undefined) {
+    return 0;
+  }
+
+  // Se o valor for numérico, convertemos diretamente para número
+  if (typeof value === "number") {
+    return value;
+  }
+
+  // Se o valor não for string, convertemos para string
+  const stringValue = String(value);
+
+  // Remove o símbolo de moeda, pontos de milhares e substitui a vírgula decimal por ponto
+  const cleanedValue = stringValue
+    .replace(/[R$\s]/g, "") // Remove "R$", espaço
+    .replace(/\./g, "") // Remove pontos de milhares
+    .replace(/,/g, "."); // Substitui a vírgula decimal por ponto
+
+  return parseFloat(cleanedValue) || 0; // Converte para número e retorna 0 se for inválido
 }
 
 // Função para gerar cores aleatórias (opcional)
@@ -172,3 +207,53 @@ export const rgbToRgba = (rgbColor: string, alpha: number): string => {
   // Retorna a cor no formato RGBA
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
+
+export const getFirstAndLastName = (fullName: string): string => {
+  // Divide o nome completo em partes usando o espaço como separador
+  const nameParts = fullName.trim().split(" ");
+
+  // Se houver apenas um nome, retorna o nome
+  if (nameParts.length === 1) {
+    return fullName;
+  }
+
+  // Retorna o primeiro e o último nome
+  const firstName = nameParts[0];
+  const lastName = nameParts[nameParts.length - 1];
+
+  return `${firstName} ${lastName}`;
+};
+
+export const cleanObject = (obj: Record<string, any>): Record<string, any> => {
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    // Verifica se o valor é uma string vazia, null, ou "null"
+    if (value === "" || value === null || value === "null") {
+      return acc; // Não inclui propriedades com valores vazios ou nulos
+    }
+
+    acc[key] = value;
+    return acc;
+  }, {} as Record<string, any>);
+};
+
+
+export const formatStringToCpfCnpj = (document: any): string | null  => {
+  // Verifica se o valor existe e é uma string
+  if (typeof document !== 'string' || !document.trim()) {
+    return null; // Retorna null se a variável não for uma string válida
+  }
+
+  // Remove todos os caracteres não numéricos
+  const cleanedDocument = document.replace(/\D/g, '');
+
+  // Verifica se o tamanho corresponde ao CPF ou CNPJ
+  if (cleanedDocument.length === 11) {
+    // Formata como CPF: 999.999.999-99
+    return cleanedDocument.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  } else if (cleanedDocument.length === 14) {
+    // Formata como CNPJ: 99.999.999/9999-99
+    return cleanedDocument.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+  }
+
+  return null; // Retorna null se não for nem CPF nem CNPJ
+}

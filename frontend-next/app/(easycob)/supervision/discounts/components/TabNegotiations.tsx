@@ -10,7 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDateToBR, formatToBRL, formatarFone } from "@/app/lib/utils";
+import {
+  formatCurrencyToBRL,
+  formatDateToBR,
+  formatarFone,
+  getFirstAndLastName,
+} from "@/app/lib/utils";
 import Pagination from "@/app/(easycob)/components/Pagination";
 import { Button } from "@/components/ui/button";
 import { FaRegEye } from "react-icons/fa";
@@ -22,7 +27,9 @@ import { IMeta } from "@/app/interfaces/pagination";
 import { INegotiationOfPayment } from "@/app/(easycob)/interfaces/actions";
 import { HeaderTable } from "@/app/(easycob)/components/HeaderTable";
 import { BsCheck, BsHourglassSplit } from "react-icons/bs";
-
+import { Switch } from "@/components/ui/switch";
+import { useState } from "react";
+import FormNegotiationHistories from "./FormNegotiationHistories";
 
 export default function TabNegotiations({
   query,
@@ -37,7 +44,10 @@ export default function TabNegotiations({
   refresh: () => Promise<void>;
   pending: boolean;
 }) {
-
+  const [selectRow, setSelectRow] = useState<INegotiationOfPayment | null>(
+    null
+  );
+  const [openForm, setOpenForm] = useState(false);
   const selecIcon = (status: boolean) => {
     switch (status) {
       case true:
@@ -52,10 +62,32 @@ export default function TabNegotiations({
         break;
     }
   };
-  
+
+  const handleSelectRow = (negotiation: INegotiationOfPayment) => {
+    if (selectRow && selectRow.id === negotiation.id) {
+      setSelectRow(null);
+      setOpenForm(false);
+    } else {
+      setSelectRow(negotiation);
+      setOpenForm(true);
+    }
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setSelectRow(null);
+      setOpenForm(open);
+    }
+  };
+
   return (
     <Card>
       <CardContent>
+        <FormNegotiationHistories
+          open={openForm}
+          onOpenChange={handleOpenChange}
+          selectRow={selectRow}
+        />
         {/* Skeleton com transição de opacidade */}
         <div
           className={`inset-0 transition-opacity duration-1000 ${
@@ -76,6 +108,7 @@ export default function TabNegotiations({
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead></TableHead>
                 <TableHead>
                   <HeaderTable
                     columnName="Status"
@@ -91,7 +124,7 @@ export default function TabNegotiations({
                     query={query}
                     refresh={refresh}
                   />
-                </TableHead>{" "}
+                </TableHead>
                 <TableHead>
                   <HeaderTable
                     columnName="Criação"
@@ -100,10 +133,11 @@ export default function TabNegotiations({
                     refresh={refresh}
                   />
                 </TableHead>
+                <TableHead>Contrato</TableHead>
                 <TableHead>
                   <HeaderTable
-                    columnName="N. da Negociação"
-                    fieldName="idNegotiation"
+                    columnName="Cliente"
+                    fieldName="client"
                     query={query}
                     refresh={refresh}
                   />
@@ -124,16 +158,7 @@ export default function TabNegotiations({
                     refresh={refresh}
                   />
                 </TableHead>
-                <TableHead>
-                  <HeaderTable
-                    columnName="Cliente"
-                    fieldName="client"
-                    query={query}
-                    refresh={refresh}
-                  />
-                </TableHead>
                 <TableHead>Contato</TableHead>
-                <TableHead>Contrato</TableHead>
                 <TableHead>
                   <HeaderTable
                     columnName="Operador"
@@ -148,14 +173,18 @@ export default function TabNegotiations({
             <TableBody>
               {data.map((negotiation) => (
                 <TableRow key={negotiation.id}>
+                  <TableCell>
+                    <Switch
+                      checked={!!selectRow && (selectRow.id === negotiation.id)}
+                      onCheckedChange={() => {
+                        handleSelectRow(negotiation);
+                      }}
+                    />
+                  </TableCell>
                   <TableCell>{selecIcon(negotiation.status)}</TableCell>
                   <TableCell>{formatDateToBR(negotiation.datEntra)}</TableCell>
                   <TableCell>{formatDateToBR(negotiation.createdAt)}</TableCell>
-                  <TableCell>{negotiation.idNegotiation}</TableCell>
-                  <TableCell>{formatToBRL(negotiation.valOriginal)}</TableCell>
-                  <TableCell>
-                    {formatToBRL(negotiation.valTotalPrest)}
-                  </TableCell>
+                  <TableCell>{negotiation.desContr}</TableCell>
                   <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
                     <Tooltips
                       message={negotiation.client ? negotiation.client : ""}
@@ -165,18 +194,21 @@ export default function TabNegotiations({
                       </p>
                     </Tooltips>
                   </TableCell>
+                  <TableCell>{formatCurrencyToBRL(negotiation.valOriginal)}</TableCell>
+                  <TableCell>
+                    {formatCurrencyToBRL(negotiation.valTotalPrest)}
+                  </TableCell>
                   <TableCell>
                     {formatarFone(
                       negotiation.contato ? negotiation.contato : ""
                     )}
                   </TableCell>
-                  <TableCell>{negotiation.desContr}</TableCell>
-                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
+                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip hover:cursor-pointer">
                     <Tooltips
                       message={negotiation.user ? negotiation.user : ""}
                     >
                       <p className="truncate hover:text-clip">
-                        {negotiation.user}
+                        {getFirstAndLastName(`${negotiation.user}`)}
                       </p>
                     </Tooltips>
                   </TableCell>

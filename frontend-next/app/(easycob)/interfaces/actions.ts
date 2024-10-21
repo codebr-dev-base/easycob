@@ -54,6 +54,7 @@ export interface IPromiseOfPayment {
   desContr?: string;
   createdAt: string; // ou Date
   updatedAt: string; // ou Date
+  comments?: string;
 }
 
 // Interface para NegotiationOfPayment
@@ -74,6 +75,7 @@ export interface INegotiationInvoice {
   idNegotiation?: string;
   createdAt: string; // ou Date
   updatedAt: string; // ou Date
+  comments?: string;
 }
 
 // Interface para NegotiationOfPayment
@@ -102,6 +104,7 @@ export interface INegotiationOfPayment {
   desContr?: string;
   createdAt: string; // ou Date
   updatedAt: string; // ou Date
+  comments?: string;
 }
 
 // Interface para Action

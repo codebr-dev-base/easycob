@@ -74,6 +74,9 @@ export interface IInvoice {
     desEmail?: string;
     descCodMovimento?: string;
     status?: string;
+    contracts?: IContract[]
+    phones?: IContact[]
+    emails?: IContact[]
   }
 
   export interface IContract {

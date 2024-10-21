@@ -10,7 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDateToBR, formatToBRL, formatarFone } from "@/app/lib/utils";
+import {
+  formatDateToBR,
+  formatCurrencyToBRL,
+  formatarFone,
+  getFirstAndLastName,
+} from "@/app/lib/utils";
 import Pagination from "@/app/(easycob)/components/Pagination";
 import { Button } from "@/components/ui/button";
 import { FaRegEye } from "react-icons/fa";
@@ -22,6 +27,9 @@ import { IMeta } from "@/app/interfaces/pagination";
 import { IPromiseOfPayment } from "@/app/(easycob)/interfaces/actions";
 import { BsCheck, BsHourglassSplit } from "react-icons/bs";
 import { HeaderTable } from "@/app/(easycob)/components/HeaderTable";
+import { useState } from "react";
+import FormPromiseHistories from "./FormPromiseHistories";
+import { Switch } from "@/components/ui/switch";
 
 export default function TabPromises({
   query,
@@ -36,6 +44,8 @@ export default function TabPromises({
   refresh: () => Promise<void>;
   pending: boolean;
 }) {
+  const [selectRow, setSelectRow] = useState<IPromiseOfPayment | null>(null);
+  const [openForm, setOpenForm] = useState(false);
   const selecIcon = (status: boolean) => {
     switch (status) {
       case true:
@@ -51,9 +61,31 @@ export default function TabPromises({
     }
   };
 
+  const handleSelectRow = (promise: IPromiseOfPayment) => {
+    if (selectRow && selectRow.id === promise.id) {
+      setSelectRow(null);
+      setOpenForm(false);
+    } else {
+      setSelectRow(promise);
+      setOpenForm(true);
+    }
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setSelectRow(null);
+      setOpenForm(open);
+    }
+  };
+
   return (
     <Card>
       <CardContent>
+        <FormPromiseHistories
+          open={openForm}
+          onOpenChange={handleOpenChange}
+          selectRow={selectRow}
+        />
         {/* Skeleton com transição de opacidade */}
         <div
           className={`inset-0 transition-opacity duration-1000 ${
@@ -74,6 +106,7 @@ export default function TabPromises({
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead></TableHead>
                 <TableHead>
                   <HeaderTable
                     columnName="Status"
@@ -98,6 +131,15 @@ export default function TabPromises({
                     refresh={refresh}
                   />
                 </TableHead>
+                <TableHead>Contrato</TableHead>
+                <TableHead>
+                  <HeaderTable
+                    columnName="Cliente"
+                    fieldName="client"
+                    query={query}
+                    refresh={refresh}
+                  />
+                </TableHead>
                 <TableHead>
                   <HeaderTable
                     columnName="V. Débito"
@@ -114,16 +156,7 @@ export default function TabPromises({
                     refresh={refresh}
                   />
                 </TableHead>
-                <TableHead>
-                  <HeaderTable
-                    columnName="Cliente"
-                    fieldName="client"
-                    query={query}
-                    refresh={refresh}
-                  />
-                </TableHead>
                 <TableHead>Contato</TableHead>
-                <TableHead>Contrato</TableHead>
                 <TableHead>
                   <HeaderTable
                     columnName="Operador"
@@ -138,19 +171,20 @@ export default function TabPromises({
             <TableBody>
               {data.map((promese) => (
                 <TableRow key={promese.id}>
+                  <TableCell>
+                    <Switch
+                      checked={!!selectRow && selectRow.id === promese.id}
+                      onCheckedChange={() => {
+                        handleSelectRow(promese);
+                      }}
+                    />
+                  </TableCell>
                   <TableCell>{selecIcon(promese.status)}</TableCell>
                   <TableCell>
                     {promese.datPrev ? formatDateToBR(promese.datPrev) : ""}
                   </TableCell>
                   <TableCell>{formatDateToBR(promese.createdAt)}</TableCell>
-                  <TableCell>
-                    {promese.valPrest ? formatToBRL(promese.valPrest) : ""}
-                  </TableCell>
-                  <TableCell>
-                    {promese.valOriginal
-                      ? formatToBRL(promese.valOriginal)
-                      : ""}
-                  </TableCell>
+                  <TableCell>{promese.desContr}</TableCell>
                   <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
                     <Tooltips message={promese.client ? promese.client : ""}>
                       <p className="truncate hover:text-clip">
@@ -159,12 +193,21 @@ export default function TabPromises({
                     </Tooltips>
                   </TableCell>
                   <TableCell>
+                    {promese.valPrest ? formatCurrencyToBRL(promese.valPrest) : ""}
+                  </TableCell>
+                  <TableCell>
+                    {promese.valOriginal
+                      ? formatCurrencyToBRL(promese.valOriginal)
+                      : ""}
+                  </TableCell>
+                  <TableCell>
                     {formatarFone(promese.contato ? promese.contato : "")}
                   </TableCell>
-                  <TableCell>{promese.desContr}</TableCell>
-                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
+                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip hover:cursor-pointer">
                     <Tooltips message={promese.user ? promese.user : ""}>
-                      <p className="truncate hover:text-clip">{promese.user}</p>
+                      <p className="truncate hover:text-clip">
+                        {getFirstAndLastName(`${promese.user}`)}
+                      </p>
                     </Tooltips>
                   </TableCell>
                   <TableCell className="flex">

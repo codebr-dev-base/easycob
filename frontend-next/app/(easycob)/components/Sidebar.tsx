@@ -110,6 +110,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                 width={128}
                 height={128}
                 className="min-w-10"
+                priority={true}
               />
             </div>
           )}
@@ -137,9 +138,9 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
-                  <Link href={"/operator/clients"}>Clientes</Link>
-                  <Link href={"/operator/followup"}>Acompanhamento</Link>
-                  <Link href={"/operator/loyal"}>Fidelizados</Link>
+                  <Link href={"/operation/clients"}>Clientes</Link>
+                  <Link href={"/operation/followup"}>Acompanhamento</Link>
+                  <Link href={"/operation/loyal"}>Fidelizados</Link>
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="supervisor-menu" className="border-none">

@@ -1,12 +1,10 @@
 import { redirect } from "next/navigation";
-import {
-  fetchInvoices,
-  fetchNegotiations,
-  fetchPromises,
-} from "./service/discounts";
 import ContainerDiscount from "./components/ContainerDiscount";
 import SkeletonFullPage from "../../components/SkeletonFullPage";
 import { Suspense } from "react";
+import { fetchNegotiations } from "./service/negotiations";
+import { fetchPromises } from "./service/promises";
+import { fetchInvoices } from "./service/invoices";
 
 export default async function Discounts() {
   try {
