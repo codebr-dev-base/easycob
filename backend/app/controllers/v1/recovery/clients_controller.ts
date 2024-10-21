@@ -6,6 +6,7 @@ import ClientService from '#services/client_service';
 import { createClientMailValidator } from '#validators/recovery/client_mail_validator';
 import { updateClientValidator } from '#validators/recovery/client_validator';
 import { inject } from '@adonisjs/core';
+import string from '@adonisjs/core/helpers/string';
 import type { HttpContext } from '@adonisjs/core/http';
 import app from '@adonisjs/core/services/app';
 
@@ -28,24 +29,22 @@ export default class ClientsController {
       selected = await this.service.generateWhereInPaginate(qs);
     }
 
+    const keyword = qs.keyword;
+    const keywordColumn = string.snakeCase(qs.keywordColumn);
+
     const clients = await Client.query()
-      .select(
-        'id',
-        'des_regis',
-        'nom_clien',
-        'des_cpf',
-        'cod_credor_des_regis',
-        'status'
-      )
+      .select('id', 'nom_clien', 'des_cpf', 'cod_credor_des_regis', 'status')
       .where((q) => {
         if (selected) {
           q.whereIn(selected.column, selected.list);
         } else if (qs.keyword && qs.keyword.length > 4) {
-          q.whereILike(qs.keywordColumn, `%${qs.keyword}%`);
+          q.whereILike(keywordColumn, `%${keyword}%`);
         }
 
         if (qs.status) {
-          q.where('status', `${qs.status}`.toUpperCase());
+          if (qs.status !== 'null') {
+            q.where('status', `${qs.status}`.toUpperCase());
+          }
         }
       })
       .preload('phones', (q) => {

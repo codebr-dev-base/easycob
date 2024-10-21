@@ -1,7 +1,6 @@
 import PromiseOfPayment from '#models/promise_of_payment';
 import PromiseOfPaymentHistory from '#models/promise_of_payment_history';
 import { serializeKeysCamelCase } from '#utils/serialize';
-import { updatePromiseOfPaymentValidator } from '#validators/promise_of_payment_validator';
 import { inject } from '@adonisjs/core';
 import string from '@adonisjs/core/helpers/string';
 import type { HttpContext } from '@adonisjs/core/http';
@@ -84,14 +83,28 @@ export default class PromiseOfPaymentsController {
     try {
       const { id } = params;
       const promiseOfPayment = await PromiseOfPayment.findOrFail(id);
-
       const body = request.body();
 
-      const payload = await request.validateUsing(
-        updatePromiseOfPaymentValidator
-      );
+      if (body.datPayment) {
+        promiseOfPayment.datPayment = body.datPayment;
+      }
 
-      await promiseOfPayment.merge({ ...payload, status: true }).save();
+      if (body.valPayment) {
+        promiseOfPayment.valPayment = body.valPayment;
+      }
+
+      if (body.followingStatus) {
+        promiseOfPayment.followingStatus = body.followingStatus;
+        if (body.followingStatus == 'paid') {
+          promiseOfPayment.status = true;
+        }
+      }
+
+      if (body.datBreach) {
+        promiseOfPayment.datBreach = body.datBreach;
+      }
+
+      await promiseOfPayment.save();
 
       if (body.comments) {
         const promiseOfPaymentHistory = await PromiseOfPaymentHistory.create({

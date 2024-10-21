@@ -2,7 +2,6 @@ import NegotiationOfPayment from '#models/negotiation_of_payment';
 import NegotiationOfPaymentHistory from '#models/negotiation_of_payment_history';
 import { serializeKeysCamelCase } from '#utils/serialize';
 import { confirmationNegotiationInvoiceValidator } from '#validators/negotiation_invoice_validator';
-import { updateNegotiationOfPaymentValidator } from '#validators/negotiation_of_payment_validator';
 import { inject } from '@adonisjs/core';
 import type { HttpContext } from '@adonisjs/core/http';
 import db from '@adonisjs/lucid/services/db';
@@ -101,20 +100,30 @@ export default class NegotiationOfPaymentsController {
     try {
       //TODO testar validação
       const { id } = params;
+      const body = request.body();
       const negotiationOfPayment = await NegotiationOfPayment.findOrFail(id);
 
-      const body = request.body();
+      if (body.datEntraPayment) {
+        negotiationOfPayment.datEntraPayment = body.datEntraPayment;
+      }
 
-      const payload = await request.validateUsing(
-        updateNegotiationOfPaymentValidator
-      );
+      if (body.valEntraPayment) {
+        negotiationOfPayment.valEntraPayment = body.valEntraPayment;
+      }
 
-      await negotiationOfPayment.merge({ ...payload, status: true }).save();
+      if (body.followingStatus) {
+        negotiationOfPayment.followingStatus = body.followingStatus;
+        if (body.followingStatus == 'paid') {
+          negotiationOfPayment.status = true;
+        }
+      }
+
+      await negotiationOfPayment.save();
 
       if (body.comments) {
         const negotiationOfPaymentHistory =
           await NegotiationOfPaymentHistory.create({
-            negotiationOfPaymentId: negotiationOfPayment.id,
+            negotiationOfPaymentId: id,
             comments: body.comments,
             userId: auth?.user?.id,
           });

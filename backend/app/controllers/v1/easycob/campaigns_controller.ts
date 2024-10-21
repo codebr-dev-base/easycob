@@ -121,15 +121,16 @@ export default class CampaignsController {
 
       const campaign = await Campaign.find(id);
       if (campaign) {
-        const lots = await CampaignLot.query()
+        const lot = await CampaignLot.query()
           .where('campaign_id', campaign.id)
           .whereNotNull('contato')
           .whereNull('messageid')
-          .where('valid', true);
+          .where('valid', true)
+          .first();
 
         //Criar class para enviar as campanhas
 
-        if (lots.length > 0) {
+        if (lot) {
           if (campaign.type === 'SMS') {
             await SendSmsJob.dispatch(
               {

@@ -4,18 +4,18 @@ import NegotiationOfPaymentsController from '#controllers/v1/easycob/negotiation
 import { middleware } from '#start/kernel';
 
 export default router
-    .group(() => {
-
-        router.group(() => {
-            router.get('/', [NegotiationOfPaymentsController, 'index']);
-            router.patch('/:id', [NegotiationOfPaymentsController, 'confirmation']);
-            router.put('/:id', [NegotiationOfPaymentsController, 'update']);
-            router.get('/history/:id', [NegotiationOfPaymentsController, 'getHistory']);
-        })
-            .prefix('/action/negotiation')
-            .use(middleware.auth());
-
-    })
-    .prefix('/v1');
-
-
+  .group(() => {
+    router
+      .group(() => {
+        router.get('/', [NegotiationOfPaymentsController, 'index']);
+        router.patch('/:id', [NegotiationOfPaymentsController, 'confirmation']);
+        router.put('/:id', [NegotiationOfPaymentsController, 'update']);
+        router.get('/history/:id', [
+          NegotiationOfPaymentsController,
+          'getHistory',
+        ]);
+      })
+      .prefix('/action/negotiation')
+      .use(middleware.auth());
+  })
+  .prefix('/v1');

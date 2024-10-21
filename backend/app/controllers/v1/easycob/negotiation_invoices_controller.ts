@@ -2,7 +2,6 @@ import NegotiationInvoice from '#models/negotiation_invoice';
 import NegotiationInvoiceHistory from '#models/negotiation_invoice_history';
 import User from '#models/user';
 import { serializeKeysCamelCase } from '#utils/serialize';
-import { updateNegotiationInvoiceValidator } from '#validators/negotiation_invoice_validator';
 import { inject } from '@adonisjs/core';
 import string from '@adonisjs/core/helpers/string';
 import type { HttpContext } from '@adonisjs/core/http';
@@ -94,11 +93,25 @@ export default class NegotiationInvoicesController {
 
       const body = request.body();
 
-      const payload = await request.validateUsing(
-        updateNegotiationInvoiceValidator
-      );
+      if (body.datPayment) {
+        negotiationInvoice.datPayment = body.datPayment;
+      }
 
-      await negotiationInvoice.merge({ ...payload, status: true }).save();
+      if (body.valPayment) {
+        negotiationInvoice.valPayment = body.valPayment;
+      }
+
+      if (body.followingStatus) {
+        negotiationInvoice.followingStatus = body.followingStatus;
+        if (body.followingStatus == 'paid') {
+          negotiationInvoice.status = true;
+        }
+      }
+
+      if (body.datBreach) {
+        negotiationInvoice.datBreach = body.datBreach;
+      }
+      await negotiationInvoice.save();
 
       if (body.comments) {
         const negotiationInvoiceHistory =
