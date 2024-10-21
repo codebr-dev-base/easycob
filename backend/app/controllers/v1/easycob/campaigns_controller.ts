@@ -155,7 +155,7 @@ export default class CampaignsController {
               }
             );
           }
-          return response.status(200).send({ status: true, lot });
+          return response.status(200).send({ status: true, lot, campaign });
         }
       }
       return response.badRequest({
