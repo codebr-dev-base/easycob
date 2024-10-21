@@ -161,7 +161,7 @@ export default class CampaignsController {
         errors: [
           {
             status: 'error',
-            message: 'Não foi possivel renvia campanha!',
+            message: 'Não foi possivel renvia campanha! Não achei a campanha.',
           },
         ],
       });
@@ -170,7 +170,7 @@ export default class CampaignsController {
         errors: [
           {
             status: 'error',
-            message: 'Não foi possivel renvia campanha!',
+            message: `Não foi possivel renvia campanha! ${JSON.stringify(error)}`,
           },
         ],
       });
