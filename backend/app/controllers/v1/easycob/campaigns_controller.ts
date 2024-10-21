@@ -118,7 +118,7 @@ export default class CampaignsController {
     try {
       const user: User = auth.user!;
       const { id } = params;
-      return id;
+
       const campaign = await Campaign.find(id);
       if (campaign) {
         const lot = await CampaignLot.query()
@@ -161,7 +161,7 @@ export default class CampaignsController {
         errors: [
           {
             status: 'error',
-            message: 'Não foi possivel renvia campanha! Não achei a campanha.',
+            message: `Não foi possivel renvia campanha! Não achei a campanha. ${id}`,
           },
         ],
       });
