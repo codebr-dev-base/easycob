@@ -118,7 +118,7 @@ export default class CampaignsController {
     try {
       const user: User = auth.user!;
       const { id } = params;
-
+      return id;
       const campaign = await Campaign.find(id);
       if (campaign) {
         const lot = await CampaignLot.query()
