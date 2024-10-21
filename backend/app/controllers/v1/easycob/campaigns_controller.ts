@@ -5,12 +5,12 @@ import { inject } from '@adonisjs/core';
 import app from '@adonisjs/core/services/app';
 import Campaign from '#models/campaign';
 import User from '#models/user';
-//import CampaignLot from '#models/campaign_lot';
+import CampaignLot from '#models/campaign_lot';
 import LoadCsvCampaignJob from '#jobs/load_csv_campaign_job';
 import { sep, normalize } from 'node:path';
 import fs from 'fs';
-//import SendEmailJob from '#jobs/send_email_job';
-//import SendSmsJob from '#jobs/send_sms_job';
+import SendEmailJob from '#jobs/send_email_job';
+import SendSmsJob from '#jobs/send_sms_job';
 import { serializeKeysCamelCase } from '#utils/serialize';
 import string from '@adonisjs/core/helpers/string';
 
@@ -114,14 +114,13 @@ export default class CampaignsController {
     }
   }
 
-  public async send({ params }: HttpContext) {
-    //try {
-    //const user: User = auth.user!;
-    const { id } = params;
+  public async send({ params, auth, response }: HttpContext) {
+    try {
+      const user: User = auth.user!;
+      const { id } = params;
 
-    const campaign = await Campaign.find(id);
-    return campaign;
-    /*
+      const campaign = await Campaign.find(id);
+
       if (campaign) {
         const lot = await CampaignLot.query()
           .where('campaign_id', campaign.id)
@@ -156,7 +155,7 @@ export default class CampaignsController {
               }
             );
           }
-          response.status(200).send({ status: true });
+          return response.status(200).send({ status: true, lot });
         }
       }
       return response.badRequest({
@@ -177,7 +176,6 @@ export default class CampaignsController {
         ],
       });
     }
-    */
   }
 
   public getFile({ request, response }: HttpContext) {
