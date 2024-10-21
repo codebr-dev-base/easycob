@@ -114,7 +114,7 @@ export default class CampaignsController {
     }
   }
 
-  public async send({ auth, params, response }: HttpContext) {
+  public async send({ params }: HttpContext) {
     //try {
     //const user: User = auth.user!;
     const { id } = params;
