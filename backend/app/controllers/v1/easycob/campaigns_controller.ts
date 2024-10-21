@@ -115,11 +115,13 @@ export default class CampaignsController {
   }
 
   public async send({ auth, params, response }: HttpContext) {
-    try {
-      const user: User = auth.user!;
-      const { id } = params;
+    //try {
+    //const user: User = auth.user!;
+    const { id } = params;
 
-      const campaign = await Campaign.find(id);
+    const campaign = await Campaign.find(id);
+    return campaign;
+    /*
       if (campaign) {
         const lot = await CampaignLot.query()
           .where('campaign_id', campaign.id)
@@ -175,6 +177,7 @@ export default class CampaignsController {
         ],
       });
     }
+    */
   }
 
   public getFile({ request, response }: HttpContext) {
