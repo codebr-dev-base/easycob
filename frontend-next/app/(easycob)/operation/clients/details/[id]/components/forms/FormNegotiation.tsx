@@ -315,6 +315,7 @@ export default function FormNegotiation({
                             <InputCurrency
                               type="text"
                               currency="BRL"
+                              locale="pt-BR"
                               {...form.register("negotiation.valDiscount", {
                                 disabled: !discount,
                                 setValueAs: (v) => {
@@ -401,6 +402,7 @@ export default function FormNegotiation({
                             <InputCurrency
                               type="text"
                               currency="BRL"
+                              locale="pt-BR"
                               {...form.register("negotiation.valTotalPrest", {
                                 setValueAs: (v) => {
                                   return v ? parseFromBRL(v) : "";
@@ -522,6 +524,7 @@ export default function FormNegotiation({
                             <InputCurrency
                               type="text"
                               currency="BRL"
+                              locale="pt-BR"
                               defaultValue={valPrest || 0}
                               {...form.register("negotiation.valPrest", {
                                 disabled: true,

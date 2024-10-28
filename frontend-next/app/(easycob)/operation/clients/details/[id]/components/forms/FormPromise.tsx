@@ -278,6 +278,7 @@ export default function FormPromise({
                             <InputCurrency
                               type="text"
                               currency="BRL"
+                              locale="pt-BR"
                               {...form.register("promise.valDiscount", {
                                 disabled: !discount,
                                 setValueAs: (v) => {
@@ -387,6 +388,7 @@ export default function FormPromise({
                             <InputCurrency
                               type="text"
                               currency="BRL"
+                              locale="pt-BR"
                               {...form.register("promise.valPrest", {
                                 setValueAs: (v) => {
                                   return v ? parseFromBRL(v) : "";

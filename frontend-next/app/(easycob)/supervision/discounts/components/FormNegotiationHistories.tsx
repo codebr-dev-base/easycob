@@ -186,6 +186,8 @@ export default function FormNegotiationHistories({
                           <FormControl>
                             <InputCurrency
                               type="text"
+                              currency="BRL"
+                              locale="pt-BR"
                               {...form.register("valEntraPayment", {
                                 setValueAs: (v) => {
                                   return v ? parseFromBRL(v) : "";

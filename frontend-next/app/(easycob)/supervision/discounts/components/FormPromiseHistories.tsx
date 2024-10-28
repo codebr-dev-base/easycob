@@ -186,6 +186,8 @@ export default function FormPromiseHistories({
                           <FormControl>
                             <InputCurrency
                               type="text"
+                              currency="BRL"
+                              locale="pt-BR"
                               {...form.register("valPayment", {
                                 setValueAs: (v) => {
                                   return v ? parseFromBRL(v) : "";
