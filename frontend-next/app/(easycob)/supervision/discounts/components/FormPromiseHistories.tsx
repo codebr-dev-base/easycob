@@ -17,7 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { InputMaskCurrency } from "@/components/ui/InputMaskCurrency";
+import { InputCurrency } from "@/components/ui/inputCurrency";
 import {
   Select,
   SelectContent,
@@ -184,7 +184,7 @@ export default function FormPromiseHistories({
                         <FormLabel>
                           Valor
                           <FormControl>
-                            <InputMaskCurrency
+                            <InputCurrency
                               type="text"
                               {...form.register("valPayment", {
                                 setValueAs: (v) => {

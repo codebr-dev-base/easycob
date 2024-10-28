@@ -21,10 +21,13 @@ import { useState } from "react";
 
 export function TabsContacts({
   constacts,
+  selectContact,
+  setSelectContact,
 }: {
   constacts: { phones: IContact[]; emails: IContact[] };
+  selectContact: IContact | null;
+  setSelectContact: (value: IContact | null) => void;
 }) {
-  const [selectContact, setSelectContact] = useState<IContact | null>(null);
   const handleSelectContact = (contact: IContact) => {
     if (selectContact && selectContact.id === contact.id) {
       setSelectContact(null);

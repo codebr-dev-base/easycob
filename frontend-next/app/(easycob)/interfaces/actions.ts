@@ -141,4 +141,7 @@ export interface IAction {
   user?: IUser | string;
   client?: IClient;
   cliente?: string;
+  negotiation?: INegotiationOfPayment;
+  promise?: IPromiseOfPayment;
+
 }

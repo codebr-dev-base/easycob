@@ -43,7 +43,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
     <div className="flex">
       {/* Botão para abrir sidebar no mobile */}
       <button
-        className="md:hidden fixed top-2 left-2 z-50 p-2 bg-primary text-white rounded-md"
+        className="md:hidden fixed top-2 right-2 z-50 p-2 bg-primary text-white rounded-md"
         onClick={toggleMobileSidebar}
       >
         {isMobileOpen ? <FaXmark size={24} /> : <FaBars size={24} />}
@@ -55,12 +55,12 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out lg:hidden`}
       >
-        <button
+        {/* <button
           className="absolute top-4 right-4 p-2 bg-primary text-white rounded-md"
           onClick={toggleMobileSidebar}
         >
           Fechar
-        </button>
+        </button> */}
         <nav className="mt-16 flex flex-col items-center">
           <a href="#" className="p-4 text-lg">
             Home

@@ -8,7 +8,10 @@ export default router
       .group(() => {
         router.get('/', [ActionsController, 'index']);
         router.post('/', [ActionsController, 'create']);
-        router.get('/client', [ActionsController, 'byClient']);
+        router.get('/client/:codCredorDesRegis', [
+          ActionsController,
+          'byClient',
+        ]);
         router.get('/send/:id', [ActionsController, 'send']);
         router.get('/returns/types', [ActionsController, 'getReturnTypeSync']);
         router.get('/chart/type', [

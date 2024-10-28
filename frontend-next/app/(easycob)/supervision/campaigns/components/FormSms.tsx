@@ -218,7 +218,7 @@ export function FormSms({
                       required: "Campo obrigatório",
                       setValueAs: (v) => onlyNumbers(v),
                     })}
-                    autoValue={numWhatsapp}
+                    defaultValue={numWhatsapp}
                     className="mb-2"
                   />
                 </FormControl>

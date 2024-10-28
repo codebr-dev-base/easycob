@@ -178,17 +178,17 @@ export default class ActionService {
   async createNegociation(action: Action, dataNegotiation: any) {
     const negotiation = await NegotiationOfPayment.create({
       ...dataNegotiation,
-      action_id: action.id,
+      actionId: action.id,
     });
 
-    let date = DateTime.fromSQL(dataNegotiation.dat_prest);
+    let date = DateTime.fromSQL(dataNegotiation.datPrest);
     for (let index = 0; index < negotiation.numVezes; index++) {
       if (index > 0) {
         date = date.plus({ months: 1 });
       }
       await NegotiationInvoice.create({
         datPrest: date,
-        valPrest: dataNegotiation.val_prest,
+        valPrest: dataNegotiation.valPrest,
         negotiationOfPaymentId: negotiation.id,
       });
     }

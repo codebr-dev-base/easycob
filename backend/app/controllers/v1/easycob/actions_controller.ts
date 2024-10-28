@@ -36,7 +36,6 @@ export default class ActionsController {
     const descending = qs.descending || 'true';
 
     const selected = await this.service.generateWhereInPaginate(qs);
-    console.log(selected);
     const actions = await db
       .from('public.actions AS a')
       .joinRaw(
@@ -71,13 +70,13 @@ export default class ActionsController {
     return serializeKeysCamelCase(actions.toJSON());
   }
 
-  public async byClient({ request }: HttpContext) {
-    const qs = request.qs();
+  public async byClient({ params }: HttpContext) {
+    const { codCredorDesRegis } = params;
 
     const actions = await Action.query()
       .where((q) => {
-        if (qs.codCredorDesRegis) {
-          q.where('cod_credor_des_regis', `${qs.codCredorDesRegis}`);
+        if (codCredorDesRegis) {
+          q.where('cod_credor_des_regis', `${codCredorDesRegis}`);
         }
       })
       .preload('typeAction')
@@ -86,7 +85,8 @@ export default class ActionsController {
         negotiationQuery.preload('invoices');
       })
       .preload('user')
-      .orderBy('created_at', 'desc');
+      .orderBy('created_at', 'desc')
+      .limit(10);
 
     return actions;
   }
@@ -113,29 +113,36 @@ export default class ActionsController {
 
             return this.service.afterCreate(action, data);
           } else {
-            response.badRequest({
-              messages: { errors: [{ message: 'Contrato Inativo' }] },
+            return response.badRequest({
+              success: false,
+              message: 'Contrato Inativo',
+              error: 'Contrato Inativo',
+              data,
             });
           }
         } else {
-          response.badRequest({
-            messages: {
-              errors: [
-                {
-                  message: 'Acionamento duplicado',
-                  double: true,
-                  payload: data,
-                },
-              ],
-            },
+          return response.badRequest({
+            success: false,
+            message: 'Acionamento duplicado',
+            error: 'Acionamento duplicado',
+            data: { ...data, double: true },
           });
         }
       } else {
-        response.badRequest({ messages: 'Usuario não existe' });
+        return response.badRequest({
+          success: false,
+          data,
+          message: 'Usuario não existe',
+          error: 'Usuario não existe',
+        });
       }
     } catch (error) {
-      console.log(error);
-      response.badRequest({ messages: error });
+      return response.badRequest({
+        success: false,
+        data: request.all(),
+        message: 'Usuario não existe',
+        error: 'Usuario não existe',
+      });
     }
   }
 

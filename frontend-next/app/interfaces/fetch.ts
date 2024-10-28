@@ -25,7 +25,9 @@ export interface IError {
 }
 export interface IFetchResponse<T> {
   success: boolean;
+  double?: boolean;
   data: T | null;
+  message?: string;
   error?: string;
   errors?: IError[];
 }

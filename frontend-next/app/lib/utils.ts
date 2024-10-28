@@ -3,8 +3,18 @@
  * @param isoDateString A string da data no formato ISO (ex: 2024-09-04T00:00:00.000Z).
  * @returns A data formatada no padrão brasileiro (ex: 04/09/2024).
  */
-export function formatDateToBR(isoDateString: string): string {
+export function formatDateToBR(isoDateString: string | null | undefined): string {
+  // Verifica se o valor é null ou undefined, e retorna uma string vazia
+  if (!isoDateString) {
+    return "";
+  }
+
   const date = new Date(isoDateString);
+
+  // Verifica se a data é válida
+  if (isNaN(date.getTime())) {
+    return "";
+  }
 
   // Configuração para o formato de data brasileiro
   return new Intl.DateTimeFormat("pt-BR", {
@@ -26,7 +36,7 @@ export function formatDateForInput(dateString: string): string {
 }
 
 export function formatarFone(fone: string | null | undefined): string {
-  if (typeof fone !== 'string' || !fone.trim()) {
+  if (typeof fone !== "string" || !fone.trim()) {
     return ""; // Retorna string vazia se a variável não for uma string válida
   }
 
@@ -36,18 +46,54 @@ export function formatarFone(fone: string | null | undefined): string {
   // Verifica o comprimento do número
   if (numeros.length === 10) {
     // Formato para números de telefone de 10 dígitos (ex: (92) 8246-1020)
-    return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 6)}-${numeros.slice(6)}`;
-  } else if (numeros.length === 11 && numeros[2] === '9') {
+    return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 6)}-${numeros.slice(
+      6
+    )}`;
+  } else if (numeros.length === 11 && numeros[2] === "9") {
     // Formato para números de telefone de 11 dígitos (ex: (92) 9 8246-1020)
-    return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 3)} ${numeros.slice(3, 7)}-${numeros.slice(7)}`;
+    return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 3)} ${numeros.slice(
+      3,
+      7
+    )}-${numeros.slice(7)}`;
   } else {
     // Se o número não é compatível com o formato esperado
     return `Número de fone inválido! ${fone}`;
   }
 }
 
-export function formatCurrencyToBRL(value: number): string {
-  return value.toLocaleString("pt-BR", {
+export function formatCurrencyToBRL(
+  value: number | string | undefined | null
+): string {
+  // Verifica se o valor é null e trata como undefined
+  if (value === null) {
+    value = undefined;
+  }
+
+  // Tenta converter strings para número
+  let numericValue: number | undefined;
+
+  if (typeof value === "string") {
+    // Remove espaços e converte para número, caso possível
+    numericValue = parseFloat(value.replace(/,/g, "").trim());
+
+    // Verifica se o valor convertido é válido
+    if (isNaN(numericValue)) {
+      numericValue = undefined;
+    }
+  } else {
+    numericValue = value;
+  }
+
+  // Formata o número ou retorna "R$ 0,00" se o valor for undefined ou inválido
+  if (numericValue !== undefined && !isNaN(numericValue)) {
+    return numericValue.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  }
+
+  // Caso o valor seja inválido ou indefinido, retorna "R$ 0,00"
+  return (0).toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL",
   });
@@ -236,24 +282,35 @@ export const cleanObject = (obj: Record<string, any>): Record<string, any> => {
   }, {} as Record<string, any>);
 };
 
-
-export const formatStringToCpfCnpj = (document: any): string | null  => {
+export const formatStringToCpfCnpj = (document: any): string | null => {
   // Verifica se o valor existe e é uma string
-  if (typeof document !== 'string' || !document.trim()) {
+  if (typeof document !== "string" || !document.trim()) {
     return null; // Retorna null se a variável não for uma string válida
   }
 
   // Remove todos os caracteres não numéricos
-  const cleanedDocument = document.replace(/\D/g, '');
+  const cleanedDocument = document.replace(/\D/g, "");
 
   // Verifica se o tamanho corresponde ao CPF ou CNPJ
   if (cleanedDocument.length === 11) {
     // Formata como CPF: 999.999.999-99
-    return cleanedDocument.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    return cleanedDocument.replace(
+      /(\d{3})(\d{3})(\d{3})(\d{2})/,
+      "$1.$2.$3-$4"
+    );
   } else if (cleanedDocument.length === 14) {
     // Formata como CNPJ: 99.999.999/9999-99
-    return cleanedDocument.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    return cleanedDocument.replace(
+      /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
+      "$1.$2.$3/$4-$5"
+    );
   }
 
   return null; // Retorna null se não for nem CPF nem CNPJ
-}
+};
+
+export const calcDaylate = (datVenci: string) => {
+  const today = new Date(new Date().setHours(0, 0, 0, 0));
+  const date = new Date(new Date(datVenci).setHours(24, 0, 0, 0));
+  return Math.round((today.getTime() - date.getTime()) / (1000 * 3600 * 24));
+};

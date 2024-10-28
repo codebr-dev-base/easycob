@@ -1,51 +1,74 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+// Interface para as props do Input
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
-  mask?: string; // Propriedade opcional para definir a máscara
-  autoValue?: string;
+  mask: string; // Adiciona a máscara como propriedade
 }
 
-const InputMask = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type = "text", mask, autoValue, ...props }, ref) => {
-    const [value, setValue] = React.useState("");
+// Ajuste na função de máscara para incluir o símbolo % da máscara
+const applyMask = (value: string, mask: string): string => {
+  let maskedValue = "";
+  let valueIndex = 0;
 
-    // Função para aplicar a máscara à entrada
-    const applyMask = (value: string, mask: string): string => {
-      let maskedValue = "";
-      let valueIndex = 0;
+  for (let i = 0; i < mask.length; i++) {
+    if (valueIndex >= value.length) break;
 
-      for (let i = 0; i < mask.length; i++) {
-        if (valueIndex >= value.length) break;
-
-        // Verifica se o caractere da máscara é um número ou um caractere fixo
-        if (mask[i] === "9") {
-          if (/\d/.test(value[valueIndex])) {
-            maskedValue += value[valueIndex];
-            valueIndex++;
-          }
-        } else {
-          maskedValue += mask[i];
-        }
+    // Verifica se é um número ou caractere fixo
+    if (mask[i] === "9") {
+      if (/\d/.test(value[valueIndex])) {
+        maskedValue += value[valueIndex];
+        valueIndex++;
       }
+    } else {
+      maskedValue += mask[i]; // Adiciona o caractere fixo, incluindo '%'
+    }
+  }
 
-      return maskedValue;
-    };
+  return maskedValue;
+};
+
+// Componente InputMask atualizado
+const InputMask = React.forwardRef<HTMLInputElement, InputProps>(
+  (
+    { className, type = "text", defaultValue, mask, onChange, ...props },
+    ref
+  ) => {
+    const [value, setValue] = React.useState<string>("");
 
     React.useEffect(() => {
-      if (autoValue) {
-        const rawValue = autoValue.replace(/\D/g, ""); // Remove tudo que não for número
-        const maskedValue = mask ? applyMask(rawValue, mask) : rawValue; // Aplica a máscara
-        setValue(maskedValue); // Atualiza o estado com o valor mascarado
-      }
-    }, [autoValue]);
+      if (defaultValue !== undefined && defaultValue !== null) {
+        const rawValue = String(defaultValue).replace(/\D/g, "");
+        const maskedValue = applyMask(rawValue, mask);
+        setValue(maskedValue);
 
-    // Função que manipula a mudança de valor
+        if (onChange) {
+          const event = {
+            target: {
+              value: rawValue,
+            },
+          } as unknown as React.ChangeEvent<HTMLInputElement>;
+          onChange(event);
+        }
+      }
+    }, [defaultValue, mask]);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const rawValue = e.target.value.replace(/\D/g, ""); // Remove tudo que não for número
-      const maskedValue = mask ? applyMask(rawValue, mask) : rawValue; // Aplica a máscara
-      setValue(maskedValue); // Atualiza o estado com o valor mascarado
+      const rawValue = e.target.value.replace(/\D/g, "");
+      const maskedValue = applyMask(rawValue, mask);
+
+      setValue(maskedValue);
+
+      if (onChange) {
+        onChange({
+          ...e,
+          target: {
+            ...e.target,
+            value: rawValue,
+          },
+        });
+      }
     };
 
     return (
@@ -57,8 +80,8 @@ const InputMask = React.forwardRef<HTMLInputElement, InputProps>(
           className
         )}
         ref={ref}
-        {...props}
         onChange={handleChange}
+        {...props}
       />
     );
   }

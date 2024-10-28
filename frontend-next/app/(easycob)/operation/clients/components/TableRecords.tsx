@@ -24,8 +24,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { FaUser } from "react-icons/fa";
 import { IClient } from "@/app/(easycob)/interfaces/clients";
-import { ContainerContactFone } from "./ContainerContactFone";
-import { ContainerContactEmail } from "./ContainerContactEmail";
+import { ContainerContactFone } from "../details/[id]/components/ContainerContactFone";
+import { ContainerContactEmail } from "../details/[id]/components/ContainerContactEmail";
 
 export default function TableRecords({
   meta,
