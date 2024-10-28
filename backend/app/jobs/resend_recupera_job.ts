@@ -156,18 +156,17 @@ export default class ResendRecuperaJob extends Job {
           action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
         }
 
+        action.isOk = action.retorno === '00' ? true : false;
+
+        await action.save();
+
         if (action.retorno === '00') {
-          action.isOk = true;
           const cod_credor_des_regis = `${action.codCredorDesRegis}`;
           const jsonString = JSON.stringify(
             serializeKeysSnakeCase(action.toJSON())
           );
           redis.hset('last_actions', cod_credor_des_regis, jsonString);
-        } else {
-          action.isOk = false;
         }
-
-        await action.save();
       } catch (error) {
         //action.sync = false;
         //await this.service.handleSendingForRecupera(action);
