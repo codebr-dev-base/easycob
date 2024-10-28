@@ -8,7 +8,6 @@ import NegotiationOfPayment from '#models/negotiation_of_payment';
 import User from '#models/user';
 import Client from '#models/recovery/client';
 
-
 export default class Action extends BaseModel {
   //declare static connection = 'pg'
 
@@ -53,6 +52,9 @@ export default class Action extends BaseModel {
 
   @column()
   declare unificationCheck: boolean;
+
+  @column()
+  declare isOk: boolean;
 
   @belongsTo(() => TypeAction, {
     foreignKey: 'typeActionId',
@@ -115,5 +117,4 @@ export default class Action extends BaseModel {
 
   @column()
   declare pecld: number;
-
 }
