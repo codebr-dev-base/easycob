@@ -4,7 +4,6 @@ import { inject } from '@adonisjs/core';
 import LastActionService from '#services/last_action_service';
 
 export default class UpdateLastAction extends BaseCommand {
-
   static commandName = 'update:last-action';
   static description = 'Update Last Action in Postgres(default) or Redis';
 
@@ -14,15 +13,15 @@ export default class UpdateLastAction extends BaseCommand {
 
   @args.string({
     argumentName: 'sgbd',
-    description: 'defines which DBMS will be updated, Postgres=pg or Redis=redis (default is postgres) ',
+    description:
+      'defines which DBMS will be updated, Postgres=pg or Redis=redis (default is postgres) ',
     required: false,
-    default: 'pg'
+    default: 'pg',
   })
   declare sgbd: string;
 
   @inject()
   async run(service: LastActionService) {
-
     switch (this.sgbd) {
       case 'redis':
         try {
