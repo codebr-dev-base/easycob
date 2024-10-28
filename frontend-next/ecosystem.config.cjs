@@ -7,8 +7,9 @@ module.exports = {
     {
       name: "frontend-next", // Nome da aplicação
       script: "npm", // O comando para rodar
-      args: "start", // Argumento para o comando (nesse caso, 'npm start')
+      args: "run start", // Argumento para o comando (nesse caso, 'npm start')
       cwd: severPath, // Caminho para a aplicação Next.js
+      watch: false,
       env: {
         NODE_ENV: "production", // Define a variável de ambiente NODE_ENV como 'production'
         PORT: 4000, // Define a porta em que a aplicação será executada
