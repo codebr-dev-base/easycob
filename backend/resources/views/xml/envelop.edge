@@ -10,7 +10,7 @@
                   <CODIGO>{{action.codigo}}</CODIGO>
                   <CREDOR>{{action.credor}}</CREDOR>
                   <REGIS>{{action.regis}}</REGIS>
-                  <OPERADOR>WSYUAN</OPERADOR>
+                  <OPERADOR>{{credentials.UID}}</OPERADOR>
                   <COMPLEMENTO>{{action.complemento}}</COMPLEMENTO>
                   <DATAAGENDA />
                   <FONEDISCADO>{{action.fonediscado}}</FONEDISCADO>
@@ -19,8 +19,8 @@
                   <BLOQUEIOCONTRATO>FALSE</BLOQUEIOCONTRATO>
               </OCORRENCIA>
               <login>
-                  <UID>WSYUAN</UID>
-                  <PWD>wsyuan1234</PWD>
+                  <UID>{{credentials.UID}}</UID>
+                  <PWD>{{credentials.PWD}}</PWD>
                   <EMPRESA>AEGEA</EMPRESA>
               </login>
             </XML>

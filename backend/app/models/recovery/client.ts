@@ -99,6 +99,12 @@ export default class Client extends BaseModel {
   @column()
   declare status: string;
 
+  @column()
+  declare isFixa: boolean | null;
+
+  @column()
+  declare isVar: boolean | null;
+
   @hasMany(() => Contract, {
     foreignKey: 'codCredorDesRegis',
     localKey: 'codCredorDesRegis',

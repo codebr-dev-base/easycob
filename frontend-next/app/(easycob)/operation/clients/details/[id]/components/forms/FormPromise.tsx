@@ -201,7 +201,7 @@ export default function FormPromise({
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[86vh] overflow-y-auto p-2">
-            <div className={`space-y-2 ${pending ? "" : "hidden"}`}>
+            <div className={`space-y-2 ${formPending ? "" : "hidden"}`}>
               <Skeleton className="h-12 w-full" />
               <Skeleton className="h-12 w-full" />
               <Skeleton className="h-12 w-full" />
@@ -210,7 +210,7 @@ export default function FormPromise({
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className={`${!pending ? "" : "hidden"}`}
+                className={`${!formPending ? "" : "hidden"}`}
               >
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                   {/* Campo Canal */}
@@ -383,7 +383,7 @@ export default function FormPromise({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          Valor da parcela
+                          Valor Negociado
                           <FormControl>
                             <InputCurrency
                               type="text"

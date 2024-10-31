@@ -13,6 +13,7 @@ import { FaSearch } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { IQueryClienteParams } from "../interfaces/cliente";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function FilterPus({
   query,
@@ -21,54 +22,91 @@ export default function FilterPus({
   query: IQueryClienteParams;
   refresh: () => void;
 }) {
-  const [status, setStatus] = useState(true);
+  const [isFixa, setIsFixa] = useState(false);
+  const [isVar, setIsVar] = useState(false);
 
   const handleChangeKeyword = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.name == "keyword") {
-      switch (query.keywordColumn) {
+      query.keyword = e.target.value;
+      query.page = 1;
+      query.perPage = 10;
+      refresh();
+/*       switch (query.keywordColumn) {
         case "nomClien":
           if (e.target.value.length > 4) {
-            query.keyword = e.target.value;
+            query.page = 1;
+            query.perPage = 10;
             refresh();
           }
           break;
         case "phone":
           if (e.target.value.length > 8) {
-            query.keyword = e.target.value;
+            query.page = 1;
+            query.perPage = 10;
             refresh();
           }
           break;
         case "email":
           if (e.target.value.length > 6) {
-            query.keyword = e.target.value;
+            query.page = 1;
+            query.perPage = 10;
             refresh();
           }
           break;
         case "desContr":
           if (e.target.value.length > 6) {
-            query.keyword = e.target.value;
+            query.page = 1;
+            query.perPage = 10;
             refresh();
           }
           break;
         case "desCpf":
           if (e.target.value.length > 6) {
-            query.keyword = e.target.value;
+            query.page = 1;
+            query.perPage = 10;
             refresh();
           }
           break;
         default:
           break;
-      }
+      } */
     }
   };
 
   const handleChangeStatus = (value: string) => {
     query.status = value;
+    query.page = 1;
+    query.perPage = 10;
     refresh();
   };
 
   const handleChangeColumn = (value: string) => {
     query.keywordColumn = value;
+  };
+
+  const handleChangeIsFixa = () => {
+    setIsFixa(!isFixa);
+    if (isFixa && query.isFixa) {
+      delete query.isFixa;
+    } else {
+      query.isFixa = true;
+    }
+
+    query.page = 1;
+    query.perPage = 10;
+    refresh();
+  };
+  const handleChangeIsVar = () => {
+    setIsVar(!isVar);
+    if (isVar && query.isVar) {
+      delete query.isVar;
+    } else {
+      query.isVar = true;
+    }
+
+    query.page = 1;
+    query.perPage = 10;
+    refresh();
   };
 
   return (
@@ -160,6 +198,19 @@ export default function FilterPus({
                   </Label>
                 </div>
               </RadioGroup>
+            </div>
+            <div>
+              <label className="text-base">Carteira:</label>
+            </div>
+            <div className="flex p-2 space-x-2">
+              <Label className="flex items-center space-x-2">
+                <Checkbox checked={isFixa} onCheckedChange={handleChangeIsFixa}/>
+                <span>Fixa</span>
+              </Label>
+              <Label className="flex items-center space-x-2">
+                <Checkbox checked={isVar} onCheckedChange={handleChangeIsVar}/>
+                <span>Variável</span>
+              </Label>
             </div>
           </CardContent>
         </Card>

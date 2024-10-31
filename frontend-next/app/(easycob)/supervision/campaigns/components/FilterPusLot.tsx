@@ -40,6 +40,8 @@ export default function FilterPus({
         console.log(e.target.value);
         query.keywordColumn = "cliente";
         query.keyword = e.target.value;
+        query.page = 1;
+        query.perPage = 10;
         refresh();
       }
     }

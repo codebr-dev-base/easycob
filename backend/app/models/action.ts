@@ -56,6 +56,9 @@ export default class Action extends BaseModel {
   @column()
   declare isOk: boolean;
 
+  @column()
+  declare wallet: string;
+
   @belongsTo(() => TypeAction, {
     foreignKey: 'typeActionId',
   })

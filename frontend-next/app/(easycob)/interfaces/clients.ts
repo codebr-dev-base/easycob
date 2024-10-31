@@ -77,16 +77,18 @@ export interface IClient {
   contracts?: IContract[];
   phones?: IContact[];
   emails?: IContact[];
+  isFixa?: boolean;
+  isVar?: boolean;
 }
 export interface IContract {
   id?: number;
   dtUpdate?: string; // Data como string no formato ISO
   datMovto?: string; // Data como string no formato ISO
-  codCredorDesRegis?: number | string;
+  codCredorDesRegis: number | string;
   matriculaContrato?: number;
   codCredor?: string;
   desRegis?: string;
-  desContr?: string;
+  desContr: string;
   nomFilia?: string;
   nomRede?: string;
   valCompr?: string;
@@ -98,6 +100,8 @@ export interface IContract {
   nomLoja?: string;
   status?: string;
   matriculaAntiga?: string;
+  isFixa?: boolean;
+  isVar?: boolean;
 
   // Relacionamentos
   client?: IClient; // Adicione a interface IClient se necessário

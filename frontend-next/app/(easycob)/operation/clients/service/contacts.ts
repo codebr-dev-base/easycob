@@ -20,3 +20,31 @@ export const fetchContacts = async (
     throw new Error(result.error);
   }
 };
+
+export const createContact = async (contact: any) => {
+  const result = await fetchAuth<IContact>(`${url}`, {
+    method: "POST",
+    body: JSON.stringify(contact),
+  });
+
+  if (result.success) {
+    //console.log("Dados recebidos:", result.data);
+    return result;
+  } else {
+    throw result;
+  }
+};
+
+export const updateContact = async (contact: any) => {
+  const result = await fetchAuth<IContact>(`${url}/${contact.id}`, {
+    method: "PUT",
+    body: JSON.stringify(contact),
+  });
+
+  if (result.success) {
+    //console.log("Dados recebidos:", result.data);
+    return result;
+  } else {
+    throw result;
+  }
+};

@@ -42,10 +42,23 @@ import { IMeta } from "@/app/interfaces/pagination";
 import FormPromise from "./forms/FormPromise";
 import FormSimple from "./forms/FormSimple";
 import { fetchActionsClient } from "../../../service/actions";
+import { fetchContacts } from "../../../service/contacts";
+import { GoAlert } from "react-icons/go";
+
+export function AlertCpc() {
+  return (
+    <div className="flex text-red-500">
+      <span className="pt-1 pl-2">
+        <GoAlert />
+      </span>
+      <span className="pl-2">Não existe contato CPC.</span>
+    </div>
+  );
+}
 
 export default function ConteinerDetails({
   client,
-  contacts,
+  contacts: c,
   actions: a,
   contracts,
   typesActions,
@@ -65,13 +78,21 @@ export default function ConteinerDetails({
 
   const [selectContract, setSelectContract] = useState<IContract | null>(null);
 
-  const [selectContact, setSelectContact] = useState<IContract | null>(null);
+  const [selectContact, setSelectContact] = useState<IContact | null>(null);
 
   const [actions, setActions] = useState(a);
+
+  const [contacts, setContacts] = useState(c);
 
   const refreshActions = async () => {
     fetchActionsClient(`${client.codCredorDesRegis}`).then((records) => {
       setActions(records);
+    });
+  };
+
+  const refreshContacts = async () => {
+    fetchContacts(`${client.codCredorDesRegis}`).then((records) => {
+      setContacts(records);
     });
   };
 
@@ -81,7 +102,19 @@ export default function ConteinerDetails({
     );
   };
 
+  const checkCpc = () => {
+    for (const phone of contacts.phones) {
+      if (phone.cpc) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   const checkPrerequisites = (): boolean => {
+    if (!checkCpc()) {
+      return false;
+    }
     return !!(selectTypeAction && selectContact && selectContract); // Checagem mais concisa
   };
 
@@ -153,76 +186,78 @@ export default function ConteinerDetails({
               constacts={contacts}
               selectContact={selectContact}
               setSelectContact={setSelectContact}
+              refresh={refreshContacts}
             />
           </div>
         </CardContent>
-        <CardFooter>
-          <p>Atualizado em: {formatDateToBR(`${client.dtUpdate}`)}</p>
+        <CardFooter className="flex justify-between">
+          <p>Atualizado em: {formatDateToBR(`${client.dtUpdate}`)} </p>
+          {!checkCpc() && <AlertCpc />}
         </CardFooter>
       </Card>
-      {actions.length > 0 && (
-        <Card className="grid grid-cols-1 content-between">
-          <CardHeader>
-            <CardTitle>Último acionamento válido</CardTitle>
-            <CardDescription></CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CardAction action={actions[0]} />
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Select onValueChange={handleChangeTypeAction}>
-              <SelectTrigger className="w-[280px]">
-                <SelectValue placeholder="Selecione um tipo de acionamento" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {typesActions?.map((type) => (
-                    <SelectItem key={type.id} value={`${type.id}`}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
 
-            {checkPrerequisites() ? (
-              renderFormComponent()
-            ) : (
-              <Button
-                disabled
-                className={`${buttonVariants({ variant: "default" })} flex`}
-              >
-                <span className="lg:mr-2">
-                  <FaPlus />
-                </span>
-                <span className="hidden lg:block">Novo acionamento</span>
-              </Button>
-            )}
+      <Card className="grid grid-cols-1 content-between">
+        <CardHeader>
+          <CardTitle>Último acionamento válido</CardTitle>
+          <CardDescription></CardDescription>
+        </CardHeader>
 
-            <Sheet>
-              <SheetTrigger
-                className={`${buttonVariants({ variant: "default" })} flex`}
-              >
-                <span className="mr-2">
-                  <FaRegClock />
-                </span>
-                <span>Histórico</span>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Histórico de acionamentros</SheetTitle>
-                  <SheetDescription></SheetDescription>
-                </SheetHeader>
-                <ScrollArea className="h-[96vh]">
-                  {actions.map((action) => (
-                    <CardAction key={action.id} action={action} />
-                  ))}
-                </ScrollArea>
-              </SheetContent>
-            </Sheet>
-          </CardFooter>
-        </Card>
-      )}
+        <CardContent>
+          {actions.length > 0 && <CardAction action={actions[0]} />}
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <Select onValueChange={handleChangeTypeAction}>
+            <SelectTrigger className="w-[280px]">
+              <SelectValue placeholder="Selecione um tipo de acionamento" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {typesActions?.map((type) => (
+                  <SelectItem key={type.id} value={`${type.id}`}>
+                    {type.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+
+          {checkPrerequisites() ? (
+            renderFormComponent()
+          ) : (
+            <Button
+              disabled
+              className={`${buttonVariants({ variant: "default" })} flex`}
+            >
+              <span className="lg:mr-2">
+                <FaPlus />
+              </span>
+              <span className="hidden lg:block">Novo acionamento</span>
+            </Button>
+          )}
+
+          <Sheet>
+            <SheetTrigger
+              className={`${buttonVariants({ variant: "default" })} flex`}
+            >
+              <span className="mr-2">
+                <FaRegClock />
+              </span>
+              <span>Histórico</span>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Histórico de acionamentros</SheetTitle>
+                <SheetDescription></SheetDescription>
+              </SheetHeader>
+              <ScrollArea className="h-[96vh]">
+                {actions.map((action) => (
+                  <CardAction key={action.id} action={action} />
+                ))}
+              </ScrollArea>
+            </SheetContent>
+          </Sheet>
+        </CardFooter>
+      </Card>
 
       <TableContracts
         contracts={contracts}

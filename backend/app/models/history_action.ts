@@ -9,6 +9,12 @@ import NegotiationOfPayment from '#models/negotiation_of_payment';
 import User from '#models/user';
 import Client from '#models/recovery/client';
 
+// Define o Enum TypeScript
+export enum WalletType {
+  FIXED = 'F',
+  VARIABLE = 'V',
+}
+
 export default class HistoryAction extends BaseModel {
   //declare static connection = 'pg'
 
@@ -53,6 +59,12 @@ export default class HistoryAction extends BaseModel {
 
   @column()
   declare unificationCheck: boolean;
+
+  @column()
+  declare isOk: boolean;
+
+  @column()
+  declare wallet: string;
 
   @belongsTo(() => TypeAction, {
     foreignKey: 'typeActionId',
@@ -115,5 +127,4 @@ export default class HistoryAction extends BaseModel {
 
   @column()
   declare pecld: number;
-
 }

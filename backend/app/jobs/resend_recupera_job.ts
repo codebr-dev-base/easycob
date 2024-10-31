@@ -8,7 +8,10 @@ import Action from '#models/action';
 import env from '#start/env';
 import CatchLog from '#models/catch_log';
 import xmlParser from 'xml2json';
-import { isToSendToRecupera } from '#services/utils/recupera';
+import {
+  handleSendingForRecupera,
+  isToSendToRecupera,
+} from '#services/utils/recupera';
 import { serializeKeysSnakeCase } from '#utils/serialize';
 import Contract from '#models/recovery/contract';
 import TypeAction from '#models/type_action';
@@ -21,6 +24,7 @@ interface ResendRecuperaJobPayload {
   complemento: string;
   fonediscado: string;
   cocontratovincular: string;
+  wallet: string;
   error: string;
 }
 
@@ -69,6 +73,16 @@ export default class ResendRecuperaJob extends Job {
     };
   }
 
+  credentials = {
+    UID: env.get('UID') || '',
+    PWD: env.get('PWD') || '',
+  };
+
+  fixedCredentials = {
+    UID: env.get('UIDFIXO') || '',
+    PWD: env.get('PWDFIXO') || '',
+  };
+
   checkResultSync(retornotexto: string): boolean {
     const keywords = ['PRIMARY', 'DEADLOCK', 'TIMEOUT'];
 
@@ -83,7 +97,23 @@ export default class ResendRecuperaJob extends Job {
   async handle(payload: ResendRecuperaJobPayload) {
     const edge = Edge.create();
     edge.mount(app.viewsPath());
-    const envelop = await edge.render('xml/envelop', { action: payload });
+    let envelop = '';
+
+    switch (payload.wallet) {
+      case 'F':
+        envelop = await edge.render('xml/envelop', {
+          action: payload,
+          credentials: this.fixedCredentials,
+        });
+        break;
+
+      default:
+        envelop = await edge.render('xml/envelop', {
+          action: payload,
+          credentials: this.credentials,
+        });
+        break;
+    }
 
     const action = await Action.find(payload.action_id);
     if (action) {
@@ -136,6 +166,7 @@ export default class ResendRecuperaJob extends Job {
               complemento: action.description ? action.description : '',
               fonediscado: action.contato,
               cocontratovincular: <string>contract?.desContr,
+              wallet: action.wallet,
               error: retornotexto,
             };
 
@@ -168,8 +199,9 @@ export default class ResendRecuperaJob extends Job {
           redis.hset('last_actions', cod_credor_des_regis, jsonString);
         }
       } catch (error) {
-        //action.sync = false;
-        //await this.service.handleSendingForRecupera(action);
+        action.sync = false;
+        await action.save();
+        await handleSendingForRecupera(action);
 
         await CatchLog.create({
           classJob: 'SendXmlRecupera',

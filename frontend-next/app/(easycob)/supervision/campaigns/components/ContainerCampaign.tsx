@@ -37,6 +37,8 @@ export default function ContainerCampaign({
   const handleTabChange = (value: string) => {
     query.type = value;
     setType(value);
+    query.page = 1;
+    query.perPage = 10;
     refresh();
   };
 

@@ -65,12 +65,16 @@ export default function FilterPus({
   const handleChangeStatus = () => {
     query.status = !status;
     setStatus(!status);
+    query.page = 1;
+    query.perPage = 10;
     refresh();
   };
 
   const handleChangeDiscount = () => {
     query.discount = !discount;
     setDiscount(!discount);
+    query.page = 1;
+    query.perPage = 10;
     refresh();
   };
 
@@ -80,6 +84,8 @@ export default function FilterPus({
     } else {
       query.userId = value;
     }
+    query.page = 1;
+    query.perPage = 10;
     refresh();
   };
 

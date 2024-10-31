@@ -9,14 +9,19 @@ const apiUrl = process.env.API_URL
 const urn = "/v1/recovery/client";
 const url = `${apiUrl}${urn}`;
 
-export const query: IQueryClienteParams = {
+export let query: IQueryClienteParams = {
   page: 1,
   perPage: 10,
-  orderBy: "id",
+  orderBy: "dtUpdate",
   descending: false,
   keywordColumn: "nomClien",
   status: "ATIVO",
 };
+
+// Função para atualizar `query`
+export function setQuery(newParams: Partial<IQueryClienteParams>): void {
+  query = { ...query, ...newParams };
+}
 
 export const fetchClients = async (): Promise<{
   data: IClient[];
@@ -35,7 +40,9 @@ export const fetchClients = async (): Promise<{
   }
 };
 
-export const fetchClient = async (codCredorDesRegis: String | Number): Promise<IClient> => {
+export const fetchClient = async (
+  codCredorDesRegis: String | Number
+): Promise<IClient> => {
   const result = await fetchAuth(`${url}/${codCredorDesRegis}`);
 
   if (result.success) {
@@ -46,4 +53,3 @@ export const fetchClient = async (codCredorDesRegis: String | Number): Promise<I
     throw new Error(result.error);
   }
 };
-

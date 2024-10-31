@@ -1,6 +1,6 @@
 "use client";
 import SkeletonTable from "@/app/(easycob)/components/SkeletonTable";
-import { IContract } from "@/app/(easycob)/interfaces/clients";
+import { IContract, IInvoice } from "@/app/(easycob)/interfaces/clients";
 import { IMeta } from "@/app/interfaces/pagination";
 import {
   Card,
@@ -20,10 +20,17 @@ import {
 import { useState } from "react";
 import { fetchContracts, query } from "../../../service/contracts";
 import Pagination from "@/app/(easycob)/components/Pagination";
-import { formatCurrencyToBRL, formatDateToBR } from "@/app/lib/utils";
+import {
+  calcDaylate,
+  formatCurrencyToBRL,
+  formatDateToBR,
+} from "@/app/lib/utils";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
+import { da } from "date-fns/locale";
+import TableInvoices from "./TableInvoices";
+import { fetchInvoices } from "../../../service/invoices";
 
 export default function TableContracts({
   contracts: c,
@@ -42,6 +49,7 @@ export default function TableContracts({
   const [meta, setMeta] = useState(c.meta);
   const [data, setData] = useState(c.data);
   const [pending, setPending] = useState<boolean>(false);
+  const [invoices, setInvoices] = useState<IInvoice[]>([]);
 
   const refresh = async () => {
     setPending(true);
@@ -61,8 +69,14 @@ export default function TableContracts({
   const handleSelectContract = (contract: IContract) => {
     if (selectContract && selectContract.id === contract.id) {
       setSelectContract(null);
+      setInvoices([]);
     } else {
       setSelectContract(contract);
+      fetchInvoices(contract.codCredorDesRegis, [contract.desContr]).then(
+        (data) => {
+          setInvoices(data);
+        }
+      );
     }
   };
 
@@ -109,41 +123,72 @@ export default function TableContracts({
           <Table>
             <TableHeader>
               <TableRow>
-              <TableHead></TableHead>
+                <TableHead></TableHead>
                 <TableHead>Status</TableHead>
+                {data.length > 0 && data[0].codCredor == "8" && (
+                  <TableHead>Carteira</TableHead>
+                )}
+
                 <TableHead>Contrato</TableHead>
                 <TableHead>V. Aberto</TableHead>
                 <TableHead>P. Abertas</TableHead>
                 <TableHead>V. Pago</TableHead>
                 <TableHead>P. Pagas</TableHead>
-                <TableHead>P. Mais Antiga</TableHead>
+                <TableHead>D. de Atraso</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {data.map((contract) => (
-                <TableRow key={contract.id}>
-                  <TableCell>
-                    <Switch
-                      checked={
-                        !!selectContract && selectContract.id === contract.id
+                <>
+                  <TableRow key={contract.id}>
+                    <TableCell>
+                      <Switch
+                        checked={
+                          !!selectContract && selectContract.id === contract.id
+                        }
+                        onCheckedChange={() => {
+                          handleSelectContract(contract);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>{contract.status}</TableCell>
+                    {contract.codCredor == "8" && (
+                      <TableCell>
+                        {contract.isFixa && !contract.isVar && (
+                          <span>Fixa</span>
+                        )}
+                        {!contract.isFixa && contract.isVar && (
+                          <span>Variavel</span>
+                        )}
+                      </TableCell>
+                    )}
+                    <TableCell>{contract.desContr}</TableCell>
+                    <TableCell>
+                      {formatCurrencyToBRL(contract.valPrinc)}
+                    </TableCell>
+                    <TableCell>{contract.countPrinc}</TableCell>
+                    <TableCell>
+                      {formatCurrencyToBRL(contract.valPago)}
+                    </TableCell>
+                    <TableCell>{contract.countPago}</TableCell>
+                    <TableCell>{calcDaylate(`${contract.datVenci}`)}</TableCell>
+                  </TableRow>
+                  <TableRow
+                    className={
+                      !!selectContract && selectContract.id === contract.id
+                        ? ""
+                        : "hidden"
+                    }
+                  >
+                    <TableCell
+                      colSpan={
+                        data.length > 0 && data[0].codCredor == "8" ? 9 : 8
                       }
-                      onCheckedChange={() => {
-                        handleSelectContract(contract);
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>{contract.status}</TableCell>
-                  <TableCell>{contract.desContr}</TableCell>
-                  <TableCell>
-                    {formatCurrencyToBRL(contract.valPrinc)}
-                  </TableCell>
-                  <TableCell>{contract.countPrinc}</TableCell>
-                  <TableCell>{formatCurrencyToBRL(contract.valPago)}</TableCell>
-                  <TableCell>{contract.countPago}</TableCell>
-                  <TableCell>
-                    {formatDateToBR(`${contract.datVenci}`)}
-                  </TableCell>
-                </TableRow>
+                    >
+                      <TableInvoices invoices={invoices}/>
+                    </TableCell>
+                  </TableRow>
+                </>
               ))}
             </TableBody>
           </Table>

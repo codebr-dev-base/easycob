@@ -33,7 +33,15 @@ export default class ClientsController {
     const keywordColumn = string.snakeCase(qs.keywordColumn);
 
     const clients = await Client.query()
-      .select('id', 'nom_clien', 'des_cpf', 'cod_credor_des_regis', 'status')
+      .select(
+        'id',
+        'nom_clien',
+        'des_cpf',
+        'cod_credor_des_regis',
+        'status',
+        'is_fixa',
+        'is_var'
+      )
       .where((q) => {
         if (selected) {
           q.whereIn(selected.column, selected.list);
@@ -45,6 +53,14 @@ export default class ClientsController {
           if (qs.status !== 'null') {
             q.where('status', `${qs.status}`.toUpperCase());
           }
+        }
+
+        if (qs.isFixa) {
+          q.where('is_fixa', true);
+        }
+
+        if (qs.isVar) {
+          q.where('is_var', true);
         }
       })
       .preload('phones', (q) => {

@@ -6,6 +6,57 @@ import {
 } from "../interfaces/fetch";
 import { getAccessToken } from "./auth";
 
+export function buildQueryString(query: Record<string, any>): string {
+  // Limpa os valores nulos, indefinidos e strings vazias ou com espaços em branco
+  const cleanedQuery = Object.fromEntries(
+    Object.entries(query).filter(
+      ([_, value]) =>
+        value !== null &&
+        value !== undefined &&
+        (typeof value !== "string" || value.trim() !== "")
+    )
+  );
+
+  // Converte arrays para múltiplos valores na query string
+  return new URLSearchParams(
+    Object.entries(cleanedQuery).reduce((acc, [key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => {
+          if (v !== null && v !== undefined) {
+            acc.append(key, v.toString());
+          }
+        });
+      } else if (value !== null && value !== undefined) {
+        acc.append(key, value.toString());
+      }
+      return acc;
+    }, new URLSearchParams())
+  ).toString();
+}
+
+export function parseQueryString(
+  searchParams: URLSearchParams
+): Record<string, any> {
+  const result: Record<string, any> = {};
+
+  searchParams.forEach((value, key) => {
+    // Verifica se a chave já existe para tratar múltiplos valores como arrays
+    if (result[key]) {
+      // Se já existe e não é um array, transforma em array
+      if (!Array.isArray(result[key])) {
+        result[key] = [result[key]];
+      }
+      // Adiciona o novo valor ao array
+      result[key].push(value);
+    } else {
+      // Caso contrário, adiciona o valor normalmente
+      result[key] = value;
+    }
+  });
+
+  return result;
+}
+
 export async function fetchAuth<T = any>(
   url: string,
   options: IFetchOptions = {}
@@ -28,7 +79,8 @@ export async function fetchAuth<T = any>(
   }
 
   // Converte o objeto query para query string, se existir
-  let finalUrl = url;
+  //let finalUrl = url;
+  /*
   if (options.query) {
     // Limpa os valores nulos, indefinidos e strings vazias ou com espaços em branco
     const cleanedQuery = Object.fromEntries(
@@ -61,6 +113,13 @@ export async function fetchAuth<T = any>(
     // Anexa a string de consulta à URL
     finalUrl = `${url}?${queryString}`;
   }
+  */
+
+  let finalUrl = url;
+  if (options.query) {
+    const queryString = buildQueryString(options.query);
+    finalUrl = `${url}?${queryString}`;
+  }
 
   try {
     const response = await fetch(finalUrl, {
@@ -75,6 +134,27 @@ export async function fetchAuth<T = any>(
       // Verifica os possíveis formatos da resposta de erro
       if (responseBody) {
         const { data, message, error, errors } = responseBody;
+
+        // Verifica status para tratamento específico
+        if (response.status === 401) {
+          return {
+            success: false,
+            data: null,
+            message: "Unauthorized",
+            error: "Unauthorized",
+            errors: errors || errorData,
+          };
+        }
+
+        if (response.status === 403) {
+          return {
+            success: false,
+            data: null,
+            message: "Forbidden",
+            error: "Forbidden",
+            errors: errors || errorData,
+          };
+        }
 
         // Configuração da resposta de erro com múltiplas possibilidades
         return {

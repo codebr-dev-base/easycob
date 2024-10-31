@@ -53,6 +53,8 @@ export default function FilterPus({
     } else {
       query.userId = value;
     }
+    query.page = 1;
+    query.perPage = 10;
     refresh();
   };
 
@@ -74,6 +76,8 @@ export default function FilterPus({
     if (e.target.name == "keyword") {
       if (e.target.value.length > 4) {
         query.keyword = e.target.value;
+        query.page = 1;
+        query.perPage = 10;
         refresh();
       }
     }
@@ -83,6 +87,8 @@ export default function FilterPus({
     if (range.from && range.to) {
       query.startDate = range.from?.toISOString().split("T")[0];
       query.endDate = range.to?.toISOString().split("T")[0];
+      query.page = 1;
+      query.perPage = 10;
       refresh();
     }
   };

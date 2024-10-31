@@ -1,5 +1,6 @@
 "use client";
 import { IMeta, IQueryPaginationParams } from "@/app/interfaces/pagination";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -76,27 +77,27 @@ export default function Pagination({
           {meta?.currentPage && meta?.currentPage > 1 && (
             <>
               {" "}
-              <button>
+              <Button variant={"outline"}>
                 <MdKeyboardDoubleArrowLeft onClick={handlerFirstPage} />
-              </button>
-              <button onClick={handlerPreviousPage}>
+              </Button >
+              <Button onClick={handlerPreviousPage} variant={"outline"}>
                 <MdKeyboardArrowLeft />
-              </button>
+              </Button>
             </>
           )}
 
-          <span className="px-2 text-sm">
+          <span className="px-2 py-2 text-sm border">
             Página {meta?.currentPage} de {meta?.lastPage}
           </span>
           {meta?.currentPage && meta?.currentPage < meta?.lastPage && (
             <>
               {" "}
-              <button onClick={handlerNextPage}>
+              <Button onClick={handlerNextPage} variant={"outline"}>
                 <MdKeyboardArrowRight />
-              </button>
-              <button onClick={handlerLastPage}>
+              </Button>
+              <Button onClick={handlerLastPage} variant={"outline"}>
                 <MdKeyboardDoubleArrowRight />
-              </button>
+              </Button>
             </>
           )}
         </>

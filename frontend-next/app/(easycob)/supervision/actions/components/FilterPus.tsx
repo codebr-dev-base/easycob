@@ -26,6 +26,7 @@ import { FaSearch } from "react-icons/fa";
 import { DatePicker } from "@/app/(easycob)/components/DatePicker";
 import { Input } from "@/components/ui/input";
 import { DateRange } from "react-day-picker";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function FilterPus({
   query,
@@ -39,6 +40,7 @@ export default function FilterPus({
   const [status, setStatus] = useState(true);
   const [operators, setOperators] = useState<IUser[]>([]);
   const [returnsTypes, setReturnsTypes] = useState<IReturnType[]>([]);
+  const [wallet, setWallet] = useState<string[]>([]);
 
   const handleChangeSelectTypesActions = () => {
     const ids = selectTypesActions.map((item) => {
@@ -73,6 +75,8 @@ export default function FilterPus({
 
   useEffect(() => {
     handleChangeSelectTypesActions();
+    query.page = 1;
+    query.perPage = 10;
     refresh();
   }, [selectTypesActions]);
 
@@ -82,6 +86,8 @@ export default function FilterPus({
     } else {
       query.userId = value;
     }
+    query.page = 1;
+    query.perPage = 10;
     refresh();
   };
 
@@ -91,6 +97,8 @@ export default function FilterPus({
     } else {
       query.returnType = value;
     }
+    query.page = 1;
+    query.perPage = 10;
     refresh();
   };
 
@@ -98,6 +106,8 @@ export default function FilterPus({
     if (e.target.name == "keyword") {
       if (e.target.value.length > 4) {
         query.keyword = e.target.value;
+        query.page = 1;
+        query.perPage = 10;
         refresh();
       }
     }
@@ -107,9 +117,34 @@ export default function FilterPus({
     if (range.from && range.to) {
       query.startDate = range.from?.toISOString().split("T")[0];
       query.endDate = range.to?.toISOString().split("T")[0];
+      query.page = 1;
+      query.perPage = 10;
       refresh();
     }
   };
+
+  const handlerWallet = (element: string) => {
+    const newArray = [...wallet];
+    const index = newArray.indexOf(element);
+  
+    if (index === -1) {
+      // Elemento não está no array, então adiciona
+      newArray.push(element);
+    } else {
+      // Elemento já está no array, então remove
+      newArray.splice(index, 1);
+    }
+  
+    if (newArray.length < 1 && query.wallet) {
+      delete query.wallet;
+    } else {
+      query.wallet = newArray;
+    }
+    query.page = 1;
+    query.perPage = 10;
+    refresh();
+    setWallet(newArray)
+  }
 
   return (
     <Popover>
@@ -194,6 +229,23 @@ export default function FilterPus({
                     ))}
                   </SelectContent>
                 </Select>
+              </Label>
+            </div>
+            <div>
+              <label className="text-base">Carteira:</label>
+            </div>
+            <div className="flex p-2 space-x-2">
+              <Label className="flex items-center space-x-2">
+                <Checkbox checked={wallet.includes('F')} onCheckedChange={() => {
+                  handlerWallet('F')
+                }}/>
+                <span>Fixa</span>
+              </Label>
+              <Label className="flex items-center space-x-2">
+                <Checkbox checked={wallet.includes('V')} onCheckedChange={() => {
+                  handlerWallet('V')
+                }}/>
+                <span>Variável</span>
               </Label>
             </div>
           </CardContent>

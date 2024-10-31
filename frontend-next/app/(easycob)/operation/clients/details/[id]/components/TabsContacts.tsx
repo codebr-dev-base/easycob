@@ -18,15 +18,19 @@ import { IoMailOutline } from "react-icons/io5";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
+import { FormContactPhone } from "./forms/FormContactPhone";
+import { BsHandThumbsUp } from "react-icons/bs";
 
 export function TabsContacts({
   constacts,
   selectContact,
   setSelectContact,
+  refresh,
 }: {
   constacts: { phones: IContact[]; emails: IContact[] };
   selectContact: IContact | null;
   setSelectContact: (value: IContact | null) => void;
+  refresh: () => void;
 }) {
   const handleSelectContact = (contact: IContact) => {
     if (selectContact && selectContact.id === contact.id) {
@@ -34,6 +38,22 @@ export function TabsContacts({
     } else {
       setSelectContact(contact);
     }
+  };
+
+  const selectColor = (contact: IContact) => {
+    if (contact.blockAll) {
+      return "text-purple-800";
+    }
+
+    if (contact.block) {
+      return "text-red-800";
+    }
+
+    if (contact.isWhatsapp) {
+      return "text-green-800";
+    }
+
+    return "";
   };
 
   return (
@@ -57,10 +77,7 @@ export function TabsContacts({
             </TableHeader>
             <TableBody>
               {constacts.phones.map((phone) => (
-                <TableRow
-                  key={phone.id}
-                  className={phone.isWhatsapp ? "text-green-800" : ""}
-                >
+                <TableRow key={phone.id} className={selectColor(phone)}>
                   <TableCell>
                     <Switch
                       checked={!!selectContact && selectContact.id === phone.id}
@@ -70,15 +87,32 @@ export function TabsContacts({
                     />
                   </TableCell>
                   <TableCell className="flex space-x-1">
-                    <span className="pt-1">
-                      {phone.isWhatsapp ? <FaWhatsapp /> : <FiPhone />}
-                    </span>
-                    <span>{formatarFone(phone.contato)}</span>
+                    <div className="flex pt-2">
+                      <span className="pt-1">
+                        {phone.isWhatsapp ? <FaWhatsapp /> : <FiPhone />}
+                      </span>
+                      <span
+                        className={
+                          phone.block || phone.blockAll ? "line-through" : ""
+                        }
+                      >
+                        {formatarFone(phone.contato)}
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell>{phone.countAtender}</TableCell>
                   <TableCell>{phone.percentualAtender}</TableCell>
-                  <TableCell>{phone.cpc}</TableCell>
-                  <TableCell>btn</TableCell>
+                  <TableCell>
+                    {phone.cpc && (
+                      <span className="flex pl-4 ">
+                        {" "}
+                        <BsHandThumbsUp />{" "}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <FormContactPhone contact={phone} refresh={refresh} />
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

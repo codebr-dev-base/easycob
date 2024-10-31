@@ -21,7 +21,16 @@ export default class ContractsController {
 
     const contracts = await db
       .from('recupera.tbl_arquivos_contratos as c')
-      .select('c.id', 'c.status', 'c.des_contr', 'c.matricula_contrato')
+      .select(
+        'c.id',
+        'c.status',
+        'c.des_contr',
+        'c.cod_credor',
+        'c.matricula_contrato',
+        'c.is_fixa',
+        'c.is_var',
+        'c.cod_credor_des_regis'
+      )
       .select(
         raw(`sum(pt.val_princ) filter ( WHERE ${filterIndAlter}) as val_princ`)
       )
@@ -54,7 +63,7 @@ export default class ContractsController {
           'pt.des_contr'
         );
       })
-      .groupByRaw('1,2,3,4')
+      .groupByRaw('1,2,3,4,5,6,7,8')
       .orderBy(`c.${orderBy}`, descending === 'true' ? 'desc' : 'asc')
       .paginate(pageNumber, limit);
 

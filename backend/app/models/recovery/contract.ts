@@ -63,6 +63,12 @@ export default class Contract extends BaseModel {
   declare status: string;
 
   @column()
+  declare isFixa: boolean | null;
+
+  @column()
+  declare isVar: boolean | null;
+
+  @column()
   declare matriculaAntiga: string;
 
   @belongsTo(() => Client, {

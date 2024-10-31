@@ -79,6 +79,12 @@ export default class Invoice extends BaseModel {
   @column()
   declare matriculaAntiga: string;
 
+  @column()
+  declare isFixa: boolean | null;
+
+  @column()
+  declare isVar: boolean | null;
+
   @belongsTo(() => Client, {
     foreignKey: 'codCredorDesRegis',
     localKey: 'codCredorDesRegis',

@@ -114,7 +114,7 @@ export default class EmailService {
           const group = groupCodCredorDesRegis[k];
 
           for (const [i, client] of group.entries()) {
-            const action = await createActionForClient(
+            const actions = await createActionForClient(
               client,
               typeAction,
               campaign,
@@ -122,7 +122,9 @@ export default class EmailService {
             );
 
             if (i === 0) {
-              await this.handleActionSending(action, client.subsidiary);
+              for (const action of actions) {
+                await this.handleActionSending(action, client.subsidiary);
+              }
             }
           }
         }

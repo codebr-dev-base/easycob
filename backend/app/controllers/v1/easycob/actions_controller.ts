@@ -62,6 +62,11 @@ export default class ActionsController {
         if (selected) {
           q.whereIn(selected.column, selected.list);
         }
+
+        if (qs.wallet) {
+          q.whereIn('wallet', qs.wallet);
+        }
+
         return this.service.generateWherePaginate(q, qs);
       })
       .orderBy(`${orderBy}`, descending === 'true' ? 'desc' : 'asc')

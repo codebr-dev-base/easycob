@@ -14,6 +14,7 @@ export default async function Clients() {
       </Suspense>
     );
   } catch (error) {
+    console.log(error);
     if (error instanceof Error) {
       if (error.message == "Unauthorized") {
         redirect("/logout");

@@ -26,6 +26,8 @@ export interface IClient {
   pecld: number | null;
   datVenci: string | null; // assumindo que seja uma string no formato de data
   dayLate: number | null; // quantidade de dias de atraso
+  isFixa: boolean | null;
+  isVar: boolean | null;
 }
 
 export async function handleSendingForRecupera(
@@ -116,6 +118,7 @@ export async function dispatchToRecupera(
     complemento: action.description ? action.description : '',
     fonediscado: action.contato,
     cocontratovincular: <string>contract?.desContr,
+    wallet: action.wallet,
   };
 
   /*   const jobMapping: any = {
@@ -166,6 +169,8 @@ export async function getClients(lots: Array<CampaignLot>) {
       'c.des_contr',
       'c.cod_credor',
       'c.matricula_contrato',
+      'c.is_fixa',
+      'c.is_var',
       'sb.name as subsidiary',
       'sb.email as subsidiary_mail',
       'sb.config_email as subsidiary_config_email'
@@ -210,7 +215,7 @@ export async function getClients(lots: Array<CampaignLot>) {
         .andOnVal('c.status', '=', 'ATIVO');
     })
     .leftJoin('public.subsidiaries as sb', 'c.nom_loja', '=', 'sb.nom_loja')
-    .groupByRaw('1,2,3,4,5,6,7,8,9,10')
+    .groupByRaw('1,2,3,4,5,6,7,8,9,10,11,12')
     .havingRaw(
       `sum(pt.val_princ) filter ( WHERE ${filterIndAlter}) is not null`
     );
@@ -231,7 +236,7 @@ export async function createActionForClient(
   typeAction: TypeAction,
   campaign: Campaign,
   tipoContato: string | undefined
-): Promise<Action> {
+): Promise<Action[]> {
   const {
     codCredorDesRegis,
     desRegis,
@@ -241,28 +246,65 @@ export async function createActionForClient(
     contato,
     valPrinc,
     dayLate,
+    isFixa,
+    isVar,
   } = client;
 
-  return await Action.create({
-    codCredorDesRegis,
-    desRegis,
-    desContr,
-    codCredor,
-    matriculaContrato: Number(matriculaContrato),
-    tipoContato,
-    contato,
-    typeActionId: typeAction.id,
-    description: '',
-    retorno: null,
-    retornotexto: 'Acionamento Automático, envio em massa!',
-    userId: campaign.userId,
-    valPrinc: Number(valPrinc),
-    // Verifica se client.datVenci não é nulo e converte para DateTime, senão atribui null
-    datVenci: client.datVenci
-      ? DateTime.fromJSDate(new Date(client.datVenci))
-      : undefined,
-    dayLate: Number(dayLate),
-  });
+  const actions: Action[] = [];
+
+  if (isFixa) {
+    actions.push(
+      await Action.create({
+        codCredorDesRegis,
+        desRegis,
+        desContr,
+        codCredor,
+        matriculaContrato: Number(matriculaContrato),
+        tipoContato,
+        contato,
+        typeActionId: typeAction.id,
+        description: '',
+        retorno: null,
+        retornotexto: 'Acionamento Automático, envio em massa!',
+        userId: campaign.userId,
+        valPrinc: Number(valPrinc),
+        // Verifica se client.datVenci não é nulo e converte para DateTime, senão atribui null
+        datVenci: client.datVenci
+          ? DateTime.fromJSDate(new Date(client.datVenci))
+          : undefined,
+        dayLate: Number(dayLate),
+        wallet: 'F',
+      })
+    );
+  }
+
+  if (isVar) {
+    actions.push(
+      await Action.create({
+        codCredorDesRegis,
+        desRegis,
+        desContr,
+        codCredor,
+        matriculaContrato: Number(matriculaContrato),
+        tipoContato,
+        contato,
+        typeActionId: typeAction.id,
+        description: '',
+        retorno: null,
+        retornotexto: 'Acionamento Automático, envio em massa!',
+        userId: campaign.userId,
+        valPrinc: Number(valPrinc),
+        // Verifica se client.datVenci não é nulo e converte para DateTime, senão atribui null
+        datVenci: client.datVenci
+          ? DateTime.fromJSDate(new Date(client.datVenci))
+          : undefined,
+        dayLate: Number(dayLate),
+        wallet: 'V',
+      })
+    );
+  }
+
+  return actions;
 }
 
 export function makeNameQueue(type: string, subsidiary: string) {
