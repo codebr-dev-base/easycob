@@ -103,6 +103,7 @@ export default function FormNegotiation({
       dayLate: contract?.datVenci ? calcDaylate(contract?.datVenci) : "",
       datVenci: contract?.datVenci,
       channel: data.channel,
+      wallet: client.isFixa ? 'F' : 'V'
     };
 
     let n;

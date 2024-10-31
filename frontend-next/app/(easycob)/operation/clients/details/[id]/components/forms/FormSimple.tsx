@@ -40,6 +40,7 @@ import { handlerError } from "@/app/lib/error";
 import { AlertaDuplicate } from "../AlertaDuplicate";
 import { Skeleton } from "@/components/ui/skeleton";
 import { calcDaylate } from "@/app/lib/utils";
+import { Wallet } from "lucide-react";
 
 const channelOptions = [
   {
@@ -80,7 +81,6 @@ export default function FormSimple({
   const [pending, setPending] = useState(false);
 
   const onSubmit: SubmitHandler<IAction> = async (data) => {
-    console.log(data);
 
     let d = {
       codCredorDesRegis: client.codCredorDesRegis,
@@ -96,6 +96,7 @@ export default function FormSimple({
       dayLate: contract?.datVenci ? calcDaylate(contract?.datVenci) : "",
       datVenci: contract?.datVenci,
       channel: data.channel,
+      wallet: client.isFixa ? 'F' : 'V'
     };
 
     try {
