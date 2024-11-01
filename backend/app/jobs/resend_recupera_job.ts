@@ -74,13 +74,13 @@ export default class ResendRecuperaJob extends Job {
   }
 
   credentials = {
-    UID: env.get('UID') || '',
-    PWD: env.get('PWD') || '',
+    UID: 'WSYUAN',
+    PWD: 'yuan123',
   };
 
   fixedCredentials = {
-    UID: env.get('UIDFIXO') || '',
-    PWD: env.get('PWDFIXO') || '',
+    UID: 'WSYUANFX',
+    PWD: 'YUANFIXO1234',
   };
 
   checkResultSync(retornotexto: string): boolean {
