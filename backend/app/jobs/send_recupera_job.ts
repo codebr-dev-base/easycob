@@ -16,6 +16,7 @@ import { serializeKeysSnakeCase } from '#utils/serialize';
 import Contract from '#models/recovery/contract';
 import TypeAction from '#models/type_action';
 import ResendRecuperaJob from '#jobs/resend_recupera_job';
+//import logger from '@adonisjs/core/services/logger';
 
 interface SendRecuperaJobPayload {
   action_id: number;
@@ -119,6 +120,8 @@ export default class SendRecuperaJob extends Job {
         });
         break;
     }
+
+    //logger.info(envelop);
 
     const action = await Action.find(payload.action_id);
     if (action) {
