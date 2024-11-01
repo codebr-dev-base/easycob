@@ -1,82 +1,82 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { DateTime } from 'luxon';
+import { BaseModel, column } from '@adonisjs/lucid/orm';
 
 export default class Loyal extends BaseModel {
   //declare static connection = 'recover'
-  static table = 'recupera.redistribuicao_carteira_base'
+  static table = 'recupera.redistribuicao_carteira_base';
 
   @column({ isPrimary: true })
-  declare id: bigint
+  declare id: bigint;
 
   @column.dateTime()
-  declare dtInsert: DateTime
+  declare dtInsert: DateTime;
 
   @column()
-  declare codCredorDesRegis: bigint
+  declare codCredorDesRegis: bigint;
 
   @column()
-  declare unidade: string
+  declare unidade: string;
 
   @column()
-  declare nomClien: string
+  declare nomClien: string;
 
   @column()
-  declare tipoCliente: string
+  declare tipoCliente: string;
 
   @column()
-  declare contato: string
+  declare contato: string;
 
   @column()
-  declare codCredor: number
+  declare codCredor: number;
 
   @column()
-  declare dtVenci: bigint
+  declare dtVenci: bigint;
 
   @column()
-  declare valor: number
+  declare valor: number;
 
   @column()
-  declare qtdTitulos: number
+  declare qtdTitulos: number;
 
   @column()
-  declare qtdContratos: number
+  declare qtdContratos: number;
 
   @column()
-  declare faixaTempo: string
+  declare faixaTempo: string;
 
   @column()
-  declare faixaValor: string
+  declare faixaValor: string;
 
   @column()
-  declare faixaTitulos: string
+  declare faixaTitulos: string;
 
   @column()
-  declare bko: string
+  declare bko: string;
 
   @column()
-  declare lnCodCredor: number
+  declare lnCodCredor: number;
 
   @column()
-  declare lnContato: number
+  declare lnContato: number;
 
   @column()
-  declare desContr: string
+  declare desContr: string;
 
   @column()
-  declare classUtiliz: string
+  declare classUtiliz: string;
 
   @column()
-  declare classSitcontr: string
+  declare classSitcontr: string;
 
   @column()
-  declare classClassif: string
+  declare classClassif: string;
 
   @column()
-  declare classCluster: string
+  declare classCluster: string;
 
   @column()
-  declare userId: bigint
+  declare userId: bigint;
 
   @column()
-  declare check: boolean
+  declare check: boolean;
 }

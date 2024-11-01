@@ -4,6 +4,7 @@ import db from '@adonisjs/lucid/services/db';
 import LoyalService from '#services/loyal_service';
 import { inject } from '@adonisjs/core';
 import { serializeKeysCamelCase } from '#utils/serialize';
+import string from '@adonisjs/core/helpers/string';
 
 @inject()
 export default class LoyalsController {
@@ -11,16 +12,34 @@ export default class LoyalsController {
 
   public async index({ request, auth }: HttpContext) {
     if (auth && auth.user && auth.user.id) {
-      const userId = auth.user.id;
+      //const userId = auth.user.id;
       const qs = request.qs();
       const pageNumber = qs.page || '1';
       const limit = qs.perPage || '20';
-      const orderBy = qs.orderBy || 'id';
       const descending = qs.descending || 'true';
 
-      const clients = await db
-        .from(this.service.getQueryDistinctClients(userId))
-        .distinctOn('l.des_contr')
+      let orderBy = `l.id`;
+
+      switch (qs.orderBy) {
+        case 'lastAction':
+          orderBy = `la.synced_at`;
+          break;
+        case 'lastActionName':
+          orderBy = `ta.name`;
+          break;
+        case null:
+          orderBy = `l.id`;
+          break;
+        case undefined:
+          orderBy = `l.id`;
+          break;
+        default:
+          orderBy = `l.${string.snakeCase(qs.orderBy)}`;
+          break;
+      }
+
+      const loyals = await db
+        .from('recupera.redistribuicao_carteira_base as l')
         .leftJoin('public.last_actions as la', (q) => {
           q.on('l.cod_credor_des_regis', '=', 'la.cod_credor_des_regis').andOn(
             'l.des_contr',
@@ -40,12 +59,13 @@ export default class LoyalsController {
         .where((q) => {
           return this.service.generateWherePaginate(q, qs);
         })
-        .orderBy('l.des_contr', 'asc')
+        //.where('l.user_id', userId)
+        //.orderBy('l.des_contr', 'asc')
         .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
         .paginate(pageNumber, limit);
 
       //return clients;
-      return serializeKeysCamelCase(clients.toJSON());
+      return serializeKeysCamelCase(loyals.toJSON());
     } else {
       return {
         meta: {},
