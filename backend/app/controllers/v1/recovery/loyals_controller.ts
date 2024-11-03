@@ -8,11 +8,11 @@ import string from '@adonisjs/core/helpers/string';
 
 @inject()
 export default class LoyalsController {
-  constructor(protected service: LoyalService) {}
+  constructor(protected service: LoyalService) { }
 
   public async index({ request, auth }: HttpContext) {
     if (auth && auth.user && auth.user.id) {
-      //const userId = auth.user.id;
+      const userId = auth.user.id;
       const qs = request.qs();
       const pageNumber = qs.page || '1';
       const limit = qs.perPage || '20';
@@ -59,7 +59,7 @@ export default class LoyalsController {
         .where((q) => {
           return this.service.generateWherePaginate(q, qs);
         })
-        //.where('l.user_id', userId)
+        .where('l.user_id', userId)
         //.orderBy('l.des_contr', 'asc')
         .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
         .paginate(pageNumber, limit);
