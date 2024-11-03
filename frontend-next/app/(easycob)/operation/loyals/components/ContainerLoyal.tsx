@@ -1,25 +1,24 @@
 "use client";
-import Header from "../../../components/Header";
-import { useEffect, useState } from "react";
-import { fetchClients, query, setQuery } from "../service/clients";
-import { IMeta } from "@/app/interfaces/pagination";
-import "@/app/assets/css/tabs.css";
-import { IClient } from "@/app/(easycob)/interfaces/clients";
+import React, { useEffect, useState } from "react";
+import { ILoyal } from "../interfaces/loyal";
+import { IMeta } from "../../../../interfaces/pagination";
 import TableRecords from "./TableRecords";
-import FilterPus from "./FilterPus";
-import { useSearchParams } from "next/navigation";
 import { buildQueryString, parseQueryString } from "@/app/lib/fetchAuth";
+import { useSearchParams } from "next/navigation";
+import { fetchLoyals, query, setQuery } from "../service/loyals";
+import Header from "@/app/(easycob)/components/Header";
+import FilterPus from "./FilterPus";
 
-export default function ContainerClient({
-  clients,
+export default function ContainerLoyal({
+  loyals,
 }: {
-  clients: {
+  loyals: {
     meta: IMeta;
-    data: IClient[];
+    data: ILoyal[];
   };
 }) {
-  const [meta, setMeta] = useState<IMeta>(clients.meta);
-  const [data, setData] = useState<IClient[]>(clients.data ? clients.data : []);
+  const [meta, setMeta] = useState<IMeta>(loyals.meta);
+  const [data, setData] = useState<ILoyal[]>(loyals.data ? loyals.data : []);
   const [pending, setPending] = useState<boolean>(false);
   const searchParams = useSearchParams();
 
@@ -28,7 +27,7 @@ export default function ContainerClient({
       const historyQuery = parseQueryString(searchParams);
       setQuery(historyQuery);
       setPending(true);
-      fetchClients().then((records) => {
+      fetchLoyals().then((records) => {
         setMeta(records.meta);
         setData(records.data);
         setPending(false);
@@ -43,7 +42,7 @@ export default function ContainerClient({
     const queryString = buildQueryString(query);
     window.history.pushState(null, "", `?${queryString}`);
     setPending(true);
-    fetchClients().then((records) => {
+    fetchLoyals().then((records) => {
       setMeta(records.meta);
       setData(records.data);
       setPending(false);
@@ -53,9 +52,9 @@ export default function ContainerClient({
   return (
     <article className="max-w-full">
       <div className="p-2">
-        <Header title="Clientes">
+        <Header title="Fidelizados">
           <div className="flex flex-col md:flex-row justify-end items-end gap-4">
-            <FilterPus query={query} refresh={refresh} />
+            <FilterPus query={query} refresh={refresh} /> 
           </div>
         </Header>
       </div>

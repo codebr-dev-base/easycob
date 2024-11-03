@@ -8,7 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { TbFilterPlus } from "react-icons/tb";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { IQueryClienteParams } from "../interfaces/cliente";
@@ -25,13 +25,22 @@ export default function FilterPus({
   const [isFixa, setIsFixa] = useState(false);
   const [isVar, setIsVar] = useState(false);
 
+  useEffect(() => {
+    if (query.isFixa) {
+      setIsFixa(true);
+    }
+
+    if (query.isVar) {
+      setIsVar(true);
+    }
+  }, [query]);
   const handleChangeKeyword = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.name == "keyword") {
       query.keyword = e.target.value;
       query.page = 1;
       query.perPage = 10;
       refresh();
-/*       switch (query.keywordColumn) {
+      /*       switch (query.keywordColumn) {
         case "nomClien":
           if (e.target.value.length > 4) {
             query.page = 1;
@@ -151,7 +160,7 @@ export default function FilterPus({
             </div>
             <div className="flex w-full">
               <Label className="w-full">
-                Por nome do cliente:
+                Buscar cliente:
                 <div className="flex">
                   <div className="bg-white flex items-center justify-center rounded rounded-r-none mt-1 p-3 border ring-offset-background group-focus:ring-2">
                     <FaSearch className="text-foreground" />
@@ -204,11 +213,14 @@ export default function FilterPus({
             </div>
             <div className="flex p-2 space-x-2">
               <Label className="flex items-center space-x-2">
-                <Checkbox checked={isFixa} onCheckedChange={handleChangeIsFixa}/>
+                <Checkbox
+                  checked={isFixa}
+                  onCheckedChange={handleChangeIsFixa}
+                />
                 <span>Fixa</span>
               </Label>
               <Label className="flex items-center space-x-2">
-                <Checkbox checked={isVar} onCheckedChange={handleChangeIsVar}/>
+                <Checkbox checked={isVar} onCheckedChange={handleChangeIsVar} />
                 <span>Variável</span>
               </Label>
             </div>

@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { fetchContracts, query } from "../../../service/contracts";
 import Pagination from "@/app/(easycob)/components/Pagination";
 import {
@@ -139,8 +139,8 @@ export default function TableContracts({
             </TableHeader>
             <TableBody>
               {data.map((contract) => (
-                <>
-                  <TableRow key={contract.id}>
+                <Fragment key={contract.id}>
+                  <TableRow>
                     <TableCell>
                       <Switch
                         checked={
@@ -188,7 +188,7 @@ export default function TableContracts({
                       <TableInvoices invoices={invoices}/>
                     </TableCell>
                   </TableRow>
-                </>
+                </Fragment>
               ))}
             </TableBody>
           </Table>

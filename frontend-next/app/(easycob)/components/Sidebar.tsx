@@ -140,7 +140,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                 <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
                   <Link href={"/operation/clients"}>Clientes</Link>
                   <Link href={"/operation/followup"}>Acompanhamento</Link>
-                  <Link href={"/operation/loyal"}>Fidelizados</Link>
+                  <Link href={"/operation/loyals"}>Fidelizados</Link>
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="supervisor-menu" className="border-none">

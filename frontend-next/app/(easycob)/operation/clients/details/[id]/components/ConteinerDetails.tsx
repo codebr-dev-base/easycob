@@ -112,10 +112,20 @@ export default function ConteinerDetails({
   };
 
   const checkPrerequisites = (): boolean => {
-    if (!checkCpc()) {
+    console.log(selectTypeAction);
+    console.log(selectContact);
+    console.log(selectContract);
+    if (!selectTypeAction || !selectContact || !selectContract) {
+      console.log("falta alguem")
       return false;
     }
-    return !!(selectTypeAction && selectContact && selectContract); // Checagem mais concisa
+
+    if (selectTypeAction.commissioned < 2) {
+      console.log(selectTypeAction.commissioned)
+      return true;
+    }
+
+    return checkCpc();
   };
 
   const renderFormComponent = () => {
