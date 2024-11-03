@@ -9,11 +9,10 @@ export default async function Loyals() {
     const [loyals] = await Promise.all([fetchLoyals()]);
     return (
       <Suspense fallback={<SkeletonFullPage />}>
-        <ContainerLoyal loyals={loyals}/>
+        <ContainerLoyal loyals={loyals} />
       </Suspense>
     );
   } catch (error) {
-    console.log(error);
     if (error instanceof Error) {
       if (error.message == "Unauthorized") {
         redirect("/logout");

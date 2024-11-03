@@ -9,7 +9,6 @@ const apiUrl = process.env.API_URL
   : process.env.NEXT_PUBLIC_API_URL;
 const urn = "/v1/recovery/loyal";
 const url = `${apiUrl}${urn}`;
-const user = getUser();
 
 export let query: IQueryLoyalParams = {
   page: 1,
@@ -17,7 +16,6 @@ export let query: IQueryLoyalParams = {
   orderBy: "id",
   descending: false,
   keywordColumn: "nomClien",
-  //userId: user ? user.id : 0,
 };
 
 // Função para atualizar `query`
