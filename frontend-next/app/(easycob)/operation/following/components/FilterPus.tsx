@@ -29,7 +29,6 @@ import MultipleSelector, { Option } from "@/components/ui/multiple-selector";
 import { ChangeEvent, useEffect, useState } from "react";
 import { fetchUserByModule } from "@/app/(easycob)/admin/users/service/users";
 import { IQueryDiscountParams } from "../interfaces/discounts";
-import { IReturnType } from "../../actions/interfaces/action";
 import { DatePicker } from "@/app/(easycob)/components/DatePicker";
 import { DateRange } from "react-day-picker";
 import {
