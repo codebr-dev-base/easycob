@@ -24,8 +24,9 @@ import { Switch } from "@/components/ui/switch";
 import { createContact, updateContact } from "../../../../service/contacts";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
 
-export function FormContactPhone({
+export function FormContactEmail({
   children,
   contact,
   refresh,
@@ -39,8 +40,6 @@ export function FormContactPhone({
   const form = useForm<IContact>({
     mode: "all",
     defaultValues: {
-      cpc: contact ? contact.cpc : false,
-      isWhatsapp: contact ? contact.isWhatsapp : false,
       block: contact ? contact.block : false,
       blockAll: contact ? contact.blockAll : false,
     },
@@ -71,7 +70,7 @@ export function FormContactPhone({
         }
         const c = await createContact({
           codCredorDesRegis,
-          tipoContato: "TELEFONE",
+          tipoContato: "EMAIL",
           ...data,
         });
         toast({
@@ -114,57 +113,17 @@ export function FormContactPhone({
                   <FormLabel>
                     Contato
                     <FormControl>
-                      <InputMask
-                        mask="(99) 9 9999-9999"
-                        type="text"
+                      <Input
+                        type="email"
                         required
                         {...form.register("contato", {
                           required: "Campo obrigatório",
-                          setValueAs: (v) => onlyNumbers(v),
                         })}
                         defaultValue={contact ? contact.contato : ""}
                         className="mb-2"
                       />
                     </FormControl>
                   </FormLabel>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="cpc"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center space-x-2 space-y-0 p-4">
-                  <FormControl>
-                    <Switch
-                      {...form.register("cpc")}
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      aria-readonly
-                    />
-                  </FormControl>
-                  <div className="items-center">
-                    <FormLabel className="m-0">CPC</FormLabel>
-                  </div>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="isWhatsapp"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center space-x-2 space-y-0 p-4">
-                  <FormControl>
-                    <Switch
-                      {...form.register("isWhatsapp")}
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      aria-readonly
-                    />
-                  </FormControl>
-                  <div className="items-center">
-                    <FormLabel className="m-0">Whatsapp</FormLabel>
-                  </div>
                 </FormItem>
               )}
             />

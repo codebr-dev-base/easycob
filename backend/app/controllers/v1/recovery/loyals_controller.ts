@@ -8,7 +8,7 @@ import string from '@adonisjs/core/helpers/string';
 
 @inject()
 export default class LoyalsController {
-  constructor(protected service: LoyalService) { }
+  constructor(protected service: LoyalService) {}
 
   public async index({ request, auth }: HttpContext) {
     if (auth && auth.user && auth.user.id) {

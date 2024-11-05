@@ -139,7 +139,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                 </AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
                   <Link href={"/operation/clients"}>Clientes</Link>
-                  <Link href={"/operation/followup"}>Acompanhamento</Link>
+                  <Link href={"/operation/following"}>Acompanhamento</Link>
                   <Link href={"/operation/loyals"}>Fidelizados</Link>
                 </AccordionContent>
               </AccordionItem>
@@ -155,7 +155,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                 <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
                   <Link href={"/supervision/actions"}>Acionamentos</Link>
                   <Link href={"/supervision/campaigns"}>Campanhas</Link>
-                  <Link href={"/supervision/discounts"}>Descontos</Link>
+                  <Link href={"/supervision/following"}>Acompanhamento</Link>
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="admin-menu" className="border-none">
@@ -190,7 +190,12 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             action={logout}
             className="p-1 flex items-center justify-center"
           >
-            <Button variant="destructive" type="submit" className="max-w-[80%]" size={!isExpanded ? "sm" : "default"}>
+            <Button
+              variant="destructive"
+              type="submit"
+              className="max-w-[80%]"
+              size={!isExpanded ? "sm" : "default"}
+            >
               Sair
             </Button>
           </form>

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { formatarFone } from "@/app/lib/utils";
 import { FiPhone } from "react-icons/fi";
-import { FaWhatsapp } from "react-icons/fa";
+import { FaPlus, FaWhatsapp } from "react-icons/fa";
 import { IoMailOutline } from "react-icons/io5";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -20,17 +20,22 @@ import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 import { FormContactPhone } from "./forms/FormContactPhone";
 import { BsHandThumbsUp } from "react-icons/bs";
+import { Button } from "@/components/ui/button";
+import { MdEdit } from "react-icons/md";
+import { FormContactEmail } from "./forms/FormContactEmail";
 
 export function TabsContacts({
   constacts,
   selectContact,
   setSelectContact,
   refresh,
+  codCredorDesRegis,
 }: {
   constacts: { phones: IContact[]; emails: IContact[] };
   selectContact: IContact | null;
   setSelectContact: (value: IContact | null) => void;
   refresh: () => void;
+  codCredorDesRegis: string | number;
 }) {
   const handleSelectContact = (contact: IContact) => {
     if (selectContact && selectContact.id === contact.id) {
@@ -63,6 +68,16 @@ export function TabsContacts({
         <TabsTrigger value="emails">Email</TabsTrigger>
       </TabsList>
       <TabsContent value="phones">
+        <FormContactPhone
+          contact={null}
+          refresh={refresh}
+          codCredorDesRegis={codCredorDesRegis}
+        >
+          <button className="w-full flex justify-center hover:bg-accent border rounded-sm py-1">
+            <FaPlus />
+          </button>
+        </FormContactPhone>
+
         <ScrollArea className="h-36 w-full rounded-md border">
           <Table>
             <TableHeader>
@@ -105,13 +120,16 @@ export function TabsContacts({
                   <TableCell>
                     {phone.cpc && (
                       <span className="flex pl-4 ">
-                        {" "}
                         <BsHandThumbsUp />{" "}
                       </span>
                     )}
                   </TableCell>
                   <TableCell>
-                    <FormContactPhone contact={phone} refresh={refresh} />
+                    <FormContactPhone contact={phone} refresh={refresh}>
+                      <Button>
+                        <MdEdit />
+                      </Button>
+                    </FormContactPhone>
                   </TableCell>
                 </TableRow>
               ))}
@@ -120,6 +138,15 @@ export function TabsContacts({
         </ScrollArea>
       </TabsContent>
       <TabsContent value="emails">
+        <FormContactEmail
+          contact={null}
+          refresh={refresh}
+          codCredorDesRegis={codCredorDesRegis}
+        >
+          <button className="w-full flex justify-center hover:bg-accent border rounded-sm py-1">
+            <FaPlus />
+          </button>
+        </FormContactEmail>
         <ScrollArea className="h-36 w-full rounded-md border">
           <Table>
             <TableHeader>
@@ -132,7 +159,7 @@ export function TabsContacts({
             </TableHeader>
             <TableBody>
               {constacts.emails.map((email) => (
-                <TableRow key={email.id}>
+                <TableRow key={email.id} className={selectColor(email)}>
                   <TableCell>
                     <Switch
                       checked={!!selectContact && selectContact.id === email.id}
@@ -145,11 +172,23 @@ export function TabsContacts({
                     <span className="pt-1">
                       <IoMailOutline />
                     </span>
-                    <span>{email.contato}</span>
+                    <span
+                      className={
+                        email.block || email.blockAll ? "line-through" : ""
+                      }
+                    >
+                      {email.contato}
+                    </span>
                   </TableCell>
                   <TableCell>{email.cpc}</TableCell>
 
-                  <TableCell>btn</TableCell>
+                  <TableCell>
+                    <FormContactEmail contact={email} refresh={refresh}>
+                      <Button>
+                        <MdEdit />
+                      </Button>
+                    </FormContactEmail>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

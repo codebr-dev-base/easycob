@@ -112,9 +112,6 @@ export default function ConteinerDetails({
   };
 
   const checkPrerequisites = (): boolean => {
-    console.log(selectTypeAction);
-    console.log(selectContact);
-    console.log(selectContract);
     if (!selectTypeAction || !selectContact || !selectContract) {
       console.log("falta alguem")
       return false;
@@ -197,6 +194,7 @@ export default function ConteinerDetails({
               selectContact={selectContact}
               setSelectContact={setSelectContact}
               refresh={refreshContacts}
+              codCredorDesRegis={client.codCredorDesRegis}
             />
           </div>
         </CardContent>

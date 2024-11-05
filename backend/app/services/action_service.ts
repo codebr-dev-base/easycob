@@ -224,6 +224,9 @@ export default class ActionService {
   async getAggregationContract(des_contr: string) {
     const filterIndAlter = "ind_alter = '1'";
     const oneYearAgo = "CURRENT_DATE - INTERVAL '1 year'";
+    const specificDateRange =
+      "pt.dat_venci >= '2022-12-01' AND pt.dat_venci <= '2023-11-30'";
+
     const raw = db.raw;
 
     return await db
@@ -232,8 +235,10 @@ export default class ActionService {
         raw(`sum(pt.val_princ) FILTER ( WHERE ${filterIndAlter}) as val_princ`), // Soma total
         raw(`
             SUM(CASE
-                WHEN pt.dat_venci <= ${oneYearAgo} AND (${filterIndAlter})
-                THEN pt.val_princ
+                WHEN pt.cod_credor = '8' AND ${specificDateRange} AND (${filterIndAlter})
+                    THEN pt.val_princ
+                WHEN pt.cod_credor != '8' AND pt.dat_venci <= ${oneYearAgo} AND (${filterIndAlter})
+                    THEN pt.val_princ
                 ELSE 0
             END) AS pecld`),
         raw(`MIN(pt.dat_venci) FILTER (WHERE ${filterIndAlter}) AS dat_venci`)
