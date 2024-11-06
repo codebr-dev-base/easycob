@@ -24,8 +24,9 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { FaUser } from "react-icons/fa";
 import { IClient } from "@/app/(easycob)/interfaces/clients";
-import { ContainerContactFone } from "../details/[id]/components/ContainerContactFone";
-import { ContainerContactEmail } from "../details/[id]/components/ContainerContactEmail";
+import { ContainerContactFone } from "./ContainerContactFone";
+import { ContainerContactEmail } from "./ContainerContactEmail";
+import { ContainerContract } from "./ContainerContract";
 
 export default function TableRecords({
   meta,
@@ -125,9 +126,9 @@ export default function TableRecords({
                   </TableCell>
                   <TableCell>{formatStringToCpfCnpj(client.desCpf)}</TableCell>
                   <TableCell>
-                    {client.contracts && client.contracts.length > 0
-                      ? `${client.contracts[0].desContr}`
-                      : ""}
+                    {client.contracts && Array.isArray(client.contracts) && (
+                      <ContainerContract contracts={client.contracts} />
+                    )}
                   </TableCell>
                   <TableCell>{client.status}</TableCell>
                   <TableCell>

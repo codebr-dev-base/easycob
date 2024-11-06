@@ -13,6 +13,7 @@ import {
 //import { FaHandshake } from "react-icons/fa";
 import { FaRegHandshake, FaRegBell } from "react-icons/fa";
 import { MdAlternateEmail, MdOutlineSms } from "react-icons/md";
+import { formatarFone } from '../../../../../../lib/utils';
 
 // Função de Type Guard para validar se um objeto é do tipo ITypeAction
 function isTypeAction(obj: any): obj is ITypeAction {
@@ -77,6 +78,12 @@ export default function CardAction({ action }: { action: IAction }) {
           {action.negotiations && action.negotiations?.length > 0 && (
             <p>{action.negotiations[0].comments}</p>
           )}
+          <p>Contrato: {action.desContr}</p>
+          {action.tipoContato === "TELEFONE" ? (
+            <p>Contrato: {formatarFone(action.contato)}</p>
+          ) : (
+            <p>Contrato: {action.contato}</p>
+          )}
         </CardContent>
         <CardFooter>
           <p>
@@ -87,10 +94,6 @@ export default function CardAction({ action }: { action: IAction }) {
       </Card>
     );
   } else {
-    return (
-      <p className="">
-        Não é um acionamento válido:{" "}
-      </p>
-    );
+    return <p className="">Não é um acionamento válido: </p>;
   }
 }
