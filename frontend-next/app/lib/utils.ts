@@ -3,20 +3,39 @@
  * @param isoDateString A string da data no formato ISO (ex: 2024-09-04T00:00:00.000Z).
  * @returns A data formatada no padrão brasileiro (ex: 04/09/2024).
  */
-export function formatDateToBR(isoDateString: string | null | undefined): string {
-  // Verifica se o valor é null ou undefined, e retorna uma string vazia
+
+export function formatDateToBR(
+  isoDateString: string | null | undefined
+): string {
   if (!isoDateString) {
     return "";
   }
 
-  const date = new Date(isoDateString);
+  console.log("Original: ", isoDateString);
 
-  // Verifica se a data é válida
+  let dateString = isoDateString;
+
+  // Verifica se contém "T" e, se sim, remove o horário
+  if (isoDateString.includes("T")) {
+    dateString = isoDateString.split("T")[0]; // Pega apenas a parte "YYYY-MM-DD"
+  }
+
+  console.log("Intermediario: ", dateString);
+
+  const [year, month, day] = dateString.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day)); // Define o UTC 00:00 do dia
+  //const date = new Date(dateString);
+
+  // Adiciona três horas para compensar o fuso horário local
+  date.setUTCHours(date.getUTCHours() + 3);
+
+  console.log("Convertido e ajustado: ", date.toISOString());
+
   if (isNaN(date.getTime())) {
     return "";
   }
 
-  // Configuração para o formato de data brasileiro
+  // Formata para o padrão brasileiro
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",

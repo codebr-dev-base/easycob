@@ -5,6 +5,7 @@ import {
   fetchActions,
   fetchChartType,
   fetchChartUser,
+  fetchChartUserAndCpc,
   fetchChartUserAndType,
   query,
 } from "../service/actions";
@@ -15,13 +16,18 @@ import { IAction } from "@/app/(easycob)/interfaces/actions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TabRecords from "./TabRecords";
 import TabChart from "./TabChart";
-import { IChartConfig, IChartData, IChartDataStack } from "../interfaces/action";
+import {
+  IChartConfig,
+  IChartData,
+  IChartDataStack,
+} from "../interfaces/action";
 
 export default function ContainerAction({
   actions,
   chartType: ct,
   chartUser: cu,
   chartUserType: cut,
+  chartUserCpc: cuc,
 }: {
   actions: {
     meta: IMeta;
@@ -36,6 +42,10 @@ export default function ContainerAction({
     chartConfig: IChartConfig;
   };
   chartUserType: {
+    chartData: IChartDataStack[];
+    chartConfig: IChartConfig;
+  };
+  chartUserCpc: {
     chartData: IChartDataStack[];
     chartConfig: IChartConfig;
   };
@@ -59,19 +69,26 @@ export default function ContainerAction({
     chartConfig: IChartConfig;
   }>(cut);
 
+  const [chartUserCpc, setChartUserCpc] = useState<{
+    chartData: IChartDataStack[];
+    chartConfig: IChartConfig;
+  }>(cuc);
+
   const refresh = async () => {
     setPending(true);
 
-    const [records, ct, cu, cut] = await Promise.all([
+    const [records, ct, cu, cut, cuc] = await Promise.all([
       fetchActions(),
       fetchChartType(),
       fetchChartUser(),
-      fetchChartUserAndType()
+      fetchChartUserAndType(),
+      fetchChartUserAndCpc(),
     ]);
 
     setChartType(ct);
     setChartUser(cu);
     setChartUserType(cut);
+    setChartUserCpc(cuc);
 
     setMeta(records.meta);
     setData(records.data);
@@ -99,7 +116,13 @@ export default function ContainerAction({
             </TabsTrigger>
           </TabsList>
           <TabsContent value="chart">
-            <TabChart chartType={chartType} chartUser={chartUser} chartUserType={chartUserType} query={query}/>
+            <TabChart
+              chartType={chartType}
+              chartUser={chartUser}
+              chartUserType={chartUserType}
+              chartUserCpc={chartUserCpc}
+              query={query}
+            />
           </TabsContent>
           <TabsContent value="records">
             <TabRecords

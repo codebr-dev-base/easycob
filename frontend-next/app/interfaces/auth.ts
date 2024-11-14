@@ -33,14 +33,7 @@ export interface ISkillModule {
   shortName: string;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface ISkillModule {
-  id: number;
-  name: string;
-  shortName: string;
-  createdAt: string;
-  updatedAt: string;
+  skills: ISkill[]
 }
 
 export interface ISkill {
@@ -53,6 +46,10 @@ export interface ISkill {
   module: ISkillModule;
 }
 
+export interface IPassword {
+  password: string;
+  passwordConfirmation: string;
+}
 export interface IUser {
   id: number;
   email: string;
@@ -64,5 +61,5 @@ export interface IUser {
   passwordExpiresAt: string;
   createdAt: string;
   updatedAt: string;
-  skills: ISkill[];
+  skills: ISkill[] | number[];
 }

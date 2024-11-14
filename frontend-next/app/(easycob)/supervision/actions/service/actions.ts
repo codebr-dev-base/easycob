@@ -6,6 +6,7 @@ import {
   IChartDataStack,
   IQueryActionParams,
   IReturnType,
+  IUserAndTypesData,
 } from "../interfaces/action";
 import { IAction, ITypeAction } from "@/app/(easycob)/interfaces/actions";
 
@@ -30,6 +31,20 @@ export const fetchActions = async (): Promise<{
   meta: IMeta;
 }> => {
   const result = await fetchAuth(url, {
+    query,
+  });
+
+  if (result.success) {
+    //console.log("Dados recebidos:", result.data);
+    return result.data;
+  } else {
+    //console.error("Erro ao buscar dados:", result.error);
+    throw new Error(result.error);
+  }
+};
+
+export const fetchUserAndTypes = async (): Promise<IUserAndTypesData[]> => {
+  const result = await fetchAuth(`${url}/list/user/type`, {
     query,
   });
 
@@ -105,6 +120,23 @@ export const fetchChartUserAndType = async (): Promise<{
   chartConfig: IChartConfig;
 }> => {
   const result = await fetchAuth(`${url}/chart/user/type`, {
+    query,
+  });
+
+  if (result.success) {
+    //console.log("Dados recebidos:", result.data);
+    return result.data;
+  } else {
+    //console.error("Erro ao buscar dados:", result.error);
+    throw new Error(result.error);
+  }
+};
+
+export const fetchChartUserAndCpc = async (): Promise<{
+  chartData: IChartDataStack[];
+  chartConfig: IChartConfig;
+}> => {
+  const result = await fetchAuth(`${url}/chart/user/cpc`, {
     query,
   });
 

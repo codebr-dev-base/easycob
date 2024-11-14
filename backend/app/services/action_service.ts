@@ -12,6 +12,7 @@ import db from '@adonisjs/lucid/services/db';
 import string from '@adonisjs/core/helpers/string';
 import { handleSendingForRecupera } from './utils/recupera.js';
 import { DatabaseQueryBuilderContract } from '@adonisjs/lucid/types/querybuilder';
+import lodash from 'lodash';
 
 export default class ActionService {
   // Define a helper function for querying and pushing IDs
@@ -295,5 +296,32 @@ export default class ActionService {
         await handleSendingForRecupera(a);
       }
     }
+  }
+
+  transformUserActions(userActions: any[]) {
+    // Agrupa as ações por usuário, utilizando o `id`
+    const groupedByUser = lodash.groupBy(userActions, 'id');
+
+    // Mapeia os grupos para o formato desejado
+    const transformed = Object.values(groupedByUser).map((actions) => {
+      const total = actions.reduce(
+        (sum, action) => sum + parseInt(action.quant, 10),
+        0
+      ); // Soma dos totais de cada ação
+
+      return {
+        userName: actions[0].userName, // Nome do usuário
+        id: actions[0].id, // ID do usuário
+        total, // Total de todas as ações
+        actions: actions.map((action) => ({
+          name: action.name,
+          typeActionId: action.typeActionId,
+          abbreviation: action.abbreviation,
+          quant: parseInt(action.quant, 10), // Converte `quant` para número
+        })),
+      };
+    });
+
+    return transformed;
   }
 }

@@ -4,8 +4,7 @@ import {
   fetchChartType,
   fetchChartUser,
   fetchChartUserAndType,
-  fetchReturnsTypes,
-  fetchTypesActions,
+  fetchChartUserAndCpc
 } from "./service/actions";
 import ContainerAction from "./components/ContainerAction";
 import { Suspense } from "react";
@@ -13,11 +12,12 @@ import SkeletonFullPage from "../../components/SkeletonFullPage";
 
 export default async function Actions() {
   try {
-    const [actions, chartType, chartUser, chartUserType] = await Promise.all([
+    const [actions, chartType, chartUser, chartUserType, chartUserCpc] = await Promise.all([
       fetchActions(),
       fetchChartType(),
       fetchChartUser(),
-      fetchChartUserAndType()
+      fetchChartUserAndType(),
+      fetchChartUserAndCpc()
     ]);
 
     return (
@@ -27,6 +27,7 @@ export default async function Actions() {
           chartType={chartType}
           chartUser={chartUser}
           chartUserType={chartUserType}
+          chartUserCpc={chartUserCpc}
         />
       </Suspense>
     );

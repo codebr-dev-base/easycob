@@ -34,12 +34,15 @@ import {
   getRandomColor,
 } from "@/app/lib/utils";
 import React from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 export const description = "A mixed bar chart";
 
 export default function TabChart({
   chartType,
   chartUser,
   chartUserType,
+  chartUserCpc,
   query,
 }: {
   chartType: {
@@ -51,6 +54,10 @@ export default function TabChart({
     chartConfig: IChartConfig;
   };
   chartUserType: {
+    chartData: IChartDataStack[];
+    chartConfig: IChartConfig;
+  };
+  chartUserCpc: {
     chartData: IChartDataStack[];
     chartConfig: IChartConfig;
   };
@@ -71,7 +78,7 @@ export default function TabChart({
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-1 md:grid-cols-2 md:gap-2">
+      <div className="grid grid-cols-1 gap-1 md:grid-cols-3 md:gap-3 mb-2">
         <Card>
           <CardHeader>
             <CardTitle>Acionamentos</CardTitle>
@@ -80,7 +87,10 @@ export default function TabChart({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={chartType.chartConfig}>
+            <ChartContainer
+              config={chartType.chartConfig}
+              className="aspect-auto h-[250px] w-full"
+            >
               <BarChart
                 accessibilityLayer
                 data={chartType.chartData}
@@ -139,7 +149,10 @@ export default function TabChart({
             <CardDescription>Classificação por operador</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={chartUser.chartConfig}>
+            <ChartContainer
+              config={chartUser.chartConfig}
+              className="aspect-auto h-[250px] w-full"
+            >
               <BarChart
                 accessibilityLayer
                 data={chartUser.chartData}
@@ -193,15 +206,16 @@ export default function TabChart({
             </div>
           </CardFooter>
         </Card>
-      </div>
-      <div className="grid grid-cols-1 gap-1">
         <Card>
           <CardHeader>
             <CardTitle>Acionamentos</CardTitle>
             <CardDescription>Classificação por operador e tipo</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={chartUserType.chartConfig}>
+            <ChartContainer
+              config={chartUserType.chartConfig}
+              className="aspect-auto h-[250px] w-full"
+            >
               <BarChart
                 accessibilityLayer
                 data={chartUserType.chartData}
@@ -261,6 +275,115 @@ export default function TabChart({
                   /* Add a bar just for the gap after each bar */
                   /*  bars.push(<Bar dataKey="gap" stackId="a" fill="transparent" />); */
                 })}
+              </BarChart>
+            </ChartContainer>
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <div className="flex-col items-start gap-2 text-sm">
+              <div className="flex gap-2 font-medium leading-none">
+                Perído de valiação:
+              </div>
+              <div className="leading-none text-muted-foreground">
+                {`${formatDateToBR(query.startDate)} - ${formatDateToBR(
+                  query.endDate
+                )}`}
+              </div>
+            </div>
+
+            <Button variant={"outline"} asChild>
+              <Link href="/supervision/actions/type"> Tabela </Link>
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-1 md:grid-cols-3 md:gap-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Acionamentos</CardTitle>
+            <CardDescription>Classificação por CPC</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer
+              config={chartUserCpc.chartConfig}
+              className="aspect-auto h-[250px] w-full"
+            >
+              <BarChart
+                accessibilityLayer
+                data={chartUserCpc.chartData}
+                layout="vertical"
+              >
+                <CartesianGrid horizontal={false} />
+
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  tickLine={true}
+                  tickMargin={1}
+                  axisLine={true}
+                  tickFormatter={(value) => {
+                    return value.slice(0, 5) + ".";
+                  }}
+                  fontSize={8}
+                />
+
+                <XAxis dataKey="total" type="number" />
+
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent indicator="line" />}
+                />
+
+                <Bar
+                  dataKey="CPC"
+                  layout="vertical"
+                  fill="rgba(34, 105, 211, 1)"
+                  radius={4}
+                />
+
+                <Bar
+                  dataKey="NCPC"
+                  layout="vertical"
+                  fill="rgba(34, 105, 211, .5)"
+                  radius={4}
+                />
+              </BarChart>
+            </ChartContainer>
+          </CardContent>
+          <CardFooter className="flex-col items-start gap-2 text-sm">
+            <div className="flex gap-2 font-medium leading-none">
+              Perído de valiação:
+            </div>
+            <div className="leading-none text-muted-foreground">
+              {`${formatDateToBR(query.startDate)} - ${formatDateToBR(
+                query.endDate
+              )}`}
+            </div>
+          </CardFooter>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Acionamentos</CardTitle>
+            <CardDescription>Classificação por CPC</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={chartUserCpc.chartConfig}>
+              <BarChart accessibilityLayer data={chartUserCpc.chartData}>
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  tickFormatter={(value) => value.slice(0, 6) + "."}
+                  fontSize={8}
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent indicator="dashed" />}
+                />
+                <Bar dataKey="CPC" fill="rgba(34, 105, 211, 1)" radius={4} />
+                <Bar dataKey="NCPC" fill="rgba(34, 105, 211, .5)" radius={4} />
               </BarChart>
             </ChartContainer>
           </CardContent>

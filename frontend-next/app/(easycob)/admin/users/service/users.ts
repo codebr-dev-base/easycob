@@ -9,12 +9,19 @@ const apiUrl = process.env.API_URL
 const urn = "/v1/user";
 const url = `${apiUrl}${urn}`;
 
-export const query: IQueryUserParams = {
+export let query: IQueryUserParams = {
   page: 1,
   perPage: 10,
   orderBy: "id",
   descending: false,
+  status: "true",
+  keywordColumn: "name",
 };
+
+// Função para atualizar `query`
+export function setQuery(newParams: Partial<IQueryUserParams>): void {
+  query = { ...query, ...newParams };
+}
 
 export const fetchUsers = async (): Promise<{
   data: IUser[];
@@ -23,8 +30,6 @@ export const fetchUsers = async (): Promise<{
   const result = await fetchAuth(url, {
     query,
   });
-
-  console.log(result);
 
   if (result.success) {
     //console.log("Dados recebidos:", result.data);
@@ -49,5 +54,33 @@ export const fetchUserByModule = async (
   } else {
     //console.error("Erro ao buscar dados:", result.error);
     throw new Error(result.error);
+  }
+};
+
+export const createUser = async (user: IUser) => {
+  const result = await fetchAuth<IUser>(`${url}`, {
+    method: "POST",
+    body: JSON.stringify(user),
+  });
+
+  if (result.success) {
+    //console.log("Dados recebidos:", result.data);
+    return result;
+  } else {
+    throw result;
+  }
+};
+
+export const updateUser = async (user: IUser) => {
+  const result = await fetchAuth<IUser>(`${url}/${user.id}`, {
+    method: "PUT",
+    body: JSON.stringify(user),
+  });
+
+  if (result.success) {
+    //console.log("Dados recebidos:", result.data);
+    return result;
+  } else {
+    throw result;
   }
 };

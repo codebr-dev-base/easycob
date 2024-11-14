@@ -13,6 +13,7 @@ export function buildQueryString(query: Record<string, any>): string {
       ([_, value]) =>
         value !== null &&
         value !== undefined &&
+        value !== "null" && // Remove a string "null"
         (typeof value !== "string" || value.trim() !== "")
     )
   );
@@ -22,11 +23,11 @@ export function buildQueryString(query: Record<string, any>): string {
     Object.entries(cleanedQuery).reduce((acc, [key, value]) => {
       if (Array.isArray(value)) {
         value.forEach((v) => {
-          if (v !== null && v !== undefined) {
+          if (v !== null && v !== undefined && v !== "null") {
             acc.append(key, v.toString());
           }
         });
-      } else if (value !== null && value !== undefined) {
+      } else if (value !== null && value !== undefined && value !== "null") {
         acc.append(key, value.toString());
       }
       return acc;

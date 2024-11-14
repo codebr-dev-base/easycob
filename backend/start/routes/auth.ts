@@ -16,7 +16,7 @@ export default router
           .post('refresh', [AuthController, 'refresh'])
           .use(middleware.auth());
         router.get('me', [AuthController, 'me']).use(middleware.auth());
-        router.get('module', [AuthController, 'me']).use(middleware.auth());
+        router.get('module', [AuthController, 'module']).use(middleware.auth());
       })
       .prefix('/auth');
 

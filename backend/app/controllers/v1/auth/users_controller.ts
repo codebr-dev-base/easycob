@@ -18,12 +18,19 @@ export default class UsersController {
     const limit = qs.perPage || '10';
     const orderBy = qs.orderBy || 'id';
     const descending = qs.descending || 'true';
+    const keywordColumn = qs.keywordColumn || 'name';
 
     const users = await User.query()
       .where((q) => {
         if (qs.keyword && qs.keyword.length > 3) {
-          q.whereILike('name', `%${qs.keyword}%`);
+          q.whereILike(keywordColumn, `%${qs.keyword}%`);
         }
+
+        if (qs.status) {
+          const isActived = qs.status === 'true';
+          q.where('isActived', isActived);
+        }
+
         return q;
       })
       .preload('skills')
@@ -137,7 +144,7 @@ export default class UsersController {
     await module?.load('skills', (q) => {
       return q.preload('users');
     });
-    let listUserId: any[] = [];
+    let listUserId: number[] = [];
 
     if (module) {
       for (const skill of module.skills) {
@@ -155,7 +162,7 @@ export default class UsersController {
           }
           return q;
         })
-        .whereIn('id', [...listUserId])
+        .whereIn('id', listUserId)
         .orderBy('name', 'asc');
       return users;
     }

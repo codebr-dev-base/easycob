@@ -315,7 +315,7 @@ export default class ActionsController {
     };
   }
 
-  async categorizeByUserAndTypeAction({ request }: HttpContext) {
+  async chartByUserAndTypeAction({ request }: HttpContext) {
     const qs = request.qs();
 
     // Gera o where com paginação, caso seja necessário
@@ -387,5 +387,128 @@ export default class ActionsController {
       chartData: limitedChartData,
       chartConfig,
     };
+  }
+
+  async categorizeByUserAndCpc({ request }: HttpContext) {
+    const qs = request.qs();
+
+    // Gera o where com paginação, caso seja necessário
+    const selected = await this.service.generateWhereInPaginate(qs);
+
+    // Consulta ao banco de dados para agrupar por usuários e contar acionamentos separados por CPC e NCPC
+    const actionsByUser = await db
+      .from('public.actions AS a')
+      .joinRaw('LEFT JOIN public.users AS u ON a.user_id = u.id') // Relacionando ações com usuários
+      .joinRaw(
+        'LEFT JOIN public.type_actions AS ta ON a.type_action_id = ta.id'
+      ) // Relacionando com os tipos de ações
+      .joinRaw(
+        'LEFT JOIN recupera.tbl_arquivos_cliente_numero n ON a.cod_credor_des_regis = n.cod_credor_des_regis AND a.contato = n.contato'
+      ) // Relaciona para verificar se é CPC ou NCPC
+      .select('u.name AS user_name') // Seleciona o nome do usuário
+      .count('a.id AS total') // Conta o número total de acionamentos por usuário
+      .count({ CPC: db.raw('CASE WHEN n.cpc = true THEN a.id END') }) // Contagem de CPC
+      .count({ NCPC: db.raw('CASE WHEN n.cpc = false THEN a.id END') }) // Contagem de NCPC
+      .where((q) => {
+        if (selected) {
+          q.whereIn(selected.column, selected.list); // Filtros dinâmicos, se houver
+        }
+        return this.service.generateWherePaginate(q, qs); // Gerar o paginate dinamicamente
+      })
+      .whereNotIn('ta.abbreviation', ['EME', 'SMS']) // Excluindo os tipos de ação 'EME' e 'SMS'
+      .groupBy('u.name') // Agrupa pelos usuários
+      .orderBy('total', 'desc') // Ordena pelo total de acionamentos de forma decrescente
+      .limit(10); // Limita a 10 registros
+
+    // Ordena os resultados pela quantidade total de acionamentos
+    const sortedActions = actionsByUser.sort(
+      (a, b) => Number(b.total) - Number(a.total)
+    );
+
+    // Geração do chartData com a classificação por usuário
+    const chartData = sortedActions.map((action) => ({
+      name: action.user_name || 'Unknown', // Garante que existe um nome de usuário ou 'Unknown'
+      total: Number(action.total),
+      CPC: Number(action.CPC) || 0,
+      NCPC: Number(action.NCPC) || 0,
+    }));
+
+    // Geração do chartConfig para personalizar as cores e rótulos
+    const chartConfig = sortedActions.reduce(
+      (config, action) => {
+        const userName = action.user_name
+          ? action.user_name.toLowerCase().replace(/\s+/g, '_') // Gera uma chave válida
+          : 'unknown';
+        config[userName] = {
+          label: action.user_name || 'Unknown', // Nome do usuário para o gráfico
+        };
+        return config;
+      },
+      {
+        total: { label: 'Total' }, // Configuração base para o total
+        CPC: { label: 'CPC' },
+        NCPC: { label: 'NCPC' },
+      }
+    );
+
+    return {
+      chartData,
+      chartConfig,
+    };
+  }
+
+  async listByUserAndTypeAction({ request }: HttpContext) {
+    const qs = request.qs();
+
+    let orderBy = 'u.id';
+    if (qs.orderBy) {
+      if (qs.orderBy === 'user') {
+        orderBy = `u.name`;
+      } else if (qs.orderBy === 'id') {
+        orderBy = `u.id`;
+      } else if (qs.orderBy === 'typeAction') {
+        orderBy = `ta.name`;
+      } else {
+        orderBy = `a.${string.snakeCase(qs.orderBy)}`;
+      }
+    }
+    const descending = qs.descending || 'true';
+
+    // Gera o where com paginação, caso seja necessário
+    const selected = await this.service.generateWhereInPaginate(qs);
+
+    // Obtenção dos usuários e seus acionamentos
+    const userActions = await db
+      .from('public.actions AS a')
+      .joinRaw(
+        'LEFT JOIN public.type_actions AS ta ON a.type_action_id = ta.id'
+      ) // Relacionando ações com tipos
+      .joinRaw('LEFT JOIN public.users AS u ON a.user_id = u.id') // Relacionando ações com usuários
+      .select('u.name AS userName') // Seleciona o nome do usuário
+      .select('a.user_id as id') // Seleciona o ID do usuário
+      .select('ta.id AS typeActionId') // Seleciona o tipo de acionamento
+      .select('ta.abbreviation AS abbreviation') // Seleciona o tipo de acionamento
+      .select('ta.name AS name') // Seleciona o tipo de acionamento
+      .count('a.id AS quant') // Conta o total de acionamentos por tipo
+      .where((q) => {
+        if (selected) {
+          q.whereIn(selected.column, selected.list); // Filtros dinâmicos, se houver
+        }
+        return this.service.generateWherePaginate(q, qs); // Gerar o paginate dinamicamente
+      })
+      .whereNotIn('ta.abbreviation', ['SMS', 'EME']) // Excluir acionamentos de SMS e EME
+      .groupBy([
+        'u.id',
+        'a.user_id',
+        'u.name',
+        'ta.id',
+        'ta.abbreviation',
+        'ta.name',
+      ]) // Agrupa por usuário, nome do usuário, e tipo de acionamento
+      .orderBy(`${orderBy}`, descending === 'true' ? 'desc' : 'asc');
+
+    return this.service.transformUserActions(
+      serializeKeysCamelCase(userActions)
+    );
   }
 }

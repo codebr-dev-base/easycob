@@ -22,9 +22,16 @@ export function DatePicker({
   placeholder: string;
   onChange: (range: DateRange) => void;
 }) {
+  // Ajusta a data atual para GMT-3 ao inicializar o estado
+  const initializeDateWithGMT3 = (): Date => {
+    const date = new Date();
+    date.setHours(date.getHours() - 3); // Ajusta para GMT-3
+    return date;
+  };
+
   const [date, setDate] = React.useState<DateRange>({
-    from: new Date(),
-    to: new Date(),
+    from: initializeDateWithGMT3(),
+    to: initializeDateWithGMT3(),
   });
 
   const handlerSelectRangeDate = (

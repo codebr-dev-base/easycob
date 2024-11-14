@@ -21,7 +21,17 @@ export default router
         router.get('/chart/user', [ActionsController, 'categorizeByUser']);
         router.get('/chart/user/type', [
           ActionsController,
-          'categorizeByUserAndTypeAction',
+          'chartByUserAndTypeAction',
+        ]);
+
+        router.get('/list/user/type', [
+          ActionsController,
+          'listByUserAndTypeAction',
+        ]);
+
+        router.get('/chart/user/cpc', [
+          ActionsController,
+          'categorizeByUserAndCpc',
         ]);
 
         router.patch('/unification/check/:id', [
