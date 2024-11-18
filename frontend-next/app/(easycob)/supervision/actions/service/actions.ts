@@ -1,12 +1,15 @@
 import { fetchAuth } from "@/app/lib/fetchAuth";
 import { IMeta } from "@/app/interfaces/pagination";
 import {
+  IChartChannelResponse,
   IChartConfig,
   IChartData,
   IChartDataStack,
   IQueryActionParams,
   IReturnType,
+  IUserAndCpc,
   IUserAndTypesData,
+  IUserChannel,
 } from "../interfaces/action";
 import { IAction, ITypeAction } from "@/app/(easycob)/interfaces/actions";
 
@@ -45,6 +48,20 @@ export const fetchActions = async (): Promise<{
 
 export const fetchUserAndTypes = async (): Promise<IUserAndTypesData[]> => {
   const result = await fetchAuth(`${url}/list/user/type`, {
+    query,
+  });
+
+  if (result.success) {
+    //console.log("Dados recebidos:", result.data);
+    return result.data;
+  } else {
+    //console.error("Erro ao buscar dados:", result.error);
+    throw new Error(result.error);
+  }
+};
+
+export const fetchUserAndCpc = async (): Promise<IUserAndCpc[]> => {
+  const result = await fetchAuth(`${url}/list/user/cpc`, {
     query,
   });
 
@@ -137,6 +154,34 @@ export const fetchChartUserAndCpc = async (): Promise<{
   chartConfig: IChartConfig;
 }> => {
   const result = await fetchAuth(`${url}/chart/user/cpc`, {
+    query,
+  });
+
+  if (result.success) {
+    //console.log("Dados recebidos:", result.data);
+    return result.data;
+  } else {
+    //console.error("Erro ao buscar dados:", result.error);
+    throw new Error(result.error);
+  }
+};
+
+export const fetchChartUserAndChannel = async (): Promise<IChartChannelResponse> => {
+  const result = await fetchAuth(`${url}/chart/user/channel`, {
+    query,
+  });
+
+  if (result.success) {
+    //console.log("Dados recebidos:", result.data);
+    return result.data;
+  } else {
+    //console.error("Erro ao buscar dados:", result.error);
+    throw new Error(result.error);
+  }
+};
+
+export const fetchUserAndChannel = async (): Promise<IUserChannel[]> => {
+  const result = await fetchAuth(`${url}/list/user/channel`, {
     query,
   });
 

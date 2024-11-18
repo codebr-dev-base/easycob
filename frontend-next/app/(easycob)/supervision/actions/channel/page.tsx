@@ -1,16 +1,16 @@
 import SkeletonFullPage from '@/app/(easycob)/components/SkeletonFullPage';
 import React, { Suspense } from 'react'
-import { fetchUserAndCpc } from '../service/actions';
+import { fetchUserAndChannel } from '../service/actions';
 import { redirect } from 'next/navigation';
-import ContainerCpc from './components/ContainerCpc';
+import ContainerCpc from './components/ContainerChannel';
 
 export default async function Cpc() {
     try {
-        const usersAndCpc = await fetchUserAndCpc();
+        const usersAndChannel = await fetchUserAndChannel();
     
         return (
           <Suspense fallback={<SkeletonFullPage />}>
-            <ContainerCpc usersAndCpc={usersAndCpc}/>
+            <ContainerCpc usersAndChannel={usersAndChannel}/>
           </Suspense>
         );
       } catch (error) {

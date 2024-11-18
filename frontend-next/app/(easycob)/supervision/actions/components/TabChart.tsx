@@ -23,8 +23,10 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import {
+  IChartChannelConfig,
   IChartConfig,
   IChartData,
+  IChartDataChannelItem,
   IChartDataStack,
   IQueryActionParams,
 } from "../interfaces/action";
@@ -43,6 +45,7 @@ export default function TabChart({
   chartUser,
   chartUserType,
   chartUserCpc,
+  chartUserChannel,
   query,
 }: {
   chartType: {
@@ -61,6 +64,10 @@ export default function TabChart({
     chartData: IChartDataStack[];
     chartConfig: IChartConfig;
   };
+  chartUserChannel: {
+    chartData: IChartDataChannelItem[]; // Lista de dados para o gráfico
+    chartConfig: IChartChannelConfig; 
+  }
   query: IQueryActionParams;
 }) {
   const actionKeys = Array.from(
@@ -297,7 +304,7 @@ export default function TabChart({
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-1 md:grid-cols-3 md:gap-2">
+      <div className="grid grid-cols-1 gap-1 md:grid-cols-2 md:gap-2">
         <Card>
           <CardHeader>
             <CardTitle>Acionamentos</CardTitle>
@@ -308,66 +315,6 @@ export default function TabChart({
               config={chartUserCpc.chartConfig}
               className="aspect-auto h-[250px] w-full"
             >
-              <BarChart
-                accessibilityLayer
-                data={chartUserCpc.chartData}
-                layout="vertical"
-              >
-                <CartesianGrid horizontal={false} />
-
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  tickLine={true}
-                  tickMargin={1}
-                  axisLine={true}
-                  tickFormatter={(value) => {
-                    return value.slice(0, 5) + ".";
-                  }}
-                  fontSize={8}
-                />
-
-                <XAxis dataKey="total" type="number" />
-
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent indicator="line" />}
-                />
-
-                <Bar
-                  dataKey="CPC"
-                  layout="vertical"
-                  fill="rgba(34, 105, 211, 1)"
-                  radius={4}
-                />
-
-                <Bar
-                  dataKey="NCPC"
-                  layout="vertical"
-                  fill="rgba(34, 105, 211, .5)"
-                  radius={4}
-                />
-              </BarChart>
-            </ChartContainer>
-          </CardContent>
-          <CardFooter className="flex-col items-start gap-2 text-sm">
-            <div className="flex gap-2 font-medium leading-none">
-              Perído de valiação:
-            </div>
-            <div className="leading-none text-muted-foreground">
-              {`${formatDateToBR(query.startDate)} - ${formatDateToBR(
-                query.endDate
-              )}`}
-            </div>
-          </CardFooter>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Acionamentos</CardTitle>
-            <CardDescription>Classificação por CPC</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={chartUserCpc.chartConfig}>
               <BarChart accessibilityLayer data={chartUserCpc.chartData}>
                 <CartesianGrid vertical={false} />
                 <XAxis
@@ -375,8 +322,8 @@ export default function TabChart({
                   tickLine={false}
                   tickMargin={10}
                   axisLine={false}
-                  tickFormatter={(value) => value.slice(0, 6) + "."}
-                  fontSize={8}
+                  tickFormatter={(value) => value.slice(0, 9) + "."}
+                  fontSize={10}
                 />
                 <ChartTooltip
                   cursor={false}
@@ -387,15 +334,69 @@ export default function TabChart({
               </BarChart>
             </ChartContainer>
           </CardContent>
-          <CardFooter className="flex-col items-start gap-2 text-sm">
-            <div className="flex gap-2 font-medium leading-none">
-              Perído de valiação:
+          <CardFooter className="flex justify-between">
+            <div className="flex-col items-start gap-2 text-sm">
+              <div className="flex gap-2 font-medium leading-none">
+                Perído de valiação:
+              </div>
+              <div className="leading-none text-muted-foreground">
+                {`${formatDateToBR(query.startDate)} - ${formatDateToBR(
+                  query.endDate
+                )}`}
+              </div>
             </div>
-            <div className="leading-none text-muted-foreground">
-              {`${formatDateToBR(query.startDate)} - ${formatDateToBR(
-                query.endDate
-              )}`}
+
+            <Button variant={"outline"} asChild>
+              <Link href="/supervision/actions/cpc"> Tabela </Link>
+            </Button>
+          </CardFooter>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Acionamentos</CardTitle>
+            <CardDescription>Classificação por Canal</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer
+              config={chartUserChannel.chartConfig}
+              className="aspect-auto h-[250px] w-full"
+            >
+              <BarChart accessibilityLayer data={chartUserChannel.chartData}>
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  tickFormatter={(value) => value.slice(0, 9) + "."}
+                  fontSize={10}
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent indicator="dashed" />}
+                />
+                <Bar dataKey="active" fill="rgba(34, 105, 211, 1)" radius={2} />
+                <Bar dataKey="dialer" fill="rgba(255, 159, 64, 1)" radius={2} />
+                <Bar dataKey="whatsapp" fill="rgba(75, 192, 192, 1)" radius={2} />
+                <Bar dataKey="nullChannel" fill="rgba(153, 102, 255, 1)" radius={2} />
+              </BarChart>
+            </ChartContainer>
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <div className="flex-col items-start gap-2 text-sm">
+              <div className="flex gap-2 font-medium leading-none">
+                Perído de valiação:
+              </div>
+              <div className="leading-none text-muted-foreground">
+                {`${formatDateToBR(query.startDate)} - ${formatDateToBR(
+                  query.endDate
+                )}`}
+              </div>
             </div>
+
+            <Button variant={"outline"} asChild>
+              <Link href="/supervision/actions/channel"> Tabela </Link>
+            </Button>
           </CardFooter>
         </Card>
       </div>

@@ -2,18 +2,20 @@ import { RxCaretSort, RxArrowDown, RxArrowUp } from "react-icons/rx";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { IQueryPaginationParams } from "@/app/interfaces/pagination";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 export function HeaderTable({
   columnName,
   fieldName,
   query,
   refresh,
+  children,
 }: {
-  columnName: string;
+  columnName?: string;
   fieldName: string;
   query: IQueryPaginationParams;
-  refresh: () => {};
+  refresh: () => void;
+  children?: ReactNode;
 }) {
   const [descending, setDescending] = useState<boolean>(
     query.descending ? query.descending : false
@@ -40,7 +42,10 @@ export function HeaderTable({
         className="-ml-3 h-8 p-0"
         onClick={toggleSorting}
       >
-        <span>{columnName}</span>
+        {columnName && <span>{columnName}</span>}
+
+        {children && children}
+
         {orderBy != fieldName ? (
           <RxCaretSort className="ml-2 h-4 w-4" />
         ) : descending == false ? (

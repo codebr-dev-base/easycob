@@ -5,6 +5,7 @@ import {
   fetchActions,
   fetchChartType,
   fetchChartUser,
+  fetchChartUserAndChannel,
   fetchChartUserAndCpc,
   fetchChartUserAndType,
   query,
@@ -17,8 +18,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TabRecords from "./TabRecords";
 import TabChart from "./TabChart";
 import {
+  IChartChannelConfig,
   IChartConfig,
   IChartData,
+  IChartDataChannelItem,
   IChartDataStack,
 } from "../interfaces/action";
 
@@ -28,6 +31,7 @@ export default function ContainerAction({
   chartUser: cu,
   chartUserType: cut,
   chartUserCpc: cuc,
+  chartUserChannel: cuch
 }: {
   actions: {
     meta: IMeta;
@@ -49,6 +53,10 @@ export default function ContainerAction({
     chartData: IChartDataStack[];
     chartConfig: IChartConfig;
   };
+  chartUserChannel: {
+    chartData: IChartDataChannelItem[]; // Lista de dados para o gráfico
+    chartConfig: IChartChannelConfig; 
+  }
 }) {
   const [meta, setMeta] = useState<IMeta>(actions.meta);
   const [data, setData] = useState<IAction[]>(actions.data ? actions.data : []);
@@ -74,21 +82,28 @@ export default function ContainerAction({
     chartConfig: IChartConfig;
   }>(cuc);
 
+  const [chartUserChannel, setChartUserChannel] = useState<{
+    chartData: IChartDataChannelItem[]; // Lista de dados para o gráfico
+    chartConfig: IChartChannelConfig; 
+  }>(cuch);
+
   const refresh = async () => {
     setPending(true);
 
-    const [records, ct, cu, cut, cuc] = await Promise.all([
+    const [records, ct, cu, cut, cuc, cuch] = await Promise.all([
       fetchActions(),
       fetchChartType(),
       fetchChartUser(),
       fetchChartUserAndType(),
       fetchChartUserAndCpc(),
+      fetchChartUserAndChannel(),
     ]);
 
     setChartType(ct);
     setChartUser(cu);
     setChartUserType(cut);
     setChartUserCpc(cuc);
+    setChartUserChannel(cuch)
 
     setMeta(records.meta);
     setData(records.data);
@@ -121,6 +136,7 @@ export default function ContainerAction({
               chartUser={chartUser}
               chartUserType={chartUserType}
               chartUserCpc={chartUserCpc}
+              chartUserChannel={chartUserChannel}
               query={query}
             />
           </TabsContent>

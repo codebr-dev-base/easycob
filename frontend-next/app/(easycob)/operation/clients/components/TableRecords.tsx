@@ -79,14 +79,7 @@ export default function TableRecords({
                     refresh={refresh}
                   />
                 </TableHead>
-                <TableHead>
-                  <HeaderTable
-                    columnName="Contratos"
-                    fieldName="desContr"
-                    query={query}
-                    refresh={refresh}
-                  />
-                </TableHead>
+                <TableHead>Contratos</TableHead>
                 <TableHead>
                   <HeaderTable
                     columnName="Status"
@@ -95,22 +88,8 @@ export default function TableRecords({
                     refresh={refresh}
                   />
                 </TableHead>
-                <TableHead>
-                  <HeaderTable
-                    columnName="Telefone"
-                    fieldName="phone"
-                    query={query}
-                    refresh={refresh}
-                  />
-                </TableHead>
-                <TableHead>
-                  <HeaderTable
-                    columnName="Email"
-                    fieldName="email"
-                    query={query}
-                    refresh={refresh}
-                  />
-                </TableHead>
+                <TableHead>Telefone</TableHead>
+                <TableHead>Email</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>

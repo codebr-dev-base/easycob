@@ -11,8 +11,6 @@ export function formatDateToBR(
     return "";
   }
 
-  console.log("Original: ", isoDateString);
-
   let dateString = isoDateString;
 
   // Verifica se contém "T" e, se sim, remove o horário
@@ -20,16 +18,12 @@ export function formatDateToBR(
     dateString = isoDateString.split("T")[0]; // Pega apenas a parte "YYYY-MM-DD"
   }
 
-  console.log("Intermediario: ", dateString);
-
   const [year, month, day] = dateString.split("-").map(Number);
   const date = new Date(Date.UTC(year, month - 1, day)); // Define o UTC 00:00 do dia
   //const date = new Date(dateString);
 
   // Adiciona três horas para compensar o fuso horário local
   date.setUTCHours(date.getUTCHours() + 3);
-
-  console.log("Convertido e ajustado: ", date.toISOString());
 
   if (isNaN(date.getTime())) {
     return "";
