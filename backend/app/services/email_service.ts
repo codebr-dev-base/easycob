@@ -224,8 +224,8 @@ export default class EmailService {
       }
     }
 
-    const enviosChunks = chunks(envios, 16);
-    const itemsChunks = chunks(items, 16);
+    const enviosChunks = chunks(envios, 24);
+    const itemsChunks = chunks(items, 24);
     try {
       for (const [i, chunk] of enviosChunks.entries()) {
         const promises = chunk.map(async (email: IEmailData, j: number) => {

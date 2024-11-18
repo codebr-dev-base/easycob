@@ -225,6 +225,7 @@ export default class ActionsController {
     const chartData = sortedActions.map((action, index) => ({
       name: action.type_action || 'Unknown', // Garante que existe um tipo ou um 'Unknown'
       abbreviation: action.abbreviation,
+      commissioned: action.commissioned,
       total: Number(action.total),
       fill: colors[index % colors.length], // Aplica a cor da mais forte à mais fraca
     }));
@@ -489,6 +490,7 @@ export default class ActionsController {
       .select('ta.id AS typeActionId') // Seleciona o tipo de acionamento
       .select('ta.abbreviation AS abbreviation') // Seleciona o tipo de acionamento
       .select('ta.name AS name') // Seleciona o tipo de acionamento
+      .select('ta.commissioned AS commissioned')
       .count('a.id AS quant') // Conta o total de acionamentos por tipo
       .where((q) => {
         if (selected) {
@@ -497,6 +499,7 @@ export default class ActionsController {
         return this.service.generateWherePaginate(q, qs); // Gerar o paginate dinamicamente
       })
       .whereNotIn('ta.abbreviation', ['SMS', 'EME']) // Excluir acionamentos de SMS e EME
+      .whereRaw('ta.commissioned > 0')
       .groupBy([
         'u.id',
         'a.user_id',
@@ -510,5 +513,199 @@ export default class ActionsController {
     return this.service.transformUserActions(
       serializeKeysCamelCase(userActions)
     );
+  }
+
+  async listByUserAndCpc({ request }: HttpContext) {
+    const qs = request.qs();
+
+    let orderBy = 'u.id';
+    if (qs.orderBy) {
+      if (qs.orderBy === 'user') {
+        orderBy = `u.name`;
+      } else if (qs.orderBy === 'userId') {
+        orderBy = `u.id`;
+      } else if (qs.orderBy === 'typeAction') {
+        orderBy = `ta.name`;
+      } else {
+        orderBy = `a.${string.snakeCase(qs.orderBy)}`;
+      }
+    }
+    const descending = qs.descending || 'true';
+
+    // Gera o where com paginação, caso seja necessário
+    const selected = await this.service.generateWhereInPaginate(qs);
+
+    // Consulta ao banco de dados para agrupar por usuários e contar acionamentos separados por CPC e NCPC
+    const actionsByUser = await db
+      .from('public.actions AS a')
+      .joinRaw('LEFT JOIN public.users AS u ON a.user_id = u.id') // Relacionando ações com usuários
+      .joinRaw(
+        'LEFT JOIN public.type_actions AS ta ON a.type_action_id = ta.id'
+      ) // Relacionando com os tipos de ações
+      .joinRaw(
+        'LEFT JOIN recupera.tbl_arquivos_cliente_numero n ON a.cod_credor_des_regis = n.cod_credor_des_regis AND a.contato = n.contato'
+      ) // Relaciona para verificar se é CPC ou NCPC
+      .select('u.name AS userName') // Seleciona o nome do usuário
+      .select('u.id AS userId')
+      .count('a.id AS total') // Conta o número total de acionamentos por usuário
+      .count({ CPC: db.raw('CASE WHEN n.cpc = true THEN a.id END') }) // Contagem de CPC
+      .count({ NCPC: db.raw('CASE WHEN n.cpc = false THEN a.id END') }) // Contagem de NCPC
+      .where((q) => {
+        if (selected) {
+          q.whereIn(selected.column, selected.list); // Filtros dinâmicos, se houver
+        }
+        return this.service.generateWherePaginate(q, qs); // Gerar o paginate dinamicamente
+      })
+      .whereNotIn('ta.abbreviation', ['EME', 'SMS']) // Excluindo os tipos de ação 'EME' e 'SMS'
+      .groupBy(['u.id', 'u.name'])
+      .orderBy(`${orderBy}`, descending === 'true' ? 'desc' : 'asc');
+
+    return serializeKeysCamelCase(actionsByUser);
+  }
+
+  async listByUserAndChannel({ request }: HttpContext) {
+    const qs = request.qs();
+
+    let orderBy = 'u.id';
+    if (qs.orderBy) {
+      if (qs.orderBy === 'user') {
+        orderBy = `u.name`;
+      } else if (qs.orderBy === 'userId') {
+        orderBy = `u.id`;
+      } else if (qs.orderBy === 'channelActive') {
+        orderBy = `activeCount`;
+      } else if (qs.orderBy === 'channelDialer') {
+        orderBy = `dialerCount`;
+      } else if (qs.orderBy === 'channelWhatsapp') {
+        orderBy = `whatsappCount`;
+      } else if (qs.orderBy === 'channelNull') {
+        orderBy = `nullCount`;
+      }
+    }
+    const descending = qs.descending || 'true';
+
+    // Gera o where com paginação, caso seja necessário
+    const selected = await this.service.generateWhereInPaginate(qs);
+
+    // Consulta ao banco de dados para agrupar por usuários e contar acionamentos separados por valores de `channel`
+    const actionsByUser = await db
+      .from('public.actions AS a')
+      .joinRaw('LEFT JOIN public.users AS u ON a.user_id = u.id') // Relacionando ações com usuários
+      .joinRaw(
+        'LEFT JOIN public.type_actions AS ta ON a.type_action_id = ta.id'
+      ) // Relacionando com os tipos de ações
+      .select('u.name AS userName') // Seleciona o nome do usuário
+      .select('u.id AS userId')
+      .count('a.id AS total') // Conta o número total de acionamentos por usuário
+      .count({
+        activeCount: db.raw(
+          "CASE WHEN a.channel = 'active' THEN 1 ELSE NULL END"
+        ),
+      }) // Contagem de `active`
+      .count({
+        dialerCount: db.raw(
+          "CASE WHEN a.channel = 'dialer' THEN 1 ELSE NULL END"
+        ),
+      }) // Contagem de `dialer`
+      .count({
+        whatsappCount: db.raw(
+          "CASE WHEN a.channel = 'whatsapp' THEN 1 ELSE NULL END"
+        ),
+      }) // Contagem de `whatsapp`
+      .count({
+        nullCount: db.raw('CASE WHEN a.channel IS NULL THEN 1 ELSE NULL END'),
+      }) // Contagem de `NULL`
+      .where((q) => {
+        if (selected) {
+          q.whereIn(selected.column, selected.list); // Filtros dinâmicos, se houver
+        }
+        return this.service.generateWherePaginate(q, qs); // Gerar o paginate dinamicamente
+      })
+      .whereNotIn('ta.abbreviation', ['EME', 'SMS']) // Excluindo os tipos de ação 'EME' e 'SMS'
+      .groupBy(['u.id', 'u.name'])
+      .orderBy(`${orderBy}`, descending === 'true' ? 'desc' : 'asc');
+
+    return serializeKeysCamelCase(actionsByUser);
+  }
+
+  async categorizeByUserAndChannel({ request }: HttpContext) {
+    const qs = request.qs();
+
+    // Gera o where com paginação, caso seja necessário
+    const selected = await this.service.generateWhereInPaginate(qs);
+
+    // Consulta ao banco de dados para agrupar por usuários e contar acionamentos por valores da coluna channel
+    const actionsByUser = await db
+      .from('public.actions AS a')
+      .joinRaw('LEFT JOIN public.users AS u ON a.user_id = u.id') // Relacionando ações com usuários
+      .joinRaw(
+        'LEFT JOIN public.type_actions AS ta ON a.type_action_id = ta.id'
+      ) // Relacionando com os tipos de ações
+      .select('u.name AS user_name') // Seleciona o nome do usuário
+      .count('a.id AS total') // Conta o número total de acionamentos por usuário
+      .count({
+        active: db.raw("CASE WHEN a.channel = 'active' THEN 1 ELSE NULL END"),
+      }) // Contagem de `active`
+      .count({
+        dialer: db.raw("CASE WHEN a.channel = 'dialer' THEN 1 ELSE NULL END"),
+      }) // Contagem de `dialer`
+      .count({
+        whatsapp: db.raw(
+          "CASE WHEN a.channel = 'whatsapp' THEN 1 ELSE NULL END"
+        ),
+      }) // Contagem de `whatsapp`
+      .count({
+        nullChannel: db.raw('CASE WHEN a.channel IS NULL THEN 1 ELSE NULL END'),
+      }) // Contagem de valores `NULL`
+      .where((q) => {
+        if (selected) {
+          q.whereIn(selected.column, selected.list); // Filtros dinâmicos, se houver
+        }
+        return this.service.generateWherePaginate(q, qs); // Gerar o paginate dinamicamente
+      })
+      .whereNotIn('ta.abbreviation', ['EME', 'SMS']) // Excluindo os tipos de ação 'EME' e 'SMS'
+      .groupBy('u.name') // Agrupa pelos usuários
+      .orderBy('total', 'desc') // Ordena pelo total de acionamentos de forma decrescente
+      .limit(10); // Limita a 10 registros
+
+    // Ordena os resultados pela quantidade total de acionamentos
+    const sortedActions = actionsByUser.sort(
+      (a, b) => Number(b.total) - Number(a.total)
+    );
+
+    // Geração do chartData com a classificação por usuário
+    const chartData = sortedActions.map((action) => ({
+      name: action.user_name || 'Unknown', // Garante que existe um nome de usuário ou 'Unknown'
+      total: Number(action.total),
+      active: Number(action.active) || 0,
+      dialer: Number(action.dialer) || 0,
+      whatsapp: Number(action.whatsapp) || 0,
+      nullChannel: Number(action.nullChannel) || 0,
+    }));
+
+    // Geração do chartConfig para personalizar as cores e rótulos
+    const chartConfig = sortedActions.reduce(
+      (config, action) => {
+        const userName = action.user_name
+          ? action.user_name.toLowerCase().replace(/\s+/g, '_') // Gera uma chave válida
+          : 'unknown';
+        config[userName] = {
+          label: action.user_name || 'Unknown', // Nome do usuário para o gráfico
+        };
+        return config;
+      },
+      {
+        total: { label: 'Total' }, // Configuração base para o total
+        active: { label: 'Active' },
+        dialer: { label: 'Dialer' },
+        whatsapp: { label: 'Whatsapp' },
+        nullChannel: { label: 'Null' },
+      }
+    );
+
+    return {
+      chartData,
+      chartConfig,
+    };
   }
 }

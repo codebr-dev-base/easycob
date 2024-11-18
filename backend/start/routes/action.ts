@@ -34,6 +34,18 @@ export default router
           'categorizeByUserAndCpc',
         ]);
 
+        router.get('/list/user/cpc', [ActionsController, 'listByUserAndCpc']);
+
+        router.get('/chart/user/channel', [
+          ActionsController,
+          'categorizeByUserAndChannel',
+        ]);
+
+        router.get('/list/user/channel', [
+          ActionsController,
+          'listByUserAndChannel',
+        ]);
+
         router.patch('/unification/check/:id', [
           ActionsController,
           'setUnificationCheck',

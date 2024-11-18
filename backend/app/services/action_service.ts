@@ -317,6 +317,7 @@ export default class ActionService {
           name: action.name,
           typeActionId: action.typeActionId,
           abbreviation: action.abbreviation,
+          commissioned: action.commissioned,
           quant: parseInt(action.quant, 10), // Converte `quant` para número
         })),
       };
