@@ -526,8 +526,6 @@ export default class ActionsController {
         orderBy = `u.id`;
       } else if (qs.orderBy === 'typeAction') {
         orderBy = `ta.name`;
-      } else {
-        orderBy = `a.${string.snakeCase(qs.orderBy)}`;
       }
     }
     const descending = qs.descending || 'true';
