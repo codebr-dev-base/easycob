@@ -484,6 +484,9 @@ export default class ActionsController {
       .joinRaw(
         'LEFT JOIN public.type_actions AS ta ON a.type_action_id = ta.id'
       ) // Relacionando ações com tipos
+      .joinRaw(
+        'LEFT JOIN recupera.tbl_arquivos_cliente_numero n ON a.cod_credor_des_regis = n.cod_credor_des_regis AND a.contato = n.contato'
+      ) // Relaciona para verificar se é CPC ou NCPC
       .joinRaw('LEFT JOIN public.users AS u ON a.user_id = u.id') // Relacionando ações com usuários
       .select('u.name AS userName') // Seleciona o nome do usuário
       .select('a.user_id as id') // Seleciona o ID do usuário
@@ -492,6 +495,22 @@ export default class ActionsController {
       .select('ta.name AS name') // Seleciona o tipo de acionamento
       .select('ta.commissioned AS commissioned')
       .count('a.id AS quant') // Conta o total de acionamentos por tipo
+      .count({ CPC: db.raw('CASE WHEN n.cpc = true THEN a.id END') }) // Contagem de CPC
+      .count({ NCPC: db.raw('CASE WHEN n.cpc = false THEN a.id END') }) // Contagem de NCPC
+      .count({
+        active: db.raw("CASE WHEN a.channel = 'active' THEN 1 ELSE NULL END"),
+      }) // Contagem de `active`
+      .count({
+        dialer: db.raw("CASE WHEN a.channel = 'dialer' THEN 1 ELSE NULL END"),
+      }) // Contagem de `dialer`
+      .count({
+        whatsapp: db.raw(
+          "CASE WHEN a.channel = 'whatsapp' THEN 1 ELSE NULL END"
+        ),
+      }) // Contagem de `whatsapp`
+      .count({
+        nullChannel: db.raw('CASE WHEN a.channel IS NULL THEN 1 ELSE NULL END'),
+      }) // Contagem de valores `NULL`
       .where((q) => {
         if (selected) {
           q.whereIn(selected.column, selected.list); // Filtros dinâmicos, se houver

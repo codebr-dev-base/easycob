@@ -318,7 +318,13 @@ export default class ActionService {
           typeActionId: action.typeActionId,
           abbreviation: action.abbreviation,
           commissioned: action.commissioned,
-          quant: parseInt(action.quant, 10), // Converte `quant` para número
+          quant: Number(action.quant) || 0, // Converte `quant` para número
+          cpc: Number(action.cpc) || 0,
+          ncpc: Number(action.ncpc) || 0,
+          active: Number(action.active) || 0,
+          dialer: Number(action.dialer) || 0,
+          whatsapp: Number(action.whatsapp) || 0,
+          nullChannel: Number(action.nullChannel) || 0,
         })),
       };
     });

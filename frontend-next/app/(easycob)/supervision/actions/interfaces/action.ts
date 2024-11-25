@@ -66,6 +66,12 @@ export interface IUserAndTypes {
   abbreviation: string; // Abreviação do acionamento (ex: ACP, ALE)
   quant: number; // Quantidade de ocorrências desse acionamento
   commissioned: number;
+  cpc: string;
+  ncpc: string;
+  active: number;   // Contagem de ações do tipo 'active'
+  dialer: number;   // Contagem de ações do tipo 'dialer'
+  whatsapp: number; // Contagem de ações do tipo 'whatsapp'
+  nullChannel: number;     // Contagem de ações onde 'channel' é NULL
 }
 
 // Interface para representar um usuário e suas ações

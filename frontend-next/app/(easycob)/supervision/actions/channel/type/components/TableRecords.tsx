@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { IUserAndTypes, IUserAndTypesData } from "../../interfaces/action";
+import { IUserAndTypes, IUserAndTypesData } from "../../../interfaces/action";
 
 import Tooltips from "@/app/(easycob)/components/Tooltips";
 import {
@@ -25,7 +25,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatDateToBR } from "@/app/lib/utils";
-import { query } from "../../service/actions";
+import { query } from "../../../service/actions";
 import { HeaderTable } from "@/app/(easycob)/components/HeaderTable";
 import { RxArrowDown, RxArrowUp, RxCaretSort } from "react-icons/rx";
 import { Button } from "@/components/ui/button";
@@ -114,18 +114,22 @@ export default function TableRecords({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="h-12">Nome do Usuário</TableHead>
+              <TableHead rowSpan={2}>Nome do Usuário</TableHead>
               {actionTypes.map((actionType) => {
                 // Verifica se todos os valores dessa coluna são zero
                 return (
-                  <TableHead key={actionType.id} className="pl-0">
+                  <TableHead
+                    key={actionType.id}
+                    className="pl-0 justify-center"
+                    colSpan={4}
+                  >
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="-ml-3 h-8 p-0"
+                            className="h-8 p-0 w-full"
                             onClick={() => {
                               toggleSorting(actionType.id);
                             }}
@@ -149,13 +153,26 @@ export default function TableRecords({
                   </TableHead>
                 );
               })}
-              <TableHead className="w-12 pl-0">
+              <TableHead className="pl-0" rowSpan={2}>
                 <p>Total</p>
               </TableHead>
             </TableRow>
+            <TableRow>
+              {actionTypes.map((actionType) => {
+                // Verifica se todos os valores dessa coluna são zero
+                return (
+                  <Fragment key={actionType.id}>
+                    <TableHead className="pl-0">Ativo</TableHead>
+                    <TableHead className="pl-0">Discador</TableHead>
+                    <TableHead className="pl-0">Whatsapp</TableHead>
+                    <TableHead className="pl-0">Nulos</TableHead>
+                  </Fragment>
+                );
+              })}
+            </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user) => (
+            {userData.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="max-w-32 md:max-w-40 lg:max-w-48">
                   <p className="hover:text-clip truncate">{user.userName}</p>
@@ -166,12 +183,28 @@ export default function TableRecords({
                     (a) => a.typeActionId === type.id
                   );
                   return (
-                    <TableCell
-                      key={type.id}
-                      className={` ${action ? selectColor(action) : ""}`}
-                    >
-                      {action ? action.quant : 0}
-                    </TableCell>
+                    <Fragment key={type.id}>
+                      <TableCell
+                        className={` ${action ? selectColor(action) : ""}`}
+                      >
+                        {action ? action.active : 0}
+                      </TableCell>
+                      <TableCell
+                        className={` ${action ? selectColor(action) : ""}`}
+                      >
+                        {action ? action.dialer : 0}
+                      </TableCell>
+                      <TableCell
+                        className={` ${action ? selectColor(action) : ""}`}
+                      >
+                        {action ? action.whatsapp : 0}
+                      </TableCell>
+                      <TableCell
+                        className={` ${action ? selectColor(action) : ""}`}
+                      >
+                        {action ? action.nullChannel : 0}
+                      </TableCell>
+                    </Fragment>
                   );
                 })}
                 <TableCell className="">{user.total}</TableCell>

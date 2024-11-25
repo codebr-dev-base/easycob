@@ -10,8 +10,8 @@ export interface ITypeAction {
   commissioned: number;
   type: string;
   timelife: number;
-  createdAt: string; // Datas geralmente são tratadas como strings no front-end
-  updatedAt: string;
+  createdAt?: string; // Datas geralmente são tratadas como strings no front-end
+  updatedAt?: string;
   category?: ICategoryAction; // Relacionamento opcional com CategoryAction
   actions?: IAction[]; // Relacionamento opcional com Action[]
 }

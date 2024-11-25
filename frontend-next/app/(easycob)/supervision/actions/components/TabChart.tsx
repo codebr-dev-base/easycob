@@ -66,8 +66,8 @@ export default function TabChart({
   };
   chartUserChannel: {
     chartData: IChartDataChannelItem[]; // Lista de dados para o gráfico
-    chartConfig: IChartChannelConfig; 
-  }
+    chartConfig: IChartChannelConfig;
+  };
   query: IQueryActionParams;
 }) {
   const actionKeys = Array.from(
@@ -347,7 +347,10 @@ export default function TabChart({
             </div>
 
             <Button variant={"outline"} asChild>
-              <Link href="/supervision/actions/cpc"> Tabela </Link>
+              <Link href="/supervision/actions/cpc"> Tabela Simples </Link>
+            </Button>
+            <Button variant={"outline"} asChild>
+              <Link href="/supervision/actions/cpc/type"> Tabela Detalha </Link>
             </Button>
           </CardFooter>
         </Card>
@@ -377,8 +380,16 @@ export default function TabChart({
                 />
                 <Bar dataKey="active" fill="rgba(34, 105, 211, 1)" radius={2} />
                 <Bar dataKey="dialer" fill="rgba(255, 159, 64, 1)" radius={2} />
-                <Bar dataKey="whatsapp" fill="rgba(75, 192, 192, 1)" radius={2} />
-                <Bar dataKey="nullChannel" fill="rgba(153, 102, 255, 1)" radius={2} />
+                <Bar
+                  dataKey="whatsapp"
+                  fill="rgba(75, 192, 192, 1)"
+                  radius={2}
+                />
+                <Bar
+                  dataKey="nullChannel"
+                  fill="rgba(153, 102, 255, 1)"
+                  radius={2}
+                />
               </BarChart>
             </ChartContainer>
           </CardContent>
@@ -395,7 +406,10 @@ export default function TabChart({
             </div>
 
             <Button variant={"outline"} asChild>
-              <Link href="/supervision/actions/channel"> Tabela </Link>
+              <Link href="/supervision/actions/channel"> Tabela Simples </Link>
+            </Button>
+            <Button variant={"outline"} asChild>
+              <Link href="/supervision/actions/channel/type"> Tabela Detalhada </Link>
             </Button>
           </CardFooter>
         </Card>
