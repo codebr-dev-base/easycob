@@ -13,6 +13,7 @@ const jobsConfig = defineConfig({
   queues: [
     'LoadCsv',
     'SendEmail',
+    'SendEmailExternal',
     'SendSms',
     'SendRecupera',
     'ResendRecupera',

@@ -54,5 +54,13 @@ export default router
       })
       .prefix('/action')
       .use(middleware.auth());
+    router
+      .group(() => {
+        router.post('/action/email', [
+          ActionsController,
+          'createExternalActions',
+        ]);
+      })
+      .prefix('/external');
   })
   .prefix('/v1');

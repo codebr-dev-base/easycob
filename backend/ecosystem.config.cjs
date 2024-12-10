@@ -25,6 +25,16 @@ module.exports = {
       },
     },
     {
+      name: 'queue:SendEmailExternal',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendEmailExternal',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
       name: 'queue:SendEmail',
       script: 'ace.js',
       args: 'jobs:listen --queue=SendEmail',

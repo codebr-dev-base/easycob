@@ -12,6 +12,10 @@ import { dispatchToRecupera } from '#services/utils/recupera';
 import { serializeKeysCamelCase } from '#utils/serialize';
 import string from '@adonisjs/core/helpers/string';
 import { generateColorClasses } from '#utils/colors';
+import ActionExternal from '#models/action_external';
+import SendMailExternalJob, {
+  IActionExternal,
+} from '#jobs/send_mail_external_job';
 
 @inject()
 export default class ActionsController {
@@ -724,5 +728,55 @@ export default class ActionsController {
       chartData,
       chartConfig,
     };
+  }
+
+  async createExternalActions({ request, response }: HttpContext) {
+    try {
+      // Obtém os dados do corpo da requisição
+      const data = request.input('actions');
+
+      // Valida se é um objeto ou array
+      if (!data || (typeof data !== 'object' && !Array.isArray(data))) {
+        return response
+          .status(400)
+          .send({ message: 'Os dados fornecidos são inválidos.' });
+      }
+
+      // Criação das ações
+      let createdActions;
+      if (Array.isArray(data)) {
+        createdActions = await ActionExternal.createMany(data);
+
+        for (const action of createdActions) {
+          await SendMailExternalJob.dispatch(
+            action.toJSON() as IActionExternal,
+            {
+              queueName: 'SendEmailExternal',
+            }
+          );
+        }
+      } else {
+        createdActions = await ActionExternal.create(data);
+
+        await SendMailExternalJob.dispatch(
+          createdActions.toJSON() as IActionExternal,
+          {
+            queueName: 'SendEmailExternal',
+          }
+        );
+      }
+
+      // Retorna as ações criadas
+      return response.status(201).send({
+        message: 'Ações criadas com sucesso!',
+        data: createdActions,
+      });
+    } catch (error) {
+      console.error('Erro ao criar ações:', error);
+      return response.status(500).send({
+        message: 'Erro ao criar ações.',
+        error: error.message,
+      });
+    }
   }
 }
