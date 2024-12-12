@@ -158,10 +158,10 @@ export async function getClients(lots: Array<CampaignLot>) {
   const filterIndAlter = "pt.ind_alter = '1'";
 
   const oneYearAgo = "CURRENT_DATE - INTERVAL '1 year'";
-
+  /*
   const specificDateRange =
     "pt.dat_venci >= '2022-12-01' AND pt.dat_venci <= '2023-11-30'";
-
+ */
   const clients = await db
     .from('recupera.tbl_arquivos_cliente_numero as n')
     .select(
@@ -182,6 +182,7 @@ export async function getClients(lots: Array<CampaignLot>) {
       db.raw(`sum(pt.val_princ) filter ( WHERE ${filterIndAlter}) as val_princ`)
     )
     .select(
+      /*
       db.raw(`
             SUM(CASE
                 WHEN pt.cod_credor = '8' AND ${specificDateRange} AND (${filterIndAlter})
@@ -190,6 +191,13 @@ export async function getClients(lots: Array<CampaignLot>) {
                     THEN pt.val_princ
                 ELSE 0
             END) AS pecld`)
+      */
+      db.raw(`
+        SUM(CASE
+            WHEN pt.dat_venci <= ${oneYearAgo} AND (${filterIndAlter})
+            THEN pt.val_princ
+            ELSE 0
+        END) AS pecld`)
     )
     .select(
       db.raw(`min(pt.dat_venci) filter ( WHERE ${filterIndAlter}) as dat_venci`)
