@@ -779,4 +779,79 @@ export default class ActionsController {
       });
     }
   }
+
+  async externalCreate({ request, response }: HttpContext) {
+    const data = request.all();
+
+    // Garante que o payload é sempre um array (único item é transformado em array)
+    const payloads = Array.isArray(data) ? data : [data];
+
+    // Resultado das operações
+    const results = [];
+
+    for (const item of payloads) {
+      try {
+        // Valida cada item do array
+        const payload = await request.validateUsing(createActionValidator, {
+          data: item,
+        });
+
+        // Verifica duplicidade
+        if (await this.service.checkDuplicate(item)) {
+          // Verifica se o contrato existe
+          if (await this.service.checkExisteContract(payload.desContr)) {
+            const aggregation = await this.service.getAggregationContract(
+              payload.desContr
+            );
+
+            // Cria a ação
+            const action = await Action.create({
+              ...aggregation,
+              ...payload,
+              userId: 2,
+            });
+
+            // Pós-criação (ex.: envio de notificações, etc.)
+            const afterCreateResult = await this.service.afterCreate(
+              action,
+              item
+            );
+
+            results.push({
+              success: true,
+              message: 'Ação criada com sucesso',
+              data: afterCreateResult,
+            });
+          } else {
+            results.push({
+              success: false,
+              message: 'Contrato Inativo',
+              error: 'Contrato Inativo',
+              data: item,
+            });
+          }
+        } else {
+          results.push({
+            success: false,
+            message: 'Acionamento duplicado',
+            error: 'Acionamento duplicado',
+            data: { ...item, double: true },
+          });
+        }
+      } catch (error) {
+        results.push({
+          success: false,
+          message: 'Erro ao processar o item',
+          error: error.message,
+          data: item,
+        });
+      }
+    }
+
+    // Retorna a resposta com o resultado de todas as operações
+    return response.status(207).json({
+      message: 'Operação concluída',
+      results,
+    });
+  }
 }

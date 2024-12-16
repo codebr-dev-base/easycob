@@ -56,6 +56,7 @@ export default router
       .use(middleware.auth());
     router
       .group(() => {
+        router.post('/action', [ActionsController, 'externalCreate']);
         router.post('/action/email', [
           ActionsController,
           'createExternalActions',
