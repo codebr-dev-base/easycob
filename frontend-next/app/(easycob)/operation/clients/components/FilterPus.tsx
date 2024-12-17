@@ -91,6 +91,7 @@ export default function FilterPus({
 
   const handleChangeColumn = (value: string) => {
     query.keywordColumn = value;
+    refresh();
   };
 
   const handleChangeIsFixa = () => {

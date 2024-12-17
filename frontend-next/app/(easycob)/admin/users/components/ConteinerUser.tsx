@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { fetchUsers, query, setQuery } from "../service/users";
 import TableRecords from "./TableRecords";
 import Header from "@/app/(easycob)/components/Header";
-import FilterPus from "./FilterPus";
+import FilterPlus from "./FilterPlus";
 import { FormUser } from "./FormUser";
 import { Button } from "@/components/ui/button";
 import { FaUserPlus } from "react-icons/fa";
@@ -64,7 +64,7 @@ export default function ConteinerUser({
                 <FaUserPlus />
               </Button>
             </FormUser>
-            <FilterPus query={query} refresh={refresh} />
+            <FilterPlus query={query} refresh={refresh} />
           </div>
         </Header>
       </div>

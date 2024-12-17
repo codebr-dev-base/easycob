@@ -84,3 +84,17 @@ export const updateUser = async (user: IUser) => {
     throw result;
   }
 };
+
+export const updatePassword = async (user: IUser) => {
+  const result = await fetchAuth<IUser>(`${url}/${user.id}`, {
+    method: "PATCH",
+    body: JSON.stringify(user),
+  });
+
+  if (result.success) {
+    //console.log("Dados recebidos:", result.data);
+    return result;
+  } else {
+    throw result;
+  }
+};

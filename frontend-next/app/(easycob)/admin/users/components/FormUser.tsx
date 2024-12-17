@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { IPassword, ISkill, ISkillModule, IUser } from "@/app/interfaces/auth";
 import { createUser, updateUser } from "../service/users";
 import { Label } from "@/components/ui/label";
+import { handlerError } from "@/app/lib/error";
 type FormData = IPassword & IUser;
 export function FormUser({
   children,
@@ -41,7 +42,7 @@ export function FormUser({
   const form = useForm<FormData>({
     mode: "all",
     defaultValues: {
-      isActived: user ? user.isActived : false,
+      isActived: (user && user.isActived) || !user ? true : false,
     },
   });
 
@@ -59,7 +60,7 @@ export function FormUser({
         const c = await updateUser({ ...user, ...data, skills });
         toast({
           title: "Sucesso",
-          description: "Contato salvo salva!",
+          description: "Usuário salvo salva!",
           variant: "success",
         });
         refresh();
@@ -69,12 +70,10 @@ export function FormUser({
       }
     } else {
       try {
-        const c = await createUser({
-          ...data,
-        });
+        const c = await createUser({ ...data, skills });
         toast({
           title: "Sucesso",
-          description: "Contato salvo salva!",
+          description: "Usuário salvo salva!",
           variant: "success",
         });
         console.log(c);
@@ -121,7 +120,7 @@ export function FormUser({
       <DialogContent className="sm:max-w-[625px]">
         <DialogHeader>
           <DialogTitle>Editar Usuário</DialogTitle>
-          <DialogDescription>{JSON.stringify(skills)}</DialogDescription>
+          <DialogDescription></DialogDescription>
         </DialogHeader>
         <div className={`space-y-2 ${formPending ? "" : "hidden"}`}>
           <Skeleton className="h-12 w-full" />
@@ -225,7 +224,7 @@ export function FormUser({
               )}
             />
 
-            {user && (
+            {!user && (
               <>
                 <FormField
                   control={form.control}
@@ -241,7 +240,6 @@ export function FormUser({
                             {...form.register("password", {
                               required: "A senha é obrigatória",
                             })}
-                            defaultValue={user ? user.name : ""}
                             className="mb-2"
                           />
                         </FormControl>
@@ -265,7 +263,6 @@ export function FormUser({
                               validate: (value) =>
                                 value === password || "As senhas não coincidem",
                             })}
-                            defaultValue={user ? user.name : ""}
                             className="mb-2"
                           />
                         </FormControl>
@@ -331,6 +328,4 @@ export function FormUser({
     </Dialog>
   );
 }
-function handlerError(error: any) {
-  throw new Error("Function not implemented.");
-}
+

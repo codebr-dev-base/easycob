@@ -20,6 +20,127 @@ import {
 } from "@/components/ui/accordion";
 import { Suspense } from "react";
 
+interface ModuleLink {
+  href: string;
+  label: string;
+}
+
+interface ModuleConfig {
+  label: string;
+  icon: React.ElementType; // Icone como componente
+  links: ModuleLink[];
+}
+
+const moduleLinks: Record<string, ModuleConfig> = {
+  operator: {
+    label: "Operador",
+    icon: HiOutlinePhone,
+    links: [
+      { href: "/operation/clients", label: "Clientes" },
+      { href: "/operation/following", label: "Acompanhamento" },
+      { href: "/operation/loyals", label: "Fidelizados" },
+    ],
+  },
+  supervisor: {
+    label: "Supervisão",
+    icon: LuListTodo,
+    links: [
+      { href: "/supervision/actions", label: "Acionamentos" },
+      { href: "/supervision/campaigns", label: "Campanhas" },
+      { href: "/supervision/following", label: "Acompanhamento" },
+    ],
+  },
+  admin: {
+    label: "Admin",
+    icon: LuLock,
+    links: [{ href: "/admin", label: "Usuários" }],
+  },
+};
+
+interface MenuProps {
+  modules: string[]; // Módulos que o usuário pode acessar
+  isExpanded?: boolean; // Controle do estado visual
+  toggleSidebar?: () => void
+}
+
+const DynamicMenu: React.FC<MenuProps> = ({ modules, isExpanded = true, toggleSidebar}) => {
+  return (
+    <Accordion type="multiple">
+      {modules.map((module) => {
+        const moduleConfig = moduleLinks[module];
+        if (!moduleConfig) return null; // Ignorar módulos inválidos
+
+        const Icon = moduleConfig.icon;
+
+        return (
+          <AccordionItem
+            key={module}
+            value={`${module}-menu`}
+            className="border-none"
+          >
+            <AccordionTrigger>
+              <div className="w-full flex gap-2 items-center cursor-pointer" onClick={toggleSidebar}>
+                <Icon size={24} />
+                <span className={`${!isExpanded ? "hidden" : ""}`}>
+                  {moduleConfig.label}
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent
+              className={`flex flex-col gap-4 items-start translate-x-8 w-full ${
+                !isExpanded ? "hidden" : ""
+              }`}
+            >
+              {moduleConfig.links.map((link) => (
+                <Link key={link.href} href={link.href}>
+                  {link.label}
+                </Link>
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+        );
+      })}
+    </Accordion>
+  );
+};
+
+const DynamicMenuMobile: React.FC<MenuProps> = ({ modules }) => {
+  return (
+    <Accordion type="multiple" className="ml-4">
+      {modules.map((module) => {
+        const moduleConfig = moduleLinks[module];
+        if (!moduleConfig) return null; // Ignorar módulos inválidos
+
+        const Icon = moduleConfig.icon;
+
+        return (
+          <AccordionItem
+            key={module}
+            value={`${module}-menu`}
+            className="border-none"
+          >
+            <AccordionTrigger>
+              <div className="w-full flex gap-2 items-center">
+                <Icon size={24} />
+                <span>{moduleConfig.label}</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent
+              className={`flex flex-col gap-4 items-start translate-x-8 w-full`}
+            >
+              {moduleConfig.links.map((link) => (
+                <Link key={link.href} href={link.href}>
+                  {link.label}
+                </Link>
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+        );
+      })}
+    </Accordion>
+  );
+};
+
 export default function Sidebar({ children }: { children: React.ReactNode }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -39,6 +160,38 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
   const user = getUser();
   const initials = getUserInitials();
 
+  // Hierarquia de acesso
+  const moduleHierarchy = {
+    admin: ["admin", "supervisor", "operator"],
+    supervisor: ["supervisor", "operator"],
+    operator: ["operator"],
+  } as const; // Use "as const" para garantir a imutabilidade e inferência precisa dos tipos
+
+  // Função para extrair módulos e aplicar a hierarquia
+  // Função para extrair módulos e aplicar a hierarquia
+  function getUserModules(user: any): string[] {
+    // Extração dos módulos
+    const userModules = user.skills.map((skill: any) => skill.module.shortName);
+
+    // Determinar todos os módulos acessíveis com base na hierarquia
+    const accessibleModules = new Set<string>();
+
+    userModules.forEach((userModule: any) => {
+      if (userModule in moduleHierarchy) {
+        // Explicitamente informe o TypeScript que userModule é uma chave válida
+        const hierarchyModules =
+          moduleHierarchy[userModule as keyof typeof moduleHierarchy];
+        hierarchyModules.forEach((hierarchicalModule) =>
+          accessibleModules.add(hierarchicalModule)
+        );
+      }
+    });
+
+    return Array.from(accessibleModules);
+  }
+
+  const accessibleModules = getUserModules(user);
+
   return (
     <div className="flex">
       {/* Botão para abrir sidebar no mobile */}
@@ -55,23 +208,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out lg:hidden`}
       >
-        {/* <button
-          className="absolute top-4 right-4 p-2 bg-primary text-white rounded-md"
-          onClick={toggleMobileSidebar}
-        >
-          Fechar
-        </button> */}
-        <nav className="mt-16 flex flex-col items-center">
-          <a href="#" className="p-4 text-lg">
-            Home
-          </a>
-          <a href="#" className="p-4 text-lg">
-            Usuário
-          </a>
-          <a href="#" className="p-4 text-lg">
-            Configurações
-          </a>
-        </nav>
+        <DynamicMenuMobile modules={accessibleModules} />
       </div>
 
       {/* Sidebar para telas médias e maiores */}
@@ -121,57 +258,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
               !isExpanded ? "ml-1" : "ml-4"
             }`}
           >
-            <Accordion
-              type="multiple"
-              className={`w-full min-w-fit data-[disabled]:w-0 transition-all`}
-              disabled={!isExpanded}
-              value={accordionSections}
-              onValueChange={setAccordionSections}
-            >
-              <AccordionItem value="operator-menu" className="border-none">
-                <AccordionTrigger>
-                  <div className="w-full flex gap-2 items-center">
-                    <HiOutlinePhone size={24} />
-                    <span className={`${!isExpanded ? "hidden" : ""} `}>
-                      Operador
-                    </span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
-                  <Link href={"/operation/clients"}>Clientes</Link>
-                  <Link href={"/operation/following"}>Acompanhamento</Link>
-                  <Link href={"/operation/loyals"}>Fidelizados</Link>
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="supervisor-menu" className="border-none">
-                <AccordionTrigger>
-                  <div className="w-full flex gap-2 items-center">
-                    <LuListTodo size={24} />
-                    <span className={`${!isExpanded ? "hidden" : ""} `}>
-                      Supervisão
-                    </span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
-                  <Link href={"/supervision/actions"}>Acionamentos</Link>
-                  <Link href={"/supervision/campaigns"}>Campanhas</Link>
-                  <Link href={"/supervision/following"}>Acompanhamento</Link>
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="admin-menu" className="border-none">
-                <AccordionTrigger>
-                  <div className="w-full flex gap-2 items-center">
-                    <LuLock size={24} />
-                    <span className={`${!isExpanded ? "hidden" : ""} `}>
-                      Admin
-                    </span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="flex flex-col gap-4 items-start translate-x-8 w-full">
-                  <Link href={"/admin"}>Usuários</Link>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+            <DynamicMenu modules={accessibleModules} isExpanded={isExpanded} toggleSidebar={toggleSidebar}/>
           </nav>
         </main>
         <footer

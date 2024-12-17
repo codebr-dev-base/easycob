@@ -11,9 +11,13 @@ export function handlerError(error: any) {
       });
     });
   } else if (error instanceof Error) {
-    console.log(error.name); // Nome do erro, ex: 'Error'
-    console.log(error.message); // Mensagem do erro, ex: 'novidade'
-    console.log(error.stack); // Detalhes do stack trace (opcional)
+
+    toast({
+      title: "Error",
+      description: error.message,
+      variant: "destructive",
+    });
+  } else if (error.message) {
 
     toast({
       title: "Error",

@@ -134,8 +134,7 @@ export async function fetchAuth<T = any>(
 
       // Verifica os possíveis formatos da resposta de erro
       if (responseBody) {
-        const { data, message, error, errors } = responseBody;
-
+        const { data, message, error, errors, messages } = responseBody;
         // Verifica status para tratamento específico
         if (response.status === 401) {
           return {
@@ -153,6 +152,16 @@ export async function fetchAuth<T = any>(
             data: null,
             message: "Forbidden",
             error: "Forbidden",
+            errors: errors || errorData,
+          };
+        }
+
+        if (messages) {
+          return {
+            success: false,
+            data: messages.detail || null,
+            message: messages.detail,
+            error: error || `Erro HTTP! Status: ${response.status}`,
             errors: errors || errorData,
           };
         }
