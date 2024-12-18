@@ -60,10 +60,14 @@ const moduleLinks: Record<string, ModuleConfig> = {
 interface MenuProps {
   modules: string[]; // Módulos que o usuário pode acessar
   isExpanded?: boolean; // Controle do estado visual
-  toggleSidebar?: () => void
+  toggleSidebar?: () => void;
 }
 
-const DynamicMenu: React.FC<MenuProps> = ({ modules, isExpanded = true, toggleSidebar}) => {
+const DynamicMenu: React.FC<MenuProps> = ({
+  modules,
+  isExpanded = true,
+  toggleSidebar,
+}) => {
   return (
     <Accordion type="multiple">
       {modules.map((module) => {
@@ -79,8 +83,11 @@ const DynamicMenu: React.FC<MenuProps> = ({ modules, isExpanded = true, toggleSi
             className="border-none"
           >
             <AccordionTrigger>
-              <div className="w-full flex gap-2 items-center cursor-pointer" onClick={toggleSidebar}>
-                <Icon size={24} />
+              <div className="w-full flex gap-2 items-center">
+                <div className="cursor-pointer" onClick={toggleSidebar}>
+                  <Icon size={24} />
+                </div>
+
                 <span className={`${!isExpanded ? "hidden" : ""}`}>
                   {moduleConfig.label}
                 </span>
@@ -258,7 +265,11 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
               !isExpanded ? "ml-1" : "ml-4"
             }`}
           >
-            <DynamicMenu modules={accessibleModules} isExpanded={isExpanded} toggleSidebar={toggleSidebar}/>
+            <DynamicMenu
+              modules={accessibleModules}
+              isExpanded={isExpanded}
+              toggleSidebar={toggleSidebar}
+            />
           </nav>
         </main>
         <footer
