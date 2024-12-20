@@ -52,6 +52,9 @@ export default class UsersController {
 
       const dt: DateTime = DateTime.local().plus({ days: passwordExpires });
       const user = await User.create({ ...payload, passwordExpiresAt: dt });
+      user.password = payload.password;
+      user.save();
+
       if (skills) {
         await user.related('skills').sync(skills);
       }

@@ -2,9 +2,12 @@ import { DateTime } from 'luxon';
 import hash from '@adonisjs/core/services/hash';
 import { compose } from '@adonisjs/core/helpers';
 import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations';
-import { BaseModel, column, beforeSave, hasMany, manyToMany } from '@adonisjs/lucid/orm';
+import { BaseModel, column, hasMany, manyToMany } from '@adonisjs/lucid/orm';
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid';
-import { DbAccessTokensProvider, AccessToken } from '@adonisjs/auth/access_tokens';
+import {
+  DbAccessTokensProvider,
+  AccessToken,
+} from '@adonisjs/auth/access_tokens';
 import Action from '#models/action';
 import Skill from '#models/skill';
 import PasswordHistory from '#models/password_history';
@@ -67,13 +70,12 @@ export default class User extends compose(BaseModel, AuthFinder) {
   })
   declare skills: ManyToMany<typeof Skill>;
 
-  @beforeSave()
+  /*   @beforeSave()
   static async hashPassword(user: User) {
     if (user.$dirty.password) {
       user.password = await hash.make(user.password);
     }
-  }
+  } */
 
   static accessTokens = DbAccessTokensProvider.forModel(User);
-
 }
