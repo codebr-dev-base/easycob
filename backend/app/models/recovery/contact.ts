@@ -36,6 +36,9 @@ export default class Contact extends BaseModel {
   declare blockAll: boolean;
 
   @column()
+  declare isDomainValid: boolean;
+
+  @column()
   declare percentualAtender: number;
 
   @column()
