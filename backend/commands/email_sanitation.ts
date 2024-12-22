@@ -20,6 +20,7 @@ export default class EmailSanitation extends BaseCommand {
       .count('* as quantidade')
       .where('tipo_contato', 'EMAIL')
       .andWhere('contato', 'LIKE', '%@%')
+      .andWhere('is_domain_valid', false) // Filtra apenas onde is_domain_valid é false
       .groupByRaw("split_part(trim(contato), '@', 2)")
       .orderBy('quantidade', 'desc');
 
@@ -34,7 +35,6 @@ export default class EmailSanitation extends BaseCommand {
         .from('recupera.tbl_arquivos_cliente_numero')
         .where('tipo_contato', 'EMAIL')
         .andWhere('contato', 'ILIKE', `%@${dominio}%`)
-        .andWhere('is_domain_valid', false) // Filtra apenas onde is_domain_valid é false
         .update({ is_domain_valid: isValid });
 
       console.log(`Atualizado domínio ${dominio} -> ${isValid}`);
