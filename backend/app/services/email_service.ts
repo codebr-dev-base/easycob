@@ -230,17 +230,19 @@ export default class EmailService {
       for (const [i, chunk] of enviosChunks.entries()) {
         const promises = chunk.map(async (email: IEmailData, j: number) => {
           try {
-            let sufixEmail = 'yuansolucoes.com.br';
-            let sufixConfigMail = '_com_br';
+            const sufixEmail = 'yuansolucoes.com.br';
+            const sufixConfigMail = '_com_br';
             let emailModel = 'emails/aegea_modelo_1';
 
             const im = Math.floor(Math.random() * 4);
             emailModel = `emails/aegea_modelo_${im}`;
 
+            /*
             if (j % 2 === 0) {
               sufixEmail = 'yuansolucoes.com';
               sufixConfigMail = '_com';
             }
+            */
 
             try {
               const configName = this.getMailerConfig(
