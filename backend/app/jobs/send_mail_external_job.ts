@@ -81,8 +81,8 @@ export default class SendMailExternalJob extends Job {
         .first();
 
       try {
-        const sufixEmail = 'yuansolucoes.com.br';
-        const sufixConfigMail = '_com_br';
+        const sufixEmail = 'yuansolucoes.com';
+        const sufixConfigMail = '_com';
         let emailModel = 'emails/aegea_modelo_1';
         const im = Math.floor(Math.random() * 4);
         emailModel = `emails/aegea_modelo_${im}`;
