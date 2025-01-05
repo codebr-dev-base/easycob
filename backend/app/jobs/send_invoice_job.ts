@@ -65,22 +65,22 @@ export default class SendInvoiceJob extends Job {
         const response = await mail.send((message) => {
           message
             .to(mailInvoice.contact)
-            .from('contato@yuansolucoes.com.br', 'Cobrança AEGEA')
+            .from('contato@yuansolucoes.com', 'Cobrança AEGEA')
             .subject(subject)
             .text(bodyEmail)
-            .listHelp(`contato@yuansolucoes.com.br?subject=help`)
+            .listHelp(`contato@yuansolucoes.com?subject=help`)
             .listUnsubscribe({
-              url: `https://www.yuansolucoes.com.br/unsubscribe?id=${mailInvoice.contact}`,
+              url: `https://www.yuansolucoes.com/unsubscribe?id=${mailInvoice.contact}`,
               comment: 'Comment',
             })
-            .listSubscribe(`contato@yuansolucoes.com.br?subject=subscribe`)
+            .listSubscribe(`contato@yuansolucoes.com?subject=subscribe`)
             .listSubscribe({
-              url: `https://www.yuansolucoes.com.br/subscribe?id=${mailInvoice.contact}`,
+              url: `https://www.yuansolucoes.com/subscribe?id=${mailInvoice.contact}`,
               comment: 'Subscribe',
             })
             .addListHeader(
               'post',
-              `https://www.yuansolucoes.com.br/subscribe?id=${mailInvoice.contact}`
+              `https://www.yuansolucoes.com/subscribe?id=${mailInvoice.contact}`
             );
         });
 
