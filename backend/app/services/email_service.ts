@@ -312,11 +312,8 @@ export default class EmailService {
               await item.refresh();
               item.shipping = item.shipping + 1;
               await item.save();
-              await CatchLog.create({
-                classJob: 'SendMail',
-                payload: JSON.stringify(item),
-                error: JSON.stringify(error),
-              });
+              console.log(error);
+              throw new Error(error);
             }
           } catch (error) {
             const item = itemsChunks[i][j];
