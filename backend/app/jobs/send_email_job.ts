@@ -22,6 +22,8 @@ export default class SendEmailJob extends Job {
     const service = new EmailService();
     const campaign = await Campaign.find(payload.campaign_id);
 
+    console.log(campaign);
+
     try {
       if (campaign) {
         const lots = await CampaignLot.query()
