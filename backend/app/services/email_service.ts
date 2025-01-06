@@ -250,8 +250,6 @@ export default class EmailService {
                 sufixConfigMail
               );
 
-              console.log(configName);
-
               //`Cobrança AEGEA <${email.from}@${sufixEmail}>`
               if (configName) {
                 try {
