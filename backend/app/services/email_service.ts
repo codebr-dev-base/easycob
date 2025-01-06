@@ -92,7 +92,7 @@ export default class EmailService {
 
   async createAction(
     item: CampaignLot,
-    clientsGroups: { [key: string]: IClient[]; },
+    clientsGroups: { [key: string]: IClient[] },
     campaign: Campaign
   ) {
     const typeAction = await TypeAction.findBy(
@@ -106,7 +106,7 @@ export default class EmailService {
 
         const groupContato = clientsGroups[key];
 
-        const groupCodCredorDesRegis: { [key: string]: IClient[]; } =
+        const groupCodCredorDesRegis: { [key: string]: IClient[] } =
           lodash.groupBy(groupContato, 'codCredorDesRegis');
 
         // Mapeia as chaves de `groupDesContr` e processa cada grupo
@@ -230,17 +230,19 @@ export default class EmailService {
       for (const [i, chunk] of enviosChunks.entries()) {
         const promises = chunk.map(async (email: IEmailData, j: number) => {
           try {
-            let sufixEmail = 'yuansolucoes.com';
-            let sufixConfigMail = '_com';
+            const sufixEmail = 'yuansolucoes.com';
+            const sufixConfigMail = '_com';
             let emailModel = 'emails/aegea_modelo_1';
 
             const im = Math.floor(Math.random() * 4);
             emailModel = `emails/aegea_modelo_${im}`;
+            /*
 
             if (j % 2 === 0) {
               sufixEmail = 'yuansolucoes.com.br';
               sufixConfigMail = '_com_br';
             }
+             */
 
             try {
               const configName = this.getMailerConfig(
