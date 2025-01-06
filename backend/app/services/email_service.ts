@@ -287,6 +287,8 @@ export default class EmailService {
                     );
                 });
 
+                console.log(response);
+
                 if (!response.messageId) {
                   console.log(response);
                   throw new Error(JSON.stringify(response));
@@ -310,7 +312,11 @@ export default class EmailService {
               await item.refresh();
               item.shipping = item.shipping + 1;
               await item.save();
-              throw new Error(error);
+              await CatchLog.create({
+                classJob: 'SendMail',
+                payload: JSON.stringify(item),
+                error: JSON.stringify(error),
+              });
             }
           } catch (error) {
             const item = itemsChunks[i][j];
