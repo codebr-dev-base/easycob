@@ -19,11 +19,8 @@ export default class SendEmailJob extends Job {
    * Base Entry point
    */
   async handle(payload: SendEmailJobPayload) {
-    console.log('Queue send mail');
     const service = new EmailService();
     const campaign = await Campaign.find(payload.campaign_id);
-
-    console.log(campaign);
 
     try {
       if (campaign) {

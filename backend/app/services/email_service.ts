@@ -210,8 +210,6 @@ export default class EmailService {
   private async send(lots: CampaignLot[], campaign: Campaign) {
     const clients = await getClients(lots);
 
-    console.log(clients);
-
     const clientsGroups = lodash.groupBy(clients, 'contato');
 
     const envios: IEmailData[] = [];
@@ -289,9 +287,8 @@ export default class EmailService {
                     );
                 });
 
-                console.log(response);
-
                 if (!response.messageId) {
+                  console.log(response);
                   throw new Error(JSON.stringify(response));
                 }
 
