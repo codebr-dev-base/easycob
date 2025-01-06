@@ -92,7 +92,7 @@ export default class EmailService {
 
   async createAction(
     item: CampaignLot,
-    clientsGroups: { [key: string]: IClient[] },
+    clientsGroups: { [key: string]: IClient[]; },
     campaign: Campaign
   ) {
     const typeAction = await TypeAction.findBy(
@@ -106,7 +106,7 @@ export default class EmailService {
 
         const groupContato = clientsGroups[key];
 
-        const groupCodCredorDesRegis: { [key: string]: IClient[] } =
+        const groupCodCredorDesRegis: { [key: string]: IClient[]; } =
           lodash.groupBy(groupContato, 'codCredorDesRegis');
 
         // Mapeia as chaves de `groupDesContr` e processa cada grupo
@@ -252,58 +252,57 @@ export default class EmailService {
 
               //`Cobrança AEGEA <${email.from}@${sufixEmail}>`
               if (configName) {
-                const response = await mail.use(configName).send((message) => {
-                  message
-                    .to(email.to)
-                    .from(`${email.from}@${sufixEmail}`, 'Cobrança AEGEA')
-                    .subject(
-                      'Aviso de Débito em Atraso - Entre em Contato para Regularização'
-                    )
-                    .htmlView(`${emailModel}_html`, {
-                      cliente: email.cliente,
-                      filial: email.filial,
-                      whatsapp: email.whatsapp,
-                    })
-                    .textView(`${emailModel}_text`, {
-                      cliente: email.cliente,
-                      filial: email.filial,
-                      whatsapp: email.whatsapp,
-                    })
-                    .listHelp(`${email.from}@${sufixEmail}?subject=help`)
-                    .listUnsubscribe({
-                      url: `https://www.${sufixEmail}/unsubscribe?id=${email.to}`,
-                      comment: 'Comment',
-                    })
-                    .listSubscribe(
-                      `${email.from}@${sufixEmail}?subject=subscribe`
-                    )
-                    .listSubscribe({
-                      url: `https://www.${sufixEmail}/subscribe?id=${email.to}`,
-                      comment: 'Subscribe',
-                    })
-                    .addListHeader(
-                      'post',
-                      `https://www.${sufixEmail}/subscribe?id=${email.to}`
-                    );
-                });
+                try {
+                  const response = await mail
+                    .use(configName)
+                    .send((message) => {
+                      message
+                        .to(email.to)
+                        .from(`${email.from}@${sufixEmail}`, 'Cobrança AEGEA')
+                        .subject(
+                          'Aviso de Débito em Atraso - Entre em Contato para Regularização'
+                        )
+                        .htmlView(`${emailModel}_html`, {
+                          cliente: email.cliente,
+                          filial: email.filial,
+                          whatsapp: email.whatsapp,
+                        })
+                        .textView(`${emailModel}_text`, {
+                          cliente: email.cliente,
+                          filial: email.filial,
+                          whatsapp: email.whatsapp,
+                        })
+                        .listHelp(`${email.from}@${sufixEmail}?subject=help`)
+                        .listUnsubscribe({
+                          url: `https://www.${sufixEmail}/unsubscribe?id=${email.to}`,
+                          comment: 'Comment',
+                        })
+                        .listSubscribe(
+                          `${email.from}@${sufixEmail}?subject=subscribe`
+                        )
+                        .listSubscribe({
+                          url: `https://www.${sufixEmail}/subscribe?id=${email.to}`,
+                          comment: 'Subscribe',
+                        })
+                        .addListHeader(
+                          'post',
+                          `https://www.${sufixEmail}/subscribe?id=${email.to}`
+                        );
+                    });
 
-                console.log(response);
-
-                if (!response.messageId) {
-                  console.log(response);
-                  throw new Error(JSON.stringify(response));
+                  const item = itemsChunks[i][j];
+                  await item.refresh();
+                  this.blacklist.push(item.standardized);
+                  item.status = 'Enviado';
+                  item.descricao = 'Envio inserido para processamento';
+                  item.messageid = response.messageId;
+                  item.codigo_status = '13';
+                  item.shipping = item.shipping + 1;
+                  await item.save();
+                  await this.createAction(item, clientsGroups, campaign);
+                } catch (error) {
+                  console.log(error);
                 }
-
-                const item = itemsChunks[i][j];
-                await item.refresh();
-                this.blacklist.push(item.standardized);
-                item.status = 'Enviado';
-                item.descricao = 'Envio inserido para processamento';
-                item.messageid = response.messageId;
-                item.codigo_status = '13';
-                item.shipping = item.shipping + 1;
-                await item.save();
-                await this.createAction(item, clientsGroups, campaign);
               } else {
                 throw new Error('Invalid mailer configuration');
               }
