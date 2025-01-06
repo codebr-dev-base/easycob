@@ -248,6 +248,8 @@ export default class EmailService {
                 sufixConfigMail
               );
 
+              console.log(configName);
+
               //`Cobrança AEGEA <${email.from}@${sufixEmail}>`
               if (configName) {
                 const response = await mail.use(configName).send((message) => {
@@ -284,6 +286,12 @@ export default class EmailService {
                       `https://www.${sufixEmail}/subscribe?id=${email.to}`
                     );
                 });
+
+                console.log(response);
+
+                if (!response.messageId) {
+                  throw new Error(JSON.stringify(response));
+                }
 
                 const item = itemsChunks[i][j];
                 await item.refresh();
