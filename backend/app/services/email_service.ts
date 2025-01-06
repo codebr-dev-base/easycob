@@ -210,6 +210,8 @@ export default class EmailService {
   private async send(lots: CampaignLot[], campaign: Campaign) {
     const clients = await getClients(lots);
 
+    console.log(clients);
+
     const clientsGroups = lodash.groupBy(clients, 'contato');
 
     const envios: IEmailData[] = [];
