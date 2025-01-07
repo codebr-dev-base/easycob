@@ -248,6 +248,11 @@ export default class EmailService {
                 sufixConfigMail
               );
 
+              console.log('##############################');
+              console.log(configName);
+              console.log(`${email.from}@${sufixEmail}`);
+              console.log('##############################');
+
               //`Cobrança AEGEA <${email.from}@${sufixEmail}>`
               if (configName) {
                 try {
