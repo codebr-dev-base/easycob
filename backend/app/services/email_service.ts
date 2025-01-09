@@ -349,7 +349,7 @@ export default class EmailService {
   }
 
   async works(campaign: Campaign, lots: CampaignLot[]) {
-    const limit: number = 500;
+    const limit: number = 100;
 
     await this.send(lots, campaign);
 
