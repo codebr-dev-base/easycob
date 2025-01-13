@@ -224,13 +224,11 @@ export default class EmailService {
       }
     }
 
-    const enviosChunks = chunks(envios, 24);
-    const itemsChunks = chunks(items, 24);
+    const enviosChunks = chunks(envios, 12);
+    const itemsChunks = chunks(items, 12);
     try {
       for (const [i, chunk] of enviosChunks.entries()) {
-        for (let j = 0; j < chunk.length; j++) {
-          const email: IEmailData = chunk[j];
-
+        const promises = chunk.map(async (email: IEmailData, j: number) => {
           try {
             const sufixEmail = 'yuansolucoes.com';
             const sufixConfigMail = '_com';
@@ -332,10 +330,9 @@ export default class EmailService {
               error: JSON.stringify(error),
             });
           }
-        }
+        });
 
-        // Intervalo de meio segundo entre cada envio
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await Promise.all(promises);
       }
     } catch (error) {
       await CatchLog.create({
