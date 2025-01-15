@@ -54,7 +54,7 @@ export const sendMailByApi = async (
         'X-Server-API-Key': env.get('POSTAL_API_KEY') || '',
       },
       body: JSON.stringify({
-        from: '"Teste Postal" <noreply@yuansolucoes.com.br>', // Remetente
+        from: '"Cobrança AEGEA" <noreply@yuansolucoes.com.br>', // Remetente
         to, // Destinatário
         subject, // Assunto
         plain_body: await edge.render(
