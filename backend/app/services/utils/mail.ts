@@ -88,9 +88,11 @@ export const sendMailByApi = async (
     }
 
     const data = (await response.json()) as ApiResponse;
+    /*
     console.log('E-mail enviado com sucesso:', data);
 
     console.log(`E-mail enviado com sucesso para ${to} via API Fetch:`, data);
+     */
     return data.data.message_id;
   } catch (error) {
     console.error(
@@ -150,10 +152,12 @@ export const sendMailBySmtp = async (
         .addListHeader('post', options.addListHeader);
     });
 
+    /*
     console.log(
       `E-mail enviado com sucesso para ${to} via SMTP:`,
       response.messageId
     );
+    */
 
     return response.messageId;
   } catch (error) {
