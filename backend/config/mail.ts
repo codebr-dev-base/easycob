@@ -98,6 +98,18 @@ const mailConfig = defineConfig({
     pimentaBueno_com_br: createMailTransport('pimenta_bueno', '.br'),
     ariquemes_com_br: createMailTransport('ariquemes', '.br'),
     rolimDeMoura_com_br: createMailTransport('rolim_de_moura', '.br'),
+
+    via_postal_br: transports.smtp({
+      host: env.get('SMTP_HOST_COM_BR') || '',
+      port: env.get('SMTP_PORT'),
+      secure: false,
+
+      auth: {
+        type: 'login',
+        user: env.get('POSTAL_SMTP_USER') || '',
+        pass: env.get('POSTAL_SMTP_KEY') || '',
+      },
+    }),
   },
 });
 

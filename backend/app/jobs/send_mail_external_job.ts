@@ -1,9 +1,10 @@
 import ActionExternal from '#models/action_external';
 import { Job } from 'adonisjs-jobs';
 import { DateTime } from 'luxon';
-import mail from '@adonisjs/mail/services/main';
+//import mail from '@adonisjs/mail/services/main';
 import Subsidiary from '#models/subsidiary';
 import CatchLog from '#models/catch_log';
+import { sendMailByApi } from '#services/utils/mail';
 
 export interface IActionExternal {
   id: number; // Opcional, pois será gerado pelo banco de dados
@@ -81,10 +82,27 @@ export default class SendMailExternalJob extends Job {
         .first();
 
       try {
-        const sufixEmail = 'yuansolucoes.com';
-        const sufixConfigMail = '_com';
-        let emailModel = 'emails/aegea_modelo_1';
+        //const sufixEmail = 'yuansolucoes.com';
+        //const sufixConfigMail = '_com';
+        //let emailModel = 'emails/aegea_modelo_1';
         const im = Math.floor(Math.random() * 4);
+
+        const messageId = await sendMailByApi(
+          item.contato,
+          'Aviso de Débito em Atraso - Entre em Contato para Regularização',
+          im,
+          '"Aegea" <aegea@yuancob.com>',
+          item.nomCliente,
+          subsidiary?.name || '',
+          `https://wa.me/55${item.numWhatsapp}`,
+          {
+            listHelp: '<mailto:aegea@yuancob.com>',
+            listUnsubscribe: '<mailto:aegea@yuancob.com>',
+            listSubscribe: '<mailto:aegea@yuancob.com>',
+            addListHeader: 'Aegea <aegea@yuancob.com>',
+          }
+        );
+        /*
         emailModel = `emails/aegea_modelo_${im}`;
 
         const email = {
@@ -136,10 +154,12 @@ export default class SendMailExternalJob extends Job {
             );
         });
 
+        */
+
         await item.refresh();
         item.status = 'Enviado';
         item.descricao = 'Envio inserido para processamento';
-        item.messageid = response.messageId;
+        item.messageid = messageId || '';
         item.codigoStatus = '13';
         await item.save();
       } catch (error) {
