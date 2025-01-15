@@ -73,7 +73,7 @@ export const sendMailByApi = async (
             whatsapp,
           }
         ), // Corpo em HTML
-        replyTo: replyTo,
+        reply_to: replyTo,
         headers: {
           ...headers,
           ...(replyTo ? { 'Reply-To': replyTo } : {}),
