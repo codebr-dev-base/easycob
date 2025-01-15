@@ -3,7 +3,7 @@ import Campaign from '#models/campaign';
 import CampaignLot from '#models/campaign_lot';
 import lodash from 'lodash';
 import { chunks } from '#utils/array';
-import mail from '@adonisjs/mail/services/main';
+//import mail from '@adonisjs/mail/services/main';
 import CatchLog from '#models/catch_log';
 import TypeAction from '#models/type_action';
 import {
@@ -15,6 +15,7 @@ import {
   makeNameQueue,
 } from './utils/recupera.js';
 import Action from '#models/action';
+import { sendMailByApi } from './utils/mail.js';
 
 interface IEmailData {
   subject: string;
@@ -230,12 +231,12 @@ export default class EmailService {
       for (const [i, chunk] of enviosChunks.entries()) {
         const promises = chunk.map(async (email: IEmailData, j: number) => {
           try {
-            const sufixEmail = 'yuansolucoes.com';
-            const sufixConfigMail = '_com';
-            let emailModel = 'emails/aegea_modelo_1';
+            //const sufixEmail = 'yuansolucoes.com';
+            //const sufixConfigMail = '_com';
+            //let emailModel = 'emails/aegea_modelo_1';
 
-            const im = Math.floor(Math.random() * 4);
-            emailModel = `emails/aegea_modelo_${im}`;
+            //const im = Math.floor(Math.random() * 4);
+            //emailModel = `emails/aegea_modelo_${im}`;
 
             /*
             if (j % 2 === 0) {
@@ -245,6 +246,24 @@ export default class EmailService {
               */
 
             try {
+              const im = Math.floor(Math.random() * 4);
+
+              const messageId = await sendMailByApi(
+                email.to,
+                'Aviso de Débito em Atraso - Entre em Contato para Regularização',
+                im,
+                '"Aegea" <aegea@yuancob.com>',
+                email.cliente,
+                email.filial || '',
+                email.whatsapp,
+                {
+                  listHelp: '<mailto:aegea@yuancob.com>',
+                  listUnsubscribe: '<mailto:aegea@yuancob.com>',
+                  listSubscribe: '<mailto:aegea@yuancob.com>',
+                  addListHeader: 'Aegea <aegea@yuancob.com>',
+                }
+              );
+              /*
               const configName = this.getMailerConfig(
                 email.config,
                 sufixConfigMail
@@ -290,22 +309,26 @@ export default class EmailService {
                         );
                     });
 
-                  const item = itemsChunks[i][j];
-                  await item.refresh();
-                  this.blacklist.push(item.standardized);
-                  item.status = 'Enviado';
-                  item.descricao = 'Envio inserido para processamento';
-                  item.messageid = response.messageId;
-                  item.codigo_status = '13';
-                  item.shipping = item.shipping + 1;
-                  await item.save();
-                  await this.createAction(item, clientsGroups, campaign);
+                    */
+              const item = itemsChunks[i][j];
+              await item.refresh();
+              this.blacklist.push(item.standardized);
+              item.status = 'Enviado';
+              item.descricao = 'Envio inserido para processamento';
+              item.messageid = messageId;
+              item.codigo_status = '13';
+              item.shipping = item.shipping + 1;
+              await item.save();
+              await this.createAction(item, clientsGroups, campaign);
+              /*
                 } catch (error) {
                   console.log(error);
                 }
+
               } else {
                 throw new Error('Invalid mailer configuration');
               }
+                */
             } catch (error) {
               const item = itemsChunks[i][j];
               await item.refresh();
