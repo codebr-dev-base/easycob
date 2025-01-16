@@ -82,16 +82,13 @@ export default class SendMailExternalJob extends Job {
         .first();
 
       try {
-        //const sufixEmail = 'yuansolucoes.com';
-        //const sufixConfigMail = '_com';
-        //let emailModel = 'emails/aegea_modelo_1';
         const im = Math.floor(Math.random() * 4);
 
         const messageId = await sendMailByApi(
           item.contato,
           'Aviso de Débito em Atraso - Entre em Contato para Regularização',
           im,
-          '"Aegea" <aegea@yuancob.com>',
+          'aegea@yuancob.com',
           item.nomCliente,
           subsidiary?.name || '',
           `https://wa.me/55${item.numWhatsapp}`,
@@ -102,59 +99,6 @@ export default class SendMailExternalJob extends Job {
             addListHeader: 'Aegea <aegea@yuancob.com>',
           }
         );
-        /*
-        emailModel = `emails/aegea_modelo_${im}`;
-
-        const email = {
-          subject:
-            'Aviso de Débito em Atraso - Entre em Contato para Regularização',
-          cliente: item.nomCliente,
-          filial: subsidiary?.email,
-          whatsapp: `https://wa.me/55${item.numWhatsapp}`,
-          from: `${subsidiary?.email}`.replace('"', ''),
-          to: item.contato,
-          config: subsidiary?.configEmail,
-        };
-
-        const configName = this.getMailerConfig(
-          `${email.config}`,
-          sufixConfigMail
-        );
-
-        const response = await mail.use(configName).send((message) => {
-          message
-            .to(email.to)
-            .from(`${email.from}@${sufixEmail}`, 'Cobrança AEGEA')
-            .subject(
-              'Aviso de Débito em Atraso - Entre em Contato para Regularização'
-            )
-            .htmlView(`${emailModel}_html`, {
-              cliente: email.cliente,
-              filial: email.filial,
-              whatsapp: email.whatsapp,
-            })
-            .textView(`${emailModel}_text`, {
-              cliente: email.cliente,
-              filial: email.filial,
-              whatsapp: email.whatsapp,
-            })
-            .listHelp(`${email.from}@${sufixEmail}?subject=help`)
-            .listUnsubscribe({
-              url: `https://www.${sufixEmail}/unsubscribe?id=${email.to}`,
-              comment: 'Comment',
-            })
-            .listSubscribe(`${email.from}@${sufixEmail}?subject=subscribe`)
-            .listSubscribe({
-              url: `https://www.${sufixEmail}/subscribe?id=${email.to}`,
-              comment: 'Subscribe',
-            })
-            .addListHeader(
-              'post',
-              `https://www.${sufixEmail}/subscribe?id=${email.to}`
-            );
-        });
-
-        */
 
         await item.refresh();
         item.status = 'Enviado';
