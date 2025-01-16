@@ -238,7 +238,9 @@ export async function getClients(lots: Array<CampaignLot>) {
 
 export async function findClient(item: CampaignLot, clients: Array<IClient>) {
   return await clients.find((client) => {
-    return `${client.contato}`.localeCompare(item.contato) === 0;
+    return (
+      `${client.codCredorDesRegis}`.localeCompare(item.codCredorDesRegis) === 0
+    );
   });
 }
 
