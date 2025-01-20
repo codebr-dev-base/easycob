@@ -1,10 +1,11 @@
 import { Job } from 'adonisjs-jobs';
-import mail from '@adonisjs/mail/services/main';
 import MailInvoice from '#models/mail_invoice';
 import Contract from '#models/recovery/contract';
 import Subsidiary from '#models/subsidiary';
 import TemplateEmail from '#models/template_email';
 import app from '@adonisjs/core/services/app';
+import { sendMailByApiSimple } from '#services/utils/mail';
+import fs from 'fs';
 
 interface SendInvoiceJobPayload {
   mail_invoice_id: number;
@@ -22,7 +23,13 @@ export default class SendInvoiceJob extends Job {
   async handle(payload: SendInvoiceJobPayload) {
     try {
       const mailInvoice = await MailInvoice.find(payload.mail_invoice_id);
-      const paths: { path: string }[] = [];
+      // const paths: { path: string }[] = [];
+      const attachments: {
+        filename: string;
+        content: string;
+        mimeType: string;
+      }[] = [];
+
       if (mailInvoice) {
         const contract = await Contract.query()
           .where('cod_credor_des_regis', mailInvoice.codCredorDesRegis)
@@ -50,8 +57,14 @@ export default class SendInvoiceJob extends Job {
 
         await mailInvoice.load('files');
         for (const file of mailInvoice.files) {
-          paths.push({
-            path: `${app.makePath('uploads/invoices')}${file.fileName}`,
+          const fileContent = fs.readFileSync(
+            `${app.makePath('uploads/invoices')}${file.fileName}`
+          );
+          const base64Content = fileContent.toString('base64');
+          attachments.push({
+            filename: file.fileName,
+            content: base64Content,
+            mimeType: 'application/pdf',
           });
         }
 
@@ -62,29 +75,21 @@ export default class SendInvoiceJob extends Job {
 
         const bodyEmail = template?.template ? template?.template : '';
 
-        const response = await mail.send((message) => {
-          message
-            .to(mailInvoice.contact)
-            .from('contato@yuansolucoes.com', 'Cobrança AEGEA')
-            .subject(subject)
-            .text(bodyEmail)
-            .listHelp(`contato@yuansolucoes.com?subject=help`)
-            .listUnsubscribe({
-              url: `https://www.yuansolucoes.com/unsubscribe?id=${mailInvoice.contact}`,
-              comment: 'Comment',
-            })
-            .listSubscribe(`contato@yuansolucoes.com?subject=subscribe`)
-            .listSubscribe({
-              url: `https://www.yuansolucoes.com/subscribe?id=${mailInvoice.contact}`,
-              comment: 'Subscribe',
-            })
-            .addListHeader(
-              'post',
-              `https://www.yuansolucoes.com/subscribe?id=${mailInvoice.contact}`
-            );
-        });
+        const messageId = await sendMailByApiSimple(
+          mailInvoice.contact,
+          subject,
+          bodyEmail,
+          'aegea@yuancob.com',
+          {
+            listHelp: '<mailto:aegea@yuancob.com>',
+            listUnsubscribe: '<mailto:aegea@yuancob.com>',
+            listSubscribe: '<mailto:aegea@yuancob.com>',
+            addListHeader: 'Aegea <aegea@yuancob.com>',
+          },
+          attachments
+        );
 
-        mailInvoice.messageid = response.messageId;
+        mailInvoice.messageid = messageId || '';
         await mailInvoice.save();
       }
     } catch (error) {

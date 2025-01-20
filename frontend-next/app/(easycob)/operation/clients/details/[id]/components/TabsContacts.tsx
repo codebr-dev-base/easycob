@@ -23,6 +23,8 @@ import { BsHandThumbsUp } from "react-icons/bs";
 import { Button } from "@/components/ui/button";
 import { MdEdit } from "react-icons/md";
 import { FormContactEmail } from "./forms/FormContactEmail";
+import { RiMailSendFill } from "react-icons/ri";
+import FormSendInvoice from "./forms/FormSendInvoice";
 
 export function TabsContacts({
   constacts,
@@ -182,12 +184,21 @@ export function TabsContacts({
                   </TableCell>
                   <TableCell>{email.cpc}</TableCell>
 
-                  <TableCell>
+                  <TableCell className="space-x-2">
                     <FormContactEmail contact={email} refresh={refresh}>
                       <Button>
                         <MdEdit />
                       </Button>
                     </FormContactEmail>
+                    <FormSendInvoice
+                      contact={email}
+                      codCredorDesRegis={codCredorDesRegis}
+                      refresh={refresh}
+                    >
+                      <Button>
+                        <RiMailSendFill />
+                      </Button>
+                    </FormSendInvoice>
                   </TableCell>
                 </TableRow>
               ))}

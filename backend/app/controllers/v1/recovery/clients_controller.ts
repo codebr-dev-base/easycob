@@ -104,7 +104,7 @@ export default class ClientsController {
     const payload = await request.validateUsing(createClientMailValidator);
 
     const mailInvoice = await MailInvoice.create({
-      codCredorDesRegis: payload.cod_credor_des_regis,
+      codCredorDesRegis: payload.codCredorDesRegis,
       contact: payload.contact,
       type: payload.type,
       userId: auth?.user?.id,

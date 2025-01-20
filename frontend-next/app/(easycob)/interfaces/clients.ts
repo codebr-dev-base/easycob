@@ -43,6 +43,12 @@ export interface IContact {
   updatedAt?: string; // Data como string no formato ISO
 }
 
+export interface ISendMail {  
+  codCredorDesRegis?: number | string;
+  contact?: string;
+  type: string
+  file?: File;
+}
 export interface IClient {
   id?: number;
   dtUpdate?: string; // Data como string no formato ISO

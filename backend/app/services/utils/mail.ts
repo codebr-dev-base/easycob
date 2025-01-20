@@ -2,6 +2,7 @@ import env from '#start/env';
 import mail from '@adonisjs/mail/services/main';
 import { Edge } from 'edge.js';
 import app from '@adonisjs/core/services/app';
+import fs from 'fs';
 
 interface optionsHeader {
   listHelp: string;
@@ -20,6 +21,27 @@ interface ApiResponse {
     messages: Record<string, { status: string; details?: string }>;
   };
 }
+
+/*
+// Exemplo de uso
+const attachments = [
+  prepareAttachment('caminho/do/arquivo.pdf', 'application/pdf'),
+  prepareAttachment('caminho/da/imagem.jpg', 'image/jpeg'),
+];
+*/
+export const prepareAttachment = (
+  filePath: string,
+  mimeType: string
+): { filename: string; content: string; mimeType: string } => {
+  const fileContent = fs.readFileSync(filePath); // Lê o conteúdo do arquivo
+  const base64Content = fileContent.toString('base64'); // Converte para Base64
+
+  return {
+    filename: filePath.split('/').pop() || 'file', // Usa o nome do arquivo como padrão
+    content: base64Content,
+    mimeType,
+  };
+};
 
 export const sendMailByApi = async (
   to: string,
@@ -78,6 +100,75 @@ export const sendMailByApi = async (
           ...headers,
           ...(replyTo ? { 'Reply-To': replyTo } : {}),
         },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Erro na requisição: ${response.status} - ${response.statusText}`
+      );
+    }
+
+    const data = (await response.json()) as ApiResponse;
+    /*
+    console.log('E-mail enviado com sucesso:', data);
+
+    console.log(`E-mail enviado com sucesso para ${to} via API Fetch:`, data);
+     */
+    return data.data.message_id;
+  } catch (error) {
+    console.error(
+      `Erro ao enviar e-mail via API Fetch para ${to}:`,
+      error.message
+    );
+  }
+};
+
+export const sendMailByApiSimple = async (
+  to: string,
+  subject: string,
+  body: string,
+  replyTo: string,
+  options: optionsHeader,
+  attachments?: { filename: string; content: string; mimeType: string }[] // Novo parâmetro
+): Promise<string | undefined> => {
+  try {
+    // Construção dos cabeçalhos adicionais, se fornecidos
+    const headers = {
+      ...(options.listHelp ? { 'List-Help': options.listHelp } : {}),
+      ...(options.listUnsubscribe
+        ? { 'List-Unsubscribe': options.listUnsubscribe }
+        : {}),
+      ...(options.listSubscribe
+        ? { 'List-Subscribe': options.listSubscribe }
+        : {}),
+      ...(options.addListHeader ? { 'List-ID': options.addListHeader } : {}),
+    };
+
+    const formattedAttachments = attachments?.map((attachment) => ({
+      name: attachment.filename,
+      content: attachment.content,
+      content_type: attachment.mimeType,
+    }));
+
+    const response = await fetch(env.get('POSTAL_API_URL') || '', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Server-API-Key': env.get('POSTAL_API_KEY') || '',
+      },
+      body: JSON.stringify({
+        from: '"Cobrança AEGEA" <noreply@yuansolucoes.com.br>', // Remetente
+        to, // Destinatário
+        subject, // Assunto
+        plain_body: body, // Corpo em texto
+        html_body: body, // Corpo em HTML
+        reply_to: replyTo,
+        headers: {
+          ...headers,
+          ...(replyTo ? { 'Reply-To': replyTo } : {}),
+        },
+        attachments: formattedAttachments, // Inclusão de anexos
       }),
     });
 
