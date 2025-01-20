@@ -4,32 +4,31 @@ import CampaignLotsController from '#controllers/v1/easycob/campaign_lots_contro
 import ErrorCampaignsController from '#controllers/v1/easycob/error_campaigns_controller';
 import { middleware } from '#start/kernel';
 
-
 export default router
-    .group(() => {
+  .group(() => {
+    router
+      .group(() => {
+        router.get('/', [CampaignsController, 'index']);
+        router.post('/', [CampaignsController, 'create']);
+        router.get('/:id', [CampaignsController, 'show']);
+        router.get('/send/:id', [CampaignsController, 'send']);
+        router.get('uploads/csv/*', [CampaignsController, 'getFile']);
+      })
+      .prefix('/campaign')
+      .use(middleware.auth());
 
-        router.group(() => {
-            router.get('/', [CampaignsController, 'index']);
-            router.post('/', [CampaignsController, 'create']);
-            router.get('/:id', [CampaignsController, 'show']);
-            router.get('/send/:id', [CampaignsController, 'send']);
-            router.get('uploads/csv/*', [CampaignsController, 'getFile']);
-        })
-            .prefix('/campaign')
-            .use(middleware.auth());
+    router
+      .group(() => {
+        router.get('/', [CampaignLotsController, 'index']);
+      })
+      .prefix('/campaign/lot/:id')
+      .use(middleware.auth());
 
-
-        router.group(() => {
-            router.get('/', [CampaignLotsController, 'index']);
-        })
-            .prefix('/campaign/lot/:id')
-            .use(middleware.auth());
-
-        router.group(() => {
-            router.get('/', [ErrorCampaignsController, 'index']);
-        })
-            .prefix('/campaign/error/:id')
-            .use(middleware.auth());
-
-    })
-    .prefix('/v1');
+    router
+      .group(() => {
+        router.get('/', [ErrorCampaignsController, 'index']);
+      })
+      .prefix('/campaign/error/:id')
+      .use(middleware.auth());
+  })
+  .prefix('/v1');

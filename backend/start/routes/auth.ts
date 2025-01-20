@@ -30,7 +30,7 @@ export default router
         router.delete('/:id', [UsersController, 'destroy']);
         router.get('/module/:name', [UsersController, 'getByModule']);
       })
-      .prefix('/user')
-      .use(middleware.auth());
+      .prefix('/user');
+    //.use(middleware.auth());
   })
   .prefix('/v1');
