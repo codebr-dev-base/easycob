@@ -31,6 +31,6 @@ export default router
         router.get('/module/:name', [UsersController, 'getByModule']);
       })
       .prefix('/user');
-    //.use(middleware.auth());
+      .use(middleware.auth());
   })
   .prefix('/v1');
