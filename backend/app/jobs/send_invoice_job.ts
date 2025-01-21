@@ -58,7 +58,7 @@ export default class SendInvoiceJob extends Job {
         await mailInvoice.load('files');
         for (const file of mailInvoice.files) {
           const fileContent = fs.readFileSync(
-            `${app.makePath('uploads/invoices')}${file.fileName}`
+            `${app.makePath('../uploads')}${file.fileName}`
           );
           const base64Content = fileContent.toString('base64');
           attachments.push({

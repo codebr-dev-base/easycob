@@ -131,7 +131,9 @@ export default class ClientsController {
 
       const dateTime = new Date().getTime();
       const newFileName = `${dateTime}.${file.extname}`;
-      await file.move(app.makePath('uploads/invoices'), { name: newFileName });
+      await file.move(app.makePath('../uploads/invoices'), {
+        name: newFileName,
+      });
 
       await MailInvoiceFile.create({
         fileName: `/invoices/${newFileName}`,
