@@ -9,6 +9,7 @@ import db from '@adonisjs/lucid/services/db';
 import { serializeKeysCamelCase } from '#utils/serialize';
 import Campaign from '#models/campaign';
 import string from '@adonisjs/core/helpers/string';
+import ActionService from '#services/action_service';
 
 // Interface para o resultado da função getClients
 export interface IClient {
@@ -26,6 +27,10 @@ export interface IClient {
   pecld: number | null;
   datVenci: string | null; // assumindo que seja uma string no formato de data
   dayLate: number | null; // quantidade de dias de atraso
+  valTotal: number | null;
+  pecldTotal: number | null;
+  datVenciTotal: string | null;
+  dayLateTotal: number | null;
   isFixa: boolean | null;
   isVar: boolean | null;
 }
@@ -250,6 +255,8 @@ export async function createActionForClient(
   campaign: Campaign,
   tipoContato: string | undefined
 ): Promise<Action[]> {
+  const service = new ActionService();
+
   const {
     codCredorDesRegis,
     desRegis,
@@ -262,6 +269,19 @@ export async function createActionForClient(
     isFixa,
     isVar,
   } = client;
+
+  const aggregationClient = await service.getAggregationClient(
+    client.codCredorDesRegis
+  );
+
+  const datVenciTotal = new Date(aggregationClient.dat_venci_total);
+
+  const intervalTotal = DateTime.now().diff(
+    DateTime.fromISO(datVenciTotal.toISOString()),
+    'days'
+  );
+
+  const daysTotal = intervalTotal.as('days');
 
   const actions: Action[] = [];
 
@@ -287,6 +307,10 @@ export async function createActionForClient(
           : undefined,
         dayLate: Number(dayLate),
         wallet: 'F',
+        datVenciTotal: DateTime.fromISO(datVenciTotal.toISOString()),
+        dayLateTotal: Math.floor(daysTotal),
+        valTotal: aggregationClient.val_total,
+        pecldTotal: aggregationClient.pecld_total,
       })
     );
   }
@@ -313,6 +337,10 @@ export async function createActionForClient(
           : undefined,
         dayLate: Number(dayLate),
         wallet: 'V',
+        datVenciTotal: DateTime.fromISO(datVenciTotal.toISOString()),
+        dayLateTotal: Math.floor(daysTotal),
+        valTotal: aggregationClient.val_total,
+        pecldTotal: aggregationClient.pecld_total,
       })
     );
   }

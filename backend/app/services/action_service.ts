@@ -258,6 +258,44 @@ export default class ActionService {
       .first();
   }
 
+  async getAggregationClient(cod_credor_des_regis: string | number) {
+    const filterIndAlter = "ind_alter = '1'";
+    const oneYearAgo = "CURRENT_DATE - INTERVAL '1 year'";
+    /*
+    const specificDateRange =
+      "pt.dat_venci >= '2022-12-01' AND pt.dat_venci <= '2023-11-30'";
+    */
+    const raw = db.raw;
+
+    return await db
+      .from('recupera.tbl_arquivos_prestacao as pt')
+      .select(
+        raw(`sum(pt.val_princ) FILTER ( WHERE ${filterIndAlter}) as val_total`), // Soma total
+        /*
+        raw(`
+            SUM(CASE
+                WHEN pt.cod_credor = '8' AND ${specificDateRange} AND (${filterIndAlter})
+                    THEN pt.val_princ
+                WHEN pt.cod_credor != '8' AND pt.dat_venci <= ${oneYearAgo} AND (${filterIndAlter})
+                    THEN pt.val_princ
+                ELSE 0
+            END) AS pecld_total`),
+        */
+        raw(`
+            SUM(CASE
+                WHEN pt.dat_venci <= ${oneYearAgo} AND (${filterIndAlter})
+                THEN pt.val_princ
+                ELSE 0
+            END) AS pecld_total`),
+        raw(
+          `MIN(pt.dat_venci) FILTER (WHERE ${filterIndAlter}) AS dat_venci_total`
+        )
+      )
+      .where('cod_credor_des_regis', cod_credor_des_regis)
+      .where('status', 'ATIVO')
+      .first();
+  }
+
   async createActionAca(action: Action) {
     await action.load('typeAction');
     const abbr = action.typeAction.abbreviation;
@@ -278,12 +316,23 @@ export default class ActionService {
           contract.desContr
         );
 
+        const aggregationClient = await this.getAggregationClient(
+          contract.codCredorDesRegis
+        );
+
         const datVenci = new Date(aggregation.dat_venci);
         const interval = DateTime.now().diff(
           DateTime.fromISO(datVenci.toISOString()),
           'days'
         );
+
+        const datVenciTotal = new Date(aggregationClient.dat_venci_total);
+        const intervalTotal = DateTime.now().diff(
+          DateTime.fromISO(datVenciTotal.toISOString()),
+          'days'
+        );
         const days = interval.as('days');
+        const daysTotal = intervalTotal.as('days');
 
         a.fill({
           codCredorDesRegis: contract.codCredorDesRegis,
@@ -300,6 +349,10 @@ export default class ActionService {
           dayLate: Math.floor(days),
           valPrinc: aggregation.val_princ,
           pecld: aggregation.pecld,
+          datVenciTotal: DateTime.fromISO(datVenciTotal.toISOString()),
+          dayLateTotal: Math.floor(daysTotal),
+          valTotal: aggregationClient.val_total,
+          pecldTotal: aggregationClient.pecld_total,
         });
 
         await handleSendingForRecupera(a);

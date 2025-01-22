@@ -16,6 +16,7 @@ import ActionExternal from '#models/action_external';
 import SendMailExternalJob, {
   IActionExternal,
 } from '#jobs/send_mail_external_job';
+import { DateTime } from 'luxon';
 
 @inject()
 export default class ActionsController {
@@ -114,10 +115,27 @@ export default class ActionsController {
               payload.desContr
             );
 
+            const aggregationClient = await this.service.getAggregationClient(
+              payload.codCredorDesRegis
+            );
+
+            const datVenciTotal = new Date(aggregationClient.dat_venci_total);
+
+            const intervalTotal = DateTime.now().diff(
+              DateTime.fromISO(datVenciTotal.toISOString()),
+              'days'
+            );
+
+            const daysTotal = intervalTotal.as('days');
+
             const action = await Action.create({
               ...aggregation,
               ...payload,
               userId: user.id,
+              datVenciTotal: DateTime.fromISO(datVenciTotal.toISOString()),
+              dayLateTotal: Math.floor(daysTotal),
+              valTotal: aggregationClient.val_total,
+              pecldTotal: aggregationClient.pecld_total,
             });
 
             return this.service.afterCreate(action, data);
@@ -804,11 +822,28 @@ export default class ActionsController {
               payload.desContr
             );
 
+            const aggregationClient = await this.service.getAggregationClient(
+              payload.codCredorDesRegis
+            );
+
+            const datVenciTotal = new Date(aggregationClient.dat_venci_total);
+
+            const intervalTotal = DateTime.now().diff(
+              DateTime.fromISO(datVenciTotal.toISOString()),
+              'days'
+            );
+
+            const daysTotal = intervalTotal.as('days');
+
             // Cria a ação
             const action = await Action.create({
               ...aggregation,
               ...payload,
               userId: 2,
+              datVenciTotal: DateTime.fromISO(datVenciTotal.toISOString()),
+              dayLateTotal: Math.floor(daysTotal),
+              valTotal: aggregationClient.val_total,
+              pecldTotal: aggregationClient.pecld_total,
             });
 
             // Pós-criação (ex.: envio de notificações, etc.)

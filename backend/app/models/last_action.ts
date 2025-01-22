@@ -113,6 +113,21 @@ export default class LastAction extends BaseModel {
   declare dayLate: number;
 
   @column()
+  declare pecld: number;
+
+  @column()
+  declare valTotal: number;
+
+  @column.date()
+  declare datVenciTotal: DateTime;
+
+  @column()
+  declare dayLateTotal: number;
+
+  @column()
+  declare pecldTotal: number;
+
+  @column()
   declare retorno: string | null;
 
   @column()
@@ -120,7 +135,4 @@ export default class LastAction extends BaseModel {
 
   @column()
   declare double: boolean;
-
-  @column()
-  declare pecld: number;
 }
