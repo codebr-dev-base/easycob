@@ -10,39 +10,47 @@ import fs from 'fs';
 import TypeAction from '#models/type_action';
 import { dispatchToRecupera } from '#services/utils/recupera';
 import { serializeKeysCamelCase } from '#utils/serialize';
-import string from '@adonisjs/core/helpers/string';
 import { generateColorClasses } from '#utils/colors';
 import ActionExternal from '#models/action_external';
 import SendMailExternalJob, {
   IActionExternal,
 } from '#jobs/send_mail_external_job';
 import { DateTime } from 'luxon';
+import Subsidiary from '#models/subsidiary';
 
 @inject()
 export default class ActionsController {
   constructor(protected service: ActionService) {}
 
+  unionQuery = db
+    .query()
+    .select('des_contr', 'cod_credor_des_regis', 'nom_loja')
+    .from('recupera.tbl_arquivos_contratos_old')
+    .union((q) => {
+      q.select('des_contr', 'cod_credor_des_regis', 'nom_loja').from(
+        'recupera.tbl_arquivos_contratos'
+      );
+    });
+
   async index({ request }: HttpContext) {
     const qs = request.qs();
     const pageNumber = qs.page || '1';
     const limit = qs.perPage || '10';
-    let orderBy = 'a.id';
-    if (qs.orderBy) {
-      if (qs.orderBy === 'user') {
-        orderBy = `u.name`;
-      } else if (qs.orderBy === 'cliente') {
-        orderBy = `cls.nom_clien`;
-      } else if (qs.orderBy === 'typeAction') {
-        orderBy = `ta.name`;
-      } else {
-        orderBy = `a.${string.snakeCase(qs.orderBy)}`;
-      }
-    }
+    const orderBy = this.service.generateOrderBy(qs);
+
     const descending = qs.descending || 'true';
 
     const selected = await this.service.generateWhereInPaginate(qs);
     const actions = await db
       .from('public.actions AS a')
+      .joinRaw(
+        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+         ON tac.des_contr = a.des_contr
+         AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
+      )
+      .joinRaw(
+        'LEFT JOIN public.subsidiaries AS s ON s.nom_loja = tac.nom_loja'
+      )
       .joinRaw(
         'LEFT JOIN recupera.tbl_arquivos_clientes AS cls ON a.cod_credor_des_regis = cls.cod_credor_des_regis'
       )
@@ -61,7 +69,8 @@ export default class ActionsController {
         'a.pecld',
         'cls.nom_clien AS cliente',
         'u.name AS user',
-        'ta.name As type_action'
+        'ta.name As type_action',
+        's.name AS subsidiary'
       )
       .where((q) => {
         if (selected) {
@@ -209,8 +218,13 @@ export default class ActionsController {
   }
 
   public async getTypeAction() {
-    const typeActions = TypeAction.query().orderBy('name');
+    const typeActions = await TypeAction.query().orderBy('name');
     return typeActions;
+  }
+
+  public async getSubsidiaries() {
+    const subsidiaries = await Subsidiary.query().orderBy('name');
+    return subsidiaries;
   }
 
   async categorizeByTypeAction({ request }: HttpContext) {
@@ -219,6 +233,14 @@ export default class ActionsController {
 
     const actionsByType = await db
       .from('public.actions AS a')
+      .joinRaw(
+        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+         ON tac.des_contr = a.des_contr
+         AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
+      )
+      .joinRaw(
+        'LEFT JOIN public.subsidiaries AS s ON s.nom_loja = tac.nom_loja'
+      )
       .joinRaw(
         'LEFT JOIN public.type_actions AS ta ON a.type_action_id = ta.id'
       )
@@ -284,6 +306,14 @@ export default class ActionsController {
     // Consulta ao banco de dados para agrupar por usuários e contar acionamentos, excluindo SMS e EME
     const actionsByUser = await db
       .from('public.actions AS a')
+      .joinRaw(
+        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+         ON tac.des_contr = a.des_contr
+         AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
+      )
+      .joinRaw(
+        'LEFT JOIN public.subsidiaries AS s ON s.nom_loja = tac.nom_loja'
+      )
       .joinRaw('LEFT JOIN public.users AS u ON a.user_id = u.id') // Relacionando ações com usuários
       .joinRaw(
         'LEFT JOIN public.type_actions AS ta ON a.type_action_id = ta.id'
@@ -347,6 +377,14 @@ export default class ActionsController {
     // Obtenção dos usuários e seus acionamentos
     const userActions = await db
       .from('public.actions AS a')
+      .joinRaw(
+        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+         ON tac.des_contr = a.des_contr
+         AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
+      )
+      .joinRaw(
+        'LEFT JOIN public.subsidiaries AS s ON s.nom_loja = tac.nom_loja'
+      )
       .joinRaw(
         'LEFT JOIN public.type_actions AS ta ON a.type_action_id = ta.id'
       ) // Relacionando ações com tipos
@@ -421,6 +459,14 @@ export default class ActionsController {
     // Consulta ao banco de dados para agrupar por usuários e contar acionamentos separados por CPC e NCPC
     const actionsByUser = await db
       .from('public.actions AS a')
+      .joinRaw(
+        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+         ON tac.des_contr = a.des_contr
+         AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
+      )
+      .joinRaw(
+        'LEFT JOIN public.subsidiaries AS s ON s.nom_loja = tac.nom_loja'
+      )
       .joinRaw('LEFT JOIN public.users AS u ON a.user_id = u.id') // Relacionando ações com usuários
       .joinRaw(
         'LEFT JOIN public.type_actions AS ta ON a.type_action_id = ta.id'
@@ -483,18 +529,7 @@ export default class ActionsController {
   async listByUserAndTypeAction({ request }: HttpContext) {
     const qs = request.qs();
 
-    let orderBy = 'u.id';
-    if (qs.orderBy) {
-      if (qs.orderBy === 'user') {
-        orderBy = `u.name`;
-      } else if (qs.orderBy === 'id') {
-        orderBy = `u.id`;
-      } else if (qs.orderBy === 'typeAction') {
-        orderBy = `ta.name`;
-      } else {
-        orderBy = `a.${string.snakeCase(qs.orderBy)}`;
-      }
-    }
+    const orderBy = this.service.generateOrderBy(qs);
     const descending = qs.descending || 'true';
 
     // Gera o where com paginação, caso seja necessário
@@ -503,6 +538,14 @@ export default class ActionsController {
     // Obtenção dos usuários e seus acionamentos
     const userActions = await db
       .from('public.actions AS a')
+      .joinRaw(
+        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+         ON tac.des_contr = a.des_contr
+         AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
+      )
+      .joinRaw(
+        'LEFT JOIN public.subsidiaries AS s ON s.nom_loja = tac.nom_loja'
+      )
       .joinRaw(
         'LEFT JOIN public.type_actions AS ta ON a.type_action_id = ta.id'
       ) // Relacionando ações com tipos
@@ -559,16 +602,7 @@ export default class ActionsController {
   async listByUserAndCpc({ request }: HttpContext) {
     const qs = request.qs();
 
-    let orderBy = 'u.id';
-    if (qs.orderBy) {
-      if (qs.orderBy === 'user') {
-        orderBy = `u.name`;
-      } else if (qs.orderBy === 'userId') {
-        orderBy = `u.id`;
-      } else if (qs.orderBy === 'typeAction') {
-        orderBy = `ta.name`;
-      }
-    }
+    const orderBy = this.service.generateOrderBy(qs);
     const descending = qs.descending || 'true';
 
     // Gera o where com paginação, caso seja necessário
@@ -577,6 +611,14 @@ export default class ActionsController {
     // Consulta ao banco de dados para agrupar por usuários e contar acionamentos separados por CPC e NCPC
     const actionsByUser = await db
       .from('public.actions AS a')
+      .joinRaw(
+        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+         ON tac.des_contr = a.des_contr
+         AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
+      )
+      .joinRaw(
+        'LEFT JOIN public.subsidiaries AS s ON s.nom_loja = tac.nom_loja'
+      )
       .joinRaw('LEFT JOIN public.users AS u ON a.user_id = u.id') // Relacionando ações com usuários
       .joinRaw(
         'LEFT JOIN public.type_actions AS ta ON a.type_action_id = ta.id'
@@ -605,22 +647,7 @@ export default class ActionsController {
   async listByUserAndChannel({ request }: HttpContext) {
     const qs = request.qs();
 
-    let orderBy = 'u.id';
-    if (qs.orderBy) {
-      if (qs.orderBy === 'user') {
-        orderBy = `u.name`;
-      } else if (qs.orderBy === 'userId') {
-        orderBy = `u.id`;
-      } else if (qs.orderBy === 'channelActive') {
-        orderBy = `activeCount`;
-      } else if (qs.orderBy === 'channelDialer') {
-        orderBy = `dialerCount`;
-      } else if (qs.orderBy === 'channelWhatsapp') {
-        orderBy = `whatsappCount`;
-      } else if (qs.orderBy === 'channelNull') {
-        orderBy = `nullCount`;
-      }
-    }
+    const orderBy = this.service.generateOrderBy(qs);
     const descending = qs.descending || 'true';
 
     // Gera o where com paginação, caso seja necessário
@@ -629,6 +656,14 @@ export default class ActionsController {
     // Consulta ao banco de dados para agrupar por usuários e contar acionamentos separados por valores de `channel`
     const actionsByUser = await db
       .from('public.actions AS a')
+      .joinRaw(
+        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+         ON tac.des_contr = a.des_contr
+         AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
+      )
+      .joinRaw(
+        'LEFT JOIN public.subsidiaries AS s ON s.nom_loja = tac.nom_loja'
+      )
       .joinRaw('LEFT JOIN public.users AS u ON a.user_id = u.id') // Relacionando ações com usuários
       .joinRaw(
         'LEFT JOIN public.type_actions AS ta ON a.type_action_id = ta.id'
@@ -676,6 +711,14 @@ export default class ActionsController {
     // Consulta ao banco de dados para agrupar por usuários e contar acionamentos por valores da coluna channel
     const actionsByUser = await db
       .from('public.actions AS a')
+      .joinRaw(
+        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+         ON tac.des_contr = a.des_contr
+         AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
+      )
+      .joinRaw(
+        'LEFT JOIN public.subsidiaries AS s ON s.nom_loja = tac.nom_loja'
+      )
       .joinRaw('LEFT JOIN public.users AS u ON a.user_id = u.id') // Relacionando ações com usuários
       .joinRaw(
         'LEFT JOIN public.type_actions AS ta ON a.type_action_id = ta.id'

@@ -9,10 +9,16 @@ export interface IQueryActionParams extends IQueryPaginationParams {
   userId?: string; // ID do usuário (ou null)
   typeActionIds?: number[] | string[] | string; // Lista de IDs de tipos de ações
   returnType?: string; // Tipo de retorno (ou null)
+  nomLoja?: string; // Nome da loja (ou null)
 }
 
 export interface IReturnType {
   retornotexto: string;
+}
+
+export interface ISubsidiary {
+  nomLoja: string;
+  name: string;
 }
 
 export interface IChartData {

@@ -17,11 +17,15 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { IUser } from "@/app/interfaces/auth";
-import { IQueryActionParams, IReturnType } from "../interfaces/action";
+import { IQueryActionParams, IReturnType, ISubsidiary } from "../interfaces/action";
 import MultipleSelector, { Option } from "@/components/ui/multiple-selector";
 import { ChangeEvent, useEffect, useState } from "react";
 import { fetchUserByModule } from "@/app/(easycob)/admin/users/service/users";
-import { fetchReturnsTypes, fetchTypesActions } from "../service/actions";
+import {
+  fetchReturnsTypes,
+  fetchSubsidiaries,
+  fetchTypesActions,
+} from "../service/actions";
 import { FaSearch } from "react-icons/fa";
 import { DatePicker } from "@/app/(easycob)/components/DatePicker";
 import { Input } from "@/components/ui/input";
@@ -41,7 +45,7 @@ export default function FilterPus({
   const [operators, setOperators] = useState<IUser[]>([]);
   const [returnsTypes, setReturnsTypes] = useState<IReturnType[]>([]);
   const [wallet, setWallet] = useState<string[]>([]);
-
+  const [subsidiaries, setSubsidiaries] = useState<ISubsidiary[]>([]);
   const handleChangeSelectTypesActions = () => {
     const ids = selectTypesActions.map((item) => {
       return item.value;
@@ -71,6 +75,12 @@ export default function FilterPus({
         setReturnsTypes(result);
       }
     });
+
+    fetchSubsidiaries().then((result) => {
+      if (result) {
+        setSubsidiaries(result);
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -85,6 +95,18 @@ export default function FilterPus({
       query.userId = "";
     } else {
       query.userId = value;
+    }
+    query.page = 1;
+    query.perPage = 10;
+    refresh();
+  };
+
+  const handleChangeSubsidiary = (value: string) => {
+    console.log(value);
+    if (value == "all") {
+      query.nomLoja = "";
+    } else {
+      query.nomLoja = value;
     }
     query.page = 1;
     query.perPage = 10;
@@ -126,7 +148,7 @@ export default function FilterPus({
   const handlerWallet = (element: string) => {
     const newArray = [...wallet];
     const index = newArray.indexOf(element);
-  
+
     if (index === -1) {
       // Elemento não está no array, então adiciona
       newArray.push(element);
@@ -134,7 +156,7 @@ export default function FilterPus({
       // Elemento já está no array, então remove
       newArray.splice(index, 1);
     }
-  
+
     if (newArray.length < 1 && query.wallet) {
       delete query.wallet;
     } else {
@@ -143,8 +165,8 @@ export default function FilterPus({
     query.page = 1;
     query.perPage = 10;
     refresh();
-    setWallet(newArray)
-  }
+    setWallet(newArray);
+  };
 
   return (
     <Popover>
@@ -169,6 +191,7 @@ export default function FilterPus({
                     placeholder="Buscar.."
                     className="rounded-l-none"
                     onChange={handleChangeKeyword}
+                    defaultValue={query.keyword}
                   />
                 </div>
               </Label>
@@ -176,18 +199,25 @@ export default function FilterPus({
             <div className="flex">
               <Label>
                 Por data de criação:
-                <DatePicker placeholder="Ínicio" onChange={handleChangeDate} />
+                <DatePicker
+                  placeholder="Ínicio"
+                  onChange={handleChangeDate}
+                  defaultDate={{
+                    from: query.startDate ? new Date(query.startDate) : undefined,
+                    to: query.endDate ? new Date(query.endDate) : undefined,
+                  }}
+                />
               </Label>
             </div>
             <div className="flex">
               <Label className="w-full">
                 Por operador:
-                <Select onValueChange={handleChangeOperator}>
+                <Select onValueChange={handleChangeOperator} defaultValue={query.userId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Operador" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="all" >Todos</SelectItem>
                     {operators.map((operator) => (
                       <SelectItem key={operator.id} value={`${operator.id}`}>
                         {operator.name}
@@ -216,7 +246,7 @@ export default function FilterPus({
             <div className="flex">
               <Label className="w-full">
                 Por retorno do recupera:
-                <Select onValueChange={handleReturnType}>
+                <Select onValueChange={handleReturnType} defaultValue={query.returnType}>
                   <SelectTrigger>
                     <SelectValue placeholder="Retorno recupera" />
                   </SelectTrigger>
@@ -231,20 +261,47 @@ export default function FilterPus({
                 </Select>
               </Label>
             </div>
+            <div className="flex">
+              <Label className="w-full">
+                Unidade:
+                <Select onValueChange={handleChangeSubsidiary} defaultValue={query.nomLoja}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Unidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    {subsidiaries.map((subsidiary) => (
+                      <SelectItem
+                        key={subsidiary.nomLoja}
+                        value={`${subsidiary.nomLoja}`}
+                      >
+                        {subsidiary.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Label>
+            </div>
             <div>
               <label className="text-base">Carteira:</label>
             </div>
             <div className="flex p-2 space-x-2">
               <Label className="flex items-center space-x-2">
-                <Checkbox checked={wallet.includes('F')} onCheckedChange={() => {
-                  handlerWallet('F')
-                }}/>
+                <Checkbox
+                  checked={wallet.includes("F")}
+                  onCheckedChange={() => {
+                    handlerWallet("F");
+                  }}
+                />
                 <span>Fixa</span>
               </Label>
               <Label className="flex items-center space-x-2">
-                <Checkbox checked={wallet.includes('V')} onCheckedChange={() => {
-                  handlerWallet('V')
-                }}/>
+                <Checkbox
+                  checked={wallet.includes("V")}
+                  onCheckedChange={() => {
+                    handlerWallet("V");
+                  }}
+                />
                 <span>Variável</span>
               </Label>
             </div>

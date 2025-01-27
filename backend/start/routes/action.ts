@@ -14,6 +14,7 @@ export default router
         ]);
         router.get('/send/:id', [ActionsController, 'send']);
         router.get('/returns/types', [ActionsController, 'getReturnTypeSync']);
+        router.get('/subsidiary', [ActionsController, 'getSubsidiaries']);
         router.get('/chart/type', [
           ActionsController,
           'categorizeByTypeAction',

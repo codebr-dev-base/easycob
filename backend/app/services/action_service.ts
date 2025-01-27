@@ -91,6 +91,13 @@ export default class ActionService {
       q.where('a.user_id', qs.userId);
     }
 
+    if (qs.nomLoja) {
+      console.log(qs.nomLoja);
+      if (qs.nomLoja.length > 0) {
+        q.where('tac.nom_loja', qs.nomLoja);
+      }
+    }
+
     if (qs.typeActionIds) {
       if (Array.isArray(qs.typeActionIds)) {
         if (qs.typeActionIds.length > 0) {
@@ -113,6 +120,32 @@ export default class ActionService {
     }
 
     //return q;
+  }
+
+  generateOrderBy(qs: any) {
+    if (qs.orderBy) {
+      if (qs.orderBy === 'user') {
+        return `u.name`;
+      } else if (qs.orderBy === 'cliente') {
+        return `cls.nom_clien`;
+      } else if (qs.orderBy === 'typeAction') {
+        return `ta.name`;
+      } else if (qs.orderBy === 'userId') {
+        return `u.id`;
+      } else if (qs.orderBy === 'channelActive') {
+        return `activeCount`;
+      } else if (qs.orderBy === 'channelDialer') {
+        return `dialerCount`;
+      } else if (qs.orderBy === 'channelWhatsapp') {
+        return `whatsappCount`;
+      } else if (qs.orderBy === 'channelNull') {
+        return `nullCount`;
+      } else {
+        return `a.${string.snakeCase(qs.orderBy)}`;
+      }
+    } else {
+      return 'a.id';
+    }
   }
 
   async checkExisteContract(des_contr: string) {

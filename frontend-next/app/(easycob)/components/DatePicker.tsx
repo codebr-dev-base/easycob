@@ -1,5 +1,5 @@
 "use client";
-import * as React from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
@@ -18,9 +18,11 @@ import { ActiveModifiers, DateRange } from "react-day-picker";
 export function DatePicker({
   placeholder,
   onChange,
+  defaultDate,
 }: {
   placeholder: string;
   onChange: (range: DateRange) => void;
+  defaultDate?: DateRange;
 }) {
   // Ajusta a data atual para GMT-3 ao inicializar o estado
   const initializeDateWithGMT3 = (): Date => {
@@ -29,10 +31,16 @@ export function DatePicker({
     return date;
   };
 
-  const [date, setDate] = React.useState<DateRange>({
+  const [date, setDate] = useState<DateRange>({
     from: initializeDateWithGMT3(),
     to: initializeDateWithGMT3(),
   });
+
+  useEffect(() => {
+    if (defaultDate) {
+      setDate(defaultDate);
+    }
+  }, [defaultDate]);
 
   const handlerSelectRangeDate = (
     range: DateRange | undefined,

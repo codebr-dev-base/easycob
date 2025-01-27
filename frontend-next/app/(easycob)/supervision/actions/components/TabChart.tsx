@@ -38,6 +38,7 @@ import {
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import SkeletonTable from "@/app/(easycob)/components/SkeletonTable";
 export const description = "A mixed bar chart";
 
 export default function TabChart({
@@ -47,6 +48,7 @@ export default function TabChart({
   chartUserCpc,
   chartUserChannel,
   query,
+  pending,
 }: {
   chartType: {
     chartData: IChartData[];
@@ -69,6 +71,7 @@ export default function TabChart({
     chartConfig: IChartChannelConfig;
   };
   query: IQueryActionParams;
+  pending: boolean;
 }) {
   const actionKeys = Array.from(
     new Set(
@@ -94,50 +97,54 @@ export default function TabChart({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer
-              config={chartType.chartConfig}
-              className="aspect-auto h-[250px] w-full"
-            >
-              <BarChart
-                accessibilityLayer
-                data={chartType.chartData}
-                layout="vertical"
-                margin={{
-                  right: 16,
-                }}
+            {!pending ? (
+              <ChartContainer
+                config={chartType.chartConfig}
+                className="aspect-auto h-[250px] w-full"
               >
-                <CartesianGrid horizontal={false} />
-
-                <YAxis
-                  dataKey="abbreviation"
-                  type="category"
-                  tickLine={false}
-                  tickMargin={10}
-                  axisLine={false}
-                  tickFormatter={(value) => {
-                    return value;
+                <BarChart
+                  accessibilityLayer
+                  data={chartType.chartData}
+                  layout="vertical"
+                  margin={{
+                    right: 16,
                   }}
-                />
+                >
+                  <CartesianGrid horizontal={false} />
 
-                <XAxis dataKey="total" type="number" />
-
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent indicator="line" />}
-                />
-
-                <Bar dataKey="total" layout="vertical" radius={4}>
-                  <LabelList
-                    dataKey="name"
-                    position="insideLeft"
-                    offset={5}
-                    className="fill-[--color-label]"
-                    fontSize={12}
-                    width={680}
+                  <YAxis
+                    dataKey="abbreviation"
+                    type="category"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                    tickFormatter={(value) => {
+                      return value;
+                    }}
                   />
-                </Bar>
-              </BarChart>
-            </ChartContainer>
+
+                  <XAxis dataKey="total" type="number" />
+
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="line" />}
+                  />
+
+                  <Bar dataKey="total" layout="vertical" radius={4}>
+                    <LabelList
+                      dataKey="name"
+                      position="insideLeft"
+                      offset={5}
+                      className="fill-[--color-label]"
+                      fontSize={12}
+                      width={680}
+                    />
+                  </Bar>
+                </BarChart>
+              </ChartContainer>
+            ) : (
+              <SkeletonTable rows={5} />
+            )}
           </CardContent>
           <CardFooter className="flex-col items-start gap-2 text-sm">
             <div className="flex gap-2 font-medium leading-none">
@@ -156,51 +163,55 @@ export default function TabChart({
             <CardDescription>Classificação por operador</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer
-              config={chartUser.chartConfig}
-              className="aspect-auto h-[250px] w-full"
-            >
-              <BarChart
-                accessibilityLayer
-                data={chartUser.chartData}
-                layout="vertical"
-                margin={{
-                  right: 16,
-                }}
+            {!pending ? (
+              <ChartContainer
+                config={chartUser.chartConfig}
+                className="aspect-auto h-[250px] w-full"
               >
-                <CartesianGrid horizontal={false} />
-
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  tickLine={false}
-                  tickMargin={10}
-                  axisLine={false}
-                  tickFormatter={(value) => {
-                    return value;
+                <BarChart
+                  accessibilityLayer
+                  data={chartUser.chartData}
+                  layout="vertical"
+                  margin={{
+                    right: 16,
                   }}
-                  hide
-                />
+                >
+                  <CartesianGrid horizontal={false} />
 
-                <XAxis dataKey="total" type="number" />
-
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent indicator="line" />}
-                />
-
-                <Bar dataKey="total" layout="vertical" radius={4}>
-                  <LabelList
+                  <YAxis
                     dataKey="name"
-                    position="insideLeft"
-                    offset={5}
-                    className="fill-[--color-label]"
-                    fontSize={12}
-                    width={680}
+                    type="category"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                    tickFormatter={(value) => {
+                      return value;
+                    }}
+                    hide
                   />
-                </Bar>
-              </BarChart>
-            </ChartContainer>
+
+                  <XAxis dataKey="total" type="number" />
+
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="line" />}
+                  />
+
+                  <Bar dataKey="total" layout="vertical" radius={4}>
+                    <LabelList
+                      dataKey="name"
+                      position="insideLeft"
+                      offset={5}
+                      className="fill-[--color-label]"
+                      fontSize={12}
+                      width={680}
+                    />
+                  </Bar>
+                </BarChart>
+              </ChartContainer>
+            ) : (
+              <SkeletonTable rows={5} />
+            )}
           </CardContent>
           <CardFooter className="flex-col items-start gap-2 text-sm">
             <div className="flex gap-2 font-medium leading-none">
@@ -219,71 +230,75 @@ export default function TabChart({
             <CardDescription>Classificação por operador e tipo</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer
-              config={chartUserType.chartConfig}
-              className="aspect-auto h-[250px] w-full"
-            >
-              <BarChart
-                accessibilityLayer
-                data={chartUserType.chartData}
-                layout="vertical"
+            {!pending ? (
+              <ChartContainer
+                config={chartUserType.chartConfig}
+                className="aspect-auto h-[250px] w-full"
               >
-                <CartesianGrid horizontal={false} />
+                <BarChart
+                  accessibilityLayer
+                  data={chartUserType.chartData}
+                  layout="vertical"
+                >
+                  <CartesianGrid horizontal={false} />
 
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  tickFormatter={(value) => {
-                    return value;
-                  }}
-                  hide
-                />
-
-                <XAxis dataKey="total" type="number" />
-
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent indicator="line" />}
-                />
-                <Bar dataKey="total" stackId="b" fill="transparent">
-                  <LabelList
+                  <YAxis
                     dataKey="name"
-                    position="insideLeft"
-                    offset={5}
-                    className="fill-[--color-label]"
-                    fontSize={12}
-                    width={680}
+                    type="category"
+                    tickFormatter={(value) => {
+                      return value;
+                    }}
+                    hide
                   />
-                </Bar>
-                {actionKeys.map((key: string, index: number): any => {
-                  if (index % 2 == 0) {
-                    color = getColorVariation(color, 1.4);
-                    return (
-                      <Bar
-                        key={key}
-                        dataKey={key}
-                        stackId="a"
-                        fill={rgbToRgba(color, 0.8)}
-                      />
-                    );
-                  } else {
-                    inverseColor = getInverseColor(color);
 
-                    return (
-                      <Bar
-                        key={key}
-                        dataKey={key}
-                        stackId="a"
-                        fill={rgbToRgba(inverseColor, 0.6)}
-                      />
-                    );
-                  }
+                  <XAxis dataKey="total" type="number" />
 
-                  /* Add a bar just for the gap after each bar */
-                  /*  bars.push(<Bar dataKey="gap" stackId="a" fill="transparent" />); */
-                })}
-              </BarChart>
-            </ChartContainer>
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="line" />}
+                  />
+                  <Bar dataKey="total" stackId="b" fill="transparent">
+                    <LabelList
+                      dataKey="name"
+                      position="insideLeft"
+                      offset={5}
+                      className="fill-[--color-label]"
+                      fontSize={12}
+                      width={680}
+                    />
+                  </Bar>
+                  {actionKeys.map((key: string, index: number): any => {
+                    if (index % 2 == 0) {
+                      color = getColorVariation(color, 1.4);
+                      return (
+                        <Bar
+                          key={key}
+                          dataKey={key}
+                          stackId="a"
+                          fill={rgbToRgba(color, 0.8)}
+                        />
+                      );
+                    } else {
+                      inverseColor = getInverseColor(color);
+
+                      return (
+                        <Bar
+                          key={key}
+                          dataKey={key}
+                          stackId="a"
+                          fill={rgbToRgba(inverseColor, 0.6)}
+                        />
+                      );
+                    }
+
+                    /* Add a bar just for the gap after each bar */
+                    /*  bars.push(<Bar dataKey="gap" stackId="a" fill="transparent" />); */
+                  })}
+                </BarChart>
+              </ChartContainer>
+            ) : (
+              <SkeletonTable rows={5} />
+            )}
           </CardContent>
           <CardFooter className="flex justify-between">
             <div className="flex-col items-start gap-2 text-sm">
@@ -311,28 +326,36 @@ export default function TabChart({
             <CardDescription>Classificação por CPC</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer
-              config={chartUserCpc.chartConfig}
-              className="aspect-auto h-[250px] w-full"
-            >
-              <BarChart accessibilityLayer data={chartUserCpc.chartData}>
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="name"
-                  tickLine={false}
-                  tickMargin={10}
-                  axisLine={false}
-                  tickFormatter={(value) => value.slice(0, 9) + "."}
-                  fontSize={10}
-                />
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent indicator="dashed" />}
-                />
-                <Bar dataKey="CPC" fill="rgba(34, 105, 211, 1)" radius={4} />
-                <Bar dataKey="NCPC" fill="rgba(34, 105, 211, .5)" radius={4} />
-              </BarChart>
-            </ChartContainer>
+            {!pending ? (
+              <ChartContainer
+                config={chartUserCpc.chartConfig}
+                className="aspect-auto h-[250px] w-full"
+              >
+                <BarChart accessibilityLayer data={chartUserCpc.chartData}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="name"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                    tickFormatter={(value) => value.slice(0, 9) + "."}
+                    fontSize={10}
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="dashed" />}
+                  />
+                  <Bar dataKey="CPC" fill="rgba(34, 105, 211, 1)" radius={4} />
+                  <Bar
+                    dataKey="NCPC"
+                    fill="rgba(34, 105, 211, .5)"
+                    radius={4}
+                  />
+                </BarChart>
+              </ChartContainer>
+            ) : (
+              <SkeletonTable rows={5} />
+            )}
           </CardContent>
           <CardFooter className="flex justify-between">
             <div className="flex-col items-start gap-2 text-sm">
@@ -360,38 +383,50 @@ export default function TabChart({
             <CardDescription>Classificação por Canal</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer
-              config={chartUserChannel.chartConfig}
-              className="aspect-auto h-[250px] w-full"
-            >
-              <BarChart accessibilityLayer data={chartUserChannel.chartData}>
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="name"
-                  tickLine={false}
-                  tickMargin={10}
-                  axisLine={false}
-                  tickFormatter={(value) => value.slice(0, 9) + "."}
-                  fontSize={10}
-                />
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent indicator="dashed" />}
-                />
-                <Bar dataKey="active" fill="rgba(34, 105, 211, 1)" radius={2} />
-                <Bar dataKey="dialer" fill="rgba(255, 159, 64, 1)" radius={2} />
-                <Bar
-                  dataKey="whatsapp"
-                  fill="rgba(75, 192, 192, 1)"
-                  radius={2}
-                />
-                <Bar
-                  dataKey="nullChannel"
-                  fill="rgba(153, 102, 255, 1)"
-                  radius={2}
-                />
-              </BarChart>
-            </ChartContainer>
+            {!pending ? (
+              <ChartContainer
+                config={chartUserChannel.chartConfig}
+                className="aspect-auto h-[250px] w-full"
+              >
+                <BarChart accessibilityLayer data={chartUserChannel.chartData}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="name"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                    tickFormatter={(value) => value.slice(0, 9) + "."}
+                    fontSize={10}
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="dashed" />}
+                  />
+                  <Bar
+                    dataKey="active"
+                    fill="rgba(34, 105, 211, 1)"
+                    radius={2}
+                  />
+                  <Bar
+                    dataKey="dialer"
+                    fill="rgba(255, 159, 64, 1)"
+                    radius={2}
+                  />
+                  <Bar
+                    dataKey="whatsapp"
+                    fill="rgba(75, 192, 192, 1)"
+                    radius={2}
+                  />
+                  <Bar
+                    dataKey="nullChannel"
+                    fill="rgba(153, 102, 255, 1)"
+                    radius={2}
+                  />
+                </BarChart>
+              </ChartContainer>
+            ) : (
+              <SkeletonTable rows={5} />
+            )}
           </CardContent>
           <CardFooter className="flex justify-between">
             <div className="flex-col items-start gap-2 text-sm">
@@ -409,7 +444,10 @@ export default function TabChart({
               <Link href="/supervision/actions/channel"> Tabela Simples </Link>
             </Button>
             <Button variant={"outline"} asChild>
-              <Link href="/supervision/actions/channel/type"> Tabela Detalhada </Link>
+              <Link href="/supervision/actions/channel/type">
+                {" "}
+                Tabela Detalhada{" "}
+              </Link>
             </Button>
           </CardFooter>
         </Card>

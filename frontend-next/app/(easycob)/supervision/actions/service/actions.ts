@@ -7,6 +7,7 @@ import {
   IChartDataStack,
   IQueryActionParams,
   IReturnType,
+  ISubsidiary,
   IUserAndCpc,
   IUserAndTypesData,
   IUserChannel,
@@ -88,6 +89,18 @@ export const fetchTypesActions = async () => {
 
 export const fetchReturnsTypes = async () => {
   const result = await fetchAuth<IReturnType[]>(`${url}/returns/types`);
+
+  if (result.success) {
+    //console.log("Dados recebidos:", result.data);
+    return result.data;
+  } else {
+    //console.error("Erro ao buscar dados:", result.error);
+    throw new Error(result.error);
+  }
+};
+
+export const fetchSubsidiaries = async () => {
+  const result = await fetchAuth<ISubsidiary[]>(`${url}/subsidiary`);
 
   if (result.success) {
     //console.log("Dados recebidos:", result.data);

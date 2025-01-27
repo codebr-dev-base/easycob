@@ -104,6 +104,7 @@ export default function TabRecords({
                     refresh={refresh}
                   />
                 </TableHead>
+                <TableHead>Unidade</TableHead>
                 <TableHead>
                   <HeaderTable
                     columnName="Status"
@@ -176,6 +177,9 @@ export default function TabRecords({
                       </p>
                     </Tooltips>
                   </TableCell>
+                  <TableCell className="max-w-28 md:max-w-36 lg:max-w-48">
+                    {action.subsidiary}
+                  </TableCell>
                   <TableCell className="">{selecIcon(action)}</TableCell>
                   <TableCell className="max-w-28 md:max-w-36 lg:max-w-48">
                     <Tooltips
@@ -188,7 +192,9 @@ export default function TabRecords({
                   </TableCell>
                   <TableCell>{action.dayLate}</TableCell>
                   <TableCell>
-                    {action.valPrinc ? formatCurrencyToBRL(action.valPrinc) : ""}
+                    {action.valPrinc
+                      ? formatCurrencyToBRL(action.valPrinc)
+                      : ""}
                   </TableCell>
                   <TableCell>
                     {action.pecld ? formatCurrencyToBRL(action.pecld) : ""}

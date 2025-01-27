@@ -143,5 +143,5 @@ export interface IAction {
   cliente?: string;
   negotiation?: INegotiationOfPayment;
   promise?: IPromiseOfPayment;
-
+  subsidiary?: string;
 }

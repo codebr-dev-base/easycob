@@ -1,6 +1,6 @@
 "use client";
 import Header from "../../../components/Header";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   fetchActions,
   fetchChartType,
@@ -31,7 +31,7 @@ export default function ContainerAction({
   chartUser: cu,
   chartUserType: cut,
   chartUserCpc: cuc,
-  chartUserChannel: cuch
+  chartUserChannel: cuch,
 }: {
   actions: {
     meta: IMeta;
@@ -55,8 +55,8 @@ export default function ContainerAction({
   };
   chartUserChannel: {
     chartData: IChartDataChannelItem[]; // Lista de dados para o gráfico
-    chartConfig: IChartChannelConfig; 
-  }
+    chartConfig: IChartChannelConfig;
+  };
 }) {
   const [meta, setMeta] = useState<IMeta>(actions.meta);
   const [data, setData] = useState<IAction[]>(actions.data ? actions.data : []);
@@ -84,7 +84,7 @@ export default function ContainerAction({
 
   const [chartUserChannel, setChartUserChannel] = useState<{
     chartData: IChartDataChannelItem[]; // Lista de dados para o gráfico
-    chartConfig: IChartChannelConfig; 
+    chartConfig: IChartChannelConfig;
   }>(cuch);
 
   const refresh = async () => {
@@ -103,12 +103,32 @@ export default function ContainerAction({
     setChartUser(cu);
     setChartUserType(cut);
     setChartUserCpc(cuc);
-    setChartUserChannel(cuch)
+    setChartUserChannel(cuch);
 
     setMeta(records.meta);
     setData(records.data);
     setPending(false);
   };
+
+  useEffect(() => {
+    query.page = 1;
+    query.perPage = 10;
+    query.orderBy = "id";
+    query.descending = false;
+    query.startDate = new Date().toISOString().split("T")[0];
+    query.endDate = new Date().toISOString().split("T")[0];
+    query.keywordColumn = "cliente";
+
+    return () => {
+      query.page = 1;
+      query.perPage = 10;
+      query.orderBy = "id";
+      query.descending = false;
+      query.startDate = new Date().toISOString().split("T")[0];
+      query.endDate = new Date().toISOString().split("T")[0];
+      query.keywordColumn = "cliente";
+    };
+  }, []);
 
   return (
     <article className="max-w-full">
@@ -138,6 +158,7 @@ export default function ContainerAction({
               chartUserCpc={chartUserCpc}
               chartUserChannel={chartUserChannel}
               query={query}
+              pending={pending}
             />
           </TabsContent>
           <TabsContent value="records">
