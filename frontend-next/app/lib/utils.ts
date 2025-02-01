@@ -37,6 +37,21 @@ export function formatDateToBR(
   }).format(date);
 }
 
+export function formatDateToISO(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toISOString();
+}
+
+export function formatDateToDatePtBr(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("pt-BR");
+}
+
+export function formatTimeToDatePtBr(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString("pt-BR");
+}
+
 export function formatDateForInput(dateString: string): string {
   const date = new Date(dateString);
 

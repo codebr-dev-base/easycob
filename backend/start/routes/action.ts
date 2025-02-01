@@ -7,6 +7,7 @@ export default router
     router
       .group(() => {
         router.get('/', [ActionsController, 'index']);
+        router.get('/csv', [ActionsController, 'csv']);
         router.post('/', [ActionsController, 'create']);
         router.get('/client/:codCredorDesRegis', [
           ActionsController,

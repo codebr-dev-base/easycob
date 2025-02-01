@@ -43,35 +43,43 @@ export const description = "A mixed bar chart";
 
 export default function TabChart({
   chartType,
+  pendingChartType,
   chartUser,
+  pendingChartUser,
   chartUserType,
+  pendingChartUserType,
   chartUserCpc,
+  pendingChartUserCpc,
   chartUserChannel,
+  pendingChartUserChannel,
   query,
-  pending,
 }: {
   chartType: {
     chartData: IChartData[];
     chartConfig: IChartConfig;
   };
+  pendingChartType: boolean;
   chartUser: {
     chartData: IChartData[];
     chartConfig: IChartConfig;
   };
+  pendingChartUser: boolean;
   chartUserType: {
     chartData: IChartDataStack[];
     chartConfig: IChartConfig;
   };
+  pendingChartUserType: boolean;
   chartUserCpc: {
     chartData: IChartDataStack[];
     chartConfig: IChartConfig;
   };
+  pendingChartUserCpc: boolean;
   chartUserChannel: {
     chartData: IChartDataChannelItem[]; // Lista de dados para o gráfico
     chartConfig: IChartChannelConfig;
   };
+  pendingChartUserChannel: boolean;
   query: IQueryActionParams;
-  pending: boolean;
 }) {
   const actionKeys = Array.from(
     new Set(
@@ -97,7 +105,7 @@ export default function TabChart({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {!pending ? (
+            {!pendingChartType ? (
               <ChartContainer
                 config={chartType.chartConfig}
                 className="aspect-auto h-[250px] w-full"
@@ -163,7 +171,7 @@ export default function TabChart({
             <CardDescription>Classificação por operador</CardDescription>
           </CardHeader>
           <CardContent>
-            {!pending ? (
+            {!pendingChartUser ? (
               <ChartContainer
                 config={chartUser.chartConfig}
                 className="aspect-auto h-[250px] w-full"
@@ -230,7 +238,7 @@ export default function TabChart({
             <CardDescription>Classificação por operador e tipo</CardDescription>
           </CardHeader>
           <CardContent>
-            {!pending ? (
+            {!pendingChartUserType ? (
               <ChartContainer
                 config={chartUserType.chartConfig}
                 className="aspect-auto h-[250px] w-full"
@@ -326,7 +334,7 @@ export default function TabChart({
             <CardDescription>Classificação por CPC</CardDescription>
           </CardHeader>
           <CardContent>
-            {!pending ? (
+            {!pendingChartUserCpc ? (
               <ChartContainer
                 config={chartUserCpc.chartConfig}
                 className="aspect-auto h-[250px] w-full"
@@ -383,7 +391,7 @@ export default function TabChart({
             <CardDescription>Classificação por Canal</CardDescription>
           </CardHeader>
           <CardContent>
-            {!pending ? (
+            {!pendingChartUserChannel ? (
               <ChartContainer
                 config={chartUserChannel.chartConfig}
                 className="aspect-auto h-[250px] w-full"

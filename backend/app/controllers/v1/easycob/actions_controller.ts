@@ -67,6 +67,8 @@ export default class ActionsController {
         'a.day_late',
         'a.val_princ',
         'a.pecld',
+        'a.des_contr',
+        'a.cod_credor_des_regis',
         'cls.nom_clien AS cliente',
         'u.name AS user',
         'ta.name As type_action',
@@ -87,6 +89,58 @@ export default class ActionsController {
       .paginate(pageNumber, limit);
 
     return serializeKeysCamelCase(actions.toJSON());
+  }
+
+  async csv({ request }: HttpContext) {
+    const qs = request.qs();
+
+    const selected = await this.service.generateWhereInPaginate(qs);
+    const actions = await db
+      .from('public.actions AS a')
+      .joinRaw(
+        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+         ON tac.des_contr = a.des_contr
+         AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
+      )
+      .joinRaw(
+        'LEFT JOIN public.subsidiaries AS s ON s.nom_loja = tac.nom_loja'
+      )
+      .joinRaw(
+        'LEFT JOIN recupera.tbl_arquivos_clientes AS cls ON a.cod_credor_des_regis = cls.cod_credor_des_regis'
+      )
+      .joinRaw('LEFT JOIN public.users AS u ON a.user_id = u.id')
+      .joinRaw(
+        'LEFT JOIN public.type_actions AS ta ON a.type_action_id = ta.id'
+      )
+      .select(
+        'a.id',
+        'a.retorno',
+        'a.unification_check',
+        'a.retornotexto',
+        'a.created_at',
+        'a.day_late',
+        'a.val_princ',
+        'a.pecld',
+        'a.des_contr',
+        'a.cod_credor_des_regis',
+        'cls.nom_clien AS cliente',
+        'u.name AS user',
+        'ta.name As type_action',
+        's.name AS subsidiary'
+      )
+      .where((q) => {
+        if (selected) {
+          q.whereIn(selected.column, selected.list);
+        }
+
+        if (qs.wallet) {
+          q.whereIn('wallet', qs.wallet);
+        }
+
+        return this.service.generateWherePaginate(q, qs);
+      });
+
+    return serializeKeysCamelCase(actions);
   }
 
   public async byClient({ params }: HttpContext) {
@@ -595,7 +649,7 @@ export default class ActionsController {
       .orderBy(`${orderBy}`, descending === 'true' ? 'desc' : 'asc');
 
     return this.service.transformUserActions(
-      serializeKeysCamelCase(userActions)
+      serializeKeysCamelCase(userActions) as any[]
     );
   }
 

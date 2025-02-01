@@ -1,4 +1,5 @@
 import { IQueryPaginationParams } from "@/app/interfaces/pagination";
+import { IAction } from '../../../interfaces/actions';
 
 export interface IQueryActionParams extends IQueryPaginationParams {
   sync?: boolean; // Filtro para itens sincronizados (ou null)
@@ -135,4 +136,21 @@ export interface IChartChannelConfig {
 export interface IChartChannelResponse {
   chartData: IChartDataChannelItem[]; // Lista de dados para o gráfico
   chartConfig: IChartChannelConfig;  // Configuração dos rótulos do gráfico
+}
+
+export interface IActionsResponse {
+  cliente: string;
+  codCredorDesRegis: string;
+  createdAt: string;
+  dayLate: number;
+  desContr: string;
+  id: number;
+  pecld: null | any; // Pode ser null ou outro tipo, ajuste conforme necessário
+  retorno: string;
+  retornotexto: string;
+  subsidiary: string;
+  typeAction: string;
+  unificationCheck: boolean;
+  user: string;
+  valPrinc: number;
 }

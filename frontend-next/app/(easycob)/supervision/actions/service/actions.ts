@@ -1,6 +1,7 @@
 import { fetchAuth } from "@/app/lib/fetchAuth";
 import { IMeta } from "@/app/interfaces/pagination";
 import {
+  IActionsResponse,
   IChartChannelResponse,
   IChartConfig,
   IChartData,
@@ -31,10 +32,24 @@ export const query: IQueryActionParams = {
 };
 
 export const fetchActions = async (): Promise<{
-  data: IAction[];
+  data: IActionsResponse[];
   meta: IMeta;
 }> => {
   const result = await fetchAuth(url, {
+    query,
+  });
+
+  if (result.success) {
+    //console.log("Dados recebidos:", result.data);
+    return result.data;
+  } else {
+    //console.error("Erro ao buscar dados:", result.error);
+    throw new Error(result.error);
+  }
+};
+
+export const fetchCsvActions = async (): Promise<IActionsResponse[]> => {
+  const result = await fetchAuth(`${url}/csv`, {
     query,
   });
 
@@ -179,19 +194,20 @@ export const fetchChartUserAndCpc = async (): Promise<{
   }
 };
 
-export const fetchChartUserAndChannel = async (): Promise<IChartChannelResponse> => {
-  const result = await fetchAuth(`${url}/chart/user/channel`, {
-    query,
-  });
+export const fetchChartUserAndChannel =
+  async (): Promise<IChartChannelResponse> => {
+    const result = await fetchAuth(`${url}/chart/user/channel`, {
+      query,
+    });
 
-  if (result.success) {
-    //console.log("Dados recebidos:", result.data);
-    return result.data;
-  } else {
-    //console.error("Erro ao buscar dados:", result.error);
-    throw new Error(result.error);
-  }
-};
+    if (result.success) {
+      //console.log("Dados recebidos:", result.data);
+      return result.data;
+    } else {
+      //console.error("Erro ao buscar dados:", result.error);
+      throw new Error(result.error);
+    }
+  };
 
 export const fetchUserAndChannel = async (): Promise<IUserChannel[]> => {
   const result = await fetchAuth(`${url}/list/user/channel`, {

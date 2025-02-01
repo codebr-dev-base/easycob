@@ -3,6 +3,7 @@ import Header from "../../../components/Header";
 import { useEffect, useState } from "react";
 import {
   fetchActions,
+  fetchCsvActions,
   fetchChartType,
   fetchChartUser,
   fetchChartUserAndChannel,
@@ -18,12 +19,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TabRecords from "./TabRecords";
 import TabChart from "./TabChart";
 import {
+  IActionsResponse,
   IChartChannelConfig,
   IChartConfig,
   IChartData,
   IChartDataChannelItem,
   IChartDataStack,
 } from "../interfaces/action";
+import { Button } from "@/components/ui/button";
+import { TbFileTypeCsv } from "react-icons/tb";
+import { Parser } from "json2csv";
+import { FaSpinner } from "react-icons/fa";
 
 export default function ContainerAction({
   actions,
@@ -60,7 +66,16 @@ export default function ContainerAction({
 }) {
   const [meta, setMeta] = useState<IMeta>(actions.meta);
   const [data, setData] = useState<IAction[]>(actions.data ? actions.data : []);
-  const [pending, setPending] = useState<boolean>(false);
+  const [pendingRecords, setPendingRecords] = useState<boolean>(false);
+  const [pendingChartType, setPendingChartType] = useState<boolean>(false);
+  const [pendingChartUser, setPendingChartUser] = useState<boolean>(false);
+  const [pendingChartUserType, setPendingChartUserType] =
+    useState<boolean>(false);
+  const [pendingChartUserCpc, setPendingChartUserCpc] =
+    useState<boolean>(false);
+  const [pendingChartUserChannel, setPendingChartUserChannel] =
+    useState<boolean>(false);
+  const [pendingCsv, setPendingCsv] = useState<boolean>(false);
 
   const [chartType, setChartType] = useState<{
     chartData: IChartData[];
@@ -88,26 +103,69 @@ export default function ContainerAction({
   }>(cuch);
 
   const refresh = async () => {
-    setPending(true);
+    setPendingRecords(true);
+    setPendingChartType(true);
+    setPendingChartUser(true);
+    setPendingChartUserType(true);
+    setPendingChartUserCpc(true);
+    setPendingChartUserChannel(true);
 
-    const [records, ct, cu, cut, cuc, cuch] = await Promise.all([
-      fetchActions(),
-      fetchChartType(),
-      fetchChartUser(),
-      fetchChartUserAndType(),
-      fetchChartUserAndCpc(),
-      fetchChartUserAndChannel(),
-    ]);
+    fetchChartType().then((res) => {
+      setChartType(res);
+      setPendingChartType(false);
+    });
 
-    setChartType(ct);
-    setChartUser(cu);
-    setChartUserType(cut);
-    setChartUserCpc(cuc);
-    setChartUserChannel(cuch);
+    fetchChartUser().then((res) => {
+      setChartUser(res);
+      setPendingChartUser(false);
+    });
 
-    setMeta(records.meta);
-    setData(records.data);
-    setPending(false);
+    fetchChartUserAndType().then((res) => {
+      setChartUserType(res);
+      setPendingChartUserType(false);
+    });
+
+    fetchChartUserAndCpc().then((res) => {
+      setChartUserCpc(res);
+      setPendingChartUserCpc(false);
+    });
+
+    fetchChartUserAndChannel().then((res) => {
+      setChartUserChannel(res);
+      setPendingChartUserChannel(false);
+    });
+
+    fetchActions().then((res) => {
+      setMeta(res.meta);
+      setData(res.data);
+      setPendingRecords(false);
+    });
+  };
+
+  const converterParaCSV = (dados: IActionsResponse[]): void => {
+    const campos: (keyof IActionsResponse)[] = Object.keys(
+      dados[0]
+    ) as (keyof IActionsResponse)[];
+    const parser = new Parser({ fields: campos });
+    const csv = parser.parse(dados);
+
+    // Cria um link para download do arquivo CSV
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "dados.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const fetchCsv = async () => {
+    setPendingCsv(true);
+    const data = await fetchCsvActions();
+    converterParaCSV(data);
+    setPendingCsv(false);
   };
 
   useEffect(() => {
@@ -135,6 +193,13 @@ export default function ContainerAction({
       <div className="p-2">
         <Header title="Acionamentos">
           <div className="flex flex-col md:flex-row justify-end items-end gap-4">
+            <Button variant="secondary" onClick={fetchCsv} disabled={pendingCsv}>
+              {pendingCsv ? (
+                <FaSpinner className="animate-spin mr-2" />
+              ) : (
+                <TbFileTypeCsv />
+              )}
+            </Button>
             <FilterPus query={query} refresh={refresh} />
           </div>
         </Header>
@@ -153,12 +218,16 @@ export default function ContainerAction({
           <TabsContent value="chart">
             <TabChart
               chartType={chartType}
+              pendingChartType={pendingChartType}
               chartUser={chartUser}
+              pendingChartUser={pendingChartUser}
               chartUserType={chartUserType}
+              pendingChartUserType={pendingChartUserType}
               chartUserCpc={chartUserCpc}
+              pendingChartUserCpc={pendingChartUserCpc}
               chartUserChannel={chartUserChannel}
+              pendingChartUserChannel={pendingChartUserChannel}
               query={query}
-              pending={pending}
             />
           </TabsContent>
           <TabsContent value="records">
@@ -167,7 +236,7 @@ export default function ContainerAction({
               data={data}
               refresh={refresh}
               query={query}
-              pending={pending}
+              pending={pendingRecords}
             />
           </TabsContent>
         </Tabs>

@@ -20,7 +20,7 @@ import {
   BsFillSendSlashFill,
   BsHourglassSplit,
 } from "react-icons/bs";
-import { formatDateToBR, formatCurrencyToBRL } from "@/app/lib/utils";
+import { formatDateToBR, formatCurrencyToBRL, formatDateToDatePtBr, formatTimeToDatePtBr } from "@/app/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { FaUser } from "react-icons/fa";
@@ -104,6 +104,9 @@ export default function TabRecords({
                     refresh={refresh}
                   />
                 </TableHead>
+                <TableHead>
+                  Contrato
+                </TableHead>
                 <TableHead>Unidade</TableHead>
                 <TableHead>
                   <HeaderTable
@@ -168,7 +171,11 @@ export default function TabRecords({
               {data.map((action) => (
                 <TableRow key={action.id}>
                   <TableCell>{action.id}</TableCell>
-                  <TableCell>{formatDateToBR(action.createdAt)}</TableCell>
+                  <TableCell>
+                    {formatDateToDatePtBr(action.createdAt)}
+                    <br />
+                    {formatTimeToDatePtBr(action.createdAt)}
+                  </TableCell>
 
                   <TableCell className="max-w-28 md:max-w-36 lg:max-w-48">
                     <Tooltips message={action.cliente ? action.cliente : ""}>
@@ -176,6 +183,9 @@ export default function TabRecords({
                         {action.cliente}
                       </p>
                     </Tooltips>
+                  </TableCell>
+                  <TableCell className="max-w-28 md:max-w-36 lg:max-w-48">
+                    {action.desContr}
                   </TableCell>
                   <TableCell className="max-w-28 md:max-w-36 lg:max-w-48">
                     {action.subsidiary}
@@ -211,7 +221,7 @@ export default function TabRecords({
                   </TableCell>
                   <TableCell>
                     <Button asChild className="mx-1">
-                      <Link href={`/supervision/campaigns/lots/1`}>
+                      <Link href={`/operation/clients/details/${action.codCredorDesRegis}`}>
                         <FaUser />
                       </Link>
                     </Button>
