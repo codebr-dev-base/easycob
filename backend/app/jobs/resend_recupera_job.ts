@@ -13,7 +13,7 @@ import {
   isToSendToRecupera,
 } from '#services/utils/recupera';
 import { serializeKeysSnakeCase } from '#utils/serialize';
-import Contract from '#models/recovery/contract';
+//import Contract from '#models/recovery/contract';
 import TypeAction from '#models/type_action';
 
 interface ResendRecuperaJobPayload {
@@ -151,11 +151,12 @@ export default class ResendRecuperaJob extends Job {
             action.retorno = 'Q';
             action.retornotexto = 'Em fila';
             await action.save();
-
+            /*
             const contract = await Contract.findBy(
               'des_contr',
               action.desContr
             );
+             */
             const typeAction = await TypeAction.find(action.typeActionId);
 
             const item = {
@@ -165,7 +166,8 @@ export default class ResendRecuperaJob extends Job {
               regis: action.desRegis,
               complemento: action.description ? action.description : '',
               fonediscado: action.contato,
-              cocontratovincular: <string>contract?.desContr,
+              //cocontratovincular: <string>contract?.desContr,
+              cocontratovincular: '',
               wallet: action.wallet,
               error: retornotexto,
             };

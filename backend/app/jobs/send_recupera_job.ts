@@ -13,7 +13,7 @@ import {
   isToSendToRecupera,
 } from '#services/utils/recupera';
 import { serializeKeysSnakeCase } from '#utils/serialize';
-import Contract from '#models/recovery/contract';
+//import Contract from '#models/recovery/contract';
 import TypeAction from '#models/type_action';
 import ResendRecuperaJob from '#jobs/resend_recupera_job';
 //import logger from '@adonisjs/core/services/logger';
@@ -159,11 +159,12 @@ export default class SendRecuperaJob extends Job {
             action.retorno = 'Q';
             action.retornotexto = 'Em fila';
             await action.save();
-
+            /*
             const contract = await Contract.findBy(
               'des_contr',
               action.desContr
             );
+            */
             const typeAction = await TypeAction.find(action.typeActionId);
 
             const item = {
@@ -173,7 +174,8 @@ export default class SendRecuperaJob extends Job {
               regis: action.desRegis,
               complemento: action.description ? action.description : '',
               fonediscado: action.contato,
-              cocontratovincular: <string>contract?.desContr,
+              //cocontratovincular: <string>contract?.desContr,
+              cocontratovincular: '',
               wallet: action.wallet,
               error: retornotexto,
             };
