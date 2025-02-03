@@ -21,7 +21,7 @@ export default class BulkActionEme extends BaseCommand {
         .whereRaw('created_at::date = CURRENT_DATE');
 
       for (const action of actions) {
-        await handleSendingForRecupera(action);
+        await handleSendingForRecupera(action, 'ResendRecupera');
       }
       console.log(actions.length);
     }
