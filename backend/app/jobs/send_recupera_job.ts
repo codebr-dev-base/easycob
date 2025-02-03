@@ -140,6 +140,8 @@ export default class SendRecuperaJob extends Job {
           timeout: 20000,
         });
 
+        console.log(result);
+
         const resultJson = <SoapResponse>(
           xmlParser.toJson(result, this.optionsJson)
         );
