@@ -16,6 +16,7 @@ import { serializeKeysSnakeCase } from '#utils/serialize';
 //import Contract from '#models/recovery/contract';
 import TypeAction from '#models/type_action';
 import ResendRecuperaJob from '#jobs/resend_recupera_job';
+import HistorySendAction from '#models/history_send_action';
 //import logger from '@adonisjs/core/services/logger';
 
 interface SendRecuperaJobPayload {
@@ -165,6 +166,16 @@ export default class SendRecuperaJob extends Job {
             action.retorno = 'Q';
             action.retornotexto = 'Em fila';
             await action.save();
+
+            const retorno = <string>resultSync.XML?.RETORNO;
+            await HistorySendAction.create({
+              actionId: action.id,
+              userId: action.userId,
+              countSends: action.countSends,
+              retorno: retorno,
+              retornotexto: retornotexto,
+            });
+
             /*
             const contract = await Contract.findBy(
               'des_contr',

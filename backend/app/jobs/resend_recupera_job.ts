@@ -167,6 +167,7 @@ export default class ResendRecuperaJob extends Job {
               retorno: retorno,
               retornotexto: retornotexto,
             });
+
             /*
             const contract = await Contract.findBy(
               'des_contr',
