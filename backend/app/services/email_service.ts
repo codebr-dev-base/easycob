@@ -21,7 +21,7 @@ interface IEmailData {
   subject: string;
   cliente: string;
   filial: string;
-  whatsapp: string;
+  chat: string;
   from: string;
   to: string;
   config: string;
@@ -199,7 +199,7 @@ export default class EmailService {
             'Aviso de Débito em Atraso - Entre em Contato para Regularização',
           cliente: cliente,
           filial: client.subsidiary,
-          whatsapp: `https://wa.me/55${campaign.numWhatsapp}`,
+          chat: `https://chat.yuancob.com.br`,
           from: `${client.subsidiaryMail}`.replace('"', ''),
           to: item.standardized,
           config: client.subsidiaryConfigEmail,
@@ -240,7 +240,7 @@ export default class EmailService {
               'aegea@yuancob.com',
               email.cliente,
               email.filial || '',
-              email.whatsapp,
+              email.chat,
               {
                 listHelp: '<mailto:aegea@yuancob.com>',
                 listUnsubscribe: '<mailto:aegea@yuancob.com>',

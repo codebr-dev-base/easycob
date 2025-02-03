@@ -50,7 +50,7 @@ export const sendMailByApi = async (
   replyTo: string,
   cliente: string,
   filial: string,
-  whatsapp: string,
+  chat: string,
   options: optionsHeader
 ): Promise<string | undefined> => {
   const edge = Edge.create();
@@ -84,7 +84,7 @@ export const sendMailByApi = async (
           {
             cliente,
             filial,
-            whatsapp,
+            chat,
           }
         ), // Corpo em texto
         html_body: await edge.render(
@@ -92,7 +92,7 @@ export const sendMailByApi = async (
           {
             cliente,
             filial,
-            whatsapp,
+            chat,
           }
         ), // Corpo em HTML
         reply_to: replyTo,
@@ -200,7 +200,7 @@ export const sendMailBySmtp = async (
   replyTo: string,
   cliente: string,
   filial: string,
-  whatsapp: string,
+  chat: string,
 
   options: optionsHeader
 ): Promise<string> => {
@@ -223,12 +223,12 @@ export const sendMailBySmtp = async (
         .htmlView(`emails/aegea_modelo_${indexTemplate}_html`, {
           cliente,
           filial,
-          whatsapp,
+          chat,
         })
         .textView(`emails/aegea_modelo_${indexTemplate}_text`, {
           cliente,
           filial,
-          whatsapp,
+          chat,
         })
         .listHelp(options.listHelp)
         .listUnsubscribe({
