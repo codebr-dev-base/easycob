@@ -139,4 +139,7 @@ export default class HistoryAction extends BaseModel {
 
   @column()
   declare double: boolean;
+
+  @column()
+  declare countSends: number;
 }

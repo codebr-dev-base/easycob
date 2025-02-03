@@ -90,7 +90,12 @@ export default class SendRecuperaJob extends Job {
   };
 
   checkResultSync(retornotexto: string): boolean {
-    const keywords = ['PRIMARY', 'DEADLOCK', 'TIMEOUT'];
+    const keywords = [
+      'PRIMARY',
+      'DEADLOCK',
+      'TIMEOUT',
+      'ERRO AO INCLUIR OCORRENCIA: PASSO',
+    ];
 
     return keywords.some((keyword) =>
       retornotexto.toUpperCase().includes(keyword)
@@ -124,8 +129,7 @@ export default class SendRecuperaJob extends Job {
     //logger.info(envelop);
 
     const action = await Action.find(payload.action_id);
-    if (action) {
-      //TODO: Remover o teste e verificar mensagem de erro (error: JSON.stringify(error))
+    if (action && action.sync === false) {
       try {
         const result = await $fetch(this.urlRecupera, {
           method: 'POST',
@@ -151,6 +155,8 @@ export default class SendRecuperaJob extends Job {
         );
 
         const retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
+
+        action.countSends = action.countSends + 1;
 
         if (this.checkResultSync(retornotexto)) {
           action.sync = false;
@@ -180,8 +186,15 @@ export default class SendRecuperaJob extends Job {
               error: retornotexto,
             };
 
+            const d = new Date();
+            let delay = 1000 * 60 * 60;
+            if (d.getHours() > 19 && d.getMinutes() > 30) {
+              delay = 1000 * 60 * 60 * 12;
+            }
+
             await ResendRecuperaJob.dispatch(item, {
               queueName: 'ResendRecupera',
+              delay,
             });
           } else {
             action.retorno = null;
@@ -211,7 +224,7 @@ export default class SendRecuperaJob extends Job {
       } catch (error) {
         action.sync = false;
         await action.save();
-        await handleSendingForRecupera(action);
+        await handleSendingForRecupera(action, 'ResendRecupera');
 
         await CatchLog.create({
           classJob: 'SendXmlRecupera',

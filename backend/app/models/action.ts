@@ -132,4 +132,7 @@ export default class Action extends BaseModel {
 
   @column()
   declare double: boolean;
+
+  @column()
+  declare countSends: number;
 }

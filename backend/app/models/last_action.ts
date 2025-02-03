@@ -135,4 +135,7 @@ export default class LastAction extends BaseModel {
 
   @column()
   declare double: boolean;
+
+  @column()
+  declare countSends: number;
 }
