@@ -165,7 +165,7 @@ export default class SendRecuperaJob extends Job {
 
             if (await isToSendToRecupera(action)) {
               action.retorno = 'Q';
-              action.retornotexto = `Em fila - ${retornotexto}`;
+              action.retornotexto = `Em Tentativa - ${retornotexto}`;
               await action.save();
 
               if (action.countSends > 1) {
