@@ -151,68 +151,71 @@ export default class ResendRecuperaJob extends Job {
 
         action.countSends = action.countSends + 1;
 
-        if (this.checkResultSync(retornotexto)) {
-          action.sync = false;
+        if (action.countSends <= 10) {
+          if (this.checkResultSync(retornotexto)) {
+            action.sync = false;
 
-          if (await isToSendToRecupera(action)) {
-            action.retorno = 'Q';
-            action.retornotexto = 'Em fila';
-            await action.save();
+            if (await isToSendToRecupera(action)) {
+              action.retorno = 'Q';
+              action.retornotexto = `Em fila - ${retornotexto}`;
+              await action.save();
 
-            const retorno = <string>resultSync.XML?.RETORNO;
-            await HistorySendAction.create({
-              actionId: action.id,
-              userId: action.userId,
-              countSends: action.countSends,
-              retorno: retorno,
-              retornotexto: retornotexto,
-            });
+              if (action.countSends > 1) {
+                const retorno = <string>resultSync.XML?.RETORNO;
+                await HistorySendAction.create({
+                  actionId: action.id,
+                  userId: action.userId,
+                  countSends: action.countSends,
+                  retorno: retorno,
+                  retornotexto: retornotexto,
+                });
+              }
 
-            /*
-            const contract = await Contract.findBy(
-              'des_contr',
-              action.desContr
-            );
-             */
-            const typeAction = await TypeAction.find(action.typeActionId);
+              /*
+              const contract = await Contract.findBy(
+                'des_contr',
+                action.desContr
+              );
+               */
+              const typeAction = await TypeAction.find(action.typeActionId);
 
-            const item = {
-              action_id: action.id,
-              codigo: <string>typeAction?.abbreviation,
-              credor: action.codCredor,
-              regis: action.desRegis,
-              complemento: action.description ? action.description : '',
-              fonediscado: action.contato,
-              //cocontratovincular: <string>contract?.desContr,
-              cocontratovincular: '',
-              wallet: action.wallet,
-              error: retornotexto,
-            };
+              const item = {
+                action_id: action.id,
+                codigo: <string>typeAction?.abbreviation,
+                credor: action.codCredor,
+                regis: action.desRegis,
+                complemento: action.description ? action.description : '',
+                fonediscado: action.contato,
+                //cocontratovincular: <string>contract?.desContr,
+                cocontratovincular: '',
+                wallet: action.wallet,
+                error: retornotexto,
+              };
 
-            const d = new Date();
-            let delay = 1000 * 60 * 60;
-            if (d.getHours() > 19 && d.getMinutes() > 30) {
-              delay = 1000 * 60 * 60 * 12;
+              const d = new Date();
+              let delay = 1000 * 60 * 60;
+              if (d.getHours() > 19 && d.getMinutes() > 30) {
+                delay = 1000 * 60 * 60 * 12;
+              }
+
+              await ResendRecuperaJob.dispatch(item, {
+                queueName: 'ResendRecupera',
+                delay,
+              });
+            } else {
+              action.retorno = null;
+              action.retornotexto =
+                'Já existe um acionamento válido de prioridade igual ou maior';
+              await action.save();
             }
-
-            await ResendRecuperaJob.dispatch(item, {
-              queueName: 'ResendRecupera',
-              delay,
-            });
           } else {
-            action.retorno = null;
-            action.retornotexto =
-              'Já existe um acionamento válido de prioridade igual ou maior';
-            await action.save();
+            action.sync = true;
+            action.resultSync = JSON.stringify(resultSync);
+            action.syncedAt = DateTime.now();
+            action.retorno = <string>resultSync.XML?.RETORNO;
+            action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
           }
-        } else {
-          action.sync = true;
-          action.resultSync = JSON.stringify(resultSync);
-          action.syncedAt = DateTime.now();
-          action.retorno = <string>resultSync.XML?.RETORNO;
-          action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
         }
-
         action.isOk = action.retorno === '00' ? true : false;
 
         await action.save();
