@@ -91,7 +91,7 @@ export default class SendMailExternalJob extends Job {
           'aegea@yuancob.com',
           item.nomCliente,
           subsidiary?.name || '',
-          `https://wa.me/55${item.numWhatsapp}`,
+          `https://chat.yuancob.com.br`,
           {
             listHelp: '<mailto:aegea@yuancob.com>',
             listUnsubscribe: '<mailto:aegea@yuancob.com>',
