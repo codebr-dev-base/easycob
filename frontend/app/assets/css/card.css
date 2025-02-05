@@ -1,0 +1,3 @@
+.card {
+    @apply flex bg-white m-auto p-2 rounded-md shadow-md;
+}

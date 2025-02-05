@@ -1,0 +1,9 @@
+.TabsTrigger {
+    @apply rounded-full
+}
+.TabsTrigger:hover {
+  @apply bg-primary text-primary-foreground hover:bg-blue-700;
+}
+.TabsTrigger[data-state="active"] {
+  @apply bg-primary text-primary-foreground hover:bg-blue-700;
+}
