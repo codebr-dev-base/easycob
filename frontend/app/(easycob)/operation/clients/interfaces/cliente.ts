@@ -6,4 +6,5 @@ export interface IQueryClienteParams extends IQueryPaginationParams {
   keywordColumn?: string; // Coluna específica para busca (ou null)
   isFixa?: boolean;
   isVar?: boolean;
+  desRegis?: string;
 }

@@ -174,7 +174,7 @@ export default class SmsService {
       message = this.buildMessage(campaign.message, {
         cliente: cliente,
         filial: client.subsidiary,
-        chat: `https://chat.yuancob.com.br`,
+        chat: `https://chat.yuancob.com.br/${client.desRegis}-${client.codCredor}`,
         //whatsapp: `wa.me/55${campaign.numWhatsapp}`,
       });
 

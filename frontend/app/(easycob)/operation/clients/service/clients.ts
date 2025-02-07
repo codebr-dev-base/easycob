@@ -1,7 +1,9 @@
 import { fetchAuth } from "@/app/lib/fetchAuth";
-import { IMeta } from "@/app/interfaces/pagination";
+import { IMeta, IPaginationResponse } from "@/app/interfaces/pagination";
 import { IQueryClienteParams } from "../interfaces/cliente";
 import { IClient, ISendMail } from "@/app/(easycob)/interfaces/clients";
+import * as dotEnv from "dotenv";
+dotEnv.config();
 
 const apiUrl = process.env.API_URL
   ? process.env.API_URL
@@ -23,12 +25,9 @@ export function setQuery(newParams: Partial<IQueryClienteParams>): void {
   query = { ...query, ...newParams };
 }
 
-export const fetchClients = async (): Promise<{
-  data: IClient[];
-  meta: IMeta;
-}> => {
+export const fetchClients = async (initialQuery: IQueryClienteParams): Promise<IPaginationResponse<IClient>> => {
   const result = await fetchAuth(url, {
-    query,
+    query: initialQuery,
   });
 
   if (result.success) {

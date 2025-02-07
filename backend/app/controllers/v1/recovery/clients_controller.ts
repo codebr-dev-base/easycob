@@ -37,6 +37,7 @@ export default class ClientsController {
         'id',
         'nom_clien',
         'des_cpf',
+        'des_regis',
         'cod_credor_des_regis',
         'status',
         'is_fixa',
@@ -45,8 +46,12 @@ export default class ClientsController {
       .where((q) => {
         if (selected) {
           q.whereIn(selected.column, selected.list);
-        } else if (qs.keyword && qs.keyword.length > 4) {
+        } else if (qs.keyword && qs.keyword.length > 3) {
           q.whereILike(keywordColumn, `%${keyword}%`);
+        }
+
+        if (qs.desRegis && qs.desRegis.length > 3) {
+          q.where('des_regis', qs.desRegis);
         }
 
         if (qs.status) {
@@ -55,11 +60,11 @@ export default class ClientsController {
           }
         }
 
-        if (qs.isFixa) {
+        if (qs.isFixa && qs.isFixa === 'true') {
           q.where('is_fixa', true);
         }
 
-        if (qs.isVar) {
+        if (qs.isVar && qs.isVar === 'true') {
           q.where('is_var', true);
         }
       })

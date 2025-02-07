@@ -20,7 +20,7 @@ export default function FilterPus({
   refresh,
 }: {
   query: IQueryClienteParams;
-  refresh: () => void;
+  refresh: (newParams: Partial<IQueryClienteParams>) => void;
 }) {
   const [isFixa, setIsFixa] = useState(false);
   const [isVar, setIsVar] = useState(false);
@@ -34,89 +34,43 @@ export default function FilterPus({
       setIsVar(true);
     }
   }, [query]);
+
   const handleChangeKeyword = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.name == "keyword") {
-      query.keyword = e.target.value;
-      query.page = 1;
-      query.perPage = 10;
-      refresh();
-      /*       switch (query.keywordColumn) {
-        case "nomClien":
-          if (e.target.value.length > 4) {
-            query.page = 1;
-            query.perPage = 10;
-            refresh();
-          }
-          break;
-        case "phone":
-          if (e.target.value.length > 8) {
-            query.page = 1;
-            query.perPage = 10;
-            refresh();
-          }
-          break;
-        case "email":
-          if (e.target.value.length > 6) {
-            query.page = 1;
-            query.perPage = 10;
-            refresh();
-          }
-          break;
-        case "desContr":
-          if (e.target.value.length > 6) {
-            query.page = 1;
-            query.perPage = 10;
-            refresh();
-          }
-          break;
-        case "desCpf":
-          if (e.target.value.length > 6) {
-            query.page = 1;
-            query.perPage = 10;
-            refresh();
-          }
-          break;
-        default:
-          break;
-      } */
+      if (e.target.value.length > 3) {
+        refresh({keyword: e.target.value, page: 1, perPage: 10});
+      } else {
+        refresh({keyword: "", page: 1, perPage: 10});
+      }
     }
   };
 
   const handleChangeStatus = (value: string) => {
-    query.status = value;
-    query.page = 1;
-    query.perPage = 10;
-    refresh();
+    refresh({status: value,  page: 1, perPage: 10});
   };
 
   const handleChangeColumn = (value: string) => {
     query.keywordColumn = value;
-    refresh();
+    refresh({keywordColumn: value, page: 1, perPage: 10});
   };
 
   const handleChangeIsFixa = () => {
     setIsFixa(!isFixa);
     if (isFixa && query.isFixa) {
       delete query.isFixa;
+      refresh({isFixa: false, page: 1, perPage: 10});
     } else {
-      query.isFixa = true;
+      refresh({isFixa: true, page: 1, perPage: 10});
     }
-
-    query.page = 1;
-    query.perPage = 10;
-    refresh();
   };
   const handleChangeIsVar = () => {
     setIsVar(!isVar);
     if (isVar && query.isVar) {
       delete query.isVar;
+      refresh({isVar: false, page: 1, perPage: 10});
     } else {
-      query.isVar = true;
+      refresh({isVar: true, page: 1, perPage: 10});
     }
-
-    query.page = 1;
-    query.perPage = 10;
-    refresh();
   };
 
   return (
@@ -205,6 +159,11 @@ export default function FilterPus({
                   <Label className="flex items-center space-x-2">
                     <RadioGroupItem value="desCpf" />
                     <span>CPF/CNPJ</span>
+                  </Label>
+
+                  <Label className="flex items-center space-x-2">
+                    <RadioGroupItem value="desRegis" />
+                    <span>DesRegis</span>
                   </Label>
                 </div>
               </RadioGroup>

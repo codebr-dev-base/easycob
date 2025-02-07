@@ -199,7 +199,7 @@ export default class EmailService {
             'Aviso de Débito em Atraso - Entre em Contato para Regularização',
           cliente: cliente,
           filial: client.subsidiary,
-          chat: `https://chat.yuancob.com.br`,
+          chat: `https://chat.yuancob.com.br/${client.desRegis}-${client.codCredor}`,
           from: `${client.subsidiaryMail}`.replace('"', ''),
           to: item.standardized,
           config: client.subsidiaryConfigEmail,

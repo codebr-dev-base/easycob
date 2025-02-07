@@ -1,11 +1,11 @@
-const severPath = "/data/app/easycob/frontend-next/";
+const severPath = "/data/app/easycob/frontend/";
 
 require("dotenv").config({ path: `${severPath}.env` });
 
 module.exports = {
   apps: [
     {
-      name: "frontend-next", // Nome da aplicação
+      name: "frontend", // Nome da aplicação
       script: "npm", // O comando para rodar
       args: "run start", // Argumento para o comando (nesse caso, 'npm start')
       cwd: severPath, // Caminho para a aplicação Next.js

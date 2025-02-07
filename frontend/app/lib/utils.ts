@@ -342,3 +342,24 @@ export const calcDaylate = (datVenci: string) => {
   const date = new Date(new Date(datVenci).setHours(24, 0, 0, 0));
   return Math.round((today.getTime() - date.getTime()) / (1000 * 3600 * 24));
 };
+
+export function isEqual<T>(objA: T, objB: T): boolean {
+  if (objA === objB) return true; // Se forem o mesmo objeto ou primitivo, são iguais
+
+  if (typeof objA !== "object" || objA === null || typeof objB !== "object" || objB === null) {
+    return false; // Se um deles não for objeto (ou for null), são diferentes
+  }
+
+  const keysA = Object.keys(objA) as Array<keyof T>;
+  const keysB = Object.keys(objB) as Array<keyof T>;
+
+  if (keysA.length !== keysB.length) return false; // Se o número de chaves for diferente, são diferentes
+
+  for (const key of keysA) {
+    if (!keysB.includes(key)) return false; // Se objB não tem a chave, são diferentes
+
+    if (!isEqual(objA[key], objB[key])) return false; // Comparação recursiva
+  }
+
+  return true;
+}

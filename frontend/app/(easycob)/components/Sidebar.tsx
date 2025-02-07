@@ -238,7 +238,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
         {/* Conteúdo da sidebar */}
         <header className="h-20 my-3">
           {isExpanded ? (
-            <div className="justify-center items-center hidden md:flex transition-all duration-300 ease-in-out">
+            <div className="justify-center items-start hidden md:flex transition-all duration-300 ease-in-out">
               <Image
                 src={easycobWhite}
                 alt="Easycob white"
@@ -261,8 +261,8 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
         </header>
         <main className="h-full w-full">
           <nav
-            className={`flex flex-col items-center space-y-6 ${
-              !isExpanded ? "ml-1" : "ml-4"
+            className={`flex flex-col  space-y-6 ${
+              !isExpanded ? "ml-1 items-center" : "ml-4"
             }`}
           >
             <DynamicMenu

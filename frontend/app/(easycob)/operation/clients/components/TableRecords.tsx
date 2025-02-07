@@ -3,7 +3,7 @@ import { IMeta, IQueryPaginationParams } from "@/app/interfaces/pagination";
 import "@/app/assets/css/tabs.css";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import SkeletonTable from "@/app/(easycob)/components/SkeletonTable";
-import Pagination from "@/app/(easycob)/components/Pagination";
+import Pagination from "@/app/(easycob)/components/Pagination2";
 import {
   Table,
   TableBody,
@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { HeaderTable } from "@/app/(easycob)/components/HeaderTable";
+import { HeaderTable } from "@/app/(easycob)/components/HeaderTable2";
 import Tooltips from "@/app/(easycob)/components/Tooltips";
 import {
   formatDateToBR,
@@ -27,6 +27,8 @@ import { IClient } from "@/app/(easycob)/interfaces/clients";
 import { ContainerContactFone } from "./ContainerContactFone";
 import { ContainerContactEmail } from "./ContainerContactEmail";
 import { ContainerContract } from "./ContainerContract";
+import { query } from '../service/clients';
+import { IQueryClienteParams } from "../interfaces/cliente";
 
 export default function TableRecords({
   meta,
@@ -37,10 +39,11 @@ export default function TableRecords({
 }: {
   meta: IMeta;
   data: IClient[];
-  refresh: () => {};
+  refresh: (newParams: Partial<IQueryClienteParams>) => void;
   query: IQueryPaginationParams;
   pending: boolean;
 }) {
+
   return (
     <Card>
       <CardContent>
@@ -79,6 +82,14 @@ export default function TableRecords({
                     refresh={refresh}
                   />
                 </TableHead>
+                <TableHead>
+                  <HeaderTable
+                    columnName="DesRegis"
+                    fieldName="desRegis"
+                    query={query}
+                    refresh={refresh}
+                  />
+                </TableHead>
                 <TableHead>Contratos</TableHead>
                 <TableHead>
                   <HeaderTable
@@ -104,6 +115,7 @@ export default function TableRecords({
                     </Tooltips>
                   </TableCell>
                   <TableCell>{formatStringToCpfCnpj(client.desCpf)}</TableCell>
+                  <TableCell>{client.desRegis}</TableCell>
                   <TableCell>
                     {client.contracts && Array.isArray(client.contracts) && (
                       <ContainerContract contracts={client.contracts} />
