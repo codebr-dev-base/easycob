@@ -56,7 +56,7 @@ const useClientsService = ({
 
   // Chama `fetchUsers` sempre que `queryParams` mudar
   useEffect(() => {
-    if (isEqual(initialQuery, queryParams.current)) {
+    if (!isEqual(initialQuery, queryParams.current)) {
       fetchClients();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

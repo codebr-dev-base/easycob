@@ -6,7 +6,6 @@ import {
   parseStringToQuery,
 } from "@/app/lib/params";
 import { isEqual } from "@/app/lib/utils";
-import { se } from "date-fns/locale";
 
 const useQueryParams = (initialParams: Record<string, unknown>) => {
   const queryParams = useRef<Record<string, unknown>>({ ...initialParams });
