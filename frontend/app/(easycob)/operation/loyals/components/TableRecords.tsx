@@ -1,9 +1,13 @@
 "use client";
-import { IMeta, IQueryPaginationParams } from "@/app/interfaces/pagination";
+import {
+  IMeta,
+  IPaginationResponse,
+  IQueryPaginationParams,
+} from "@/app/interfaces/pagination";
 import "@/app/assets/css/tabs.css";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import SkeletonTable from "@/app/(easycob)/components/SkeletonTable";
-import Pagination from "@/app/(easycob)/components/Pagination";
+import Pagination from "@/app/(easycob)/components/Pagination2";
 import {
   Table,
   TableBody,
@@ -12,37 +16,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { HeaderTable } from "@/app/(easycob)/components/HeaderTable";
+import { HeaderTable } from "@/app/(easycob)/components/HeaderTable2";
 import Tooltips from "@/app/(easycob)/components/Tooltips";
-import {
-  formatDateToBR,
-  formatStringToCpfCnpj,
-  formatCurrencyToBRL,
-  formatarFone,
-} from "@/app/lib/utils";
+import { formatDateToBR } from "@/app/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { FaUser } from "react-icons/fa";
-import { ILoyal } from "../interfaces/loyal";
-import { Fragment, useState } from "react";
+import { ILoyal, IQueryLoyalParams } from "../interfaces/loyal";
+import { Dispatch, Fragment, SetStateAction, useState } from "react";
 import TableDetails from "./TableDetails";
 import { FaCaretUp, FaCaretDown } from "react-icons/fa";
-import { LogIn } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { check } from "../service/loyals";
 
 export default function TableRecords({
-  meta,
-  data,
-  refresh,
+  loyals,
   query,
+  refresh,
   pending,
+  setLoyals,
 }: {
-  meta: IMeta;
-  data: ILoyal[];
-  refresh: () => {};
+  loyals: IPaginationResponse<ILoyal>;
   query: IQueryPaginationParams;
+  refresh: (newParams: Partial<IQueryLoyalParams>) => void;
   pending: boolean;
+  setLoyals: Dispatch<SetStateAction<IPaginationResponse<ILoyal> | null>>;
 }) {
   const [selectLoyal, setSelectLoyal] = useState<ILoyal | null>(null);
 
@@ -70,8 +68,32 @@ export default function TableRecords({
   };
 
   const handleChengeCheck = async (loyal: ILoyal) => {
-    await check(loyal.id);
-    refresh();
+    try {
+      await check(loyal.id);
+      setLoyals((prevLoyals) => {
+        if (!prevLoyals) return null;
+        const updatedLoyals = prevLoyals.data.map((l) => {
+          if (l.id === loyal.id) {
+            return { ...l, ...{ check: !loyal.check } };
+          }
+          return l;
+        });
+        return { ...prevLoyals, data: updatedLoyals };
+      });
+    } catch (error) {
+      setLoyals((prevLoyals) => {
+        if (!prevLoyals) return null;
+        const updatedLoyals = prevLoyals.data.map((l) => {
+          if (l.id === loyal.id) {
+            return { ...l, ...{ check: loyal.check } };
+          }
+          return l;
+        });
+        return { ...prevLoyals, data: updatedLoyals };
+      });
+    }
+
+    //refresh();
   };
 
   return (
@@ -84,7 +106,11 @@ export default function TableRecords({
           }`}
         >
           <SkeletonTable
-            rows={meta && meta.perPage ? meta.perPage : query.perPage}
+            rows={
+              loyals.meta && loyals.meta.perPage
+                ? loyals.meta.perPage
+                : query.perPage
+            }
           />
         </div>
         {/* Tabela com transição de opacidade */}
@@ -106,7 +132,15 @@ export default function TableRecords({
                     refresh={refresh}
                   />
                 </TableHead>
-
+                <TableHead>U. acion.</TableHead>
+                <TableHead>
+                  <HeaderTable
+                    columnName="PECLD"
+                    fieldName="pecld"
+                    query={query}
+                    refresh={refresh}
+                  />
+                </TableHead>
                 <TableHead>
                   <HeaderTable
                     columnName="Unidade"
@@ -155,19 +189,12 @@ export default function TableRecords({
                     refresh={refresh}
                   />
                 </TableHead>
-                <TableHead>
-                  <HeaderTable
-                    columnName="Cluster"
-                    fieldName="classCluster"
-                    query={query}
-                    refresh={refresh}
-                  />
-                </TableHead>
+                <TableHead>Sit. do Contrato</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((loyal) => (
+              {loyals.data.map((loyal) => (
                 <Fragment key={loyal.id}>
                   <TableRow className={setColorRow(loyal)}>
                     <TableCell
@@ -187,13 +214,25 @@ export default function TableRecords({
                         id="airplane-mode"
                         checked={loyal.check}
                         onCheckedChange={() => {
-                          handleChengeCheck(loyal)
+                          handleChengeCheck(loyal);
                         }}
                       />
                     </TableCell>
                     <TableCell>
                       {formatDateToBR(`${loyal.lastAction}`)}
                     </TableCell>
+                    <TableCell className="max-w-2  md:max-w-28 lg:max-w-36">
+                      <Tooltips
+                        message={
+                          loyal.lastActionName ? loyal.lastActionName : ""
+                        }
+                      >
+                        <p className="truncate hover:text-clip">
+                          {loyal.lastActionName}
+                        </p>
+                      </Tooltips>
+                    </TableCell>
+                    <TableCell>{loyal.pecld ? loyal.pecld : 0}</TableCell>
                     <TableCell>{loyal.unidade}</TableCell>
                     <TableCell className="max-w-28 md:max-w-36 lg:max-w-48">
                       <Tooltips message={loyal.nomClien ? loyal.nomClien : ""}>
@@ -206,8 +245,7 @@ export default function TableRecords({
                     <TableCell>{loyal.faixaTempo}</TableCell>
                     <TableCell>{loyal.faixaValor}</TableCell>
                     <TableCell>{loyal.faixaTitulos}</TableCell>
-                    <TableCell>{loyal.classCluster}</TableCell>
-
+                    <TableCell>{loyal.classSitcontr}</TableCell>
                     <TableCell>
                       <Button asChild className="mx-1">
                         <Link
@@ -240,7 +278,7 @@ export default function TableRecords({
           pending ? "opacity-0 hidden" : "opacity-100"
         }`}
       >
-        <Pagination meta={meta} query={query} refresh={refresh} />
+        <Pagination meta={loyals.meta} query={query} refresh={refresh} />
       </CardFooter>
     </Card>
   );

@@ -40,7 +40,7 @@ import { toast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FaClockRotateLeft } from "react-icons/fa6";
-import { IInvoiceHistory } from "../interfaces/discounts";
+import { IInvoiceHistory } from "../interfaces/following";
 import { updateInvoice } from "../service/invoices";
 import { fetchInvoiceHistories } from "../service/invoiceHistories";
 

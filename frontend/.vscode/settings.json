@@ -1,5 +1,15 @@
 {
   "files.associations": {
     "*.css": "tailwindcss"
-  }
+  },
+  "cSpell.words": [
+    "easycob",
+    "loyals",
+    "Loyals",
+    "promese",
+    "Sitcontr",
+    "situacoes",
+    "Situacoes",
+    "Titulos"
+  ]
 }

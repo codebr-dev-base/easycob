@@ -1,7 +1,8 @@
 import { fetchAuth } from "@/app/lib/fetchAuth";
 import { IMeta } from "@/app/interfaces/pagination";
-import { IQueryDiscountParams } from "../interfaces/discounts";
+import { IQueryFollowingParams } from "../interfaces/following";
 import { IPromiseOfPayment } from "@/app/(easycob)/interfaces/actions";
+import { initialQuery } from '../page';
 
 const apiUrl = process.env.API_URL
   ? process.env.API_URL
@@ -9,21 +10,12 @@ const apiUrl = process.env.API_URL
 const urn = "/v1/action";
 const url = `${apiUrl}${urn}`;
 
-export const queryPromises: IQueryDiscountParams = {
-  page: 1,
-  perPage: 10,
-  orderBy: "id",
-  descending: false,
-  startDate: new Date().toISOString().split("T")[0],
-  endDate: new Date().toISOString().split("T")[0],
-};
-
-export const fetchPromises = async (): Promise<{
+export const fetchPromises = async (initialQuery: IQueryFollowingParams): Promise<{
   data: IPromiseOfPayment[];
   meta: IMeta;
 }> => {
   const result = await fetchAuth(`${url}/promise`, {
-    query: queryPromises,
+    query: initialQuery,
   });
 
   if (result.success) {

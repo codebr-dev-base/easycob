@@ -16,32 +16,30 @@ import {
   formatarFone,
   getFirstAndLastName,
 } from "@/app/lib/utils";
-import Pagination from "@/app/(easycob)/components/Pagination";
+import Pagination from "@/app/(easycob)/components/Pagination2";
 import { Button } from "@/components/ui/button";
-import { FaRegEye } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
 import Tooltips from "../../../components/Tooltips";
 import SkeletonTable from "@/app/(easycob)/components/SkeletonTable";
 import Link from "next/link";
-import { IQueryDiscountParams } from "../interfaces/discounts";
-import { IMeta } from "@/app/interfaces/pagination";
+import { IMeta, IPaginationResponse } from "@/app/interfaces/pagination";
 import { INegotiationInvoice } from "../../../interfaces/actions";
 import { BsCheck, BsHourglassSplit } from "react-icons/bs";
-import { HeaderTable } from "@/app/(easycob)/components/HeaderTable";
+import { HeaderTable } from "@/app/(easycob)/components/HeaderTable2";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 import FormInvoiceHistories from "./FormInvoiceHistories";
+import { IQueryFollowingParams } from "../interfaces/following";
 
 export default function TabInvoices({
+  invoices,
   query,
-  meta,
-  data,
   refresh,
   pending,
 }: {
-  query: IQueryDiscountParams;
-  meta?: IMeta;
-  data: INegotiationInvoice[];
-  refresh: () => Promise<void>;
+  invoices: IPaginationResponse<INegotiationInvoice>;
+  query: IQueryFollowingParams;
+  refresh: (newParams: Partial<IQueryFollowingParams>) => void;
   pending: boolean;
 }) {
   const [selectRow, setSelectRow] = useState<INegotiationInvoice | null>(null);
@@ -93,7 +91,11 @@ export default function TabInvoices({
           }`}
         >
           <SkeletonTable
-            rows={meta && meta.perPage ? meta.perPage : query.perPage}
+            rows={
+              invoices.meta && invoices.meta.perPage
+                ? invoices.meta.perPage
+                : query.perPage
+            }
           />
         </div>
 
@@ -162,7 +164,7 @@ export default function TabInvoices({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((invoice) => (
+              {invoices.data.map((invoice) => (
                 <TableRow key={invoice.id}>
                   <TableCell>
                     <Switch
@@ -196,8 +198,10 @@ export default function TabInvoices({
                   </TableCell>
                   <TableCell className="flex">
                     <Button asChild className="mx-1">
-                      <Link href={`/supervision/campaigns/lots/${invoice.id}`}>
-                        <FaRegEye />
+                      <Link
+                        href={`/operation/clients/details/${invoice.codCredorDesRegis}`}
+                      >
+                        <FaUser />
                       </Link>
                     </Button>
                   </TableCell>
@@ -212,7 +216,7 @@ export default function TabInvoices({
           pending ? "opacity-0 hidden" : "opacity-100"
         }`}
       >
-        <Pagination meta={meta} query={query} refresh={refresh} />
+        <Pagination meta={invoices.meta} query={query} refresh={refresh} />
       </CardFooter>
     </Card>
   );

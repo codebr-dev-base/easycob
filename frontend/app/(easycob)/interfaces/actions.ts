@@ -55,6 +55,7 @@ export interface IPromiseOfPayment {
   createdAt: string; // ou Date
   updatedAt: string; // ou Date
   comments?: string;
+  codCredorDesRegis?: string;
 }
 
 // Interface para NegotiationOfPayment
@@ -76,6 +77,7 @@ export interface INegotiationInvoice {
   createdAt: string; // ou Date
   updatedAt: string; // ou Date
   comments?: string;
+  codCredorDesRegis?: string;
 }
 
 // Interface para NegotiationOfPayment
@@ -105,6 +107,7 @@ export interface INegotiationOfPayment {
   createdAt: string; // ou Date
   updatedAt: string; // ou Date
   comments?: string;
+  codCredorDesRegis?: string;
 }
 
 // Interface para Action

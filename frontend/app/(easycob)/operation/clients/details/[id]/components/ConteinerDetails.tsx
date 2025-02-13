@@ -113,12 +113,12 @@ export default function ConteinerDetails({
 
   const checkPrerequisites = (): boolean => {
     if (!selectTypeAction || !selectContact || !selectContract) {
-      console.log("falta alguem")
+      console.log("falta alguem");
       return false;
     }
 
     if (selectTypeAction.commissioned < 2) {
-      console.log(selectTypeAction.commissioned)
+      console.log(selectTypeAction.commissioned);
       return true;
     }
 
@@ -130,6 +130,16 @@ export default function ConteinerDetails({
 
     switch (selectTypeAction?.id) {
       case 1:
+        return (
+          <FormPromise
+            client={client}
+            typeAction={selectTypeAction}
+            contract={selectContract}
+            contact={selectContact}
+            refresh={refreshActions}
+          />
+        );
+      case 2:
         return (
           <FormPromise
             client={client}

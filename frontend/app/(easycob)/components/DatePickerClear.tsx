@@ -21,11 +21,13 @@ import {
 export function DatePickerClear({
   placeholder,
   onChange,
+  defaultDate,
 }: {
   placeholder: string;
   onChange: (range: DateRange) => void;
+  defaultDate?: DateRange | undefined;
 }) {
-  const [date, setDate] = React.useState<DateRange>();
+  const [date, setDate] = React.useState<DateRange | undefined>(undefined);
 
   const handlerSelectRangeDate = (
     range: DateRange | undefined,

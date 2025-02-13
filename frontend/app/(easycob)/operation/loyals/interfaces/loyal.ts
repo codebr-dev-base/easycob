@@ -4,12 +4,12 @@ export interface IQueryLoyalParams extends IQueryPaginationParams {
   //userId: number;
   keyword?: string;
   keywordColumn?: string;
-  faixaTempos?: string | string[];
-  faixaValores?: string | string[];
-  faixaTitulos?: string | string[];
-  faixaClusters?: string | string[];
-  unidades?: string | string[];
-  situacoes?: string | string[];
+  faixaTempos?: string[];
+  faixaValores?: string[];
+  faixaTitulos?: string[];
+  faixaClusters?: string[];
+  unidades?: string[];
+  situacoes?: string[];
   typeActions?: string;
   notAction?: string;
   startDate?: string;
@@ -44,4 +44,5 @@ export interface ILoyal {
   check: boolean;
   lastAction?: string;
   lastActionName?: string;
+  pecld?: number;
 }

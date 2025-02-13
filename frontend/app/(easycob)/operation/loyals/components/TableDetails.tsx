@@ -21,8 +21,7 @@ export default function TableInvoices({ loyal }: { loyal: ILoyal }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>U. acion.</TableHead>
-              <TableHead>Sit. do Contrato</TableHead>
+              <TableHead>Cluster</TableHead>
               <TableHead>T. Cliente</TableHead>
               <TableHead>D. de Venc.</TableHead>
               <TableHead>Valor</TableHead>
@@ -33,16 +32,7 @@ export default function TableInvoices({ loyal }: { loyal: ILoyal }) {
           </TableHeader>
           <TableBody>
             <TableRow>
-              <TableCell className="max-w-2  md:max-w-28 lg:max-w-36">
-                <Tooltips
-                  message={loyal.lastActionName ? loyal.lastActionName : ""}
-                >
-                  <p className="truncate hover:text-clip">
-                    {loyal.lastActionName}
-                  </p>
-                </Tooltips>
-              </TableCell>
-              <TableCell>{loyal.classSitcontr}</TableCell>
+              <TableCell>{loyal.classCluster}</TableCell>
               <TableCell>{loyal.tipoCliente}</TableCell>
               <TableCell>{loyal.dtVenci}</TableCell>
               <TableCell>{formatCurrencyToBRL(loyal.valor)}</TableCell>

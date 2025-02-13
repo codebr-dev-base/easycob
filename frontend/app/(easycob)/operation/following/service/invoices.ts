@@ -1,6 +1,6 @@
 import { fetchAuth } from "@/app/lib/fetchAuth";
 import { IMeta } from "@/app/interfaces/pagination";
-import { IQueryDiscountParams } from "../interfaces/discounts";
+import { IQueryFollowingParams } from "../interfaces/following";
 import { INegotiationInvoice } from "@/app/(easycob)/interfaces/actions";
 
 const apiUrl = process.env.API_URL
@@ -9,21 +9,12 @@ const apiUrl = process.env.API_URL
 const urn = "/v1/action";
 const url = `${apiUrl}${urn}`;
 
-export const queryInvoices: IQueryDiscountParams = {
-  page: 1,
-  perPage: 10,
-  orderBy: "id",
-  descending: false,
-  startDate: new Date().toISOString().split("T")[0],
-  endDate: new Date().toISOString().split("T")[0],
-};
-
-export const fetchInvoices = async (): Promise<{
+export const fetchInvoices = async (initialQuery: IQueryFollowingParams): Promise<{
   data: INegotiationInvoice[];
   meta: IMeta;
 }> => {
   const result = await fetchAuth(`${url}/negotiation/invoice`, {
-    query: queryInvoices,
+    query: initialQuery,
   });
 
   if (result.success) {

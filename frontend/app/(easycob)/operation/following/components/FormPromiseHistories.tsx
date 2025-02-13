@@ -44,7 +44,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FaClockRotateLeft } from "react-icons/fa6";
 import { updatePromise } from "../service/promises";
 import { fetchPromiseHistories } from "../service/promiseHistories";
-import { IPromeseHistory } from "../interfaces/discounts";
+import { IPromeseHistory } from "../interfaces/following";
 
 const options = [
   {

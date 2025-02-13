@@ -40,6 +40,7 @@ export default class NegotiationInvoicesController {
       .select('cls.nom_clien as client')
       .select('a.contato as contato')
       .select('a.des_contr as des_contr')
+      .select('a.cod_credor_des_regis as cod_credor_des_regis')
       .innerJoin(
         'negotiation_of_payments as n',
         'n.id',
@@ -74,6 +75,10 @@ export default class NegotiationInvoicesController {
 
         if (qs.status && qs.status == 'true') {
           q.where('i.status', qs.status);
+        }
+
+        if (qs.keyword) {
+          q.whereILike('cls.nom_clien', `%${qs.keyword}%`);
         }
 
         return q;

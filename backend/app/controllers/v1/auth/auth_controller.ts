@@ -8,6 +8,7 @@ export default class AuthController {
 
     try {
       const user = await User.verifyCredentials(email, password);
+      console.log(user);
       if (!user.isActived) {
         return response.unauthorized('Invalid credentials');
       }

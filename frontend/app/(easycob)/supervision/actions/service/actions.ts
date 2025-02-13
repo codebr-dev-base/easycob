@@ -1,5 +1,5 @@
 import { fetchAuth } from "@/app/lib/fetchAuth";
-import { IMeta } from "@/app/interfaces/pagination";
+import { IMeta, IPaginationResponse } from "@/app/interfaces/pagination";
 import {
   IActionsResponse,
   IChartChannelResponse,
@@ -20,6 +20,22 @@ const apiUrl = process.env.API_URL
   : process.env.NEXT_PUBLIC_API_URL;
 const urn = "/v1/action";
 const url = `${apiUrl}${urn}`;
+
+export const fA = async (
+  initialQuery: IQueryActionParams
+): Promise<IPaginationResponse<IAction>> => {
+  const result = await fetchAuth(url, {
+    query: initialQuery,
+  });
+
+  if (result.success) {
+    //console.log("Dados recebidos:", result.data);
+    return result.data;
+  } else {
+    //console.error("Erro ao buscar dados:", result.error);
+    throw new Error(result.error);
+  }
+};
 
 export const query: IQueryActionParams = {
   page: 1,

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -16,32 +15,30 @@ import {
   formatarFone,
   getFirstAndLastName,
 } from "@/app/lib/utils";
-import Pagination from "@/app/(easycob)/components/Pagination";
+import Pagination from "@/app/(easycob)/components/Pagination2";
 import { Button } from "@/components/ui/button";
-import { FaRegEye } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
 import Tooltips from "../../../components/Tooltips";
 import SkeletonTable from "@/app/(easycob)/components/SkeletonTable";
 import Link from "next/link";
-import { IQueryDiscountParams } from "../interfaces/discounts";
-import { IMeta } from "@/app/interfaces/pagination";
+import { IPaginationResponse } from "@/app/interfaces/pagination";
 import { INegotiationOfPayment } from "@/app/(easycob)/interfaces/actions";
-import { HeaderTable } from "@/app/(easycob)/components/HeaderTable";
+import { HeaderTable } from "@/app/(easycob)/components/HeaderTable2";
 import { BsCheck, BsHourglassSplit } from "react-icons/bs";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 import FormNegotiationHistories from "./FormNegotiationHistories";
+import { IQueryFollowingParams } from "../interfaces/following";
 
 export default function TabNegotiations({
+  negotiations,
   query,
-  meta,
-  data,
   refresh,
   pending,
 }: {
-  query: IQueryDiscountParams;
-  meta?: IMeta;
-  data: INegotiationOfPayment[];
-  refresh: () => Promise<void>;
+  negotiations: IPaginationResponse<INegotiationOfPayment>;
+  query: IQueryFollowingParams;
+  refresh: (newParams: Partial<IQueryFollowingParams>) => void;
   pending: boolean;
 }) {
   const [selectRow, setSelectRow] = useState<INegotiationOfPayment | null>(
@@ -95,7 +92,11 @@ export default function TabNegotiations({
           }`}
         >
           <SkeletonTable
-            rows={meta && meta.perPage ? meta.perPage : query.perPage}
+            rows={
+              negotiations.meta && negotiations.meta.perPage
+                ? negotiations.meta.perPage
+                : query.perPage
+            }
           />
         </div>
 
@@ -171,11 +172,11 @@ export default function TabNegotiations({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((negotiation) => (
+              {negotiations.data.map((negotiation) => (
                 <TableRow key={negotiation.id}>
                   <TableCell>
                     <Switch
-                      checked={!!selectRow && (selectRow.id === negotiation.id)}
+                      checked={!!selectRow && selectRow.id === negotiation.id}
                       onCheckedChange={() => {
                         handleSelectRow(negotiation);
                       }}
@@ -194,7 +195,9 @@ export default function TabNegotiations({
                       </p>
                     </Tooltips>
                   </TableCell>
-                  <TableCell>{formatCurrencyToBRL(negotiation.valOriginal)}</TableCell>
+                  <TableCell>
+                    {formatCurrencyToBRL(negotiation.valOriginal)}
+                  </TableCell>
                   <TableCell>
                     {formatCurrencyToBRL(negotiation.valTotalPrest)}
                   </TableCell>
@@ -215,9 +218,9 @@ export default function TabNegotiations({
                   <TableCell className="flex">
                     <Button asChild className="mx-1">
                       <Link
-                        href={`/supervision/campaigns/lots/${negotiation.id}`}
+                        href={`/operation/clients/details/${negotiation.codCredorDesRegis}`}
                       >
-                        <FaRegEye />
+                        <FaUser />
                       </Link>
                     </Button>
                   </TableCell>
@@ -232,7 +235,7 @@ export default function TabNegotiations({
           pending ? "opacity-0 hidden" : "opacity-100"
         }`}
       >
-        <Pagination meta={meta} query={query} refresh={refresh} />
+        <Pagination meta={negotiations.meta} query={query} refresh={refresh} />
       </CardFooter>
     </Card>
   );

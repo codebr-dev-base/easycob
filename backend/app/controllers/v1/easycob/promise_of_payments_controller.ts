@@ -36,7 +36,7 @@ export default class PromiseOfPaymentsController {
       .select('cls.nom_clien as client')
       .select('a.contato as contato')
       .select('a.des_contr as des_contr')
-
+      .select('a.cod_credor_des_regis as cod_credor_des_regis')
       .innerJoin('actions as a', 'a.id', '=', 'p.action_id')
       .innerJoin('users as u', 'u.id', '=', 'a.user_id')
       .innerJoin(
@@ -69,6 +69,20 @@ export default class PromiseOfPaymentsController {
 
         if (qs.status && qs.status === 'true') {
           q.where('p.status', qs.status);
+        }
+
+        if (qs.keyword) {
+          q.whereILike('cls.nom_clien', `%${qs.keyword}%`);
+        }
+
+        if (qs.typeActionIds) {
+          if (Array.isArray(qs.typeActionIds)) {
+            if (qs.typeActionIds.length > 0) {
+              q.whereIn('a.type_action_id', qs.typeActionIds);
+            }
+          } else {
+            q.where('a.type_action_id', qs.typeActionIds);
+          }
         }
 
         return q;

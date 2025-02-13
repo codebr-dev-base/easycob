@@ -22,19 +22,9 @@ export function DatePicker({
 }: {
   placeholder: string;
   onChange: (range: DateRange) => void;
-  defaultDate?: DateRange;
+  defaultDate?: DateRange | undefined;
 }) {
-  // Ajusta a data atual para GMT-3 ao inicializar o estado
-  const initializeDateWithGMT3 = (): Date => {
-    const date = new Date();
-    date.setHours(date.getHours() - 3); // Ajusta para GMT-3
-    return date;
-  };
-
-  const [date, setDate] = useState<DateRange>({
-    from: initializeDateWithGMT3(),
-    to: initializeDateWithGMT3(),
-  });
+  const [date, setDate] = useState<DateRange | undefined>(undefined);
 
   useEffect(() => {
     if (defaultDate) {

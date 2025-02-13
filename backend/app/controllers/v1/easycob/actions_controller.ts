@@ -222,16 +222,16 @@ export default class ActionsController {
         return response.badRequest({
           success: false,
           data,
-          message: 'Usuario não existe',
-          error: 'Usuario não existe',
+          message: 'Usuário não existe',
+          error: 'Usuário não existe',
         });
       }
     } catch (error) {
       return response.badRequest({
         success: false,
         data: request.all(),
-        message: 'Usuario não existe',
-        error: 'Usuario não existe',
+        message: 'Usuário não existe',
+        error: 'Usuário não existe',
       });
     }
   }

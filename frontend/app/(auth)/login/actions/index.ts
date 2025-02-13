@@ -39,6 +39,8 @@ export async function signin(
     },
   });
 
+  console.log(response);
+
   // Verifica se a resposta está ok (status 200-299)
   if (!response.ok) {
     const text = await response.text();

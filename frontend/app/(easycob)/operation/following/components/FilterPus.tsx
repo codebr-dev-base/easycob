@@ -25,18 +25,12 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { IUser } from "@/app/interfaces/auth";
-import MultipleSelector, { Option } from "@/components/ui/multiple-selector";
-import { ChangeEvent, useEffect, useState } from "react";
+import { Option } from "@/components/ui/multiple-selector";
+import { ChangeEvent, use, useEffect, useState } from "react";
 import { fetchUserByModule } from "@/app/(easycob)/admin/users/service/users";
-import { IQueryDiscountParams } from "../interfaces/discounts";
+import { IQueryFollowingParams } from "../interfaces/following";
 import { DatePicker } from "@/app/(easycob)/components/DatePicker";
 import { DateRange } from "react-day-picker";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { FaSearch } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { DatePickerClear } from "@/app/(easycob)/components/DatePickerClear";
@@ -45,12 +39,18 @@ export default function FilterPus({
   query,
   refresh,
 }: {
-  query: IQueryDiscountParams;
-  refresh: () => void;
+  query: IQueryFollowingParams;
+  refresh: (newParams: Partial<IQueryFollowingParams>) => void;
 }) {
-  const [statusOperator, setStatusOperator] = useState(true);
   const [status, setStatus] = useState(false);
   const [discount, setDiscount] = useState(false);
+  const [rangeDateCreate, setRangeDateCreate] = useState<DateRange | undefined>(
+    undefined
+  );
+  const [rangeDate, setRangeDate] = useState<DateRange>({
+    from: new Date(new Date().setHours(1, 1, 1, 0)),
+    to: new Date(new Date().setHours(23, 59, 59, 999)),
+  });
   const [operators, setOperators] = useState<IUser[]>([]);
 
   useEffect(() => {
@@ -61,36 +61,55 @@ export default function FilterPus({
     const opts: Option[] = [];
   }, []);
 
+  useEffect(() => {
+    if (query.status && query.status == "true") {
+      setStatus(true);
+    } else if (query.status && query.status == "false") {
+      setStatus(false);
+    }
+
+    if (query.discount && query.discount == "true") {
+      setDiscount(true);
+    } else if (query.discount && query.discount == "false") {
+      setDiscount(false);
+    }
+  }, [query.status, query.discount]);
+
+  useEffect(() => {
+    if (query.startDate && query.endDate) {
+      setRangeDate({
+        from: new Date(query.startDate),
+        to: new Date(query.endDate),
+      });
+    }
+  }, [query.startDate, query.endDate]);
+
+  useEffect(() => {
+    if (query.startDateCreate && query.endDateCreate) {
+      setRangeDateCreate({
+        from: new Date(query.startDateCreate),
+        to: new Date(query.endDateCreate),
+      });
+    }
+  }, [query.startDateCreate, query.endDateCreate]);
+
   const handleChangeStatus = () => {
-    query.status = !status;
     setStatus(!status);
-    query.page = 1;
-    query.perPage = 10;
-    refresh();
+    refresh({ status: `${!status}`, page: 1 });
   };
 
   const handleChangeDiscount = () => {
-    query.discount = !discount;
     setDiscount(!discount);
-    query.page = 1;
-    query.perPage = 10;
-    refresh();
+    refresh({ discount: `${!discount}`, page: 1 });
   };
 
   const handleChangeOperator = (value: string) => {
-    if (value == "all") {
-      query.userId = "";
-    } else {
-      query.userId = value;
-    }
-    query.page = 1;
-    query.perPage = 10;
-    refresh();
+    refresh({ userId: value == "all" ? "" : value, page: 1 });
   };
 
   useEffect(() => {
-    refreshOperators(statusOperator);
-  }, [statusOperator]);
+    refreshOperators(status);
+  }, [status]);
 
   const refreshOperators = async (value: boolean) => {
     const result = await fetchUserByModule("operator", value);
@@ -99,26 +118,27 @@ export default function FilterPus({
 
   const handleChangeKeyword = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.name == "keyword") {
-      if (e.target.value.length > 4) {
-        query.keyword = e.target.value;
-        refresh();
-      }
+      refresh({ keyword: e.target.value, page: 1 });
     }
   };
 
   const handleChangeDate = (range: DateRange) => {
     if (range.from && range.to) {
-      query.startDate = range.from?.toISOString().split("T")[0];
-      query.endDate = range.to?.toISOString().split("T")[0];
-      refresh();
+      refresh({
+        startDate: range.from?.toISOString().split("T")[0],
+        endDate: range.to?.toISOString().split("T")[0],
+        page: 1,
+      });
     }
   };
 
   const handleChangeDateCreate = (range: DateRange) => {
     if (range.from && range.to) {
-      query.startDateCreate = range.from?.toISOString().split("T")[0];
-      query.endDateCreate = range.to?.toISOString().split("T")[0];
-      refresh();
+      refresh({
+        startDateCreate: range.from?.toISOString().split("T")[0],
+        endDateCreate: range.to?.toISOString().split("T")[0],
+        page: 1,
+      });
     }
   };
 
@@ -131,7 +151,7 @@ export default function FilterPus({
         <Card>
           <CardHeader>
             <CardTitle>Filtro</CardTitle>
-            <CardDescription>Card Description</CardDescription>
+            <CardDescription></CardDescription>
           </CardHeader>
           <CardContent className="p-2 space-y-2">
             <div className="flex w-full">
@@ -146,14 +166,18 @@ export default function FilterPus({
                     placeholder="Buscar.."
                     className="rounded-l-none"
                     onChange={handleChangeKeyword}
+                    defaultValue={query.keyword ? query.keyword : ""}
                   />
                 </div>
               </Label>
             </div>
             <div className="flex">
               <Label className="w-full">
-                Por operdor:
-                <Select onValueChange={handleChangeOperator}>
+                Por operador:
+                <Select
+                  onValueChange={handleChangeOperator}
+                  defaultValue={query.userId}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Operador" />
                   </SelectTrigger>
@@ -174,23 +198,26 @@ export default function FilterPus({
                 <DatePicker
                   placeholder="Período de vencimento"
                   onChange={handleChangeDate}
+                  defaultDate={rangeDate}
                 />
               </Label>
             </div>
             <div className="flex">
               <Label className="w-full">
                 Por data de criação:
-                <DatePickerClear
+                <DatePicker
                   placeholder="Período da criação"
                   onChange={handleChangeDateCreate}
+                  defaultDate={rangeDateCreate}
                 />
               </Label>
             </div>
 
             <div className="flex">
               <Label className="flex items-center space-x-1 m-0">
+                {status}
                 <Checkbox
-                  checked={status}
+                  defaultChecked={status}
                   onCheckedChange={handleChangeStatus}
                 />
                 <span>Status Registro</span>
@@ -199,7 +226,7 @@ export default function FilterPus({
             <div className="flex">
               <Label className="flex items-center space-x-1 py-2">
                 <Checkbox
-                  checked={discount}
+                  defaultChecked={discount}
                   onCheckedChange={handleChangeDiscount}
                 />
                 <span>Acordo com descontos</span>

@@ -1,5 +1,5 @@
 import { fetchAuth } from "@/app/lib/fetchAuth";
-import { INegotiationHistory } from "../interfaces/discounts";
+import { INegotiationHistory } from "../interfaces/following";
 
 const apiUrl = process.env.API_URL
   ? process.env.API_URL

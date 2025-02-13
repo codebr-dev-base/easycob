@@ -41,7 +41,7 @@ import { updateNegotiation } from "../service/negotiations";
 import { fetchNegotiationHistories } from "../service/negotiationHistories";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { INegotiationHistory } from "../interfaces/discounts";
+import { INegotiationHistory } from "../interfaces/following";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FaClockRotateLeft } from "react-icons/fa6";

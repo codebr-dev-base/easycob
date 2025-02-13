@@ -16,32 +16,30 @@ import {
   formatarFone,
   getFirstAndLastName,
 } from "@/app/lib/utils";
-import Pagination from "@/app/(easycob)/components/Pagination";
+import Pagination from "@/app/(easycob)/components/Pagination2";
 import { Button } from "@/components/ui/button";
-import { FaRegEye } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
 import Tooltips from "../../../components/Tooltips";
 import SkeletonTable from "@/app/(easycob)/components/SkeletonTable";
 import Link from "next/link";
-import { IQueryDiscountParams } from "../interfaces/discounts";
-import { IMeta } from "@/app/interfaces/pagination";
+import { IPaginationResponse } from "@/app/interfaces/pagination";
 import { IPromiseOfPayment } from "@/app/(easycob)/interfaces/actions";
 import { BsCheck, BsHourglassSplit } from "react-icons/bs";
-import { HeaderTable } from "@/app/(easycob)/components/HeaderTable";
+import { HeaderTable } from "@/app/(easycob)/components/HeaderTable2";
 import { useState } from "react";
 import FormPromiseHistories from "./FormPromiseHistories";
 import { Switch } from "@/components/ui/switch";
+import { IQueryFollowingParams } from "../interfaces/following";
 
 export default function TabPromises({
+  promises,
   query,
-  meta,
-  data,
   refresh,
   pending,
 }: {
-  query: IQueryDiscountParams;
-  meta?: IMeta;
-  data: IPromiseOfPayment[];
-  refresh: () => Promise<void>;
+  promises: IPaginationResponse<IPromiseOfPayment>;
+  query: IQueryFollowingParams;
+  refresh: (newParams: Partial<IQueryFollowingParams>) => void;
   pending: boolean;
 }) {
   const [selectRow, setSelectRow] = useState<IPromiseOfPayment | null>(null);
@@ -93,7 +91,11 @@ export default function TabPromises({
           }`}
         >
           <SkeletonTable
-            rows={meta && meta.perPage ? meta.perPage : query.perPage}
+            rows={
+              promises.meta && promises.meta.perPage
+                ? promises.meta.perPage
+                : query.perPage
+            }
           />
         </div>
 
@@ -169,7 +171,7 @@ export default function TabPromises({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((promese) => (
+              {promises.data.map((promese) => (
                 <TableRow key={promese.id}>
                   <TableCell>
                     <Switch
@@ -193,7 +195,9 @@ export default function TabPromises({
                     </Tooltips>
                   </TableCell>
                   <TableCell>
-                    {promese.valPrest ? formatCurrencyToBRL(promese.valPrest) : ""}
+                    {promese.valPrest
+                      ? formatCurrencyToBRL(promese.valPrest)
+                      : ""}
                   </TableCell>
                   <TableCell>
                     {promese.valOriginal
@@ -212,8 +216,10 @@ export default function TabPromises({
                   </TableCell>
                   <TableCell className="flex">
                     <Button asChild className="mx-1">
-                      <Link href={`/supervision/campaigns/lots/${promese.id}`}>
-                        <FaRegEye />
+                      <Link
+                        href={`/operation/clients/details/${promese.codCredorDesRegis}`}
+                      >
+                        <FaUser />
                       </Link>
                     </Button>
                   </TableCell>
@@ -228,7 +234,7 @@ export default function TabPromises({
           pending ? "opacity-0 hidden" : "opacity-100"
         }`}
       >
-        <Pagination meta={meta} query={query} refresh={refresh} />
+        <Pagination meta={promises.meta} query={query} refresh={refresh} />
       </CardFooter>
     </Card>
   );

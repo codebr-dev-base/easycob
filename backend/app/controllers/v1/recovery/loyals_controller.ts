@@ -8,7 +8,7 @@ import string from '@adonisjs/core/helpers/string';
 
 @inject()
 export default class LoyalsController {
-  constructor(protected service: LoyalService) { }
+  constructor(protected service: LoyalService) {}
 
   public async index({ request, auth }: HttpContext) {
     if (auth && auth.user && auth.user.id) {
@@ -23,6 +23,9 @@ export default class LoyalsController {
       switch (qs.orderBy) {
         case 'lastAction':
           orderBy = `la.synced_at`;
+          break;
+        case 'pecld':
+          orderBy = `la.pecld`;
           break;
         case 'lastActionName':
           orderBy = `ta.name`;
@@ -55,6 +58,7 @@ export default class LoyalsController {
         )
         .select('l.*')
         .select(db.raw('la.synced_at as last_action'))
+        .select(db.raw('la.pecld as pecld'))
         .select(db.raw('ta.name as last_action_name'))
         .where((q) => {
           return this.service.generateWherePaginate(q, qs);
@@ -77,7 +81,7 @@ export default class LoyalsController {
   public async getFaixaTempos() {
     const faixaTempos = await db
       .from('recupera.redistribuicao_carteira_base as l')
-      .select('faixa_tempo')
+      .select('faixa_tempo as value')
       .distinct('faixa_tempo')
       .orderBy('faixa_tempo');
 
@@ -87,7 +91,7 @@ export default class LoyalsController {
   public async getFaixaValores() {
     const faixaValores = await db
       .from('recupera.redistribuicao_carteira_base as l')
-      .select('faixa_valor')
+      .select('faixa_valor as value')
       .distinct('faixa_valor')
       .orderBy('faixa_valor');
 
@@ -97,7 +101,7 @@ export default class LoyalsController {
   public async getFaixaTitulos() {
     const faixaTitulos = await db
       .from('recupera.redistribuicao_carteira_base as l')
-      .select('faixa_titulos')
+      .select('faixa_titulos as value')
       .distinct('faixa_titulos')
       .orderBy('faixa_titulos');
 
@@ -106,7 +110,7 @@ export default class LoyalsController {
   public async getFaixaClusters() {
     const faixaCluster = await db
       .from('recupera.redistribuicao_carteira_base as l')
-      .select('class_cluster')
+      .select('class_cluster as value')
       .distinct('class_cluster')
       .orderBy('class_cluster');
 
@@ -115,7 +119,7 @@ export default class LoyalsController {
   public async getUnidades() {
     const unidades = await db
       .from('recupera.redistribuicao_carteira_base as l')
-      .select('unidade')
+      .select('unidade as value')
       .distinct('unidade')
       .orderBy('unidade');
 
@@ -125,7 +129,7 @@ export default class LoyalsController {
   public async getSituacoes() {
     const situacoes = await db
       .from('recupera.redistribuicao_carteira_base as l')
-      .select('class_sitcontr as situacao')
+      .select('class_sitcontr as value')
       .distinct('class_sitcontr')
       .orderBy('class_sitcontr');
 

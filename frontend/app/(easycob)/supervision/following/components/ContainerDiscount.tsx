@@ -16,7 +16,7 @@ import FilterPus from "./FilterPus";
 import { fetchInvoices, queryInvoices } from "../service/invoices";
 import { fetchPromises, queryPromises } from "../service/promises";
 import { fetchNegotiations, queryNegotiations } from "../service/negotiations";
-export default function ContainerDiscount({
+export default function ContainerFlowings({
   negotiations,
   promises,
   invoices,

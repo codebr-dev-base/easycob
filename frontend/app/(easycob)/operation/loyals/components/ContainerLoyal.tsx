@@ -1,71 +1,65 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { ILoyal } from "../interfaces/loyal";
-import { IMeta } from "../../../../interfaces/pagination";
+import React, { useCallback, useEffect, useState } from "react";
+import { ILoyal, IQueryLoyalParams } from "../interfaces/loyal";
+import { IPaginationResponse } from "../../../../interfaces/pagination";
 import TableRecords from "./TableRecords";
-import { buildQueryString, parseQueryString } from "@/app/lib/fetchAuth";
-import { useSearchParams } from "next/navigation";
-import { fetchLoyals, query, setQuery } from "../service/loyals";
 import Header from "@/app/(easycob)/components/Header";
 import FilterPus from "./FilterPus";
+import useLoyalsService from "../service/use-loyals-service";
 
 export default function ContainerLoyal({
-  loyals,
+  initialData,
+  initialQuery,
 }: {
-  loyals: {
-    meta: IMeta;
-    data: ILoyal[];
-  };
+  initialData: IPaginationResponse<ILoyal>;
+  initialQuery: IQueryLoyalParams;
 }) {
-  const [meta, setMeta] = useState<IMeta>(loyals.meta);
-  const [data, setData] = useState<ILoyal[]>(loyals.data ? loyals.data : []);
-  const [pending, setPending] = useState<boolean>(false);
-  const searchParams = useSearchParams();
+  const {
+    loyals,
+    setLoyals,
+    isLoading,
+    error,
+    queryParams,
+    fetchLoyals,
+    setQueryParams,
+  } = useLoyalsService({ initialData, initialQuery });
 
-  useEffect(() => {
-    if (searchParams.toString()) {
-      const historyQuery = parseQueryString(searchParams);
-      setQuery(historyQuery);
-      setPending(true);
-      fetchLoyals().then((records) => {
-        setMeta(records.meta);
-        setData(records.data);
-        setPending(false);
-      });
-    } else {
-      const queryString = buildQueryString(query);
-      window.history.pushState(null, "", `?${queryString}`);
-    }
-  }, []);
+  const refresh = useCallback(
+    (newParams: Partial<IQueryLoyalParams>) => {
+      setQueryParams(newParams);
+      fetchLoyals();
+    },
+    [setQueryParams, fetchLoyals]
+  );
 
-  const refresh = async () => {
-    const queryString = buildQueryString(query);
-    window.history.pushState(null, "", `?${queryString}`);
-    setPending(true);
-    fetchLoyals().then((records) => {
-      setMeta(records.meta);
-      setData(records.data);
-      setPending(false);
-    });
-  };
+  if (!loyals || !initialData){
+    return (
+      <div className="w-full h-full">
+        <span>Api indisponivel</span>
+      </div>
+    );
+  }
 
   return (
     <article className="max-w-full">
       <div className="p-2">
         <Header title="Fidelizados">
           <div className="flex flex-col md:flex-row justify-end items-end gap-4">
-            <FilterPus query={query} refresh={refresh} /> 
+            <FilterPus
+              query={queryParams.current as IQueryLoyalParams}
+              refresh={refresh}
+            />
           </div>
         </Header>
       </div>
 
       <main className="p-2">
         <TableRecords
-          meta={meta}
-          data={data}
+          loyals={loyals}
+          query={queryParams.current as IQueryLoyalParams}
           refresh={refresh}
-          query={query}
-          pending={pending}
+          pending={isLoading}
+          setLoyals={setLoyals}
         />
       </main>
     </article>
