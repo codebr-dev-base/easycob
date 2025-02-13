@@ -2,7 +2,6 @@ import { fetchAuth } from "@/app/lib/fetchAuth";
 import { IMeta } from "@/app/interfaces/pagination";
 import { IQueryFollowingParams } from "../interfaces/following";
 import { INegotiationOfPayment } from "@/app/(easycob)/interfaces/actions";
-import { initialQuery } from '../page';
 
 const apiUrl = process.env.API_URL
   ? process.env.API_URL
