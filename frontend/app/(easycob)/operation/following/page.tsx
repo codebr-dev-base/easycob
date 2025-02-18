@@ -31,20 +31,17 @@ const initialQuery: IQueryFollowingParams = {
 
 export default async function Followings() {
   try {
-    if (!initialNegotiationOfPayment)
-      initialNegotiationOfPayment = await fetchNegotiations(initialQuery);
-    if (!initialAgreement)
-      initialAgreement = await fetchPromises({
-        ...initialQuery,
-        typeActionIds: 1,
-      });
-    if (!initialNegotiationInvoice)
-      initialNegotiationInvoice = await fetchInvoices(initialQuery);
-    if (!initialPromise)
-      initialPromise = await fetchPromises({
-        ...initialQuery,
-        typeActionIds: 2,
-      });
+    initialNegotiationOfPayment = await fetchNegotiations(initialQuery);
+    initialAgreement = await fetchPromises({
+      ...initialQuery,
+      typeActionIds: 1,
+    });
+
+    initialNegotiationInvoice = await fetchInvoices(initialQuery);
+    initialPromise = await fetchPromises({
+      ...initialQuery,
+      typeActionIds: 2,
+    });
 
     if (
       !initialNegotiationOfPayment ||

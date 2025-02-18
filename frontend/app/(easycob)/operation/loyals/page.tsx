@@ -18,7 +18,7 @@ const initialQuery: IQueryLoyalParams = {
 
 export default async function Loyals() {
   try {
-    if (!loyals) loyals = await fetchLoyals(initialQuery);
+    loyals = await fetchLoyals(initialQuery);
 
     if (!loyals) {
       return (
