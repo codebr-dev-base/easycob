@@ -36,7 +36,7 @@ import {
 import { TabsContacts } from "./TabsContacts";
 import { IAction, ITypeAction } from "@/app/(easycob)/interfaces/actions";
 import FormNegotiation from "./forms/FormNegotiation";
-import { useState } from "react";
+import { Dispatch, SetStateAction, use, useEffect, useState } from "react";
 import TableContracts from "./TableContracts";
 import { IMeta } from "@/app/interfaces/pagination";
 import FormPromise from "./forms/FormPromise";
@@ -44,6 +44,23 @@ import FormSimple from "./forms/FormSimple";
 import { fetchActionsClient } from "../../../service/actions";
 import { fetchContacts } from "../../../service/contacts";
 import { GoAlert } from "react-icons/go";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { LuTag } from "react-icons/lu";
+import { fetchTypesActions } from "@/app/(easycob)/supervision/actions/service/actions";
+import { fetchTags } from "@/app/(easycob)/admin/tags/page";
+import { ITag } from "@/app/(easycob)/admin/tags/interfaces/tag";
+import {
+  attachTag,
+  clearTags,
+  detachTag,
+  fetchTagsClient,
+} from "../../../service/clients";
+import { Badge, badgeVariants } from "@/components/ui/badge";
+import { fi, se } from "date-fns/locale";
 
 export function AlertCpc() {
   return (
@@ -56,21 +73,93 @@ export function AlertCpc() {
   );
 }
 
+function FormTag({
+  client,
+  set,
+}: {
+  client: IClient;
+  set: Dispatch<SetStateAction<ITag[]>>;
+}) {
+  const [tags, setTags] = useState<ITag[]>([]);
+  const [selectedTag, setSelectedTag] = useState<string | null>();
+
+  useEffect(() => {
+    fetchTags()
+      .then((data) => {
+        if (data) {
+          setTags(data);
+        }
+      })
+      .catch((error) => {
+        console.error("Erro ao buscar tags:", error);
+      });
+  }, []);
+
+  const handleTagSelect = async () => {
+    try {
+      if (selectedTag) {
+        const t = tags.find((tag) => tag.id === parseInt(selectedTag));
+        if (t) {
+          await attachTag(client.codCredorDesRegis, selectedTag);
+          set((prevTags) => {
+            const newArray: ITag[] = [
+              ...(new Set<ITag>([...prevTags, t]) as unknown as ITag[]),
+            ];
+            return newArray;
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao associar tag:", error);
+    }
+  };
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button>
+          <LuTag />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80">
+        <div className="flex gap-2 justify-between">
+          <Select
+            onValueChange={(value) => {
+              setSelectedTag(value);
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione uma tag" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {tags.map((tag) => (
+                  <SelectItem key={tag.id} value={`${tag.id}`}>
+                    {tag.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Button onClick={() => handleTagSelect()}>
+            <FaPlus />
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
 export default function ConteinerDetails({
   client,
   contacts: c,
-  actions: a,
   contracts,
-  typesActions,
 }: {
   client: IClient;
   contacts: { phones: IContact[]; emails: IContact[] };
-  actions: IAction[];
   contracts: {
     meta: IMeta;
     data: IContract[];
   };
-  typesActions: ITypeAction[];
 }) {
   const [selectTypeAction, setSelectTypeAction] = useState<ITypeAction | null>(
     null
@@ -80,9 +169,30 @@ export default function ConteinerDetails({
 
   const [selectContact, setSelectContact] = useState<IContact | null>(null);
 
-  const [actions, setActions] = useState(a);
+  const [actions, setActions] = useState<IAction[]>([]);
 
   const [contacts, setContacts] = useState(c);
+  const [typesActions, setTypesActions] = useState<ITypeAction[]>([]);
+  const [tags, setTags] = useState<ITag[]>([]);
+
+  useEffect(() => {
+    fetchTypesActions().then((records) => {
+      if (records) {
+        setTypesActions(records);
+      }
+    });
+    fetchActionsClient(`${client.codCredorDesRegis}`).then((records) => {
+      if (records) {
+        setActions(records);
+      }
+    });
+    fetchTagsClient(client.codCredorDesRegis).then((response) => {
+      console.log(response);
+      if (response) {
+        setTags(response);
+      }
+    });
+  }, []);
 
   const refreshActions = async () => {
     fetchActionsClient(`${client.codCredorDesRegis}`).then((records) => {
@@ -113,7 +223,6 @@ export default function ConteinerDetails({
 
   const checkPrerequisites = (): boolean => {
     if (!selectTypeAction || !selectContact || !selectContract) {
-      console.log("falta alguem");
       return false;
     }
 
@@ -172,12 +281,51 @@ export default function ConteinerDetails({
     }
   };
 
+  const handleDeleteTag = async (id: number) => {
+    await detachTag(client.codCredorDesRegis, id);
+
+    const newTags = tags.filter((tag) => tag.id !== id);
+    setTags(newTags);
+  };
+
+  const handleClearTags = async () => {
+    await clearTags(client.codCredorDesRegis);
+    setTags([]);
+  };
+
   return (
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Detalhes do cliente</CardTitle>
-          <CardDescription>Status: {client.status}</CardDescription>
+          <CardTitle>
+            <div className="flex justify-between">
+              <div>Detalhes do cliente</div>
+              <div className="text-base font-medium">
+                <FormTag client={client} set={setTags} />
+              </div>
+            </div>
+          </CardTitle>
+          <CardDescription className="flex">
+            <span>Status: {client.status}</span>
+            {tags.map((tag) => (
+              <Badge
+                className="ml-2 pr-0 py-0"
+                key={tag.id}
+                style={{ backgroundColor: tag.color }}
+              >
+                {tag.name}{" "}
+                <button
+                  className="ml-2 rounded-full currsor-pointer bg-slate-200 p-0 text-slate-500 h-4 w-4 text-xs hover:text-sm"
+                  onClick={() => handleDeleteTag(tag.id)}
+                >
+                  X
+                </button>
+              </Badge>
+            ))}
+            {tags.length >0 && (
+              <button className={badgeVariants({ variant: "secondary" })} onClick={() => handleClearTags()}>Limpar</button>
+            )}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex-1 space-y-1">

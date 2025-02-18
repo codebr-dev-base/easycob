@@ -28,6 +28,9 @@ export default class TypeAction extends BaseModel {
   @column()
   declare timelife: number;
 
+  @column()
+  declare active: boolean;
+
   @belongsTo(() => CategoryAction, {
     foreignKey: 'categoryActionId',
   })

@@ -1,5 +1,4 @@
 import { IPaginationResponse } from "@/app/interfaces/pagination";
-import { IQueryClienteParams } from "../interfaces/cliente";
 import { IClient } from "@/app/(easycob)/interfaces/clients";
 import useQueryParams from "@/hooks/use-query-params";
 import { fetchAuth } from "@/app/lib/fetchAuth";
@@ -7,13 +6,14 @@ import * as dotEnv from "dotenv";
 import { isEqual } from "@/app/lib/utils";
 import { useCallback, useEffect, useState } from "react";
 import { IQueryParams } from "@/app/interfaces/fetch";
+import { IQueryTagClientParams } from "../interfaces/tag";
 dotEnv.config();
 
 const apiUrl = process.env.API_URL
   ? process.env.API_URL
   : process.env.NEXT_PUBLIC_API_URL;
 
-const urn = "/v1/recovery/client";
+const urn = "/v1/tag/clients/paginated";
 const baseUrl = `${apiUrl}${urn}`;
 
 const useClientsService = ({
@@ -21,7 +21,7 @@ const useClientsService = ({
   initialQuery,
 }: {
   initialData: IPaginationResponse<IClient>;
-  initialQuery: IQueryClienteParams;
+  initialQuery: IQueryTagClientParams;
 }) => {
   const { queryParams, setQueryParams } = useQueryParams(initialQuery);
 

@@ -56,10 +56,30 @@ export default class LoyalsController {
           '=',
           'ta.id'
         )
+        .joinRaw(
+          `
+          LEFT JOIN (
+                SELECT
+                DISTINCT ON (ct.client_id)
+                ct.client_id,
+                t.name,
+                t.color,
+                ct.updated_at
+              FROM clients_tags AS ct
+              JOIN tags AS t
+              ON ct.tag_id = t.id
+              WHERE ct.updated_at >= NOW() - (t.validity || ' days')::INTERVAL
+              ORDER BY ct.client_id, ct.updated_at DESC
+          ) AS lct
+          ON l.cod_credor_des_regis = lct.client_id
+        `
+        )
         .select('l.*')
         .select(db.raw('la.synced_at as last_action'))
         .select(db.raw('la.pecld as pecld'))
         .select(db.raw('ta.name as last_action_name'))
+        .select(db.raw('lct.name as tag_name'))
+        .select(db.raw('lct.color as tag_color'))
         .where((q) => {
           return this.service.generateWherePaginate(q, qs);
         })

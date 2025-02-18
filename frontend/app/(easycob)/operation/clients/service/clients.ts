@@ -3,6 +3,8 @@ import { IMeta, IPaginationResponse } from "@/app/interfaces/pagination";
 import { IQueryClienteParams } from "../interfaces/cliente";
 import { IClient, ISendMail } from "@/app/(easycob)/interfaces/clients";
 import * as dotEnv from "dotenv";
+import { fetchTags } from '../../../admin/tags/page';
+import { ITag } from "@/app/(easycob)/admin/tags/interfaces/tag";
 dotEnv.config();
 
 const apiUrl = process.env.API_URL
@@ -25,7 +27,9 @@ export function setQuery(newParams: Partial<IQueryClienteParams>): void {
   query = { ...query, ...newParams };
 }
 
-export const fetchClients = async (initialQuery: IQueryClienteParams): Promise<IPaginationResponse<IClient>> => {
+export const fetchClients = async (
+  initialQuery: IQueryClienteParams
+): Promise<IPaginationResponse<IClient>> => {
   const result = await fetchAuth(url, {
     query: initialQuery,
   });
@@ -53,9 +57,7 @@ export const fetchClient = async (
   }
 };
 
-export const sendMail = async (
-  mail: ISendMail
-) => {
+export const sendMail = async (mail: ISendMail) => {
   const formData = new FormData();
 
   // Converter o objeto data em FormData
@@ -72,6 +74,48 @@ export const sendMail = async (
     body: formData,
   });
 
+  if (result.success) {
+    //console.log("Dados recebidos:", result.data);
+    return result.data;
+  } else {
+    if (result.errors) {
+      throw result.errors;
+    } else {
+      throw new Error(result.error);
+    }
+  }
+};
+
+export const attachTag = async (
+  codCredorDesRegis: String | Number,
+  tagId: number | string
+) => {
+  const result = await fetchAuth(`${url}/${codCredorDesRegis}/tags`, {
+    method: "POST",
+    body: JSON.stringify({ tagId }),
+  });
+};
+
+export const detachTag = async (
+  codCredorDesRegis: String | Number,
+  tagId: number | string
+) => {
+  const result = await fetchAuth(`${url}/${codCredorDesRegis}/tags`, {
+    method: "DELETE",
+    body: JSON.stringify({ tagId }),
+  });
+};
+
+export const clearTags = async (
+  codCredorDesRegis: String | Number
+) => {
+  const result = await fetchAuth(`${url}/${codCredorDesRegis}/tags/clear`, {
+    method: "DELETE",
+  });
+};
+
+export const fetchTagsClient = async (codCredorDesRegis: String | Number) => {
+  const result = await fetchAuth<ITag[]>(`${url}/${codCredorDesRegis}/tags`);
   if (result.success) {
     //console.log("Dados recebidos:", result.data);
     return result.data;

@@ -45,4 +45,6 @@ export interface ILoyal {
   lastAction?: string;
   lastActionName?: string;
   pecld?: number;
+  tagName?: string;
+  tagColor?: string;
 }

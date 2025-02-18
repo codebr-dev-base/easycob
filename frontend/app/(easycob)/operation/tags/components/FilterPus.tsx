@@ -11,16 +11,16 @@ import { Label } from "@/components/ui/label";
 import { ChangeEvent, useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
-import { IQueryClienteParams } from "../interfaces/cliente";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
+import { IQueryTagClientParams } from "../interfaces/tag";
 
 export default function FilterPus({
   query,
   refresh,
 }: {
-  query: IQueryClienteParams;
-  refresh: (newParams: Partial<IQueryClienteParams>) => void;
+  query: IQueryTagClientParams;
+  refresh: (newParams: Partial<IQueryTagClientParams>) => void;
 }) {
   const [isFixa, setIsFixa] = useState(false);
   const [isVar, setIsVar] = useState(false);

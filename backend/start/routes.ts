@@ -21,9 +21,7 @@ import contact from '#routes/recovery/contact';
 import contract from '#routes/recovery/contract';
 import recoveryinvoice from '#routes/recovery/invoice';
 import loyal from '#routes/recovery/loyal';
-
-
-
+import tag from '#routes/tag';
 
 router.get('/', async () => {
   return {
@@ -31,20 +29,20 @@ router.get('/', async () => {
   };
 });
 
-router
-  .group(() => {
-    action;
-    auth;
-    campaign;
-    invoice;
-    promise;
-    negotiation;
-    templates;
-    client;
-    contact;
-    contract;
-    recoveryinvoice;
-    loyal;
-  });
+router.group(() => {
+  action;
+  auth;
+  campaign;
+  invoice;
+  promise;
+  negotiation;
+  templates;
+  client;
+  contact;
+  contract;
+  recoveryinvoice;
+  loyal;
+  tag;
+});
 
 router.jobs();

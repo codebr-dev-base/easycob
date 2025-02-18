@@ -2,6 +2,7 @@ import SendInvoiceJob from '#jobs/send_invoice_job';
 import MailInvoice from '#models/mail_invoice';
 import MailInvoiceFile from '#models/mail_invoice_file';
 import Client from '#models/recovery/client';
+import Tag from '#models/tag';
 import ClientService from '#services/client_service';
 import { createClientMailValidator } from '#validators/recovery/client_mail_validator';
 import { updateClientValidator } from '#validators/recovery/client_validator';
@@ -156,5 +157,49 @@ export default class ClientsController {
 
       return mailInvoice;
     }
+  }
+
+  public async attachTag({ params, request }: HttpContext) {
+    const client = await Client.findByOrFail('cod_credor_des_regis', params.id);
+    const { tagId } = request.only(['tagId']);
+
+    await client.related('tags').detach([tagId]);
+
+    await client.related('tags').attach([tagId]);
+    return { message: 'Tag associada com sucesso' };
+  }
+
+  public async detachTag({ params, request }: HttpContext) {
+    const client = await Client.findByOrFail('cod_credor_des_regis', params.id);
+    const { tagId } = request.only(['tagId']);
+
+    await client.related('tags').detach([tagId]);
+
+    return { message: 'Tag desassociada com sucesso' };
+  }
+
+  public async clearTags({ params }: HttpContext) {
+    const client = await Client.findByOrFail('cod_credor_des_regis', params.id);
+
+    await client.related('tags').detach();
+
+    return { message: 'Tags removidas com sucesso' };
+  }
+
+  public async tags({ params }: HttpContext) {
+    const tags = await Tag.query()
+      .join('clients_tags', 'tags.id', 'clients_tags.tag_id')
+      .join(
+        'recupera.tbl_arquivos_clientes',
+        'recupera.tbl_arquivos_clientes.cod_credor_des_regis',
+        'clients_tags.client_id'
+      )
+      .where('clients_tags.client_id', params.id)
+      .whereRaw(
+        "clients_tags.updated_at >= NOW() - (tags.validity || ' days')::INTERVAL"
+      )
+      .select('tags.*');
+
+    return tags;
   }
 }

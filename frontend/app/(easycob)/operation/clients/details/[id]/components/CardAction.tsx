@@ -80,14 +80,14 @@ export default function CardAction({ action }: { action: IAction }) {
           )}
           <p>Contrato: {action.desContr}</p>
           {action.tipoContato === "TELEFONE" ? (
-            <p>Contrato: {formatarFone(action.contato)}</p>
+            <p>Contato: {formatarFone(action.contato)}</p>
           ) : (
-            <p>Contrato: {action.contato}</p>
+            <p>Contato: {action.contato}</p>
           )}
         </CardContent>
         <CardFooter>
           <p>
-            Atualizado em: {formatDateToBR(`${action.updatedAt}`)} Operarador:{" "}
+            Atualizado em: {formatDateToBR(`${action.updatedAt}`)} Operador:{" "}
             {action.user.name}{" "}
           </p>
         </CardFooter>

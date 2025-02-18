@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import ConteinerUser from "./users/components/ConteinerUser";
-import SkeletonFullPage from "../components/SkeletonFullPage";
-import { fetchUsers } from "./users/service/users";
-import { fetchModules } from "./users/service/module";
+import ConteinerUser from "./components/ConteinerUser";
+import SkeletonFullPage from "../../components/SkeletonFullPage";
+import { fetchUsers } from "./service/users";
+import { fetchModules } from "./service/module";
 
 export default async function Clients() {
   try {

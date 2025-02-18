@@ -10,6 +10,11 @@ export default router
         router.get('/:id', [ClientsController, 'show']);
         router.put('/:id', [ClientsController, 'update']);
         router.post('/mail', [ClientsController, 'send']);
+
+        router.get('/:id/tags', [ClientsController, 'tags']);
+        router.post('/:id/tags', [ClientsController, 'attachTag']);
+        router.delete('/:id/tags', [ClientsController, 'detachTag']);
+        router.delete('/:id/tags/clear', [ClientsController, 'clearTags']);
       })
       .prefix('/client')
       .use(middleware.auth());

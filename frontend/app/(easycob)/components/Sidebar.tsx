@@ -39,6 +39,7 @@ const moduleLinks: Record<string, ModuleConfig> = {
       { href: "/operation/clients", label: "Clientes" },
       { href: "/operation/following", label: "Acompanhamento" },
       { href: "/operation/loyals", label: "Fidelizados" },
+      { href: "/operation/tags", label: "Tags" },
     ],
   },
   supervisor: {
@@ -53,7 +54,10 @@ const moduleLinks: Record<string, ModuleConfig> = {
   admin: {
     label: "Admin",
     icon: LuLock,
-    links: [{ href: "/admin", label: "Usuários" }],
+    links: [
+      { href: "/admin/users", label: "Usuários" },
+      { href: "/admin/tags", label: "Tags" },
+    ],
   },
 };
 

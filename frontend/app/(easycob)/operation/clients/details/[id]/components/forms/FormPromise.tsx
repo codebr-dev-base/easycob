@@ -46,7 +46,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const channelOptions = [
   {
-    label: "Whatsapp",
+    label: "WhatsApp",
     value: "whatsapp",
   },
   {

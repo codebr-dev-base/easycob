@@ -55,7 +55,7 @@ export default function FilterPus({
       <PopoverContent align={"end"} className="w-96">
         <Card>
           <div className="flex text-2xl px-2">
-            <h3>Filtos</h3>
+            <h3>Filtros</h3>
           </div>
           <CardContent className="p-2 space-y-2">
             <div className="flex w-full">

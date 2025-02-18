@@ -1,32 +1,29 @@
 import { fetchClient } from "../../service/clients";
 import { fetchContacts } from "../../service/contacts";
-import { fetchActionsClient } from "../../service/actions";
-import { fetchTypesActions } from "@/app/(easycob)/supervision/actions/service/actions";
 import ConteinerDetails from "./components/ConteinerDetails";
 import { fetchContracts } from "../../service/contracts";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export default async function Details({ params }: { params: { id: string } }) {
   try {
-    const [client, contacts, actions, contracts, typesActions] =
+    const [client, contacts, contracts] =
       await Promise.all([
         fetchClient(params.id),
         fetchContacts(params.id),
-        fetchActionsClient(params.id),
         fetchContracts(params.id),
-        fetchTypesActions(),
       ]);
 
     return (
       <article className="max-w-full">
         <main className="p-2 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<p>Loading...</p>}>
           <ConteinerDetails
-            actions={actions}
             contacts={contacts}
             client={client}
             contracts={contracts}
-            typesActions={typesActions ? typesActions : []}
           />
+          </Suspense>
         </main>
       </article>
     );

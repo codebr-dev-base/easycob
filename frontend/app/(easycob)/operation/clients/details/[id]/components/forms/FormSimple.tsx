@@ -44,7 +44,7 @@ import { Wallet } from "lucide-react";
 
 const channelOptions = [
   {
-    label: "Whatsapp",
+    label: "WhatsApp",
     value: "whatsapp",
   },
   {
