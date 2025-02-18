@@ -70,7 +70,7 @@ export default function ContainerTag({
               <TabsTrigger
                 key={tag.id}
                 value={`${tag.id}`}
-                className="TabsTrigger"
+                className="rounded-full mx-1 data-[state=active]:text-white hover:text-white"
                 style={{
                   backgroundColor: tag.color,
                 }}
