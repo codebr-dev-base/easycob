@@ -20,7 +20,7 @@ const initialQuery: IQueryTagClientParams = {
   descending: false,
 };
 
-export const fetchTags = async (): Promise<ITag[]> => {
+const fetchTags = async (): Promise<ITag[]> => {
   const result = await fetchAuth(url);
 
   if (result.success) {
@@ -32,7 +32,7 @@ export const fetchTags = async (): Promise<ITag[]> => {
   }
 };
 
-export const fetchClients = async (
+const fetchClients = async (
   id: number | string
 ): Promise<IPaginationResponse<IClient>> => {
   const result = await fetchAuth(`${url}/clients/paginated`, {

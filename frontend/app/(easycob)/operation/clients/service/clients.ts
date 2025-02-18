@@ -3,7 +3,6 @@ import { IMeta, IPaginationResponse } from "@/app/interfaces/pagination";
 import { IQueryClienteParams } from "../interfaces/cliente";
 import { IClient, ISendMail } from "@/app/(easycob)/interfaces/clients";
 import * as dotEnv from "dotenv";
-import { fetchTags } from '../../../admin/tags/page';
 import { ITag } from "@/app/(easycob)/admin/tags/interfaces/tag";
 dotEnv.config();
 

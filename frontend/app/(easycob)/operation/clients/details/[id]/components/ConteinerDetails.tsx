@@ -51,7 +51,6 @@ import {
 } from "@/components/ui/popover";
 import { LuTag } from "react-icons/lu";
 import { fetchTypesActions } from "@/app/(easycob)/supervision/actions/service/actions";
-import { fetchTags } from "@/app/(easycob)/admin/tags/page";
 import { ITag } from "@/app/(easycob)/admin/tags/interfaces/tag";
 import {
   attachTag,
@@ -61,6 +60,7 @@ import {
 } from "../../../service/clients";
 import { Badge, badgeVariants } from "@/components/ui/badge";
 import { fi, se } from "date-fns/locale";
+import { fetchTags } from "@/app/(easycob)/admin/tags/service/tags";
 
 export function AlertCpc() {
   return (
@@ -85,15 +85,14 @@ function FormTag({
 
   useEffect(() => {
     fetchTags()
-      .then((data) => {
+      .then((data: ITag[]) => {
         if (data) {
           setTags(data);
         }
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         console.error("Erro ao buscar tags:", error);
-      });
-  }, []);
+      });  }, []);
 
   const handleTagSelect = async () => {
     try {

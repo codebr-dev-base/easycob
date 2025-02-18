@@ -12,7 +12,7 @@ const apiUrl = process.env.API_URL
 const urn = "/v1/tag";
 const url = `${apiUrl}${urn}`;
 
-export const fetchTags = async (): Promise<ITag[]> => {
+const fetchTags = async (): Promise<ITag[]> => {
   const result = await fetchAuth(url);
 
   if (result.success) {
