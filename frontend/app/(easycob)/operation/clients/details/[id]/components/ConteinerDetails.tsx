@@ -61,6 +61,7 @@ import {
 import { Badge, badgeVariants } from "@/components/ui/badge";
 import { fi, se } from "date-fns/locale";
 import { fetchTags } from "@/app/(easycob)/admin/tags/service/tags";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function AlertCpc() {
   return (
@@ -92,7 +93,8 @@ function FormTag({
       })
       .catch((error: unknown) => {
         console.error("Erro ao buscar tags:", error);
-      });  }, []);
+      });
+  }, []);
 
   const handleTagSelect = async () => {
     try {
@@ -307,22 +309,36 @@ export default function ConteinerDetails({
           <CardDescription className="flex">
             <span>Status: {client.status}</span>
             {tags.map((tag) => (
-              <Badge
-                className="ml-2 pr-0 py-0"
-                key={tag.id}
-                style={{ backgroundColor: tag.color }}
-              >
-                {tag.name}{" "}
-                <button
-                  className="ml-2 rounded-full currsor-pointer bg-slate-200 p-0 text-slate-500 h-4 w-4 text-xs hover:text-sm"
-                  onClick={() => handleDeleteTag(tag.id)}
-                >
-                  X
-                </button>
-              </Badge>
+              <TooltipProvider key={tag.id}>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge
+                      className="ml-2 pr-0 py-0"
+                      key={tag.id}
+                      style={{ backgroundColor: tag.color }}
+                    >
+                      {tag.name}{" "}
+                      <button
+                        className="ml-2 rounded-full currsor-pointer bg-slate-200 p-0 text-slate-500 h-4 w-4 text-xs hover:text-sm"
+                        onClick={() => handleDeleteTag(tag.id)}
+                      >
+                        X
+                      </button>
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{tag.user}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             ))}
-            {tags.length >0 && (
-              <button className={badgeVariants({ variant: "secondary" })} onClick={() => handleClearTags()}>Limpar</button>
+            {tags.length > 0 && (
+              <button
+                className={badgeVariants({ variant: "secondary" })}
+                onClick={() => handleClearTags()}
+              >
+                Limpar
+              </button>
             )}
           </CardDescription>
         </CardHeader>

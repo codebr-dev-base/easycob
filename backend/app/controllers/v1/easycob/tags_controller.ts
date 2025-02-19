@@ -46,12 +46,13 @@ export default class TagsController {
   public async destroy({ params }: HttpContext) {
     const { id } = params;
     const tag = await Tag.findOrFail(id);
-    await tag.related('clients').detach();
     await tag.delete();
     return tag;
   }
 
-  public async clients({ request }: HttpContext) {
+  public async clients({ request, auth }: HttpContext) {
+    if (!auth || !auth.user || !auth.user.id) return;
+    const userId = auth.user.id;
     const qs = request.qs();
     const pageNumber = qs.page || '1';
     const limit = qs.perPage || '10';
@@ -67,26 +68,6 @@ export default class TagsController {
     }
 
     const tag = await Tag.findOrFail(tagId);
-
-    /*  const c = await db
-      .from('recupera.tbl_arquivos_clientes as cls')
-      .joinRaw(
-        'INNER JOIN clients_tags as ct ON cls.cod_credor_des_regis = ct.client_id'
-      )
-      .where((q) => {
-        if (tagId) {
-          q.where('ct.tag_id', tagId);
-        }
-        return q;
-      })
-      .whereRaw(
-        `ct.updated_at >= NOW() - (${tag.validity} || ' days')::INTERVAL`
-      )
-      .select('cls.*')
-      .groupBy('cls.cod_credor_des_regis')
-      .groupBy('cls.id')
-      .orderBy(`${orderBy}`, descending === 'true' ? 'desc' : 'asc')
-      .paginate(pageNumber, limit); */
 
     const listOutColumn = ['phone', 'email', 'desContr'];
 
@@ -104,21 +85,23 @@ export default class TagsController {
 
     const clients = await Client.query()
       .select(
-        'id',
+        'recupera.tbl_arquivos_clientes.id as id',
         'nom_clien',
         'des_cpf',
         'des_regis',
-        'cod_credor_des_regis',
+        'recupera.tbl_arquivos_clientes.cod_credor_des_regis as cod_credor_des_regis',
         'status',
         'is_fixa',
         'is_var'
       )
       .joinRaw(
-        'INNER JOIN clients_tags as ct  ON recupera.tbl_arquivos_clientes.cod_credor_des_regis = ct.client_id'
+        'INNER JOIN clients_tags_users as ctu  ON recupera.tbl_arquivos_clientes.cod_credor_des_regis = ctu.cod_credor_des_regis'
       )
       .where((q) => {
+        q.where('ctu.user_id', userId);
+
         if (tagId) {
-          q.where('ct.tag_id', tagId);
+          q.where('ctu.tag_id', tagId);
         }
 
         if (selected) {
@@ -146,7 +129,7 @@ export default class TagsController {
         }
       })
       .whereRaw(
-        `ct.updated_at >= NOW() - (${tag.validity} || ' days')::INTERVAL`
+        `ctu.updated_at >= NOW() - (${tag.validity} || ' days')::INTERVAL`
       )
       .preload('phones', (q) => {
         q.select('contato', 'percentual_atender').where(

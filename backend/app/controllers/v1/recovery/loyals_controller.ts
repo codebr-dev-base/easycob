@@ -5,6 +5,7 @@ import LoyalService from '#services/loyal_service';
 import { inject } from '@adonisjs/core';
 import { serializeKeysCamelCase } from '#utils/serialize';
 import string from '@adonisjs/core/helpers/string';
+import Contact from '#models/recovery/contact';
 
 @inject()
 export default class LoyalsController {
@@ -60,18 +61,18 @@ export default class LoyalsController {
           `
           LEFT JOIN (
                 SELECT
-                DISTINCT ON (ct.client_id)
-                ct.client_id,
+                DISTINCT ON (ctu.cod_credor_des_regis)
+                ctu.cod_credor_des_regis,
                 t.name,
                 t.color,
-                ct.updated_at
-              FROM clients_tags AS ct
+                ctu.updated_at
+              FROM clients_tags_users AS ctu
               JOIN tags AS t
-              ON ct.tag_id = t.id
-              WHERE ct.updated_at >= NOW() - (t.validity || ' days')::INTERVAL
-              ORDER BY ct.client_id, ct.updated_at DESC
+              ON ctu.tag_id = t.id
+              WHERE ctu.updated_at >= NOW() - (t.validity || ' days')::INTERVAL
+              ORDER BY ctu.cod_credor_des_regis, ctu.updated_at DESC
           ) AS lct
-          ON l.cod_credor_des_regis = lct.client_id
+          ON l.cod_credor_des_regis = lct.cod_credor_des_regis
         `
         )
         .select('l.*')
@@ -88,8 +89,37 @@ export default class LoyalsController {
         .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
         .paginate(pageNumber, limit);
 
+      const loyalsJson = loyals.toJSON();
+
+      for (const loyal of loyalsJson.data) {
+        const tags = await db
+          .from('public.clients_tags_users as ctu')
+          .join('public.tags as t', 't.id', '=', 'ctu.tag_id')
+          .join('public.users as u', 'u.id', '=', 'ctu.user_id')
+          .where('ctu.cod_credor_des_regis', loyal.cod_credor_des_regis)
+          .whereRaw(
+            "ctu.updated_at >= NOW() - (t.validity || ' days')::INTERVAL"
+          )
+          .select(
+            't.id as id',
+            't.name as name',
+            't.color as color',
+            't.initials as initials'
+          )
+          .select('u.name as user')
+          .orderBy('ctu.updated_at', 'desc');
+
+        loyal.tags = tags;
+
+        const phones = await Contact.query()
+          .where('cod_credor_des_regis', loyal.cod_credor_des_regis)
+          .where('tipo_contato', 'TELEFONE')
+          .select('contato', 'percentualAtender')
+          .orderBy('cpc', 'desc');
+        loyal.phones = phones;
+      }
       //return clients;
-      return serializeKeysCamelCase(loyals.toJSON());
+      return serializeKeysCamelCase(loyalsJson);
     } else {
       return {
         meta: {},

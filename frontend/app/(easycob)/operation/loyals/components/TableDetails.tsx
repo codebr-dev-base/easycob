@@ -21,9 +21,11 @@ export default function TableInvoices({ loyal }: { loyal: ILoyal }) {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Sit. do Contrato</TableHead>
               <TableHead>Cluster</TableHead>
               <TableHead>T. Cliente</TableHead>
               <TableHead>D. de Venc.</TableHead>
+              <TableHead>PECLD</TableHead>
               <TableHead>Valor</TableHead>
               <TableHead>Q. de Títulos</TableHead>
               <TableHead>BKO</TableHead>
@@ -32,9 +34,11 @@ export default function TableInvoices({ loyal }: { loyal: ILoyal }) {
           </TableHeader>
           <TableBody>
             <TableRow>
+              <TableCell>{loyal.classSitcontr}</TableCell>
               <TableCell>{loyal.classCluster}</TableCell>
               <TableCell>{loyal.tipoCliente}</TableCell>
               <TableCell>{loyal.dtVenci}</TableCell>
+              <TableCell>{loyal.pecld ? loyal.pecld : 0}</TableCell>
               <TableCell>{formatCurrencyToBRL(loyal.valor)}</TableCell>
               <TableCell>{loyal.qtdTitulos}</TableCell>
               <TableCell>{loyal.bko}</TableCell>

@@ -117,6 +117,21 @@ export default function FormTag({
                 />
                 <FormField
                   control={form.control}
+                  name="initials"
+                  disabled={isLoading}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Iniciais:
+                        <FormControl>
+                          <Input {...field} className="mb-2" />
+                        </FormControl>
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="validity"
                   rules={{ required: "Campo obrigatório" }}
                   disabled={isLoading}

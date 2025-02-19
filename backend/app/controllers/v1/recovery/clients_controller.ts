@@ -1,8 +1,8 @@
 import SendInvoiceJob from '#jobs/send_invoice_job';
+import ClientTagUser from '#models/client_tag_user';
 import MailInvoice from '#models/mail_invoice';
 import MailInvoiceFile from '#models/mail_invoice_file';
 import Client from '#models/recovery/client';
-import Tag from '#models/tag';
 import ClientService from '#services/client_service';
 import { createClientMailValidator } from '#validators/recovery/client_mail_validator';
 import { updateClientValidator } from '#validators/recovery/client_validator';
@@ -10,6 +10,7 @@ import { inject } from '@adonisjs/core';
 import string from '@adonisjs/core/helpers/string';
 import type { HttpContext } from '@adonisjs/core/http';
 import app from '@adonisjs/core/services/app';
+import db from '@adonisjs/lucid/services/db';
 
 @inject()
 export default class ClientsController {
@@ -159,46 +160,85 @@ export default class ClientsController {
     }
   }
 
-  public async attachTag({ params, request }: HttpContext) {
-    const client = await Client.findByOrFail('cod_credor_des_regis', params.id);
-    const { tagId } = request.only(['tagId']);
+  public async attachTag({ params, request, auth }: HttpContext) {
+    if (auth && auth.user && auth.user.id) {
+      const userId = auth.user.id;
+      const codCredorDesRegis = params.id;
+      const { tagId } = request.only(['tagId']);
 
-    await client.related('tags').detach([tagId]);
+      let clientTagUser = await ClientTagUser.query()
+        .where('cod_credor_des_regis', codCredorDesRegis)
+        .where('tag_id', tagId)
+        .where('user_id', userId)
+        .first();
 
-    await client.related('tags').attach([tagId]);
-    return { message: 'Tag associada com sucesso' };
+      if (clientTagUser) {
+        await clientTagUser.save();
+        return { message: 'Tag já associada' };
+      }
+
+      clientTagUser = await ClientTagUser.create({
+        userId,
+        tagId,
+        codCredorDesRegis,
+      });
+
+      return { message: 'Tag associada com sucesso' };
+    }
   }
 
-  public async detachTag({ params, request }: HttpContext) {
-    const client = await Client.findByOrFail('cod_credor_des_regis', params.id);
-    const { tagId } = request.only(['tagId']);
+  public async detachTag({ params, request, auth }: HttpContext) {
+    if (auth && auth.user && auth.user.id) {
+      const userId = auth.user.id;
+      const codCredorDesRegis = params.id;
+      const { tagId } = request.only(['tagId']);
 
-    await client.related('tags').detach([tagId]);
+      const clientTagUser = await ClientTagUser.query()
+        .where('cod_credor_des_regis', codCredorDesRegis)
+        .where('tag_id', tagId)
+        .where('user_id', userId)
+        .first();
 
-    return { message: 'Tag desassociada com sucesso' };
+      if (clientTagUser) {
+        await clientTagUser.delete();
+      }
+
+      return { message: 'Tag desassociada com sucesso' };
+    }
   }
 
-  public async clearTags({ params }: HttpContext) {
-    const client = await Client.findByOrFail('cod_credor_des_regis', params.id);
+  public async clearTags({ params, auth }: HttpContext) {
+    if (auth && auth.user && auth.user.id) {
+      const userId = auth.user.id;
+      const codCredorDesRegis = params.id;
 
-    await client.related('tags').detach();
+      const clientTagUser = await ClientTagUser.query()
+        .where('cod_credor_des_regis', codCredorDesRegis)
+        .where('user_id', userId);
 
-    return { message: 'Tags removidas com sucesso' };
+      for (const tag of clientTagUser) {
+        await tag.delete();
+      }
+
+      return { message: 'Tags removidas com sucesso' };
+    }
   }
 
   public async tags({ params }: HttpContext) {
-    const tags = await Tag.query()
-      .join('clients_tags', 'tags.id', 'clients_tags.tag_id')
-      .join(
-        'recupera.tbl_arquivos_clientes',
-        'recupera.tbl_arquivos_clientes.cod_credor_des_regis',
-        'clients_tags.client_id'
+    const tags = await db
+      .from('public.clients_tags_users as ctu')
+      .join('public.tags as t', 't.id', '=', 'ctu.tag_id')
+      .join('public.users as u', 'u.id', '=', 'ctu.user_id')
+      .where('ctu.cod_credor_des_regis', params.id)
+      .whereRaw("ctu.updated_at >= NOW() - (t.validity || ' days')::INTERVAL")
+      .select(
+        't.id as id',
+        't.name as name',
+        't.color as color',
+        't.initials as initials'
       )
-      .where('clients_tags.client_id', params.id)
-      .whereRaw(
-        "clients_tags.updated_at >= NOW() - (tags.validity || ' days')::INTERVAL"
-      )
-      .select('tags.*');
+      .select('u.name as user')
+      .orderBy('ctu.updated_at', 'desc');
 
     return tags;
   }

@@ -21,9 +21,16 @@ import Tooltips from "@/app/(easycob)/components/Tooltips";
 import { formatDateToBR } from "@/app/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { FaUser } from "react-icons/fa";
+import { FaPlus, FaUser } from "react-icons/fa";
 import { ILoyal, IQueryLoyalParams } from "../interfaces/loyal";
-import { Dispatch, Fragment, SetStateAction, useState } from "react";
+import {
+  Dispatch,
+  Fragment,
+  SetStateAction,
+  use,
+  useEffect,
+  useState,
+} from "react";
 import TableDetails from "./TableDetails";
 import { FaCaretUp, FaCaretDown } from "react-icons/fa";
 import { Switch } from "@/components/ui/switch";
@@ -34,6 +41,129 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { fetchTags } from "@/app/(easycob)/admin/tags/service/tags";
+import { ITag } from "../../tags/interfaces/tag";
+import { attachTag, clearTags, detachTag } from "../../clients/service/clients";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { LuTag } from "react-icons/lu";
+import { sl, ta } from "date-fns/locale";
+import { ContainerContactFone } from "../../clients/components/ContainerContactFone";
+import { get } from "http";
+import { getUser } from "@/app/lib/auth";
+
+function FormTag({
+  client,
+  set,
+  tags,
+}: {
+  client: ILoyal;
+  set: Dispatch<SetStateAction<IPaginationResponse<ILoyal> | null>>;
+  tags: ITag[];
+}) {
+  const [selectedTag, setSelectedTag] = useState<string | null>();
+  const user = getUser();
+
+  const handleTagSelect = async (codCredorDesRegis: string | bigint) => {
+    try {
+      if (selectedTag) {
+        const t = tags.find((tag) => tag.id === parseInt(selectedTag));
+        if (t) {
+          await attachTag(codCredorDesRegis, selectedTag);
+          set((prevTags) => {
+            if (!prevTags) return prevTags;
+            const loyals = prevTags?.data;
+            const updatedLoyal = loyals?.map((loyal) => {
+              if (loyal.codCredorDesRegis === codCredorDesRegis) {
+                return {
+                  ...loyal,
+                  tagName: t.name,
+                  tagColor: t.color,
+                  tags: [
+                    { ...t, user: user?.name },
+                    ...(loyal.tags ? loyal.tags : []),
+                  ],
+                };
+              }
+              return loyal;
+            });
+            return {
+              ...prevTags,
+              data: updatedLoyal,
+            };
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao associar tag:", error);
+    }
+  };
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          className="rounded-full p-1 text-sm w-10 h-10"
+          style={
+            client.tagColor ? { backgroundColor: client.tagColor } : undefined
+          }
+        >
+          {client.tags && client.tags.length > 0 ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>{client.tags[0].initials}</TooltipTrigger>
+                <TooltipContent>
+                  <p>{client.tags[0].user}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <LuTag />
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80">
+        <div className="flex gap-2 justify-between">
+          <Select
+            onValueChange={(value) => {
+              setSelectedTag(value);
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione uma tag" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {tags.map((tag) => (
+                  <SelectItem key={tag.id} value={`${tag.id}`}>
+                    {tag.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Button
+            onClick={() => handleTagSelect(client.codCredorDesRegis)}
+            className="rounded-full px-3"
+          >
+            <FaPlus />
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export default function TableRecords({
   loyals,
@@ -49,6 +179,34 @@ export default function TableRecords({
   setLoyals: Dispatch<SetStateAction<IPaginationResponse<ILoyal> | null>>;
 }) {
   const [selectLoyal, setSelectLoyal] = useState<ILoyal | null>(null);
+  const [tags, setTags] = useState<ITag[]>([]);
+
+  useEffect(() => {
+    fetchTags()
+      .then((data: ITag[]) => {
+        if (data) {
+          setTags(data);
+        }
+      })
+      .catch((error: unknown) => {
+        console.error("Erro ao buscar tags:", error);
+      });
+  }, []);
+
+  const handleDeleteTag = async (
+    codCredorDesRegis: string | number,
+    id: number
+  ) => {
+    await detachTag(codCredorDesRegis, id);
+
+    const newTags = tags.filter((tag) => tag.id !== id);
+    setTags(newTags);
+  };
+
+  const handleClearTags = async (codCredorDesRegis: string | number) => {
+    await clearTags(codCredorDesRegis);
+    setTags([]);
+  };
 
   const handleSelectLoyal = (loyal: ILoyal) => {
     if (selectLoyal && selectLoyal.id === loyal.id) {
@@ -71,35 +229,6 @@ export default function TableRecords({
       return "text-slate-400";
     }
     return "";
-  };
-
-  const handleChengeCheck = async (loyal: ILoyal) => {
-    try {
-      await check(loyal.id);
-      setLoyals((prevLoyals) => {
-        if (!prevLoyals) return null;
-        const updatedLoyals = prevLoyals.data.map((l) => {
-          if (l.id === loyal.id) {
-            return { ...l, ...{ check: !loyal.check } };
-          }
-          return l;
-        });
-        return { ...prevLoyals, data: updatedLoyals };
-      });
-    } catch (error) {
-      setLoyals((prevLoyals) => {
-        if (!prevLoyals) return null;
-        const updatedLoyals = prevLoyals.data.map((l) => {
-          if (l.id === loyal.id) {
-            return { ...l, ...{ check: loyal.check } };
-          }
-          return l;
-        });
-        return { ...prevLoyals, data: updatedLoyals };
-      });
-    }
-
-    //refresh();
   };
 
   return (
@@ -141,14 +270,6 @@ export default function TableRecords({
                   <TableHead>U. acion.</TableHead>
                   <TableHead>
                     <HeaderTable
-                      columnName="PECLD"
-                      fieldName="pecld"
-                      query={query}
-                      refresh={refresh}
-                    />
-                  </TableHead>
-                  <TableHead>
-                    <HeaderTable
                       columnName="Unidade"
                       fieldName="unidade"
                       query={query}
@@ -163,6 +284,7 @@ export default function TableRecords({
                       refresh={refresh}
                     />
                   </TableHead>
+                  <TableHead>Telefone</TableHead>
                   <TableHead>
                     <HeaderTable
                       columnName="Contrato"
@@ -195,7 +317,6 @@ export default function TableRecords({
                       refresh={refresh}
                     />
                   </TableHead>
-                  <TableHead>Sit. do Contrato</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -228,21 +349,13 @@ export default function TableRecords({
                               )}
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>
-                              {loyal.tagName ? loyal.tagName : "Sem tag"}
-                              </p>
+                              <p>{loyal.tagName ? loyal.tagName : "Sem tag"}</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                       </TableCell>
                       <TableCell>
-                        <Switch
-                          id="airplane-mode"
-                          checked={loyal.check}
-                          onCheckedChange={() => {
-                            handleChengeCheck(loyal);
-                          }}
-                        />
+                        <FormTag client={loyal} set={setLoyals} tags={tags} />
                       </TableCell>
                       <TableCell>
                         {formatDateToBR(`${loyal.lastAction}`)}
@@ -258,7 +371,6 @@ export default function TableRecords({
                           </p>
                         </Tooltips>
                       </TableCell>
-                      <TableCell>{loyal.pecld ? loyal.pecld : 0}</TableCell>
                       <TableCell>{loyal.unidade}</TableCell>
                       <TableCell className="max-w-28 md:max-w-36 lg:max-w-48">
                         <Tooltips
@@ -269,11 +381,15 @@ export default function TableRecords({
                           </p>
                         </Tooltips>
                       </TableCell>
+                      <TableCell>
+                        {loyal.phones && Array.isArray(loyal.phones) && (
+                          <ContainerContactFone contacts={loyal.phones} />
+                        )}
+                      </TableCell>
                       <TableCell>{loyal.desContr}</TableCell>
                       <TableCell>{loyal.faixaTempo}</TableCell>
                       <TableCell>{loyal.faixaValor}</TableCell>
                       <TableCell>{loyal.faixaTitulos}</TableCell>
-                      <TableCell>{loyal.classSitcontr}</TableCell>
                       <TableCell>
                         <Button asChild className="mx-1">
                           <Link

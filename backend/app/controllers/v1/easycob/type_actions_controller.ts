@@ -7,7 +7,7 @@ import {
 
 export default class TypeActionsController {
   public async index() {
-    const typeActions = await TypeAction.all();
+    const typeActions = await TypeAction.query().where('active', true);
     return typeActions;
   }
   public async create({ request }: HttpContext) {

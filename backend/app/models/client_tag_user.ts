@@ -1,21 +1,20 @@
 import { DateTime } from 'luxon';
 import { BaseModel, column } from '@adonisjs/lucid/orm';
 
-export default class Tag extends BaseModel {
+export default class ClientTagUser extends BaseModel {
+  public static table = 'public.clients_tags_users';
+
   @column({ isPrimary: true })
   declare id: number;
 
   @column()
-  declare name: string;
+  declare userId: number;
 
   @column()
-  declare initials: string;
+  declare tagId: number;
 
   @column()
-  declare validity: number;
-
-  @column()
-  declare color: string;
+  declare codCredorDesRegis: number | string;
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime;

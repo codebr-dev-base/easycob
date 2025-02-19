@@ -86,7 +86,7 @@ export const sendMail = async (mail: ISendMail) => {
 };
 
 export const attachTag = async (
-  codCredorDesRegis: String | Number,
+  codCredorDesRegis: String | Number | BigInt,
   tagId: number | string
 ) => {
   const result = await fetchAuth(`${url}/${codCredorDesRegis}/tags`, {
@@ -96,7 +96,7 @@ export const attachTag = async (
 };
 
 export const detachTag = async (
-  codCredorDesRegis: String | Number,
+  codCredorDesRegis: String | Number | BigInt,
   tagId: number | string
 ) => {
   const result = await fetchAuth(`${url}/${codCredorDesRegis}/tags`, {
@@ -106,7 +106,7 @@ export const detachTag = async (
 };
 
 export const clearTags = async (
-  codCredorDesRegis: String | Number
+  codCredorDesRegis: String | Number | BigInt
 ) => {
   const result = await fetchAuth(`${url}/${codCredorDesRegis}/tags/clear`, {
     method: "DELETE",

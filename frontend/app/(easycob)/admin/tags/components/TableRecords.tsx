@@ -2,7 +2,6 @@
 import "@/app/assets/css/tabs.css";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import SkeletonTable from "@/app/(easycob)/components/SkeletonTable";
-import Pagination from "@/app/(easycob)/components/Pagination";
 import {
   Table,
   TableBody,
@@ -61,6 +60,7 @@ export default function TableRecords({
               <TableRow>
                 <TableHead>Id</TableHead>
                 <TableHead>Nome</TableHead>
+                <TableHead>Iniciais</TableHead>
                 <TableHead>Validade</TableHead>
                 <TableHead>Cor</TableHead>
                 <TableHead>Ações</TableHead>
@@ -71,6 +71,7 @@ export default function TableRecords({
                 <TableRow key={tag.id}>
                   <TableCell>{tag.id}</TableCell>
                   <TableCell>{tag.name}</TableCell>
+                  <TableCell>{tag.initials}</TableCell>
                   <TableCell>{tag.validity}</TableCell>
                   <TableCell>
                     <ColorBox color={tag.color} />

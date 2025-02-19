@@ -1,10 +1,9 @@
 import { DateTime } from 'luxon';
-import { BaseModel, column, hasMany, manyToMany } from '@adonisjs/lucid/orm';
-import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations';
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm';
+import type { HasMany } from '@adonisjs/lucid/types/relations';
 import Contract from '#models/recovery/contract';
 import Invoice from '#models/recovery/invoice';
 import Contact from '#models/recovery/contact';
-import Tag from '#models/tag';
 
 export default class Client extends BaseModel {
   //declare static connection = 'recover'
@@ -135,14 +134,4 @@ export default class Client extends BaseModel {
     localKey: 'codCredorDesRegis',
   })
   declare emails: HasMany<typeof Contact>;
-
-  @manyToMany(() => Tag, {
-    localKey: 'codCredorDesRegis',
-    pivotForeignKey: 'client_id',
-    relatedKey: 'id',
-    pivotRelatedForeignKey: 'tag_id',
-    pivotTable: 'clients_tags',
-    pivotTimestamps: true,
-  })
-  declare tags: ManyToMany<typeof Tag>;
 }

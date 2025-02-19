@@ -1,4 +1,7 @@
+import { IContact } from "@/app/(easycob)/interfaces/clients";
 import { IQueryPaginationParams } from "@/app/interfaces/pagination";
+import { ta } from 'date-fns/locale';
+import { ITag } from "../../tags/interfaces/tag";
 
 export interface IQueryLoyalParams extends IQueryPaginationParams {
   //userId: number;
@@ -47,4 +50,6 @@ export interface ILoyal {
   pecld?: number;
   tagName?: string;
   tagColor?: string;
+  phones?: IContact[];
+  tags?: ITag[];
 }
