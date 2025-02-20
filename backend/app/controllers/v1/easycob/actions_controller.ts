@@ -230,8 +230,8 @@ export default class ActionsController {
       return response.badRequest({
         success: false,
         data: request.all(),
-        message: 'Usuário não existe',
-        error: 'Usuário não existe',
+        message: JSON.stringify(error),
+        error: JSON.stringify(error),
       });
     }
   }
