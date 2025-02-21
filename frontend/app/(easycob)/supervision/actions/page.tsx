@@ -5,7 +5,7 @@ import {
   fetchChartUser,
   fetchChartUserAndType,
   fetchChartUserAndCpc,
-  fetchChartUserAndChannel
+  fetchChartUserAndChannel,
 } from "./service/actions";
 import ContainerAction from "./components/ContainerAction";
 import { Suspense } from "react";
@@ -13,24 +13,32 @@ import SkeletonFullPage from "../../components/SkeletonFullPage";
 
 export default async function Actions() {
   try {
-    const [actions, chartType, chartUser, chartUserType, chartUserCpc, chartUserChannel] = await Promise.all([
+    const actions = await fetchActions();
+/*     const [
+      actions,
+      chartType,
+      chartUser,
+      chartUserType,
+      chartUserCpc,
+      chartUserChannel,
+    ] = await Promise.all([
       fetchActions(),
       fetchChartType(),
       fetchChartUser(),
       fetchChartUserAndType(),
       fetchChartUserAndCpc(),
-      fetchChartUserAndChannel()
-    ]);
+      fetchChartUserAndChannel(),
+    ]); */
 
     return (
       <Suspense fallback={<SkeletonFullPage />}>
         <ContainerAction
           actions={actions}
-          chartType={chartType}
-          chartUser={chartUser}
-          chartUserType={chartUserType}
-          chartUserCpc={chartUserCpc}
-          chartUserChannel={chartUserChannel}
+          //chartType={chartType}
+          //chartUser={chartUser}
+          //chartUserType={chartUserType}
+          //chartUserCpc={chartUserCpc}
+          //chartUserChannel={chartUserChannel}
         />
       </Suspense>
     );
