@@ -88,8 +88,6 @@ export default class ActionsController {
       .orderBy(`${orderBy}`, descending === 'true' ? 'desc' : 'asc')
       .paginate(pageNumber, limit);
 
-    console.log(actions.toJSON());
-
     return serializeKeysCamelCase(actions.toJSON());
   }
 
