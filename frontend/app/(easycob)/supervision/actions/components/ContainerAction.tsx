@@ -33,17 +33,17 @@ import { FaSpinner } from "react-icons/fa";
 
 export default function ContainerAction({
   actions,
-  //chartType: ct,
-  //chartUser: cu,
-  //chartUserType: cut,
-  //chartUserCpc: cuc,
-  //chartUserChannel: cuch,
+  chartType: ct,
+  chartUser: cu,
+  chartUserType: cut,
+  chartUserCpc: cuc,
+  chartUserChannel: cuch,
 }: {
   actions: {
     meta: IMeta;
     data: IAction[];
   };
-/*   chartType: {
+  chartType: {
     chartData: IChartData[];
     chartConfig: IChartConfig;
   };
@@ -62,7 +62,7 @@ export default function ContainerAction({
   chartUserChannel: {
     chartData: IChartDataChannelItem[]; // Lista de dados para o gráfico
     chartConfig: IChartChannelConfig;
-  }; */
+  };
 }) {
   const [meta, setMeta] = useState<IMeta>(actions.meta);
   const [data, setData] = useState<IAction[]>(actions.data ? actions.data : []);
@@ -77,7 +77,7 @@ export default function ContainerAction({
     useState<boolean>(false);
   const [pendingCsv, setPendingCsv] = useState<boolean>(false);
 
-/*   const [chartType, setChartType] = useState<{
+  const [chartType, setChartType] = useState<{
     chartData: IChartData[];
     chartConfig: IChartConfig;
   }>(ct);
@@ -100,7 +100,7 @@ export default function ContainerAction({
   const [chartUserChannel, setChartUserChannel] = useState<{
     chartData: IChartDataChannelItem[]; // Lista de dados para o gráfico
     chartConfig: IChartChannelConfig;
-  }>(cuch); */
+  }>(cuch);
 
   const refresh = async () => {
     setPendingRecords(true);
@@ -109,7 +109,7 @@ export default function ContainerAction({
     setPendingChartUserType(true);
     setPendingChartUserCpc(true);
     setPendingChartUserChannel(true);
-/* 
+
     fetchChartType().then((res) => {
       setChartType(res);
       setPendingChartType(false);
@@ -133,7 +133,7 @@ export default function ContainerAction({
     fetchChartUserAndChannel().then((res) => {
       setChartUserChannel(res);
       setPendingChartUserChannel(false);
-    }); */
+    });
 
     fetchActions().then((res) => {
       setMeta(res.meta);
@@ -216,7 +216,7 @@ export default function ContainerAction({
             </TabsTrigger>
           </TabsList>
           <TabsContent value="chart">
- {/*            <TabChart
+            <TabChart
               chartType={chartType}
               pendingChartType={pendingChartType}
               chartUser={chartUser}
@@ -228,7 +228,7 @@ export default function ContainerAction({
               chartUserChannel={chartUserChannel}
               pendingChartUserChannel={pendingChartUserChannel}
               query={query}
-            /> */}
+            />
           </TabsContent>
           <TabsContent value="records">
             <TabRecords
