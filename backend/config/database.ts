@@ -20,6 +20,14 @@ const dbConfig = defineConfig({
       },
       debug: false,
     },
+    sqlite: {
+      client: 'sqlite3',
+      connection: {
+        filename: ':memory:', // Utiliza o modo memória
+      },
+      useNullAsDefault: true,
+      debug: false,
+    },
   },
 });
 

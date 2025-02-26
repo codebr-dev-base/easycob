@@ -19,9 +19,10 @@ import templates from '#routes/templates';
 import client from '#routes/recovery/client';
 import contact from '#routes/recovery/contact';
 import contract from '#routes/recovery/contract';
-import recoveryinvoice from '#routes/recovery/invoice';
+import recoveryInvoice from '#routes/recovery/invoice';
 import loyal from '#routes/recovery/loyal';
 import tag from '#routes/tag';
+import externalFile from '#routes/external/file';
 
 router.get('/', async () => {
   return {
@@ -40,9 +41,10 @@ router.group(() => {
   client;
   contact;
   contract;
-  recoveryinvoice;
+  recoveryInvoice;
   loyal;
   tag;
+  externalFile;
 });
 
 router.jobs();

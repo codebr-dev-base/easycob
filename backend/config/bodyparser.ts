@@ -1,4 +1,4 @@
-import { defineConfig } from '@adonisjs/core/bodyparser'
+import { defineConfig } from '@adonisjs/core/bodyparser';
 
 const bodyParserConfig = defineConfig({
   /**
@@ -14,6 +14,7 @@ const bodyParserConfig = defineConfig({
   form: {
     convertEmptyStringsToNull: true,
     types: ['application/x-www-form-urlencoded'],
+    limit: '100mb',
   },
 
   /**
@@ -27,6 +28,7 @@ const bodyParserConfig = defineConfig({
       'application/vnd.api+json',
       'application/csp-report',
     ],
+    limit: '100mb',
   },
 
   /**
@@ -47,9 +49,9 @@ const bodyParserConfig = defineConfig({
      * Maximum limit of data to parse including all files
      * and fields
      */
-    limit: '20mb',
+    limit: '100mb',
     types: ['multipart/form-data'],
   },
-})
+});
 
-export default bodyParserConfig
+export default bodyParserConfig;

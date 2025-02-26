@@ -10,6 +10,7 @@ module.exports = {
       instances: 4,
       exec_mode: 'cluster',
       autorestart: true,
+      node_args: '--max-old-space-size=4096', // Adicione esta linha
       env: {
         TZ: 'America/Fortaleza',
       },
@@ -262,6 +263,17 @@ module.exports = {
       args: 'jobs:listen --queue=SendInvoice',
       instances: 1,
       autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:LoadXlsx',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=LoadXlsx',
+      instances: 1,
+      autorestart: true,
+      node_args: '--max-old-space-size=4096', // Adicione esta linha
       env: {
         TZ: 'America/Fortaleza',
       },

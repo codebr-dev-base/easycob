@@ -9,7 +9,7 @@
 |
 */
 
-import { Env } from '@adonisjs/core/env';
+import { Env } from '@adonisjs/core/env'
 
 export default await Env.create(new URL('../', import.meta.url), {
   NODE_ENV: Env.schema.enum(['development', 'production', 'test'] as const),
@@ -43,4 +43,10 @@ export default await Env.create(new URL('../', import.meta.url), {
   SMTP_HOST: Env.schema.string(),
   SMTP_PORT: Env.schema.string(),
 
-});
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring the drive package
+  |----------------------------------------------------------
+  */
+  DRIVE_DISK: Env.schema.enum(['fs'] as const)
+})
