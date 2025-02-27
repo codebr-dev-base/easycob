@@ -33,7 +33,7 @@ export default class FixSendLostActionSmsEme extends BaseCommand {
         campaign_lots_filtered cl
       left join actions_filtered a
           on
-          cl.contato = a.contato
+          cl.standardized = a.contato
         and
           cl.cod_credor_des_regis = a.cod_credor_des_regis::varchar
         and
