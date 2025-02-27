@@ -7,6 +7,7 @@ import Campaign from '#models/campaign';
 import lodash from 'lodash';
 import SmsService from '../app/services/sms_service.js';
 import CampaignLot from '#models/campaign_lot';
+import luxon, { DateTime } from 'luxon';
 
 export default class FixSendLostActionSmsEme extends BaseCommand {
   static commandName = 'fix:send-lost-action-sms-eme';
@@ -28,6 +29,7 @@ export default class FixSendLostActionSmsEme extends BaseCommand {
           WHERE created_at::date > '2025-02-20'
           AND messageid IS NOT NULL
           AND codigo_status is null
+          AND data_retorno is null
       )
       SELECT
         cl.id,
@@ -67,6 +69,7 @@ export default class FixSendLostActionSmsEme extends BaseCommand {
           continue;
         }
         lot.codigoStatus = '13';
+        lot.dataRetorno = DateTime.now();
         await lot.save();
       }
     }
