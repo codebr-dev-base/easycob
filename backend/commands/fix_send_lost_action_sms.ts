@@ -9,8 +9,8 @@ import SmsService from '../app/services/sms_service.js';
 import CampaignLot from '#models/campaign_lot';
 import { DateTime } from 'luxon';
 
-export default class FixSendLostActionSmsEme extends BaseCommand {
-  static commandName = 'fix:send-lost-action-sms-eme';
+export default class FixSendLostActionSms extends BaseCommand {
+  static commandName = 'fix:send-lost-action-sms';
   static description = 'Envia registro de acionamentos de SMS e EMAIL perdidos';
 
   static options: CommandOptions = {
