@@ -38,7 +38,7 @@ export default class extends BaseSchema {
     this.defer(async (db) => {
       await db.rawQuery(`
               ALTER TABLE ${this.tableName}
-              ADD CONSTRAINT unq_des_cont_tipo_contato_contato UNIQUE (des_cont, tipo_contato, contato);
+              ADD CONSTRAINT unq_des_contr_tipo_contato_contato UNIQUE (des_contr, tipo_contato, contato);
             `);
     });
   }
