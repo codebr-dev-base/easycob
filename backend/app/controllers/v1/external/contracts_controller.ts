@@ -68,10 +68,18 @@ export default class ContractsController {
     return contracts;
   }
 
-  public async show({ params }: HttpContext) {
-    const client = await ExternalContract.findBy('des_contr', params.id);
+  public async show({ params, response }: HttpContext) {
+    const contract = await ExternalContract.findBy('des_contr', params.id);
+    if (!contract) {
+      return response.notFound({
+        message: 'Contract not found',
+      });
+    }
 
-    return client;
+    await contract.load('phones');
+    await contract.load('emails');
+
+    return contract;
   }
 
   public async send({ auth, request }: HttpContext) {

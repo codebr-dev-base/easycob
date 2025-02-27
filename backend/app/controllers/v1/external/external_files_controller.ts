@@ -64,7 +64,7 @@ export default class ExternalFilesController {
 
         return response.status(400).send({
           error: 'Erros de validação encontrados:',
-          details: validationResult.messages, // Concatena as mensagens em uma única string
+          data: validationResult.messages, // Concatena as mensagens em uma única string
         });
       }
 
