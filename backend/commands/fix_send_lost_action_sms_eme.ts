@@ -49,7 +49,7 @@ export default class FixSendLostActionSmsEme extends BaseCommand {
 
   async run() {
     const smsService = new SmsService();
-    const pendingLots = await this.getPendingLots();
+    const pendingLots = await this.getPendingLots('EMAIL');
     const pendingLotsChunks = chunks(pendingLots, 100);
     for (const lots of pendingLotsChunks) {
       const clients = await getClients(lots);
