@@ -56,7 +56,7 @@ export default class FixSendLostActionSmsEme extends BaseCommand {
           continue;
         }
         await smsService.createAction(item, clientsGroups, campaign);
-        this.logger.info(item);
+        this.logger.info(JSON.stringify(item));
       }
     }
     this.logger.info('Hello world from "FixSendLostActionSmsEme"');
