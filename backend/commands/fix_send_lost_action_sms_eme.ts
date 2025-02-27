@@ -19,31 +19,25 @@ export default class FixSendLostActionSmsEme extends BaseCommand {
       WITH actions_filtered AS (
           SELECT *
           FROM public.actions
-          WHERE created_at::date  > '2025-02-20'
+          WHERE created_at::date > '2025-02-20'
       ),
       campaign_lots_filtered AS (
           SELECT *
           FROM public.campaign_lots
           WHERE created_at::date > '2025-02-20'
-          AND messageid is not null
+          AND messageid IS NOT NULL
       )
-      select
-        COUNT(*)
-      from
-        campaign_lots_filtered cl
-      left join actions_filtered a
-          on
-          cl.contato = a.contato
-        and
-          cl.cod_credor_des_regis = a.cod_credor_des_regis::varchar
-        and
-          cl.created_at::date = a.created_at::date
-      join campaigns c on
-        cl.campaign_id = c.id
-      where
-        a.id is null
-        and
-        c.type = '${type}'
+      SELECT
+        cl.contato,
+	      cl.cod_credor_des_regis,
+        cl.campaign_id
+      FROM campaign_lots_filtered cl
+      LEFT JOIN actions_filtered a
+          ON cl.contato = a.contato
+          AND cl.created_at::date = a.created_at::date
+      JOIN campaigns c ON cl.campaign_id = c.id
+      WHERE a.id IS NULL
+      AND c.type = '${type}'
   `);
     return result.rows;
   }
