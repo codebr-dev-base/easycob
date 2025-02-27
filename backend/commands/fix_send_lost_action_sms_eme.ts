@@ -5,10 +5,10 @@ import { chunks } from '#utils/array';
 import { getClients } from '#services/utils/recupera';
 import Campaign from '#models/campaign';
 import lodash from 'lodash';
-import SmsService from '../app/services/sms_service.js';
+//import SmsService from '../app/services/sms_service.js';
 import CampaignLot from '#models/campaign_lot';
-import luxon, { DateTime } from 'luxon';
-import EmailService from '../app/services/email_service';
+import { DateTime } from 'luxon';
+import EmailService from '../app/services/email_service.js';
 
 export default class FixSendLostActionSmsEme extends BaseCommand {
   static commandName = 'fix:send-lost-action-sms-eme';
