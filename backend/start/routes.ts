@@ -23,6 +23,8 @@ import recoveryInvoice from '#routes/recovery/invoice';
 import loyal from '#routes/recovery/loyal';
 import tag from '#routes/tag';
 import externalFile from '#routes/external/file';
+import externalAction from '#routes/external/action';
+import externalContract from '#routes/external/contract';
 
 router.get('/', async () => {
   return {
@@ -45,6 +47,8 @@ router.group(() => {
   loyal;
   tag;
   externalFile;
+  externalAction;
+  externalContract;
 });
 
 router.jobs();

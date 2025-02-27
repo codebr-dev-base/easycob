@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { BaseModel, column } from '@adonisjs/lucid/orm';
 
-export default class ExternalCliente extends BaseModel {
+export default class ExternalDataset extends BaseModel {
   static table = 'base_externa.tbl_base_dataset';
 
   @column({ isPrimary: true })

@@ -19,7 +19,7 @@ interface DatasetRow {
 }
 
 interface Contact {
-  des_cont: string;
+  des_contr: string;
   tipo_contato: 'TELEFONE' | 'EMAIL';
   contato: string;
   is_whatsapp: boolean;
@@ -150,7 +150,7 @@ export default class SqLiteExternalService {
     ) => {
       if (contato) {
         contacts.push({
-          des_cont: row.des_contr, // Relaciona o contato ao contrato original
+          des_contr: row.des_contr, // Relaciona o contato ao contrato original
           tipo_contato,
           contato,
           is_whatsapp,
@@ -284,10 +284,13 @@ export default class SqLiteExternalService {
       .join(', ');
 
     return new Promise((resolve, reject) => {
-      this.dbSqlite.run(`CREATE TABLE ${table} (${columnDefs});`, (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
+      this.dbSqlite.run(
+        `CREATE TABLE ${table} (${columnDefs}, PRIMARY KEY (des_contr, num_nota));`,
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
     });
   }
 
@@ -458,7 +461,7 @@ export default class SqLiteExternalService {
       this.dbSqlite.run(`DROP TABLE IF EXISTS ${tableName};`, (err) => {
         if (err) reject(err);
         this.dbSqlite.run(
-          `CREATE TABLE ${tableName} (${columnDefinitions});`,
+          `CREATE TABLE ${tableName} (${columnDefinitions}, PRIMARY KEY (des_contr, num_nota));`,
           (err) => {
             if (err) reject(err);
             console.log(`✅ Tabela ${tableName} criada no SQLite.`);
@@ -542,6 +545,12 @@ export default class SqLiteExternalService {
     if (!columns.includes('des_contr')) columns.push('des_contr');
 
     const columnNames = columns.join(', ');
+    //const conflictColumns = ['des_contr', 'num_nota']; // Colunas de conflito
+    // Gera a cláusula SET dinamicamente
+    /* const setClause = columns
+      .filter((col) => !conflictColumns.includes(col)) // Ignora as colunas de conflito
+      .map((col) => `${col} = excluded.${col}`) // Formata como "coluna = excluded.coluna"
+      .join(', '); // Junta tudo com vírgulas */
 
     // Criando dinamicamente a query de UPSERT
     const queryUpsert = `
@@ -549,6 +558,17 @@ export default class SqLiteExternalService {
       SELECT ${columnNames}, 'ativo', CURRENT_TIMESTAMP
       FROM ${tableXlsx};
     `;
+
+    /*
+    // Constrói a query de UPSERT
+    const queryUpsert = `
+      INSERT INTO ${table} (${columnNames}, status, updated_at)
+      SELECT ${columnNames}, 'ativo', CURRENT_TIMESTAMP
+      FROM ${tableXlsx}
+      ON CONFLICT (${conflictColumns.join(', ')}) DO UPDATE
+      SET ${setClause}, status = excluded.status, updated_at = excluded.updated_at;
+    `;
+     */
 
     // Query para desativar registros que não foram atualizados
     const queryDeactivate = `
@@ -924,7 +944,7 @@ export default class SqLiteExternalService {
         const contacts: Contact[] = Array.from(
           new Map<string, Contact>(
             cts.map((c: Contact) => [
-              `${c.des_cont}-${c.tipo_contato}-${c.contato}`,
+              `${c.des_contr}-${c.tipo_contato}-${c.contato}`,
               c,
             ])
           ).values()
@@ -935,14 +955,14 @@ export default class SqLiteExternalService {
           await db.rawQuery(
             `
           INSERT INTO ${schema}.${destinationTable} (
-            des_cont, tipo_contato, contato, is_whatsapp, is_celular, dt_import,
+            des_contr, tipo_contato, contato, is_whatsapp, is_celular, dt_import,
             peso, block, block_all, priority, cpc, criado_automatico, block_tactium,
             block_tactium_dt, formato_correto, block_otima, block_otima_dt, valido_sms,
             percentual_atender, count_atender, dominio_valido, dt_block_tactium,
             enviar_sms, is_domain_valid, created_at, updated_at
           )
           SELECT * FROM UNNEST(
-            :des_cont::text[],
+            :des_contr::text[],
             :tipo_contato::text[],
             :contato::text[],
             :is_whatsapp::boolean[],
@@ -969,7 +989,7 @@ export default class SqLiteExternalService {
             :created_at::timestamptz[],
             :updated_at::timestamptz[]
           )
-          ON CONFLICT (des_cont, tipo_contato, contato)
+          ON CONFLICT (des_contr, tipo_contato, contato)
           DO UPDATE SET
             is_whatsapp = EXCLUDED.is_whatsapp,
             is_celular = EXCLUDED.is_celular,
@@ -995,7 +1015,7 @@ export default class SqLiteExternalService {
             updated_at = EXCLUDED.updated_at
         `,
             {
-              des_cont: contacts.map((c: Contact) => c.des_cont),
+              des_contr: contacts.map((c: Contact) => c.des_contr),
               tipo_contato: contacts.map((c: Contact) => c.tipo_contato),
               contato: contacts.map((c: Contact) => c.contato),
               is_whatsapp: contacts.map((c: Contact) => c.is_whatsapp),

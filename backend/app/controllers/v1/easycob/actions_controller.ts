@@ -272,7 +272,9 @@ export default class ActionsController {
   }
 
   public async getTypeAction() {
-    const typeActions = await TypeAction.query().orderBy('name');
+    const typeActions = await TypeAction.query()
+      .orderBy('name')
+      .where('active', true);
     return typeActions;
   }
 

@@ -4,7 +4,6 @@ import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm';
 import Action from '#models/action';
 import NegotiationInvoice from '#models/negotiation_invoice';
 
-
 export default class NegotiationOfPayment extends BaseModel {
   //declare static connection = 'pg'
 
