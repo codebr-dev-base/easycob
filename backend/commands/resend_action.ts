@@ -16,8 +16,7 @@ export default class ResendAction extends BaseCommand {
 
     const actions = await Action.query()
       .whereILike('retornotexto', 'Em fila')
-      .whereRaw("created_at >= CURRENT_DATE - INTERVAL '26 days'");
-
+      .whereRaw('created_at::date = CURRENT_DATE');
     for (const action of actions) {
       await handleSendingForRecupera(action);
     }
