@@ -8,6 +8,7 @@ import lodash from 'lodash';
 import SmsService from '../app/services/sms_service.js';
 import CampaignLot from '#models/campaign_lot';
 import luxon, { DateTime } from 'luxon';
+import EmailService from '../app/services/email_service';
 
 export default class FixSendLostActionSmsEme extends BaseCommand {
   static commandName = 'fix:send-lost-action-sms-eme';
@@ -48,7 +49,8 @@ export default class FixSendLostActionSmsEme extends BaseCommand {
   }
 
   async run() {
-    const smsService = new SmsService();
+    //const smsService = new SmsService();
+    const emailService = new EmailService();
     const pendingLots = await this.getPendingLots('EMAIL');
     const pendingLotsChunks = chunks(pendingLots, 100);
     for (const lots of pendingLotsChunks) {
@@ -61,7 +63,7 @@ export default class FixSendLostActionSmsEme extends BaseCommand {
           continue;
         }
 
-        await smsService.createAction(item, clientsGroups, campaign);
+        await emailService.createAction(item, clientsGroups, campaign);
         this.logger.info(JSON.stringify(item));
         const lot = await CampaignLot.find(item.id);
         if (!lot) {
