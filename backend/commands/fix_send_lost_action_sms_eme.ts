@@ -6,6 +6,7 @@ import { getClients } from '#services/utils/recupera';
 import Campaign from '#models/campaign';
 import lodash from 'lodash';
 import SmsService from '../app/services/sms_service.js';
+import CampaignLot from '#models/campaign_lot';
 
 export default class FixSendLostActionSmsEme extends BaseCommand {
   static commandName = 'fix:send-lost-action-sms-eme';
@@ -26,10 +27,12 @@ export default class FixSendLostActionSmsEme extends BaseCommand {
           FROM public.campaign_lots
           WHERE created_at::date > '2025-02-20'
           AND messageid IS NOT NULL
+          AND codigo_status is null
       )
       SELECT
+        cl.id,
         cl.contato,
-	      cl.cod_credor_des_regis,
+        cl.cod_credor_des_regis,
         cl.campaign_id
       FROM campaign_lots_filtered cl
       LEFT JOIN actions_filtered a
@@ -55,8 +58,16 @@ export default class FixSendLostActionSmsEme extends BaseCommand {
           this.logger.error('Not find campaign');
           continue;
         }
+
         await smsService.createAction(item, clientsGroups, campaign);
         this.logger.info(JSON.stringify(item));
+        const lot = await CampaignLot.find(item.id);
+        if (!lot) {
+          this.logger.error('Not find lot');
+          continue;
+        }
+        lot.codigoStatus = '13';
+        await lot.save();
       }
     }
     this.logger.info('Hello world from "FixSendLostActionSmsEme"');
