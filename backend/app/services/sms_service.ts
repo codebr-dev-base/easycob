@@ -61,8 +61,12 @@ export default class SmsService {
   }
 
   async handleActionSending(action: Action, subsidiary: string = '') {
-    const queueName = makeNameQueue(this.abbreviation, subsidiary);
-    await handleSendingForRecupera(action, queueName);
+    if (subsidiary) {
+      const queueName = makeNameQueue(this.abbreviation, subsidiary);
+      await handleSendingForRecupera(action, queueName);
+    } else {
+      await handleSendingForRecupera(action, 'SendRecupera');
+    }
   }
 
   async createAction(
@@ -88,7 +92,6 @@ export default class SmsService {
           const group = groupCodCredorDesRegis[k];
 
           for (const [i, client] of group.entries()) {
-            console.log('client', client);
             const actions = await createActionForClient(
               client,
               typeAction,
