@@ -60,6 +60,8 @@ export default class FixSendLostActionEme extends BaseCommand {
     emailService: EmailService,
     clientsGroups: { [key: string]: IClient[] }
   ) {
+    console.log(item);
+    console.log(item.campaign_id);
     const campaign = await Campaign.find(item.campaign_id);
     if (!campaign) {
       this.logger.error('Not find campaign');
