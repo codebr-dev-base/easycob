@@ -61,7 +61,7 @@ export default class FixSendLostActionEme extends BaseCommand {
       const clientsGroups = lodash.groupBy(clients, 'contato');
       //this.logger.info(JSON.stringify(clientsGroups));
       const parallel = chunks(lots, 4);
-      await parallel.each(
+      await parallel.forEach(
         async (item: {
           id: number;
           campaign_id: number;
