@@ -51,6 +51,7 @@ export default class FixSendLostActionEme extends BaseCommand {
     //const smsService = new SmsService();
     const emailService = new EmailService();
     const pendingLots = await this.getPendingLots('EMAIL');
+    this.logger.info(JSON.stringify(pendingLots));
     const pendingLotsChunks = chunks(pendingLots, 100);
     for (const lots of pendingLotsChunks) {
       const clients = await getClients(lots);

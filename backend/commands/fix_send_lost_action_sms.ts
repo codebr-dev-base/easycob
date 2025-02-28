@@ -54,6 +54,7 @@ export default class FixSendLostActionSms extends BaseCommand {
     for (const lots of pendingLotsChunks) {
       const clients = await getClients(lots);
       const clientsGroups = lodash.groupBy(clients, 'contato');
+      this.logger.info(JSON.stringify(pendingLots));
       this.logger.info(JSON.stringify(clientsGroups));
       for (const item of lots) {
         this.logger.info(JSON.stringify(item));
