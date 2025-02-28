@@ -60,8 +60,6 @@ export default class FixSendLostActionEme extends BaseCommand {
     emailService: EmailService,
     clientsGroups: { [key: string]: IClient[] }
   ) {
-    console.log(item);
-    console.log(item.campaign_id);
     const campaign = await Campaign.find(item.campaign_id);
     if (!campaign) {
       this.logger.error('Not find campaign');
@@ -96,12 +94,14 @@ export default class FixSendLostActionEme extends BaseCommand {
       const clientsGroups = lodash.groupBy(clients, 'contato');
       //this.logger.info(JSON.stringify(clientsGroups));
       const parallel = chunks(lots, 4);
-      await Promise.all([
-        this.preCreateActions(parallel[0], emailService, clientsGroups),
-        this.preCreateActions(parallel[1], emailService, clientsGroups),
-        this.preCreateActions(parallel[2], emailService, clientsGroups),
-        this.preCreateActions(parallel[3], emailService, clientsGroups),
-      ]);
+      for (const item of parallel) {
+        await Promise.all([
+          this.preCreateActions(item[0], emailService, clientsGroups),
+          this.preCreateActions(item[1], emailService, clientsGroups),
+          this.preCreateActions(item[2], emailService, clientsGroups),
+          this.preCreateActions(item[3], emailService, clientsGroups),
+        ]);
+      }
     }
     this.logger.info('Hello world from "FixSendLostActionSmsEme"');
   }
