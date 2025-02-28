@@ -45,7 +45,7 @@ export default class FixSendLostActionSms extends BaseCommand {
     JOIN campaigns c ON cl.campaign_id = c.id
     WHERE a.id IS NULL
       AND c.type = '${type}'
-    ORDER BY cl.id DESC;
+    ORDER BY cl.id ASC;
   `);
     return result.rows;
   }
