@@ -68,6 +68,7 @@ export default class FixSendLostActionEme extends BaseCommand {
           contato: string;
           cod_credor_des_regis: string;
         }) => {
+          console.log(item);
           if (!item.campaign_id) {
             this.logger.error('Not find campaign');
             return;
