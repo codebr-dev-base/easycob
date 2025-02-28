@@ -37,8 +37,12 @@ export default class FixSendLostActionSms extends BaseCommand {
         cl.campaign_id
       FROM campaign_lots_filtered cl
       LEFT JOIN actions_filtered a
-          ON cl.contato = a.contato
-          AND cl.created_at::date = a.created_at::date
+        AND
+	        cl.standardized = a.contato
+	      AND
+	        cl.cod_credor_des_regis = a.cod_credor_des_regis::varchar
+	      AND
+	        cl.created_at::date = a.created_at::date
       JOIN campaigns c ON cl.campaign_id = c.id
       WHERE a.id IS NULL
       AND c.type = '${type}'
