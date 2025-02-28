@@ -93,15 +93,13 @@ export default class FixSendLostActionEme extends BaseCommand {
       const clients = await getClients(lots);
       const clientsGroups = lodash.groupBy(clients, 'contato');
       //this.logger.info(JSON.stringify(clientsGroups));
-      const parallel = chunks(lots, 6);
+      const parallel = chunks(lots, 4);
       for (const item of parallel) {
         await Promise.all([
           this.preCreateActions(item[0], emailService, clientsGroups),
           this.preCreateActions(item[1], emailService, clientsGroups),
           this.preCreateActions(item[2], emailService, clientsGroups),
           this.preCreateActions(item[3], emailService, clientsGroups),
-          this.preCreateActions(item[4], emailService, clientsGroups),
-          this.preCreateActions(item[5], emailService, clientsGroups),
         ]);
       }
     }
