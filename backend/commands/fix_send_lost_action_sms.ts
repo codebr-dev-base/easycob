@@ -62,6 +62,7 @@ export default class FixSendLostActionSms extends BaseCommand {
           this.logger.error('Not find campaign');
           continue;
         }
+        this.logger.info(JSON.stringify(campaign));
 
         await smsService.createAction(item, clientsGroups, campaign);
         const lot = await CampaignLot.find(item.id);
