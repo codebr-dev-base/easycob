@@ -29,7 +29,6 @@ export default class FixSendLostActionEme extends BaseCommand {
           FROM public.campaign_lots
           WHERE created_at::date > '2025-02-20'
           AND messageid IS NOT NULL
-          AND codigo_status is null
           AND data_retorno is null
       )
       SELECT
