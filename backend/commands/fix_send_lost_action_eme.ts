@@ -54,12 +54,12 @@ export default class FixSendLostActionEme extends BaseCommand {
     //const smsService = new SmsService();
     const emailService = new EmailService();
     const pendingLots = await this.getPendingLots('EMAIL');
-    this.logger.info(JSON.stringify(pendingLots));
+    //this.logger.info(JSON.stringify(pendingLots));
     const pendingLotsChunks = chunks(pendingLots, 100);
     for (const lots of pendingLotsChunks) {
       const clients = await getClients(lots);
       const clientsGroups = lodash.groupBy(clients, 'contato');
-      this.logger.info(JSON.stringify(clientsGroups));
+      //this.logger.info(JSON.stringify(clientsGroups));
       for (const item of lots) {
         const campaign = await Campaign.find(item.campaign_id);
         if (!campaign) {
@@ -68,7 +68,7 @@ export default class FixSendLostActionEme extends BaseCommand {
         }
 
         await emailService.createAction(item, clientsGroups, campaign);
-        this.logger.info(JSON.stringify(item));
+        //this.logger.info(JSON.stringify(item));
         const lot = await CampaignLot.find(item.id);
         if (!lot) {
           this.logger.error('Not find lot');
