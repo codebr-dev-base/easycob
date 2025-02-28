@@ -37,8 +37,7 @@ export default class FixSendLostActionEme extends BaseCommand {
         cl.cod_credor_des_regis,
         cl.campaign_id
       FROM campaign_lots_filtered cl
-      LEFT JOIN actions_filtered a
-        AND
+      LEFT JOIN actions_filtered a ON
 	        cl.standardized = a.contato
 	      AND
 	        cl.cod_credor_des_regis = a.cod_credor_des_regis::varchar
