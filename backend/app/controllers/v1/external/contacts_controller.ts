@@ -3,7 +3,7 @@ import { contactValidator } from '#validators/external/contact_validator';
 import type { HttpContext } from '@adonisjs/core/http';
 
 export default class ContactsController {
-  public async index({ response, params }: HttpContext) {
+  public async byContract({ response, params }: HttpContext) {
     const des_contr = params.id || null;
 
     if (!des_contr) {
