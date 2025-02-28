@@ -2,7 +2,7 @@ import { BaseCommand } from '@adonisjs/core/ace';
 import type { CommandOptions } from '@adonisjs/core/types/ace';
 import db from '@adonisjs/lucid/services/db';
 import { chunks } from '#utils/array';
-import { getClients } from '#services/utils/recupera';
+import { getClients, IClient } from '#services/utils/recupera';
 import Campaign from '#models/campaign';
 import lodash from 'lodash';
 //import SmsService from '../app/services/sms_service.js';
@@ -50,6 +50,39 @@ export default class FixSendLostActionEme extends BaseCommand {
     return result.rows;
   }
 
+  async preCreateActions(
+    item: {
+      id: number;
+      campaign_id: number;
+      contato: string;
+      cod_credor_des_regis: string;
+    },
+    emailService: EmailService,
+    clientsGroups: { [key: string]: IClient[] }
+  ) {
+    const campaign = await Campaign.find(item.campaign_id);
+    if (!campaign) {
+      this.logger.error('Not find campaign');
+      return;
+    }
+    const lot = await CampaignLot.find(item.id);
+    if (!lot) {
+      this.logger.error('Not find lot');
+      return;
+    }
+
+    await emailService.createAction(lot, clientsGroups, campaign);
+    //this.logger.info(JSON.stringify(item));
+
+    if (!lot) {
+      this.logger.error('Not find lot');
+      return;
+    }
+    lot.codigoStatus = '13';
+    lot.dataRetorno = DateTime.now();
+    await lot.save();
+  }
+
   async run() {
     //const smsService = new SmsService();
     const emailService = new EmailService();
@@ -61,38 +94,12 @@ export default class FixSendLostActionEme extends BaseCommand {
       const clientsGroups = lodash.groupBy(clients, 'contato');
       //this.logger.info(JSON.stringify(clientsGroups));
       const parallel = chunks(lots, 4);
-      await parallel.forEach(
-        async (item: {
-          id: number;
-          campaign_id: number;
-          contato: string;
-          cod_credor_des_regis: string;
-        }) => {
-          console.log(item);
-          if (!item.campaign_id) {
-            this.logger.error('Not find campaign');
-            return;
-          }
-          const campaign = await Campaign.find(item.campaign_id);
-          if (!campaign) {
-            this.logger.error('Not find campaign');
-            return;
-          }
-          const lot = await CampaignLot.find(item.id);
-          if (!lot) {
-            return;
-          }
-          await emailService.createAction(lot, clientsGroups, campaign);
-          //this.logger.info(JSON.stringify(item));
-          if (!lot) {
-            this.logger.error('Not find lot');
-            return;
-          }
-          lot.codigoStatus = '13';
-          lot.dataRetorno = DateTime.now();
-          await lot.save();
-        }
-      );
+      await Promise.all([
+        this.preCreateActions(parallel[0], emailService, clientsGroups),
+        this.preCreateActions(parallel[1], emailService, clientsGroups),
+        this.preCreateActions(parallel[2], emailService, clientsGroups),
+        this.preCreateActions(parallel[3], emailService, clientsGroups),
+      ]);
     }
     this.logger.info('Hello world from "FixSendLostActionSmsEme"');
   }
