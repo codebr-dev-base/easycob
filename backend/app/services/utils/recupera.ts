@@ -349,6 +349,7 @@ export async function createActionForClient(
 }
 
 export function makeNameQueue(type: string, subsidiary: string) {
+  console.log(subsidiary);
   const local = string.pascalCase(
     string.camelCase(subsidiary).replace('aguasDe', '')
   );
