@@ -88,6 +88,7 @@ export default class SmsService {
           const group = groupCodCredorDesRegis[k];
 
           for (const [i, client] of group.entries()) {
+            console.log('client', client);
             const actions = await createActionForClient(
               client,
               typeAction,
