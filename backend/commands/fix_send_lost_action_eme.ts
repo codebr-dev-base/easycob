@@ -55,6 +55,7 @@ export default class FixSendLostActionEme extends BaseCommand {
     for (const lots of pendingLotsChunks) {
       const clients = await getClients(lots);
       const clientsGroups = lodash.groupBy(clients, 'contato');
+      this.logger.info(JSON.stringify(clientsGroups));
       for (const item of lots) {
         const campaign = await Campaign.find(item.campaign_id);
         if (!campaign) {
