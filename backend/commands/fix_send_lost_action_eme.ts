@@ -60,24 +60,34 @@ export default class FixSendLostActionEme extends BaseCommand {
       const clients = await getClients(lots);
       const clientsGroups = lodash.groupBy(clients, 'contato');
       //this.logger.info(JSON.stringify(clientsGroups));
-      for (const item of lots) {
-        const campaign = await Campaign.find(item.campaign_id);
-        if (!campaign) {
-          this.logger.error('Not find campaign');
-          continue;
+      const parallel = chunks(lots, 4);
+      await parallel.each(
+        async (item: {
+          id: number;
+          campaign_id: number;
+          contato: string;
+          cod_credor_des_regis: string;
+        }) => {
+          const campaign = await Campaign.find(item.campaign_id);
+          if (!campaign) {
+            this.logger.error('Not find campaign');
+            return;
+          }
+          const lot = await CampaignLot.find(item.id);
+          if (!lot) {
+            return;
+          }
+          await emailService.createAction(lot, clientsGroups, campaign);
+          //this.logger.info(JSON.stringify(item));
+          if (!lot) {
+            this.logger.error('Not find lot');
+            return;
+          }
+          lot.codigoStatus = '13';
+          lot.dataRetorno = DateTime.now();
+          await lot.save();
         }
-
-        await emailService.createAction(item, clientsGroups, campaign);
-        //this.logger.info(JSON.stringify(item));
-        const lot = await CampaignLot.find(item.id);
-        if (!lot) {
-          this.logger.error('Not find lot');
-          continue;
-        }
-        lot.codigoStatus = '13';
-        lot.dataRetorno = DateTime.now();
-        await lot.save();
-      }
+      );
     }
     this.logger.info('Hello world from "FixSendLostActionSmsEme"');
   }
