@@ -7,7 +7,7 @@ export default router
     router
       .group(() => {
         router.post('/', [ContactsController, 'create']);
-        router.patch('/', [ContactsController, 'update']);
+        router.patch('/:id', [ContactsController, 'update']);
         router.get('/client/:desContr', [ContactsController, 'byContract']);
       })
       .prefix('/base/external/contact')

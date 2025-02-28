@@ -169,12 +169,12 @@ export default class ActionService {
     }
 
     return {
-      dat_venci: invoices[0]?.datVenc,
-      val_princ: invoices.reduce((acc, invoice) => {
+      datVenci: invoices[0]?.datVenc,
+      valPrinc: invoices.reduce((acc, invoice) => {
         const value = invoice.vlrSc ? invoice.vlrSc : 0;
         return acc + value;
       }, 0),
-      day_late: invoices[0]?.diasVenc,
+      dayLate: invoices[0]?.diasVenc,
       pecld,
     };
   }
@@ -260,17 +260,17 @@ export default class ActionService {
     data: { promise?: unknown; negotiation?: unknown }
   ) {
     if (data.promise) {
-      return this.createPromise(
-        action,
-        data.promise as Record<string, unknown>
-      );
+      return this.createPromise(action, {
+        ...(data.promise as Record<string, unknown>),
+        valOriginal: action.valPrinc,
+      });
     }
 
     if (data.negotiation) {
-      return this.createNegociation(
-        action,
-        data.negotiation as Record<string, unknown>
-      );
+      return this.createNegociation(action, {
+        ...(data.negotiation as Record<string, unknown>),
+        valOriginal: action.valPrinc,
+      });
     }
 
     return action.serialize();

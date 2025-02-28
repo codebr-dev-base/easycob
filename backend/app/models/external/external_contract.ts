@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm';
 import type { HasMany } from '@adonisjs/lucid/types/relations';
 import ExternalContact from './external_contact.js';
+import ExternalInvoice from './external_invoice.js';
 
 export default class ExternalContract extends BaseModel {
   static table = 'base_externa.tbl_base_contratos';
@@ -68,6 +69,12 @@ export default class ExternalContract extends BaseModel {
     localKey: 'desContr',
   })
   declare emails: HasMany<typeof ExternalContact>;
+
+  @hasMany(() => ExternalInvoice, {
+    foreignKey: 'desContr',
+    localKey: 'desContr',
+  })
+  declare invoices: HasMany<typeof ExternalInvoice>;
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime;

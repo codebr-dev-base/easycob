@@ -225,11 +225,11 @@ export default class EmailService {
       }
     }
 
-    const enviosChunks = chunks(envios, 12);
-    const itemsChunks = chunks(items, 12);
+    const enviosChunks = chunks(envios, 6);
+    const itemsChunks = chunks(items, 6);
     try {
       for (const [i, chunk] of enviosChunks.entries()) {
-        for (const [j, email] of chunk.entries()) {
+        const promises = chunk.map(async (email: IEmailData, j: number) => {
           try {
             const im = Math.floor(Math.random() * 4);
 
@@ -282,7 +282,9 @@ export default class EmailService {
 
             throw new Error(error);
           }
-        }
+        });
+
+        await Promise.all(promises);
       }
     } catch (error) {
       await CatchLog.create({

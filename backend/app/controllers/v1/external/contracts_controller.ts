@@ -76,10 +76,21 @@ export default class ContractsController {
       });
     }
 
+    await contract.load('invoices');
+
+    for (const invoice of contract.invoices) {
+      console.log(invoice);
+    }
+
+    const valPrinc = contract.invoices.reduce((acc, invoice) => {
+      const value = invoice.vlrSc ? invoice.vlrSc : 0;
+      return acc + value;
+    }, 0);
+
     await contract.load('phones');
     await contract.load('emails');
 
-    return contract;
+    return { ...contract.toJSON(), valPrinc };
   }
 
   public async send({ auth, request }: HttpContext) {

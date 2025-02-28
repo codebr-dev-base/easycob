@@ -25,6 +25,7 @@ import tag from '#routes/tag';
 import externalFile from '#routes/external/file';
 import externalAction from '#routes/external/action';
 import externalContract from '#routes/external/contract';
+import externalContact from '#routes/external/contact';
 
 router.get('/', async () => {
   return {
@@ -49,6 +50,7 @@ router.group(() => {
   externalFile;
   externalAction;
   externalContract;
+  externalContact;
 });
 
 router.jobs();
