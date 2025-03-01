@@ -101,31 +101,39 @@ export default class EmailService {
       this.abbreviation
     );
 
-    if (typeAction) {
-      for (const key of Object.keys(clientsGroups)) {
-        if (key !== item.contato.toUpperCase()) continue;
+    if (!typeAction) {
+      console.error(
+        'Not find type action! in createAction' + this.abbreviation
+      );
+      console.error(JSON.stringify(item, null, 2));
+      console.error(JSON.stringify(clientsGroups, null, 2));
+      console.error(JSON.stringify(campaign, null, 2));
+      return;
+    }
 
-        const groupContato = clientsGroups[key];
+    for (const key of Object.keys(clientsGroups)) {
+      if (key !== item.contato.toUpperCase()) continue;
 
-        const groupCodCredorDesRegis: { [key: string]: IClient[] } =
-          lodash.groupBy(groupContato, 'codCredorDesRegis');
+      const groupContato = clientsGroups[key];
 
-        // Mapeia as chaves de `groupDesContr` e processa cada grupo
-        for (const k of Object.keys(groupCodCredorDesRegis)) {
-          const group = groupCodCredorDesRegis[k];
+      const groupCodCredorDesRegis: { [key: string]: IClient[] } =
+        lodash.groupBy(groupContato, 'codCredorDesRegis');
 
-          for (const [i, client] of group.entries()) {
-            const actions = await createActionForClient(
-              client,
-              typeAction,
-              campaign,
-              this.tipoContato
-            );
+      // Mapeia as chaves de `groupDesContr` e processa cada grupo
+      for (const k of Object.keys(groupCodCredorDesRegis)) {
+        const group = groupCodCredorDesRegis[k];
 
-            if (i === 0) {
-              for (const action of actions) {
-                await this.handleActionSending(action, client.subsidiary);
-              }
+        for (const [i, client] of group.entries()) {
+          const actions = await createActionForClient(
+            client,
+            typeAction,
+            campaign,
+            this.tipoContato
+          );
+
+          if (i === 0) {
+            for (const action of actions) {
+              await this.handleActionSending(action, client.subsidiary);
             }
           }
         }
