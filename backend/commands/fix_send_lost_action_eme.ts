@@ -93,7 +93,7 @@ export default class FixSendLostActionEme extends BaseCommand {
     const emailService = new EmailService();
     const pendingLots = await this.getPendingLots('EMAIL');
     this.logger.warning('pendingLots');
-    this.logger.info(pendingLots);
+    this.logger.info(JSON.parse(JSON.stringify(pendingLots)));
     const pendingLotsChunks = chunks(pendingLots, 100);
     this.logger.warning('pendingLotsChunks');
     this.logger.info(pendingLotsChunks);
