@@ -71,6 +71,10 @@ export default class FixSendLostActionEme extends BaseCommand {
       return;
     }
 
+    this.logger.info(JSON.stringify(lot));
+    this.logger.info(JSON.stringify(clientsGroups));
+    this.logger.info(JSON.stringify(campaign));
+
     await emailService.createAction(lot, clientsGroups, campaign);
     this.logger.info(JSON.stringify(item));
 
