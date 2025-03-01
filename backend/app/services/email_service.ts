@@ -110,15 +110,18 @@ export default class EmailService {
       return;
     }
 
-    logger.info('run createAction');
+    /*     logger.info('run createAction');
     logger.warn('item');
     logger.info(JSON.stringify(item, null, 2));
+    logger.warn('campaign');
+    logger.info(JSON.stringify(campaign, null, 2)); */
+
     logger.warn('clientsGroups');
     logger.info(JSON.stringify(clientsGroups, null, 2));
-    logger.warn('campaign');
-    logger.info(JSON.stringify(campaign, null, 2));
 
     for (const key of Object.keys(clientsGroups)) {
+      logger.warn('key: ' + key);
+
       if (key !== item.contato.toUpperCase()) continue;
 
       const groupContato = clientsGroups[key];
