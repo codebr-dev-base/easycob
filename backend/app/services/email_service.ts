@@ -111,6 +111,8 @@ export default class EmailService {
       return;
     }
 
+    console.info('run createAction');
+
     for (const key of Object.keys(clientsGroups)) {
       if (key !== item.contato.toUpperCase()) continue;
 
