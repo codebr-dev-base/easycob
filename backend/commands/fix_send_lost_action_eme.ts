@@ -30,6 +30,7 @@ export default class FixSendLostActionEme extends BaseCommand {
           WHERE created_at::date > '2025-02-20'
           AND messageid IS NOT NULL
           AND data_retorno is null
+          AND cod_credor_des_regis in ('802244675726', '840299211591')
       )
       SELECT
         cl.id,
@@ -91,12 +92,16 @@ export default class FixSendLostActionEme extends BaseCommand {
     //const smsService = new SmsService();
     const emailService = new EmailService();
     const pendingLots = await this.getPendingLots('EMAIL');
-    this.logger.info(JSON.stringify(pendingLots));
+    this.logger.warning('pendingLots');
+    this.logger.info(pendingLots);
     const pendingLotsChunks = chunks(pendingLots, 100);
+    this.logger.warning('pendingLotsChunks');
+    this.logger.info(pendingLotsChunks);
     for (const lots of pendingLotsChunks) {
       const clients = await getClients(lots);
       const clientsGroups = lodash.groupBy(clients, 'contato');
-      this.logger.info(JSON.stringify(clientsGroups));
+      this.logger.warning('clientsGroups');
+      this.logger.info(JSON.parse(JSON.stringify(clientsGroups)));
       if (lots.length < 10) {
         for (const item of lots) {
           this.logger.info(JSON.stringify(item));
