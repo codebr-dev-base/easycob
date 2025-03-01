@@ -123,6 +123,9 @@ export default class EmailService {
 
       const groupContato = clientsGroups[key];
 
+      logger.warn('groupContato');
+      logger.info(JSON.stringify(groupContato, null, 2));
+
       const groupCodCredorDesRegis: { [key: string]: IClient[] } =
         lodash.groupBy(groupContato, 'codCredorDesRegis');
 

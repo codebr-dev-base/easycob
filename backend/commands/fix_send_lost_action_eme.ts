@@ -95,7 +95,7 @@ export default class FixSendLostActionEme extends BaseCommand {
       return;
     }
     lot.codigoStatus = '13';
-    lot.dataRetorno = DateTime.now();
+    //lot.dataRetorno = DateTime.now();
     await lot.save();
   }
 
