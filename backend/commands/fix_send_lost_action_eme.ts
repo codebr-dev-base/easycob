@@ -71,13 +71,21 @@ export default class FixSendLostActionEme extends BaseCommand {
       this.logger.error('Not find lot');
       return;
     }
+    this.logger.warning('-----------------------------');
+    this.logger.warning('lot');
+    this.logger.info(JSON.stringify(lot, null, 2));
+    this.logger.warning('-----------------------------');
 
-    this.logger.info(JSON.stringify(lot));
-    this.logger.info(JSON.stringify(clientsGroups));
-    this.logger.info(JSON.stringify(campaign));
+    this.logger.warning('clientsGroups');
+    this.logger.info(JSON.stringify(clientsGroups, null, 2));
+    this.logger.warning('-----------------------------');
+
+    this.logger.warning('campaign');
+    this.logger.info(JSON.stringify(campaign, null, 2));
+    this.logger.warning('-----------------------------');
 
     await emailService.createAction(lot, clientsGroups, campaign);
-    this.logger.info(JSON.stringify(item));
+    this.logger.info(JSON.stringify(item, null, 2));
 
     if (!lot) {
       this.logger.error('Not find lot');
