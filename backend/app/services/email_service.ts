@@ -111,8 +111,11 @@ export default class EmailService {
     }
 
     logger.info('run createAction');
+    logger.warn('item');
     logger.info(JSON.stringify(item, null, 2));
+    logger.warn('clientsGroups');
     logger.info(JSON.stringify(clientsGroups, null, 2));
+    logger.warn('campaign');
     logger.info(JSON.stringify(campaign, null, 2));
 
     for (const key of Object.keys(clientsGroups)) {
