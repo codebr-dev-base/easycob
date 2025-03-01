@@ -93,18 +93,18 @@ export default class FixSendLostActionEme extends BaseCommand {
     const emailService = new EmailService();
     const pendingLots = await this.getPendingLots('EMAIL');
     this.logger.warning('pendingLots');
-    this.logger.info(JSON.parse(JSON.stringify(pendingLots)));
+    this.logger.info(JSON.stringify(pendingLots, null, 2));
     const pendingLotsChunks = chunks(pendingLots, 100);
     this.logger.warning('pendingLotsChunks');
-    this.logger.info(pendingLotsChunks);
+    this.logger.info(JSON.stringify(pendingLotsChunks, null, 2));
     for (const lots of pendingLotsChunks) {
       const clients = await getClients(lots);
       const clientsGroups = lodash.groupBy(clients, 'contato');
       this.logger.warning('clientsGroups');
-      this.logger.info(JSON.parse(JSON.stringify(clientsGroups)));
+      this.logger.info(JSON.stringify(clientsGroups, null, 2));
       if (lots.length < 10) {
         for (const item of lots) {
-          this.logger.info(JSON.stringify(item));
+          this.logger.info(JSON.stringify(item, null, 2));
           await this.preCreateActions(item, emailService, clientsGroups);
         }
         continue;
