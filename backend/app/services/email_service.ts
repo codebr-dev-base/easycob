@@ -122,7 +122,7 @@ export default class EmailService {
     for (const key of Object.keys(clientsGroups)) {
       logger.warn('key: ' + key);
 
-      if (key !== item.contato.toUpperCase()) continue;
+      if (key.toUpperCase() !== item.contato.toUpperCase()) continue;
 
       const groupContato = clientsGroups[key];
 
