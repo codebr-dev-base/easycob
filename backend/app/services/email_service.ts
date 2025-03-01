@@ -16,6 +16,7 @@ import {
 } from './utils/recupera.js';
 import Action from '#models/action';
 import { sendMailByApi } from './utils/mail.js';
+import logger from '@adonisjs/core/services/logger';
 
 interface IEmailData {
   subject: string;
@@ -102,16 +103,17 @@ export default class EmailService {
     );
 
     if (!typeAction) {
-      console.error(
-        'Not find type action! in createAction' + this.abbreviation
-      );
-      console.error(JSON.stringify(item, null, 2));
-      console.error(JSON.stringify(clientsGroups, null, 2));
-      console.error(JSON.stringify(campaign, null, 2));
+      logger.error('Not find type action! in createAction' + this.abbreviation);
+      logger.error(JSON.stringify(item, null, 2));
+      logger.error(JSON.stringify(clientsGroups, null, 2));
+      logger.error(JSON.stringify(campaign, null, 2));
       return;
     }
 
-    console.info('run createAction');
+    logger.info('run createAction');
+    logger.info(JSON.stringify(item, null, 2));
+    logger.info(JSON.stringify(clientsGroups, null, 2));
+    logger.info(JSON.stringify(campaign, null, 2));
 
     for (const key of Object.keys(clientsGroups)) {
       if (key !== item.contato.toUpperCase()) continue;

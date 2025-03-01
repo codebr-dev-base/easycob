@@ -71,23 +71,24 @@ export default class FixSendLostActionEme extends BaseCommand {
       this.logger.error('Not find lot');
       return;
     }
-    this.logger.warning('-----------------------------');
+    /*     this.logger.warning('-----------------------------');
     this.logger.warning('lot');
     this.logger.info(JSON.stringify(lot, null, 2));
-    this.logger.warning('-----------------------------');
-
+    this.logger.warning('-----------------------------'); */
+    /* 
     this.logger.warning('clientsGroups');
     this.logger.info(JSON.stringify(clientsGroups, null, 2));
-    this.logger.warning('-----------------------------');
-
+    this.logger.warning('-----------------------------'); */
+    /* 
     this.logger.warning('campaign');
     this.logger.info(JSON.stringify(campaign, null, 2));
-    this.logger.warning('-----------------------------');
+    this.logger.warning('-----------------------------'); */
 
     await emailService.createAction(lot, clientsGroups, campaign);
+    /*    
     this.logger.warning('-----------------------------');
     this.logger.warning('item');
-    this.logger.info(JSON.stringify(item, null, 2));
+    this.logger.info(JSON.stringify(item, null, 2)); */
 
     if (!lot) {
       this.logger.error('Not find lot');
@@ -102,19 +103,25 @@ export default class FixSendLostActionEme extends BaseCommand {
     //const smsService = new SmsService();
     const emailService = new EmailService();
     const pendingLots = await this.getPendingLots('EMAIL');
+    /* 
     this.logger.warning('pendingLots');
-    this.logger.info(JSON.stringify(pendingLots, null, 2));
+    this.logger.info(JSON.stringify(pendingLots, null, 2)); */
+
     const pendingLotsChunks = chunks(pendingLots, 100);
+    /* 
     this.logger.warning('pendingLotsChunks');
-    this.logger.info(JSON.stringify(pendingLotsChunks, null, 2));
+    this.logger.info(JSON.stringify(pendingLotsChunks, null, 2)); */
+
     for (const lots of pendingLotsChunks) {
       const clients = await getClients(lots);
       const clientsGroups = lodash.groupBy(clients, 'contato');
+      /* 
       this.logger.warning('clientsGroups');
-      this.logger.info(JSON.stringify(clientsGroups, null, 2));
+      this.logger.info(JSON.stringify(clientsGroups, null, 2)); */
+
       if (lots.length < 10) {
         for (const item of lots) {
-          this.logger.info(JSON.stringify(item, null, 2));
+          //this.logger.info(JSON.stringify(item, null, 2));
           await this.preCreateActions(item, emailService, clientsGroups);
         }
         continue;
