@@ -22,7 +22,7 @@ import { Value } from "@radix-ui/react-select";
 import React, { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { sendMail } from "../../../../service/clients";
+//import { sendMail } from "../../../../service/clients";
 import { toast } from "@/hooks/use-toast";
 import { handlerError } from "@/app/lib/error";
 
@@ -46,7 +46,7 @@ export default function FormSendInvoice({
     },
   });
   const { pending: formPending } = useFormStatus();
-
+/* 
   const onSubmit: SubmitHandler<ISendMail> = async (data) => {
     try {
       await sendMail(data);
@@ -60,7 +60,7 @@ export default function FormSendInvoice({
     } catch (error) {
       handlerError(error);
     }
-  };
+  }; */
 
   const changeType = (value: string) => {
     form.setValue("type", value);
@@ -87,7 +87,7 @@ export default function FormSendInvoice({
           <Skeleton className="h-12 w-full" />
         </div>
 
-        <Form {...form}>
+{/*         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className={`${!formPending ? "" : "hidden"}`}
@@ -174,7 +174,7 @@ export default function FormSendInvoice({
               </Button>
             </div>
           </form>
-        </Form>
+        </Form> */}
       </DialogContent>
     </Dialog>
   );

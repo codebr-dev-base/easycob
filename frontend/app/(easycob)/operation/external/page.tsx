@@ -14,7 +14,7 @@ const apiUrl = process.env.API_URL
 const urn = "/v1/base/external/contract";
 const url = `${apiUrl}${urn}`;
 
-export const fetchContracts = async (
+const fetchContracts = async (
   initialQuery: IQueryContractParams
 ): Promise<IPaginationResponse<IContract>> => {
   const result = await fetchAuth(url, {

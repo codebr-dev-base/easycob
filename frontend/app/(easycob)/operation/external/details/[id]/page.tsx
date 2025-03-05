@@ -16,7 +16,7 @@ const url = `${apiUrl}${urn}`;
 let contract: IContract | null = null;
 let contacts: IContact[] | null = null;
 
-export const fetchContract = async (id: string): Promise<IContract> => {
+const fetchContract = async (id: string): Promise<IContract> => {
   const result = await fetchAuth(`${url}/${id}`, {
     method: "GET",
   });
