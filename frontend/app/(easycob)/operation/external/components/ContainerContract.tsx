@@ -38,7 +38,7 @@ export default function ContainerContract({
   return (
     <article className="max-w-full">
       <div className="p-2">
-        <Header title="Clientes">
+        <Header title="Contratos">
           <div className="flex flex-col md:flex-row justify-end items-end gap-4">
             <FilterPus
               query={queryParams.current as IQueryContractParams}

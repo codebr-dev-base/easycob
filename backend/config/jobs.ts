@@ -75,6 +75,11 @@ const jobsConfig = defineConfig({
       age: 12 * 3600, // keep up to 12 hours
     },
   },
+
+  workerOptions: {
+    stalledInterval: 120000,
+    lockDuration: 120000,
+  },
 });
 
 export default jobsConfig;

@@ -9,6 +9,11 @@ import ExternalPromiseOfPayment from '#models/external/external_promise_of_payme
 import { DateTime } from 'luxon';
 import ExternalNegotiationOfPayment from '#models/external/external_negotiation_of_payment';
 import ExternalNegotiationInvoice from '#models/external/external_negotiation_invoice';
+import Contract from '#models/recovery/contract';
+import ActionServiceRecovery from '#services/action_service';
+import ActionRecovery from '#models/action';
+import type { HttpContext } from '@adonisjs/core/http';
+import User from '#models/user';
 
 export default class ActionService {
   generateOrderBy(qs: Record<string, unknown>) {
@@ -280,5 +285,63 @@ export default class ActionService {
     await this.setIncrementAtender(action);
 
     return this.handlerData(action, data as Record<string, unknown>);
+  }
+
+  async createRecoveryAction({ request }: HttpContext, user: User) {
+    const data = request.all();
+    const actionServiceRecovery = new ActionServiceRecovery();
+
+    const contract = await Contract.findBy('des_contr', data.desContr);
+
+    if (!contract) {
+      return;
+    }
+
+    const aggregation = await actionServiceRecovery.getAggregationContract(
+      data.desContr
+    );
+
+    const aggregationClient = await actionServiceRecovery.getAggregationClient(
+      data.codCredorDesRegis
+    );
+
+    const datVenciTotal = new Date(aggregationClient.dat_venci_total);
+
+    const datVenci = new Date(aggregation.dat_venci);
+    const interval = DateTime.now().diff(
+      DateTime.fromISO(datVenci.toISOString()),
+      'days'
+    );
+
+    const intervalTotal = DateTime.now().diff(
+      DateTime.fromISO(datVenciTotal.toISOString()),
+      'days'
+    );
+
+    const days = interval.as('days');
+    const daysTotal = intervalTotal.as('days');
+
+    const action = await ActionRecovery.create({
+      codCredorDesRegis: contract.codCredorDesRegis,
+      desContr: contract.desContr,
+      desRegis: contract.desRegis,
+      codCredor: contract.codCredor,
+      matriculaContrato: contract.matriculaContrato,
+      tipoContato: data.tipoContato,
+      contato: data.contato,
+      typeActionId: data.typeActionId,
+      description: data.description,
+      datVenci: aggregation.dat_venci,
+      valPrinc: aggregation.val_princ,
+      pecld: aggregation.pecld,
+      dayLate: Math.floor(days),
+      userId: user.id,
+      datVenciTotal: DateTime.fromISO(datVenciTotal.toISOString()),
+      dayLateTotal: Math.floor(daysTotal),
+      valTotal: aggregationClient.val_total,
+      pecldTotal: aggregationClient.pecld_total,
+    });
+
+    return actionServiceRecovery.afterCreate(action, data);
   }
 }

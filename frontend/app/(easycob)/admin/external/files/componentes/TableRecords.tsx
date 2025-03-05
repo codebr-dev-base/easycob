@@ -71,7 +71,7 @@ export default function TableRecords({
                 </TableHead>
                 <TableHead>
                   <HeaderTable
-                    columnName="Cliente Novos"
+                    columnName="Contratos Novos"
                     fieldName="newContract"
                     query={query}
                     refresh={refresh}
@@ -79,7 +79,7 @@ export default function TableRecords({
                 </TableHead>
                 <TableHead>
                   <HeaderTable
-                    columnName="Cliente Atualizados"
+                    columnName="Contratos Atualizados"
                     fieldName="updateContract"
                     query={query}
                     refresh={refresh}
@@ -87,7 +87,7 @@ export default function TableRecords({
                 </TableHead>
                 <TableHead>
                   <HeaderTable
-                    columnName="Cliente Inativados"
+                    columnName="Contratos Inativados"
                     fieldName="disableContract"
                     query={query}
                     refresh={refresh}

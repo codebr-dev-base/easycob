@@ -1073,11 +1073,17 @@ export default class SqLiteExternalService {
     console.log(`🔄 Sincronizando a tabela ${schema}.${table} com SQLite...`);
     const externalFile = await ExternalFile.findOrFail(externalFile_id);
     const initialCount = (
-      await db.from(`${schema}.${table}`).where('status', 'ativo').count('*')
+      await db
+        .from(`${schema}.tbl_base_contratos`)
+        .where('status', 'ativo')
+        .count('*')
     )[0]['count'];
 
     const initialInativoCount = (
-      await db.from(`${schema}.${table}`).where('status', 'inativo').count('*')
+      await db
+        .from(`${schema}.tbl_base_contratos`)
+        .where('status', 'inativo')
+        .count('*')
     )[0]['count'];
 
     /*     const interval = setInterval(() => {
@@ -1127,18 +1133,24 @@ export default class SqLiteExternalService {
     console.log('🔟 - Alimentar base contratos');
     await this.syncContratos(schema, table, 'tbl_base_contratos');
 
-    console.log('1️⃣1️⃣ - Alimentar base prestações');
+    console.log('1️⃣ 1️⃣ - Alimentar base prestações');
     await this.syncPrestacoes(schema, table, 'tbl_base_prestacoes');
 
-    console.log('1️⃣2️⃣ - Alimentar base contatos');
+    console.log('1️⃣ 2️⃣ - Alimentar base contatos');
     await this.syncContatos(schema, table, 'tbl_base_contatos');
 
-    const finalCount = (await db.from(`${schema}.${table}`).count('*'))[0][
-      'count'
-    ];
+    const finalCount = (
+      await db
+        .from(`${schema}.tbl_base_contratos`)
+        .where('status', 'ativo')
+        .count('*')
+    )[0]['count'];
 
     const countInactive = (
-      await db.from(`${schema}.${table}`).where('status', 'inativo').count('*')
+      await db
+        .from(`${schema}.tbl_base_contratos`)
+        .where('status', 'inativo')
+        .count('*')
     )[0]['count'];
 
     await this.handleExternalFile(
