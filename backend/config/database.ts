@@ -18,7 +18,7 @@ const dbConfig = defineConfig({
         naturalSort: true,
         paths: ['database/migrations'],
       },
-      debug: false,
+      debug: env.get('NODE_ENV') === 'development' ? true : false,
     },
     sqlite: {
       client: 'sqlite3',
