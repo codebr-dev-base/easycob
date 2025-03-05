@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon';
-import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm';
-import type { HasMany } from '@adonisjs/lucid/types/relations';
+import { BaseModel, column, hasMany, hasOne } from '@adonisjs/lucid/orm';
+import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations';
 import ExternalContact from './external_contact.js';
 import ExternalInvoice from './external_invoice.js';
+import Subsidiary from '#models/subsidiary';
 
 export default class ExternalContract extends BaseModel {
   static table = 'base_externa.tbl_base_contratos';
@@ -15,6 +16,12 @@ export default class ExternalContract extends BaseModel {
 
   @column()
   declare empCodigo: number | null;
+
+  @hasOne(() => Subsidiary, {
+    foreignKey: 'nomLoja',
+    localKey: 'empCodigo',
+  })
+  declare subsidiary: HasOne<typeof Subsidiary>;
 
   @column()
   declare chaveContrato: number | null;
@@ -61,12 +68,18 @@ export default class ExternalContract extends BaseModel {
   @hasMany(() => ExternalContact, {
     foreignKey: 'desContr',
     localKey: 'desContr',
+    onQuery: (q) => {
+      q.where('tipoContato', 'TELEFONE');
+    },
   })
   declare phones: HasMany<typeof ExternalContact>;
 
   @hasMany(() => ExternalContact, {
     foreignKey: 'desContr',
     localKey: 'desContr',
+    onQuery: (q) => {
+      q.where('tipoContato', 'EMAIL');
+    },
   })
   declare emails: HasMany<typeof ExternalContact>;
 

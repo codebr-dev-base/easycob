@@ -26,6 +26,7 @@ import externalFile from '#routes/external/file';
 import externalAction from '#routes/external/action';
 import externalContract from '#routes/external/contract';
 import externalContact from '#routes/external/contact';
+import externalInvoice from '#routes/external/invoice';
 
 router.get('/', async () => {
   return {
@@ -51,6 +52,7 @@ router.group(() => {
   externalAction;
   externalContract;
   externalContact;
+  externalInvoice;
 });
 
 router.jobs();

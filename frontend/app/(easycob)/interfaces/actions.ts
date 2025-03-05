@@ -10,6 +10,8 @@ export interface ITypeAction {
   commissioned: number;
   type: string;
   timelife: number;
+  active: boolean;
+  cpc: boolean;
   createdAt?: string; // Datas geralmente são tratadas como strings no front-end
   updatedAt?: string;
   category?: ICategoryAction; // Relacionamento opcional com CategoryAction

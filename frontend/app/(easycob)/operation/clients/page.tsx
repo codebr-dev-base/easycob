@@ -19,7 +19,7 @@ const initialQuery: IQueryClienteParams = {
 
 export default async function Clients() {
   try {
-    if (!clients) clients = await fetchClients(initialQuery);
+    clients = await fetchClients(initialQuery);
 
     if (!clients) {
       return (

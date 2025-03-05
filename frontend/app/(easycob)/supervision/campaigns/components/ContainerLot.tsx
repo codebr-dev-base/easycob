@@ -177,7 +177,7 @@ export default function ContainerLot({
                       <TableCell>{lot.status}</TableCell>
                       <TableCell>
                         <Button asChild className="mx-1">
-                          <Link href={`/supervision/campaigns/lots/1`}>
+                          <Link href={`/operation/clients/details/${lot.codCredorDesRegis}`}>
                             <FaUser />
                           </Link>
                         </Button>

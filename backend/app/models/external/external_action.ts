@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
-import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm';
+import { BaseModel, belongsTo, column, hasOne } from '@adonisjs/lucid/orm';
 import TypeAction from '#models/type_action';
-import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations';
+import type { BelongsTo, HasOne } from '@adonisjs/lucid/types/relations';
 import User from '#models/user';
 import ExternalPromiseOfPayment from './external_promise_of_payment.js';
 import ExternalNegotiationOfPayment from './external_negotiation_of_payment.js';
@@ -61,15 +61,15 @@ export default class ExternalAction extends BaseModel {
   })
   declare user: BelongsTo<typeof User>;
 
-  @hasMany(() => ExternalPromiseOfPayment, {
+  @hasOne(() => ExternalPromiseOfPayment, {
     foreignKey: 'actionId',
   })
-  declare promises: HasMany<typeof ExternalPromiseOfPayment>;
+  declare promise: HasOne<typeof ExternalPromiseOfPayment>;
 
-  @hasMany(() => ExternalNegotiationOfPayment, {
+  @hasOne(() => ExternalNegotiationOfPayment, {
     foreignKey: 'actionId',
   })
-  declare negotiations: HasMany<typeof ExternalNegotiationOfPayment>;
+  declare negotiation: HasOne<typeof ExternalNegotiationOfPayment>;
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime;

@@ -61,7 +61,12 @@ import {
 import { Badge, badgeVariants } from "@/components/ui/badge";
 import { fi, se } from "date-fns/locale";
 import { fetchTags } from "@/app/(easycob)/admin/tags/service/tags";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function AlertCpc() {
   return (
@@ -227,12 +232,12 @@ export default function ConteinerDetails({
       return false;
     }
 
-    if (selectTypeAction.commissioned < 2) {
-      console.log(selectTypeAction.commissioned);
-      return true;
+    // Adicionando a verificação do CPC
+    if (selectTypeAction.cpc) {
+      return checkCpc();
     }
 
-    return checkCpc();
+    return true;
   };
 
   const renderFormComponent = () => {

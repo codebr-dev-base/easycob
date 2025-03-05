@@ -19,8 +19,8 @@ export default class ContractService {
 
           phones.forEach(
             (result) =>
-              typeof result.desCont === 'string' &&
-              resultArray.push(result.desCont)
+              typeof result.desContr === 'string' &&
+              resultArray.push(result.desContr)
           );
           return resultArray;
         }
@@ -33,8 +33,8 @@ export default class ContractService {
 
           emails.forEach(
             (result) =>
-              typeof result.desCont === 'string' &&
-              resultArray.push(result.desCont)
+              typeof result.desContr === 'string' &&
+              resultArray.push(result.desContr)
           );
           return resultArray;
         }

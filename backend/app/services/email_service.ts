@@ -126,8 +126,8 @@ export default class EmailService {
 
       const groupContato = clientsGroups[key];
 
-      logger.warn('groupContato');
-      logger.info(JSON.stringify(groupContato, null, 2));
+      /*     logger.warn('groupContato');
+      logger.info(JSON.stringify(groupContato, null, 2)); */
 
       const groupCodCredorDesRegis: { [key: string]: IClient[] } =
         lodash.groupBy(groupContato, 'codCredorDesRegis');
@@ -163,33 +163,39 @@ export default class EmailService {
           '^(([^<>()[]\\.,;:s@"]+(.[^<>()[]\\.,;:s@"]+)*)|(".+"))@(([[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}])|(([a-zA-Z-0-9]+.)+[a-zA-Z]{2,}))$'
         )
         */
-    if (regex.test(item.standardized)) {
-      if (campaign.singleSend) {
-        const isContato = this.blacklist.includes(item.standardized);
-        await item.refresh();
 
-        if (!isContato) {
-          item.status = 'Preparado para envio';
-          item.descricao = 'Envio inserido para processamento';
-          await item.save();
-          return true;
-        } else {
-          if (item.messageid === null) {
-            item.status = 'E-mail já utilizado';
-            item.descricao = null;
-            item.valid = false;
+    try {
+      if (regex.test(item.standardized)) {
+        if (campaign.singleSend) {
+          const isContato = this.blacklist.includes(item.standardized);
+          await item.refresh();
+
+          if (!isContato) {
+            item.status = 'Preparado para envio';
+            item.descricao = 'Envio inserido para processamento';
             await item.save();
+            return true;
+          } else {
+            if (item.messageid === null) {
+              item.status = 'E-mail já utilizado';
+              item.descricao = null;
+              item.valid = false;
+              await item.save();
+            }
+            return false;
           }
-          return false;
         }
+        return true;
       }
-      return true;
-    }
 
-    item.status = 'E-mail mal formatado';
-    item.valid = false;
-    await item.save();
-    return false;
+      item.status = 'E-mail mal formatado';
+      item.valid = false;
+      await item.save();
+      return false;
+    } catch (error) {
+      logger.error(error);
+      logger.error(JSON.stringify(item, null, 2));
+    }
   }
 
   private async prepareSend(

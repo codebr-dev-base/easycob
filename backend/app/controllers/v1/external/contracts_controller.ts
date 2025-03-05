@@ -23,6 +23,7 @@ export default class ContractsController {
     const listOutColumn = ['phone', 'email'];
     let selected = null;
     if (listOutColumn.includes(qs.keywordColumn)) {
+      console.log(qs);
       selected = await this.service.generateWhereInPaginate(qs);
     }
 
@@ -77,6 +78,9 @@ export default class ContractsController {
     }
 
     await contract.load('invoices');
+    await contract.load('phones');
+    await contract.load('emails');
+    await contract.load('subsidiary');
 
     for (const invoice of contract.invoices) {
       console.log(invoice);
@@ -86,9 +90,6 @@ export default class ContractsController {
       const value = invoice.vlrSc ? invoice.vlrSc : 0;
       return acc + value;
     }, 0);
-
-    await contract.load('phones');
-    await contract.load('emails');
 
     return { ...contract.toJSON(), valPrinc };
   }

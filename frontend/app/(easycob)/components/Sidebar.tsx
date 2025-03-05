@@ -40,6 +40,7 @@ const moduleLinks: Record<string, ModuleConfig> = {
       { href: "/operation/following", label: "Acompanhamento" },
       { href: "/operation/loyals", label: "Fidelizados" },
       { href: "/operation/tags", label: "Tags" },
+      { href: "/operation/external", label: "Externos" },
     ],
   },
   supervisor: {
@@ -57,6 +58,7 @@ const moduleLinks: Record<string, ModuleConfig> = {
     links: [
       { href: "/admin/users", label: "Usuários" },
       { href: "/admin/tags", label: "Tags" },
+      { href: "/admin/external/files", label: "Base Externa" },
     ],
   },
 };

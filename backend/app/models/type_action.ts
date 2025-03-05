@@ -31,6 +31,9 @@ export default class TypeAction extends BaseModel {
   @column()
   declare active: boolean;
 
+  @column()
+  declare cpc: boolean;
+
   @belongsTo(() => CategoryAction, {
     foreignKey: 'categoryActionId',
   })

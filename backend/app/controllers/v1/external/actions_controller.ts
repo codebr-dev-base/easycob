@@ -108,8 +108,8 @@ export default class ActionsController {
         }
       })
       .preload('typeAction')
-      .preload('promises')
-      .preload('negotiations', (negotiationQuery) => {
+      .preload('promise')
+      .preload('negotiation', (negotiationQuery) => {
         negotiationQuery.preload('invoices');
       })
       .preload('user')
@@ -162,7 +162,14 @@ export default class ActionsController {
         ...aggregate,
       });
 
-      return this.service.afterCreate(action, data);
+      await action.load('typeAction');
+
+      const ActionData = await this.service.afterCreate(action, data);
+
+      return {
+        ...ActionData,
+        user,
+      };
     } catch (error) {
       return response.badRequest({
         success: false,
