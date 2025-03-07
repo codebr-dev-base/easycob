@@ -22,28 +22,28 @@ interface Contact {
   des_contr: string;
   tipo_contato: 'TELEFONE' | 'EMAIL';
   contato: string;
-  is_whatsapp: boolean;
-  is_celular: boolean;
-  dt_import: DateTime;
-  peso: number;
-  block: boolean;
-  block_all: boolean;
-  priority: number;
-  cpc: boolean;
-  criado_automatico: boolean;
-  block_tactium: boolean;
-  block_tactium_dt: DateTime | null;
-  formato_correto: boolean;
-  block_otima: boolean;
-  block_otima_dt: DateTime | null;
-  valido_sms: boolean;
-  percentual_atender: number;
-  count_atender: number;
-  dominio_valido: boolean;
-  dt_block_tactium: DateTime | null;
-  enviar_sms: boolean;
-  is_domain_valid: boolean;
-  created_at: DateTime;
+  is_whatsapp?: boolean;
+  is_celular?: boolean;
+  dt_import?: DateTime;
+  peso?: number;
+  block?: boolean;
+  block_all?: boolean;
+  priority?: number;
+  cpc?: boolean;
+  criado_automatico?: boolean;
+  block_tactium?: boolean;
+  block_tactium_dt?: DateTime | null;
+  formato_correto?: boolean;
+  block_otima?: boolean;
+  block_otima_dt?: DateTime | null;
+  valido_sms?: boolean;
+  percentual_atender?: number;
+  count_atender?: number;
+  dominio_valido?: boolean;
+  dt_block_tactium?: DateTime | null;
+  enviar_sms?: boolean;
+  is_domain_valid?: boolean;
+  created_at?: DateTime;
   updated_at: DateTime;
 }
 
@@ -135,6 +135,106 @@ export default class SqLiteExternalService {
   }
  */
 
+  private handleEmail(email: string): string {
+    if (!email) {
+      return email;
+    }
+
+    let emailCorrigido = email.toLowerCase();
+
+    // Correções usando expressões regulares
+    emailCorrigido = emailCorrigido.replace(
+      /@[a-z0-9]*hotm(a|i|o|u|e|l|r|t|p)[a-z0-9]*\.com(\.br)?$/,
+      '@hotmail.com'
+    );
+    emailCorrigido = emailCorrigido.replace(
+      /@[a-z0-9]*outl(o|u|i|e|a|k|l|t)[a-z0-9]*\.com(\.br)?$/,
+      '@outlook.com'
+    );
+    emailCorrigido = emailCorrigido.replace(
+      /@[a-z0-9]*gm(a|i|e|l|s|y|o|u|t)[a-z0-9]*\.com(\.br)?$/,
+      '@gmail.com'
+    );
+    emailCorrigido = emailCorrigido.replace(
+      /@[a-z0-9]*y(a|h)[a-z0-9]*\.com(\.br)?$/,
+      '@yahoo.com'
+    );
+    emailCorrigido = emailCorrigido.replace(
+      /@[a-z0-9]*icl(o|u|i|e|a|k|l|t)[a-z0-9]*\.com(\.br)?$/,
+      '@icloud.com'
+    );
+    emailCorrigido = emailCorrigido.replace(
+      /@[a-z0-9]*b(o|u|i|e|a|k|l|t)[a-z0-9]*\.com(\.br)?$/,
+      '@bol.com.br'
+    );
+    emailCorrigido = emailCorrigido.replace(
+      /@[a-z0-9]*u(o|u|i|e|a|k|l|t)[a-z0-9]*\.com(\.br)?$/,
+      '@uol.com.br'
+    );
+
+    //Correção de outros erros
+    emailCorrigido = emailCorrigido.replace('@gmeil.com', '@gmail.com');
+    emailCorrigido = emailCorrigido.replace('@outllok.com', '@outlook.com');
+    emailCorrigido = emailCorrigido.replace('@outolook.com', '@outlook.com');
+    emailCorrigido = emailCorrigido.replace('@rotmail.com', '@hotmail.com');
+    emailCorrigido = emailCorrigido.replace('@hotmaol.com', '@hotmail.com');
+    emailCorrigido = emailCorrigido.replace('@hotmaiil.com', '@hotmail.com');
+    emailCorrigido = emailCorrigido.replace('@hotmaul.com', '@hotmail.com');
+    emailCorrigido = emailCorrigido.replace('@gma.com', '@gmail.com');
+    emailCorrigido = emailCorrigido.replace('@outloook.com', '@outlook.com');
+    emailCorrigido = emailCorrigido.replace('@gtmail.com', '@gmail.com');
+    emailCorrigido = emailCorrigido.replace('@outlokk.com', '@outlook.com');
+    emailCorrigido = emailCorrigido.replace('@holtmail.com', '@hotmail.com');
+    emailCorrigido = emailCorrigido.replace('@hootmail.com', '@hotmail.com');
+    emailCorrigido = emailCorrigido.replace('@oultlook.com', '@outlook.com');
+    emailCorrigido = emailCorrigido.replace('@gmaisl.com', '@gmail.com');
+    emailCorrigido = emailCorrigido.replace('@hoitmail.com', '@hotmail.com');
+    emailCorrigido = emailCorrigido.replace('@hotrmail.com', '@hotmail.com');
+    emailCorrigido = emailCorrigido.replace('@homtial.com', '@hotmail.com');
+    emailCorrigido = emailCorrigido.replace('@hotmal.com.br', '@hotmail.com');
+    emailCorrigido = emailCorrigido.replace('@outelook.com', '@outlook.com');
+    emailCorrigido = emailCorrigido.replace('@outilook.com', '@outlook.com');
+    emailCorrigido = emailCorrigido.replace('@outoolk.com', '@outlook.com');
+    emailCorrigido = emailCorrigido.replace('@hptmail.com', '@hotmail.com');
+    emailCorrigido = emailCorrigido.replace('@totmail.com', '@hotmail.com');
+    emailCorrigido = emailCorrigido.replace('@gmaol.com', '@gmail.com');
+    emailCorrigido = emailCorrigido.replace('@outllok.com.br', '@outlook.com');
+    emailCorrigido = emailCorrigido.replace('@hotimal.com', '@hotmail.com');
+    emailCorrigido = emailCorrigido.replace('@outlkoo.com', '@outlook.com');
+    emailCorrigido = emailCorrigido.replace('@yaroo.com', '@yahoo.com');
+    emailCorrigido = emailCorrigido.replace('@yhoo.com', '@yahoo.com');
+    emailCorrigido = emailCorrigido.replace('@gemail.com', '@gmail.com');
+    emailCorrigido = emailCorrigido.replace('@gml.com', '@gmail.com');
+
+    return emailCorrigido;
+  }
+
+  private allDigitsRepeated(number: string): boolean {
+    if (number == null || number.length === 0) {
+      return false; // Returns false if the string is null or empty
+    }
+
+    const firstDigit = number[0];
+    for (let i = 1; i < number.length; i++) {
+      if (number[i] !== firstDigit) {
+        return false; // Returns false if a different digit is found
+      }
+    }
+
+    return true; // Returns true if all digits are the same
+  }
+
+  private handlePhone(phone: string | null | undefined): string {
+    if (!phone) {
+      return ''; // Retorna uma string vazia se o telefone for nulo ou indefinido
+    }
+
+    // Remove todos os caracteres não numéricos
+    const cleanedPhone = phone.replace(/\D/g, '');
+
+    return cleanedPhone;
+  }
+
   /**
    * Criar contatos a partir de um objeto DatasetRow
    */
@@ -144,47 +244,36 @@ export default class SqLiteExternalService {
     // Função para adicionar um contato ao array
     const addContact = (
       tipo_contato: 'TELEFONE' | 'EMAIL',
-      contato: string | null,
-      is_celular = false,
-      is_whatsapp = false
+      contato: string | null
     ) => {
-      if (contato) {
-        contacts.push({
-          des_contr: row.des_contr, // Relaciona o contato ao contrato original
-          tipo_contato,
-          contato,
-          is_whatsapp,
-          is_celular,
-          dt_import: DateTime.now(),
-          peso: 1, // Valor padrão para peso
-          block: false, // Valor padrão para block
-          block_all: false, // Valor padrão para block_all
-          priority: 0, // Valor padrão para priority
-          cpc: false, // Valor padrão para cpc
-          criado_automatico: true, // Indica que o registro foi criado automaticamente
-          block_tactium: false, // Valor padrão para block_tactium
-          block_tactium_dt: null, // Valor padrão para block_tactium_dt
-          formato_correto: true, // Assumindo que o formato está correto
-          block_otima: false, // Valor padrão para block_otima
-          block_otima_dt: null, // Valor padrão para block_otima_dt
-          valido_sms: true, // Assumindo que o número é válido para SMS
-          percentual_atender: 100, // Valor padrão para percentual_atender
-          count_atender: 0, // Valor padrão para count_atender
-          dominio_valido: true, // Assumindo que o domínio é válido
-          dt_block_tactium: null, // Valor padrão para dt_block_tactium
-          enviar_sms: true, // Valor padrão para enviar_sms
-          is_domain_valid: true, // Assumindo que o domínio é válido
-          created_at: DateTime.now(),
-          updated_at: DateTime.now(),
-        });
+      if (!contato) return;
+      if (contato === null) return;
+      contato = contato?.trim();
+
+      if (tipo_contato === 'TELEFONE') {
+        if (this.allDigitsRepeated(contato)) return;
+        contato = this.handlePhone(contato);
       }
+
+      if (tipo_contato === 'EMAIL') {
+        contato = this.handleEmail(`${contato}`);
+      }
+
+      if (contato === '') return;
+
+      contacts.push({
+        des_contr: row.des_contr, // Relaciona o contato ao contrato original
+        tipo_contato,
+        contato,
+        updated_at: DateTime.now(),
+      });
     };
 
     // Celular 1
-    addContact('TELEFONE', row.num_celular, true, true); // Celular e WhatsApp
+    addContact('TELEFONE', row.num_celular); // Celular e WhatsApp
 
     // Celular 2
-    addContact('TELEFONE', row.num_celular_2, true, true); // Celular e WhatsApp
+    addContact('TELEFONE', row.num_celular_2); // Celular e WhatsApp
 
     // Residencial
     addContact('TELEFONE', row.num_residencial);
@@ -500,7 +589,8 @@ export default class SqLiteExternalService {
     for (const row of xlsxData) {
       const num_ligacao = row.num_ligacao as string;
       const seq_responsavel = row.seq_responsavel as string;
-      row.des_contr = `${num_ligacao}-${seq_responsavel}-8`;
+      const emp_codigo = row.emp_codigo as string;
+      row.des_contr = `${num_ligacao}-${seq_responsavel}-${emp_codigo}`;
       //row.status = 'ativo';
       if (row.vlr_sc) val_total = parseFloat(`${row.vlr_sc}`) + val_total;
 
@@ -955,101 +1045,21 @@ export default class SqLiteExternalService {
           await db.rawQuery(
             `
           INSERT INTO ${schema}.${destinationTable} (
-            des_contr, tipo_contato, contato, is_whatsapp, is_celular, dt_import,
-            peso, block, block_all, priority, cpc, criado_automatico, block_tactium,
-            block_tactium_dt, formato_correto, block_otima, block_otima_dt, valido_sms,
-            percentual_atender, count_atender, dominio_valido, dt_block_tactium,
-            enviar_sms, is_domain_valid, created_at, updated_at
+            des_contr, tipo_contato, contato, updated_at
           )
           SELECT * FROM UNNEST(
             :des_contr::text[],
             :tipo_contato::text[],
             :contato::text[],
-            :is_whatsapp::boolean[],
-            :is_celular::boolean[],
-            :dt_import::timestamptz[],
-            :peso::int[],
-            :block::boolean[],
-            :block_all::boolean[],
-            :priority::int[],
-            :cpc::boolean[],
-            :criado_automatico::boolean[],
-            :block_tactium::boolean[],
-            :block_tactium_dt::timestamptz[],
-            :formato_correto::boolean[],
-            :block_otima::boolean[],
-            :block_otima_dt::timestamptz[],
-            :valido_sms::boolean[],
-            :percentual_atender::int[],
-            :count_atender::int[],
-            :dominio_valido::boolean[],
-            :dt_block_tactium::timestamptz[],
-            :enviar_sms::boolean[],
-            :is_domain_valid::boolean[],
-            :created_at::timestamptz[],
             :updated_at::timestamptz[]
           )
           ON CONFLICT (des_contr, tipo_contato, contato)
-          DO UPDATE SET
-            is_whatsapp = EXCLUDED.is_whatsapp,
-            is_celular = EXCLUDED.is_celular,
-            dt_import = EXCLUDED.dt_import,
-            peso = EXCLUDED.peso,
-            block = EXCLUDED.block,
-            block_all = EXCLUDED.block_all,
-            priority = EXCLUDED.priority,
-            cpc = EXCLUDED.cpc,
-            criado_automatico = EXCLUDED.criado_automatico,
-            block_tactium = EXCLUDED.block_tactium,
-            block_tactium_dt = EXCLUDED.block_tactium_dt,
-            formato_correto = EXCLUDED.formato_correto,
-            block_otima = EXCLUDED.block_otima,
-            block_otima_dt = EXCLUDED.block_otima_dt,
-            valido_sms = EXCLUDED.valido_sms,
-            percentual_atender = EXCLUDED.percentual_atender,
-            count_atender = EXCLUDED.count_atender,
-            dominio_valido = EXCLUDED.dominio_valido,
-            dt_block_tactium = EXCLUDED.dt_block_tactium,
-            enviar_sms = EXCLUDED.enviar_sms,
-            is_domain_valid = EXCLUDED.is_domain_valid,
-            updated_at = EXCLUDED.updated_at
+          DO NOTHING
         `,
             {
               des_contr: contacts.map((c: Contact) => c.des_contr),
               tipo_contato: contacts.map((c: Contact) => c.tipo_contato),
               contato: contacts.map((c: Contact) => c.contato),
-              is_whatsapp: contacts.map((c: Contact) => c.is_whatsapp),
-              is_celular: contacts.map((c: Contact) => c.is_celular),
-              dt_import: contacts.map((c: Contact) => c.dt_import.toSQL()),
-              peso: contacts.map((c: Contact) => c.peso),
-              block: contacts.map((c: Contact) => c.block),
-              block_all: contacts.map((c: Contact) => c.block_all),
-              priority: contacts.map((c: Contact) => c.priority),
-              cpc: contacts.map((c: Contact) => c.cpc),
-              criado_automatico: contacts.map(
-                (c: Contact) => c.criado_automatico
-              ),
-              block_tactium: contacts.map((c: Contact) => c.block_tactium),
-              block_tactium_dt: contacts.map(
-                (c: Contact) => c.block_tactium_dt?.toSQL() || null
-              ),
-              formato_correto: contacts.map((c: Contact) => c.formato_correto),
-              block_otima: contacts.map((c: Contact) => c.block_otima),
-              block_otima_dt: contacts.map(
-                (c: Contact) => c.block_otima_dt?.toSQL() || null
-              ),
-              valido_sms: contacts.map((c: Contact) => c.valido_sms),
-              percentual_atender: contacts.map(
-                (c: Contact) => c.percentual_atender
-              ),
-              count_atender: contacts.map((c: Contact) => c.count_atender),
-              dominio_valido: contacts.map((c: Contact) => c.dominio_valido),
-              dt_block_tactium: contacts.map(
-                (c: Contact) => c.dt_block_tactium?.toSQL() || null
-              ),
-              enviar_sms: contacts.map((c: Contact) => c.enviar_sms),
-              is_domain_valid: contacts.map((c: Contact) => c.is_domain_valid),
-              created_at: contacts.map((c: Contact) => c.created_at.toSQL()),
               updated_at: contacts.map((c: Contact) => c.updated_at.toSQL()),
             }
           );
