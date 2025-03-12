@@ -10,7 +10,7 @@ module.exports = {
       instances: 4,
       exec_mode: 'cluster',
       autorestart: true,
-      node_args: '--max-old-space-size=8192', // Adicione esta linha
+      node_args: '--max-old-space-size=16384', // Adicione esta linha
       env: {
         TZ: 'America/Fortaleza',
       },
@@ -21,7 +21,7 @@ module.exports = {
       args: 'jobs:listen --queue=LoadCsv',
       instances: 1,
       autorestart: true,
-      node_args: '--max-old-space-size=8192', // Adicione esta linha
+      node_args: '--max-old-space-size=16384', // Adicione esta linha
       env: {
         TZ: 'America/Fortaleza',
       },
