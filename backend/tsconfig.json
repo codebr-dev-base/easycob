@@ -45,6 +45,12 @@
       ],
       "#routes/*": [
         "start/routes/*"
+      ],
+      "#start/*": [
+        "start/*.js"
+      ],
+      "#config/*": [
+        "config/*.js"
       ]
     }
   },
