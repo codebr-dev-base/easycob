@@ -77,8 +77,8 @@ const jobsConfig = defineConfig({
   },
 
   workerOptions: {
-    stalledInterval: 120000,
-    lockDuration: 120000,
+    stalledInterval: 12 * 3600, // 12 hours
+    lockDuration: 12 * 3600, // 12 hours
   },
 });
 
