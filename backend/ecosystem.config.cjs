@@ -274,7 +274,7 @@ module.exports = {
       args: 'jobs:listen --queue=LoadXlsx',
       instances: 1,
       autorestart: true,
-      node_args: '--max-old-space-size=8192', // Adicione esta linha
+      node_args: '--max-old-space-size=16384', // Adicione esta linha
       env: {
         TZ: 'America/Fortaleza',
       },
