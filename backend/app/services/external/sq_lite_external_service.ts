@@ -834,8 +834,8 @@ export default class SqLiteExternalService {
 
       // 4️⃣ Inserir os dados na tabela temporária do PostgreSQL
       if (rows.length > 0) {
-        if (rows.length > 10000) {
-          const rowsChunked = chunks(rows, 1000);
+        if (rows.length > 500) {
+          const rowsChunked = chunks(rows, 500);
           for (const chunk of rowsChunked) {
             await trx.table(`${schema}.${tempTable}`).multiInsert(chunk);
           }
