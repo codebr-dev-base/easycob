@@ -272,6 +272,7 @@ module.exports = {
       name: 'queue:LoadXlsx',
       script: 'ace.js',
       args: 'jobs:listen --queue=LoadXlsx',
+      instances: 1,
       autorestart: true,
       node_args: '--max-old-space-size=16384', // Adicione esta linha
       env: {
