@@ -1,7 +1,7 @@
 import { decrypt } from "@/app/lib/crypto";
 import Cookies from "js-cookie";
 import { getCookies } from "next-client-cookies/server";
-import { ISessionCookie, IUser } from "../interfaces/auth";
+import { ISessionCookie, ISkill, IUser } from "../interfaces/auth";
 
 export function getSession(): ISessionCookie | null {
   // Se estiver no lado do cliente
@@ -64,3 +64,14 @@ export function getUserInitials(): string | null {
     .slice(0, 2) // Pega apenas as duas primeiras iniciais
     .join(""); // Junta as iniciais
 }
+
+export function checkUserModule(moduleName: string): boolean {
+  const user = getUser();
+  
+  const skill = user?.skills.find((skill) => {
+    const s = skill as ISkill;
+    return s.name === 'full' && s.module.shortName === moduleName;
+  });
+  return !!skill;
+}
+

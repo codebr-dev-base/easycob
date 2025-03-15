@@ -7,7 +7,6 @@ import db from '@adonisjs/lucid/services/db';
 import { inject } from '@adonisjs/core';
 import User from '#models/user';
 import LoadXlsxExternal from '#jobs/load_xlsx_external';
-import { promises as fs } from 'fs';
 
 // import type { HttpContext } from '@adonisjs/core/http'
 @inject()
@@ -56,10 +55,12 @@ export default class ExternalFilesController {
         'tbl_base_dataset'
       );
 
+      console.log('🟢 Fim da validação');
+
       // Se houver erros de validação, retorna as mensagens
       if (!validationResult.success) {
         if (newFileName) {
-          await fs.unlink(this.service.getFilePath(newFileName));
+          //await fs.unlink(this.service.getFilePath(newFileName));
         }
 
         return response.status(400).send({
@@ -89,7 +90,7 @@ export default class ExternalFilesController {
       return externalFile;
     } catch (error) {
       if (newFileName) {
-        await fs.unlink(this.service.getFilePath(newFileName));
+        //await fs.unlink(this.service.getFilePath(newFileName));
       }
 
       if (error.code === 'E_INVALID_FILE_EXTENSION') {

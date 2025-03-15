@@ -1,11 +1,11 @@
 import db from '@adonisjs/lucid/services/db';
 import sqlite3 from 'sqlite3';
-import ExcelJS from 'exceljs';
 import { Dictionary } from '@adonisjs/lucid/types/querybuilder';
-import string from '@adonisjs/core/helpers/string';
 import { chunks } from '#utils/array';
 import ExternalFile from '#models/external/external_file';
 import { DateTime } from 'luxon';
+import path from 'path';
+import fs from 'fs';
 
 interface DatasetRow {
   des_contr: string;
@@ -60,6 +60,30 @@ export default class SqLiteExternalService {
   }
 
   /**
+   * Encontra todos os arquivos JSON em um diretório e suas subpastas.
+   * @param dir - Diretório inicial para busca.
+   * @returns Array de caminhos completos para os arquivos JSON encontrados.
+   */
+  private findJsonFiles(dir: string): string[] {
+    let results: string[] = [];
+    const list = fs.readdirSync(dir);
+
+    list.forEach((file) => {
+      const filePath = path.join(dir, file);
+      const stat = fs.statSync(filePath);
+
+      if (stat && stat.isDirectory()) {
+        // Recursão para subdiretórios
+        results = results.concat(this.findJsonFiles(filePath));
+      } else if (file.endsWith('.json')) {
+        results.push(filePath);
+      }
+    });
+
+    return results;
+  }
+
+  /**
    * OTIMIZA O BANCO DE DADOS SQLITE
    */
   private optimizeDatabase() {
@@ -70,6 +94,14 @@ export default class SqLiteExternalService {
     this.dbSqlite.run('PRAGMA cache_size = -10000;');
     this.dbSqlite.run('PRAGMA foreign_keys = OFF;');
     this.dbSqlite.run('PRAGMA locking_mode = EXCLUSIVE;');
+  }
+
+  public sortFiles(files: string[]): string[] {
+    return files.sort((a, b) => {
+      const numA = parseInt(a.match(/\d+/)?.[0] || '0', 10);
+      const numB = parseInt(b.match(/\d+/)?.[0] || '0', 10);
+      return numA - numB;
+    });
   }
 
   /**
@@ -109,31 +141,6 @@ export default class SqLiteExternalService {
     };
     return typeMap[pgType] || 'TEXT'; // Se o tipo não for mapeado, usa TEXT por padrão
   }
-
-  /**
-   * Inferir o tipo do valor lido do XLSX.
-   */
-  /*
-  private inferType(value: unknown): string {
-    if (typeof value === 'number') {
-      return Number.isInteger(value) ? 'INTEGER' : 'REAL';
-    }
-
-    if (typeof value === 'boolean') {
-      return 'INTEGER'; // SQLite não tem BOOLEAN, então armazenamos como 0 e 1
-    }
-
-    if (typeof value === 'string') {
-      // Tenta converter para número
-      const numValue = parseFloat(value);
-      if (!isNaN(numValue)) {
-        return Number.isInteger(numValue) ? 'INTEGER' : 'REAL';
-      }
-    }
-
-    return 'TEXT'; // Se não for nenhum dos tipos acima, mantém como texto
-  }
- */
 
   private handleEmail(email: string): string {
     if (!email) {
@@ -314,6 +321,102 @@ export default class SqLiteExternalService {
 
     await externalFile.save();
   }
+
+  public getOutputDir(filePath: string): string {
+    // Obtém o diretório do arquivo
+    const dir = path.dirname(filePath);
+
+    // Obtém o nome do arquivo sem a extensão
+    const fileName = path.basename(filePath, '.xlsx');
+
+    // Combina o diretório e o nome do arquivo para formar o caminho da pasta
+    return path.join(dir, fileName);
+  }
+
+  public getRecord(outputDir: string) {
+    // Filtra apenas os arquivos JSON e ordena
+    const jsonFiles = this.sortFiles(this.findJsonFiles(outputDir));
+
+    if (jsonFiles.length === 0) {
+      throw new Error('Nenhum arquivo JSON encontrado.');
+    }
+
+    // 1. Primeiro registro do primeiro arquivo
+    const firstFileData = fs.readFileSync(jsonFiles[0], 'utf-8');
+    const firstFileRecords = JSON.parse(firstFileData);
+    const firstRecord = firstFileRecords[0];
+
+    return firstRecord;
+  }
+
+  // Método para inserção em lote (um arquivo de cada vez)
+  private async insertBatch(
+    table: string,
+    records: Record<string, unknown>[],
+    columnsJson: string[]
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Inicia uma transação
+      this.dbSqlite.run('BEGIN TRANSACTION', (err) => {
+        if (err) return reject(err);
+
+        // Prepara a query de inserção
+        const columns = columnsJson.join(', ');
+        const placeholders = Object.keys(records[0])
+          .map(() => '?')
+          .join(', ');
+        const query = `INSERT OR REPLACE INTO ${table} (${columns}) VALUES (${placeholders})`;
+
+        // Itera sobre cada registro e insere na tabela
+        records.forEach((record) => {
+          const values = Object.values(record);
+
+          this.dbSqlite.run(query, values, (err) => {
+            if (err) {
+              // Em caso de erro, faz rollback da transação
+              this.dbSqlite.run('ROLLBACK', () => reject(err));
+            }
+          });
+          //const values = Object.values(record);
+
+          this.dbSqlite.run(query, values, (err) => {
+            if (err) {
+              // Em caso de erro, faz rollback da transação
+              this.dbSqlite.run('ROLLBACK', () => reject(err));
+            }
+          });
+        });
+
+        // Finaliza a transação
+        this.dbSqlite.run('COMMIT', (err) => {
+          if (err) {
+            this.dbSqlite.run('ROLLBACK', () => reject(err));
+          } else {
+            resolve();
+          }
+        });
+      });
+    });
+  }
+
+  // Função de normalização
+  private normalizarObjeto(
+    objeto: { [x: string]: unknown },
+    sequenciaColunas: string[]
+  ) {
+    const objetoNormalizado: { [x: string]: unknown } = {};
+
+    for (const coluna of sequenciaColunas) {
+      if (Object.prototype.hasOwnProperty.call(objeto, coluna)) {
+        objetoNormalizado[coluna] = objeto[coluna];
+      } else {
+        objetoNormalizado[coluna] = null; // Ou outro valor padrão
+      }
+    }
+
+    return objetoNormalizado;
+  }
+
   /**
    * ##############################################################################
    * Métodos utilitários
@@ -363,8 +466,18 @@ export default class SqLiteExternalService {
    */
   private async createTableInSqlite(
     table: string,
-    columns: { column_name: string; column_type: string }[]
-  ): Promise<void> {
+    columns: { column_name: string; column_type: string }[],
+    filePath: string
+  ): Promise<{
+    columns: {
+      column_name: string;
+      column_type: string;
+    }[];
+    columnsJson: string[];
+  }> {
+    const outputDir = this.getOutputDir(filePath);
+    const firstRecord = this.getRecord(outputDir);
+
     const columnDefs = columns
       .map(
         (col) =>
@@ -372,7 +485,7 @@ export default class SqLiteExternalService {
       )
       .join(', ');
 
-    return new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       this.dbSqlite.run(
         `CREATE TABLE ${table} (${columnDefs}, PRIMARY KEY (des_contr, num_nota));`,
         (err) => {
@@ -381,6 +494,31 @@ export default class SqLiteExternalService {
         }
       );
     });
+
+    // 2. Criar a tabela para Json
+    const columnsJson = Object.keys(firstRecord);
+    if (!columnsJson.includes('des_contr')) columnsJson.push('des_contr');
+    if (!columnsJson.includes('status')) columnsJson.push('status');
+
+    const columnDefsReduced = columns
+      .filter((col) => columnsJson.includes(col.column_name)) // Filtra colunas presentes no firstRecord
+      .map(
+        (col) =>
+          `${col.column_name} ${this.mapPostgresToSqliteType(col.column_type)}`
+      )
+      .join(', ');
+
+    await new Promise<void>((resolve, reject) => {
+      this.dbSqlite.run(
+        `CREATE TABLE ${table}_json (${columnDefsReduced}, PRIMARY KEY (des_contr, num_nota));`,
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+
+    return { columns, columnsJson };
   }
 
   /**
@@ -436,13 +574,6 @@ export default class SqLiteExternalService {
       this.dbSqlite.serialize(() => {
         this.dbSqlite.run('BEGIN TRANSACTION;');
 
-        /*
-        const columnNames = Object.keys(result.rows[0]).join(', ');
-        const placeholders = Object.keys(result.rows[0])
-          .map(() => '?')
-          .join(',');
-        */
-
         const stmt = this.dbSqlite.prepare(
           `INSERT INTO ${table} (${columnNames}) VALUES (${placeholders})`
         );
@@ -465,206 +596,93 @@ export default class SqLiteExternalService {
   }
 
   /**
-   * 5️⃣ - Carrega os dados do XLSX e infere os tipos das colunas.
+   * 5️⃣ - CARREGA OS DADOS DO JSON PARA O SQLITE
    */
-  private async loadXlsxData(filePath: string): Promise<{
-    data: Record<string, unknown>[];
-    inferredTypes: Record<string, string>;
-  }> {
-    console.log(`📥 Lendo arquivo XLSX: ${filePath}...`);
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile(filePath);
-    const worksheet = workbook.worksheets[0];
+  private async loadJsonToSqlite(
+    table: string,
+    filePath: string,
+    columnsJson: string[]
+  ): Promise<{ totalValTotal: number; countTotal: number }> {
+    const outputDir = this.getOutputDir(filePath);
+    const jsonFiles = this.sortFiles(this.findJsonFiles(outputDir));
 
-    if (!worksheet) {
-      throw new Error('❌ Planilha XLSX inválida ou vazia.');
+    if (jsonFiles.length === 0) {
+      throw new Error('Nenhum arquivo JSON reduzido encontrado.');
     }
 
-    const rows: Record<string, unknown>[] = [];
-    let inferredTypes: Record<string, string> = {};
+    let countTotal = 0;
+    let totalValTotal = 0;
+    const uniqueCombinations = new Set<string>(); // Set para rastrear combinações únicas
 
-    worksheet.eachRow((row, rowIndex) => {
-      if (rowIndex === 1) {
-        // Primeira linha contém os nomes das colunas
-        inferredTypes = (row.values as string[]).reduce(
-          (acc: Record<string, string>, colName: string) => {
-            const colNameClean = string
-              .snakeCase(colName.toString())
-              .toLowerCase()
-              .trim();
-            acc[colNameClean] = 'TEXT'; // Definido como padrão
-            return acc;
-          },
-          {}
-        );
-      } else {
-        // Linhas seguintes são os dados
-        const rowData: Record<string, unknown> = {};
-        row.eachCell((cell, colIndex) => {
-          const columnName = Object.keys(inferredTypes)[colIndex - 1];
-          let value = cell.value;
+    for (const file of jsonFiles) {
+      const data = fs.readFileSync(file, 'utf-8');
+      const jsonData = JSON.parse(data);
 
-          if (value instanceof Date) {
-            value = value.toISOString().split('T')[0]; // Pega apenas a parte antes do 'T'
+      const processedRecords = jsonData
+        .map((row: { [x: string]: unknown }) => {
+          const num_ligacao = row.num_ligacao as string;
+          const seq_responsavel = row.seq_responsavel as string;
+          const emp_codigo = row.emp_codigo as string;
+          const des_contr = `${num_ligacao}-${seq_responsavel}-${emp_codigo}`;
+
+          if (row.vlr_sc) {
+            totalValTotal += parseFloat(`${row.vlr_sc}`);
           }
+          countTotal++;
 
-          if (columnName) {
-            rowData[columnName] =
-              typeof value === 'string' ? value.trim() : value;
-
-            // Inferir o tipo se ainda não foi definido
-            /*             if (inferredTypes[columnName] === 'TEXT') {
-              inferredTypes[columnName] = this.inferType(value);
-            } */
+          return this.normalizarObjeto({ ...row, des_contr }, columnsJson); // Adiciona num_nota ao objeto
+        })
+        .filter((row: { [x: string]: unknown }) => {
+          const combinationKey = `${row.des_contr}-${row.num_nota}`; // Cria chave de combinação
+          if (uniqueCombinations.has(combinationKey)) {
+            return false; // Combinação duplicada, filtra
           }
+          uniqueCombinations.add(combinationKey); // Marca combinação como única
+          return true; // Combinação única, mantém
         });
 
-        if (Object.keys(rowData).length > 0) {
-          rows.push(rowData);
-        }
-      }
-    });
-
-    console.log('✅ XLSX lido com sucesso.');
-    return { data: rows, inferredTypes };
-  }
-
-  /**
-   * 6️⃣ - Cria a tabela no SQLite.
-   */
-  private async createTableXlsxInSqlite(
-    tableName: string,
-    inferredTypes: Record<string, string>
-  ) {
-    console.log(`🛠 Criando a tabela ${tableName} no SQLite...`);
-
-    const columns = Object.keys(inferredTypes);
-    if (!columns.includes('des_contr')) columns.push('des_contr');
-    if (!columns.includes('status')) columns.push('status');
-
-    const columnDefinitions = columns
-      .map((col) => `${col} ${inferredTypes[col] || 'TEXT'}`)
-      .join(', ');
-
-    return new Promise((resolve, reject) => {
-      this.dbSqlite.run(`DROP TABLE IF EXISTS ${tableName};`, (err) => {
-        if (err) reject(err);
-        this.dbSqlite.run(
-          `CREATE TABLE ${tableName} (${columnDefinitions}, PRIMARY KEY (des_contr, num_nota));`,
-          (err) => {
-            if (err) reject(err);
-            console.log(`✅ Tabela ${tableName} criada no SQLite.`);
-            resolve(true);
-          }
+      try {
+        await this.insertBatch(table, processedRecords, columnsJson);
+      } catch (error) {
+        console.error(
+          `Erro ao inserir em lote no arquivo ${file}:`,
+          error,
+          processedRecords
         );
-      });
-    });
+      }
+    }
+
+    return { totalValTotal, countTotal };
   }
 
   /**
-   * 7️⃣ - CARREGA OS DADOS DO XLSX PARA O SQLITE
-   */
-  private async loadXlsxDataToSqlite(
-    xlsxData: Record<string, unknown>[],
-    tableName: string,
-    inferredTypes: Record<string, string>
-  ) {
-    console.log(`📥 Carregando XLSX para SQLite na tabela ${tableName}...`);
-    let val_total = 0;
-    if (xlsxData.length === 0) {
-      console.log('⚠️ Nenhum dado encontrado para inserir.');
-      return;
-    }
-    const columns = Object.keys(inferredTypes);
-    if (!columns.includes('des_contr')) columns.push('des_contr');
-    if (!columns.includes('status')) columns.push('status');
-
-    const placeholders = columns.map(() => '?').join(', ');
-    const columnNames = columns.join(', ');
-
-    const stmt = this.dbSqlite.prepare(
-      `INSERT INTO ${tableName} (${columnNames}) VALUES (${placeholders})`
-    );
-
-    for (const row of xlsxData) {
-      const num_ligacao = row.num_ligacao as string;
-      const seq_responsavel = row.seq_responsavel as string;
-      const emp_codigo = row.emp_codigo as string;
-      row.des_contr = `${num_ligacao}-${seq_responsavel}-${emp_codigo}`;
-      //row.status = 'ativo';
-      if (row.vlr_sc) val_total = parseFloat(`${row.vlr_sc}`) + val_total;
-
-      const values = columns.map((col) => {
-        const value = row[col];
-
-        if (value === undefined || value === null) return null;
-
-        const inferredType = inferredTypes[col];
-
-        if (inferredType === 'INTEGER')
-          return parseInt(value as string, 10) || null;
-        if (inferredType === 'REAL') return parseFloat(value as string) || null;
-        if (inferredType === 'TEXT') return value.toString();
-
-        return value;
-      });
-
-      stmt.run(values);
-    }
-
-    stmt.finalize();
-
-    console.log(
-      `✅ XLSX carregado no SQLite com ${xlsxData.length} registros.`
-    );
-    return val_total;
-  }
-
-  /**
-   * 8️⃣ - COMBINAR DADOS DA TABELA ORIGINAL COM OS DADOS DO XLSX
+   * 6️⃣ - COMBINAR DADOS DA TABELA ORIGINAL COM OS DADOS DO JSON
    */
 
   public async syncTables(
     table: string,
-    tableXlsx: string,
-    inferredTypes: Record<string, string>
+    tableJSon: string,
+    columns: { column_name: string; column_type: string }[],
+    columnsJson: string[]
   ): Promise<void> {
-    console.log(`🔄 Sincronizando tabelas: ${table} ⬅️ ${tableXlsx}`);
+    console.log(`🔄 Sincronizando tabelas: ${table} ⬅️ ${tableJSon}`);
 
-    const columns = Object.keys(inferredTypes);
-    if (!columns.includes('des_contr')) columns.push('des_contr');
+    if (!columnsJson.includes('des_contr')) columnsJson.push('des_contr');
 
-    const columnNames = columns.join(', ');
-    //const conflictColumns = ['des_contr', 'num_nota']; // Colunas de conflito
-    // Gera a cláusula SET dinamicamente
-    /* const setClause = columns
-      .filter((col) => !conflictColumns.includes(col)) // Ignora as colunas de conflito
-      .map((col) => `${col} = excluded.${col}`) // Formata como "coluna = excluded.coluna"
-      .join(', '); // Junta tudo com vírgulas */
+    const columnNames = columnsJson.join(', ');
 
     // Criando dinamicamente a query de UPSERT
     const queryUpsert = `
       INSERT OR REPLACE INTO ${table} (${columnNames}, status, updated_at)
       SELECT ${columnNames}, 'ativo', CURRENT_TIMESTAMP
-      FROM ${tableXlsx};
+      FROM ${tableJSon};
     `;
-
-    /*
-    // Constrói a query de UPSERT
-    const queryUpsert = `
-      INSERT INTO ${table} (${columnNames}, status, updated_at)
-      SELECT ${columnNames}, 'ativo', CURRENT_TIMESTAMP
-      FROM ${tableXlsx}
-      ON CONFLICT (${conflictColumns.join(', ')}) DO UPDATE
-      SET ${setClause}, status = excluded.status, updated_at = excluded.updated_at;
-    `;
-     */
 
     // Query para desativar registros que não foram atualizados
     const queryDeactivate = `
       UPDATE ${table}
       SET status = 'inativo'
-      WHERE des_contr NOT IN (SELECT des_contr FROM ${tableXlsx});
+      WHERE DATE(updated_at) < DATE('now');
     `;
 
     return new Promise((resolve, reject) => {
@@ -691,92 +709,20 @@ export default class SqLiteExternalService {
     });
   }
 
-  /*
-  public async syncTables(
-    table: string,
-    tableXlsx: string,
-    inferredTypes: Record<string, string>
-  ): Promise<void> {
-    console.log(`🔄 Sincronizando tabelas: ${table} ⬅️ ${tableXlsx}`);
-
-    const columns = Object.keys(inferredTypes);
-    if (!columns.includes('des_contr')) columns.push('des_contr');
-
-    const columnNames = columns.join(', ');
-    const updateAssignments = columns
-      .map(
-        (col) =>
-          `${col} = (SELECT ${col} FROM ${tableXlsx} WHERE ${tableXlsx}.des_contr = ${table}.des_contr)`
-      )
-      .join(', ');
-
-    return new Promise((resolve, reject) => {
-      this.dbSqlite.serialize(() => {
-        // 1️⃣ Primeiro, tenta atualizar os registros existentes
-        const updateQuery = `
-          UPDATE ${table}
-          SET ${updateAssignments},
-          status = 'ativo',
-          updated_at = CURRENT_TIMESTAMP
-          WHERE EXISTS (SELECT 1 FROM ${tableXlsx} WHERE ${tableXlsx}.des_contr = ${table}.des_contr);
-        `;
-
-        this.dbSqlite.run(updateQuery, (err) => {
-          if (err) {
-            console.error('❌ Erro no UPDATE:', err);
-            return reject(err);
-          }
-          console.log('✅ Registros existentes atualizados!');
-
-          // 2️⃣ Agora, insere novos registros que não existem
-          const insertQuery = `
-            INSERT INTO ${table} (${columnNames}, status, updated_at)
-            SELECT ${columnNames}, 'ativo', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP FROM ${tableXlsx}
-            WHERE NOT EXISTS (SELECT 1 FROM ${table} WHERE ${table}.des_contr = ${tableXlsx}.des_contr);
-          `;
-
-          this.dbSqlite.run(insertQuery, (err) => {
-            if (err) {
-              console.error('❌ Erro no INSERT:', err);
-              return reject(err);
-            }
-            console.log('✅ Novos registros inseridos!');
-
-            // 3️⃣ Desativar registros que não foram atualizados
-            const deactivateQuery = `
-              UPDATE ${table}
-              SET status = 'inativo'
-              WHERE des_contr NOT IN (SELECT des_contr FROM ${tableXlsx});
-            `;
-
-            this.dbSqlite.run(deactivateQuery, (err) => {
-              if (err) {
-                console.error('❌ Erro ao desativar registros:', err);
-                return reject(err);
-              }
-              console.log('✅ Registros inativos atualizados!');
-              resolve();
-            });
-          });
-        });
-      });
-    });
-  }
- */
   /**
-   * 9️⃣ - ENVIA OS DADOS DO SQLITE PARA O POSTGRES
+   * 7️⃣ - ENVIA OS DADOS DO SQLITE PARA O POSTGRES
    */
 
   public async syncToPostgres(
     schema: string,
     sourceTable: string,
-    inferredTypes: Record<string, string>
+    columnsAndTypes: { column_name: string; column_type: string }[]
   ): Promise<void> {
     const tempTable = `${sourceTable}_new`;
     const oldTable = `${sourceTable}_old`;
     const originalTable = `${sourceTable}`;
 
-    const columns = Object.keys(inferredTypes);
+    const columns = columnsAndTypes.map((column) => column.column_name);
     if (!columns.includes('des_contr')) columns.push('des_contr');
 
     const columnNames = columns.join(', ');
@@ -834,10 +780,21 @@ export default class SqLiteExternalService {
 
       // 4️⃣ Inserir os dados na tabela temporária do PostgreSQL
       if (rows.length > 0) {
-        if (rows.length > 500) {
-          const rowsChunked = chunks(rows, 500);
+        if (rows.length > 1000) {
+          const rowsChunked = chunks(rows, 1000);
           for (const chunk of rowsChunked) {
             await trx.table(`${schema}.${tempTable}`).multiInsert(chunk);
+            /*
+            try {
+              await trx.table(`${schema}.${tempTable}`).multiInsert(chunk);
+            } catch (error) {
+              console.error(
+                `Erro ao inserir dados em ${tempTable}:
+                  Dados: ${JSON.stringify(chunk)},
+                Erro: ${JSON.stringify(error)}`
+              );
+            }
+             */
           }
         } else {
           await trx.table(`${schema}.${tempTable}`).multiInsert(rows);
@@ -883,7 +840,7 @@ export default class SqLiteExternalService {
   }
 
   /*
-   * 🔟 - Alimentar base contratos
+   * 8️⃣ - Alimentar base contratos
    */
   public async syncContratos(
     schema: string,
@@ -954,7 +911,7 @@ export default class SqLiteExternalService {
   }
 
   /**
-   * 1️⃣1️⃣ - Alimentar base de prestações
+   * 9️⃣ - Alimentar base de prestações
    */
   public async syncPrestacoes(
     schema: string,
@@ -1006,7 +963,7 @@ export default class SqLiteExternalService {
   }
 
   /**
-   * 1️⃣2️⃣ - Alimentar base de contatos
+   * 1️⃣0️⃣- Alimentar base de contatos
    */
   public async syncContatos(
     schema: string,
@@ -1108,36 +1065,34 @@ export default class SqLiteExternalService {
     // 2️⃣ - Remove a tabela se já existir no SQLite
     console.log(`🔄 Removendo a tabela ${table} do SQLite (se existir)...`);
     await this.dropTableIfExists(table);
+    await this.dropTableIfExists(`${table}_json`);
     console.log(`✅ Tabela ${table} removida do SQLite (se existia).`);
 
     // 3️⃣ - Cria a nova tabela no SQLite
-    await this.createTableInSqlite(table, columns);
+    const { columnsJson } = await this.createTableInSqlite(
+      table,
+      columns,
+      externalFile.filePath
+    );
     console.log(`✅ Tabela ${table} recriada no SQLite.`);
 
     // 4️⃣ - Copia os dados do PostgreSQL para o SQLite
     await this.copyDataToSqlite(schema, table, columns);
     console.log(`✅ Dados copiados de ${schema}.${table} para SQLite.`);
 
-    // 5️⃣ - Carregar XLSX para SQLite
-    const { data: xlsxData, inferredTypes } = await this.loadXlsxData(
-      externalFile.filePath
-    );
-
-    // 6️⃣ - Criar tabela no SQLite
-    await this.createTableXlsxInSqlite('xlsx' + table, inferredTypes);
-
     // 7️⃣ - Carregar dados do XLSX para SQLite
-    const val_total = await this.loadXlsxDataToSqlite(
-      xlsxData,
-      'xlsx' + table,
-      inferredTypes
-    );
+    const { totalValTotal: val_total, countTotal } =
+      await this.loadJsonToSqlite(
+        `${table}_json`,
+        externalFile.filePath,
+        columnsJson
+      );
 
-    // 8️⃣ - Combinar dados da tabela original com os dados do XLSX
-    await this.syncTables(table, 'xlsx' + table, inferredTypes);
+    // 8️⃣ - Combinar dados da tabela original com os dados do JSON
+    await this.syncTables(table, `${table}_json`, columns, columnsJson);
 
     // 9️⃣ - Enviar dados para o PostgreSQL
-    await this.syncToPostgres(schema, table, inferredTypes);
+    await this.syncToPostgres(schema, table, columns);
     //clearInterval(interval);
 
     console.log('🔟 - Alimentar base contratos');
@@ -1168,7 +1123,7 @@ export default class SqLiteExternalService {
       finalCount,
       initialCount,
       countInactive,
-      xlsxData.length,
+      countTotal,
       initialInativoCount,
       val_total ? val_total : 0
     );

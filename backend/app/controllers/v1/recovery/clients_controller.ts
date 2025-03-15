@@ -71,13 +71,16 @@ export default class ClientsController {
         }
       })
       .preload('phones', (q) => {
-        q.select('contato', 'percentual_atender').where(
-          'tipo_contato',
-          'TELEFONE'
-        );
+        q.select('contato', 'percentual_atender')
+          .where('tipo_contato', 'TELEFONE')
+          .orderBy('block', 'asc')
+          .orderBy('block_all', 'asc');
       })
       .preload('emails', (q) => {
-        q.select('contato').where('tipo_contato', 'EMAIL');
+        q.select('contato')
+          .where('tipo_contato', 'EMAIL')
+          .orderBy('block', 'asc')
+          .orderBy('block_all', 'asc');
       })
       .preload('contracts', (q) => {
         q.select('des_contr').where('status', 'ATIVO');

@@ -43,6 +43,7 @@ export default defineConfig({
     () => import('@adonisjs/mail/mail_provider'),
     () => import('adonisjs-jobs/jobs_provider'),
     () => import('@adonisjs/drive/drive_provider'),
+    /*  () => import('#providers/socket_io_provider'), */
   ],
 
   /*

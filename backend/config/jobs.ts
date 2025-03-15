@@ -77,8 +77,10 @@ const jobsConfig = defineConfig({
   },
 
   workerOptions: {
-    stalledInterval: 12 * 3600, // 12 hours
-    lockDuration: 12 * 3600, // 12 hours
+    maxStalledCount: 5, // Permite 5 tentativas antes de falhar
+    stalledInterval: 60000, // Verifica a cada 60s se há jobs travados
+    lockDuration: 120000, // Mantém o lock por 2 minutos
+    lockRenewTime: 60000, // Renova o lock a cada 1 minuto
   },
 });
 

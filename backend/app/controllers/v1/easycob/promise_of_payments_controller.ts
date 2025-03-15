@@ -1,5 +1,6 @@
 import PromiseOfPayment from '#models/promise_of_payment';
 import PromiseOfPaymentHistory from '#models/promise_of_payment_history';
+import UserService from '#services/user_service';
 import { serializeKeysCamelCase } from '#utils/serialize';
 import { inject } from '@adonisjs/core';
 import string from '@adonisjs/core/helpers/string';
@@ -8,89 +9,104 @@ import db from '@adonisjs/lucid/services/db';
 
 @inject()
 export default class PromiseOfPaymentsController {
-  public async index({ request }: HttpContext) {
-    const qs = request.qs();
-    const pageNumber = qs.page || '1';
-    const limit = qs.perPage || '10';
-    let orderBy = 'p.id';
-    if (qs.orderBy) {
-      if (qs.orderBy === 'user') {
-        orderBy = `u.name`;
-      } else if (qs.orderBy === 'client') {
-        orderBy = `cls.nom_clien`;
-      } else if (qs.orderBy === 'contato') {
-        orderBy = `a.contato`;
-      } else if (qs.orderBy === 'desContr') {
-        orderBy = `a.des_contr`;
-      } else {
-        orderBy = `p.${string.snakeCase(qs.orderBy)}`;
+  constructor(protected userService: UserService) {}
+  public async index({ request, auth }: HttpContext) {
+    if (auth && auth.user && auth.user.id) {
+      let userId = undefined;
+      if (!(await this.userService.checkUserModule('admin', auth.user.id))) {
+        userId = auth.user.id;
       }
-    }
-    const descending = qs.descending || 'true';
 
-    const actions = await db
-      .from('promise_of_payments as p')
-      .select('p.*')
-      .select('a.user_id as user_id')
-      .select('u.name as user')
-      .select('cls.nom_clien as client')
-      .select('a.contato as contato')
-      .select('a.des_contr as des_contr')
-      .select('a.cod_credor_des_regis as cod_credor_des_regis')
-      .innerJoin('actions as a', 'a.id', '=', 'p.action_id')
-      .innerJoin('users as u', 'u.id', '=', 'a.user_id')
-      .innerJoin(
-        'recupera.tbl_arquivos_clientes as cls',
-        'cls.cod_credor_des_regis',
-        '=',
-        'a.cod_credor_des_regis'
-      )
-      .where((q) => {
-        if (qs.startDate && qs.endDate) {
-          q.whereRaw(`p.dat_prev::date >= ?`, [qs.startDate]).andWhereRaw(
-            `p.dat_prev::date <= ?`,
-            [qs.endDate]
-          );
+      const qs = request.qs();
+      const pageNumber = qs.page || '1';
+      const limit = qs.perPage || '10';
+      let orderBy = 'p.id';
+      if (qs.orderBy) {
+        if (qs.orderBy === 'user') {
+          orderBy = `u.name`;
+        } else if (qs.orderBy === 'client') {
+          orderBy = `cls.nom_clien`;
+        } else if (qs.orderBy === 'contato') {
+          orderBy = `a.contato`;
+        } else if (qs.orderBy === 'desContr') {
+          orderBy = `a.des_contr`;
+        } else {
+          orderBy = `p.${string.snakeCase(qs.orderBy)}`;
         }
+      }
+      const descending = qs.descending || 'true';
 
-        if (qs.startDateCreate && qs.endDateCreate) {
-          q.whereRaw(`p.created_at::date >= ?`, [
-            qs.startDateCreate,
-          ]).andWhereRaw(`p.created_at::date <= ?`, [qs.endDateCreate]);
-        }
-
-        if (qs.userId) {
-          q.where('a.user_id', qs.userId);
-        }
-
-        if (qs.discount && qs.discount == 'true') {
-          q.where('p.discount', qs.discount);
-        }
-
-        if (qs.status && qs.status === 'true') {
-          q.where('p.status', qs.status);
-        }
-
-        if (qs.keyword) {
-          q.whereILike('cls.nom_clien', `%${qs.keyword}%`);
-        }
-
-        if (qs.typeActionIds) {
-          if (Array.isArray(qs.typeActionIds)) {
-            if (qs.typeActionIds.length > 0) {
-              q.whereIn('a.type_action_id', qs.typeActionIds);
-            }
-          } else {
-            q.where('a.type_action_id', qs.typeActionIds);
+      const actions = await db
+        .from('promise_of_payments as p')
+        .select('p.*')
+        .select('a.user_id as user_id')
+        .select('u.name as user')
+        .select('cls.nom_clien as client')
+        .select('a.contato as contato')
+        .select('a.des_contr as des_contr')
+        .select('a.cod_credor_des_regis as cod_credor_des_regis')
+        .innerJoin('actions as a', 'a.id', '=', 'p.action_id')
+        .innerJoin('users as u', 'u.id', '=', 'a.user_id')
+        .innerJoin(
+          'recupera.tbl_arquivos_clientes as cls',
+          'cls.cod_credor_des_regis',
+          '=',
+          'a.cod_credor_des_regis'
+        )
+        .where((q) => {
+          if (qs.startDate && qs.endDate) {
+            q.whereRaw(`p.dat_prev::date >= ?`, [qs.startDate]).andWhereRaw(
+              `p.dat_prev::date <= ?`,
+              [qs.endDate]
+            );
           }
-        }
 
-        return q;
-      })
-      .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
-      .paginate(pageNumber, limit);
+          if (qs.startDateCreate && qs.endDateCreate) {
+            q.whereRaw(`p.created_at::date >= ?`, [
+              qs.startDateCreate,
+            ]).andWhereRaw(`p.created_at::date <= ?`, [qs.endDateCreate]);
+          }
 
-    return serializeKeysCamelCase(actions.toJSON());
+          if (userId) {
+            q.where('a.user_id', userId);
+          } else if (qs.userId) {
+            q.where('a.user_id', qs.userId);
+          }
+
+          if (qs.discount && qs.discount == 'true') {
+            q.where('p.discount', qs.discount);
+          }
+
+          if (qs.status && qs.status === 'true') {
+            q.where('p.status', qs.status);
+          }
+
+          if (qs.keyword) {
+            q.whereILike('cls.nom_clien', `%${qs.keyword}%`);
+          }
+
+          if (qs.typeActionIds) {
+            if (Array.isArray(qs.typeActionIds)) {
+              if (qs.typeActionIds.length > 0) {
+                q.whereIn('a.type_action_id', qs.typeActionIds);
+              }
+            } else {
+              q.where('a.type_action_id', qs.typeActionIds);
+            }
+          }
+
+          return q;
+        })
+        .orderBy(orderBy, descending === 'true' ? 'desc' : 'asc')
+        .paginate(pageNumber, limit);
+
+      return serializeKeysCamelCase(actions.toJSON());
+    } else {
+      return {
+        meta: {},
+        data: [],
+      };
+    }
   }
 
   public async update({ auth, params, request, response }: HttpContext) {

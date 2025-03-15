@@ -3,9 +3,14 @@ import { Request } from '@adonisjs/core/http';
 import app from '@adonisjs/core/services/app';
 import path from 'path';
 import fs from 'fs';
-import ExcelJS, { CellValue } from 'exceljs';
 import db from '@adonisjs/lucid/services/db';
 import string from '@adonisjs/core/helpers/string';
+import {
+  extractTextInsideBrackets,
+  removeAccentsAndSymbols,
+} from '#utils/string';
+import env from '#start/env';
+import { exec } from 'child_process';
 
 interface ColumnInfo {
   column_name: string;
@@ -21,6 +26,13 @@ interface ValidationResult {
     actualValue: unknown;
     actualType: string;
   }[];
+}
+
+interface ColumnMapping {
+  dbColumn: string;
+  xlsxIndex: number | null;
+  expectedType: string;
+  isNullable: boolean;
 }
 
 export default class ExternalFileService {
@@ -75,9 +87,11 @@ export default class ExternalFileService {
       throw new Error(`❌ Nenhuma coluna encontrada para ${schema}.${table}`);
     }
     // Remover colunas desnecessárias
+    // Filtrar colunas desnecessárias e manter apenas as que estão em essentialColumns
     return result.rows.filter(
       (row: ColumnInfo) =>
-        row.column_name !== 'id' &&
+        this.essentialColumns.includes(row.column_name) && // Mantém apenas colunas essenciais
+        row.column_name !== 'id' && // Remove colunas específicas
         row.column_name !== 'updated_at' &&
         row.column_name !== 'des_contr' &&
         row.column_name !== 'status'
@@ -85,67 +99,11 @@ export default class ExternalFileService {
   }
 
   /**
-   * Verifica se o valor é compatível com o tipo esperado.
-   */
-  private isTypeCompatible(expectedType: string, value: unknown): boolean {
-    // Se o valor for nulo ou indefinido, é considerado compatível (a validação de nulidade é feita antes)
-    if (value === null || value === undefined) {
-      return true;
-    }
-
-    switch (expectedType) {
-      case 'integer':
-      case 'bigint':
-        // Se o valor for uma string, tenta converter para número
-        if (typeof value === 'string') {
-          // Verifica se a string representa um número inteiro válido
-          if (!/^\d+$/.test(value)) {
-            return false; // Não é um número inteiro válido
-          }
-          // Tenta converter para BigInt
-          try {
-            BigInt(value); // Tenta criar um BigInt
-            return true; // Conversão bem-sucedida
-          } catch {
-            return false; // Falha na conversão
-          }
-        }
-        // Se o valor já for um número, verifica se é inteiro
-        return typeof value === 'number' && Number.isInteger(value);
-
-      case 'numeric':
-      case 'real':
-      case 'double precision':
-        return typeof value === 'number';
-
-      case 'character varying':
-      case 'text':
-        // Aceita strings, números ou valores nulos/indefinidos
-        return typeof value === 'string' || typeof value === 'number';
-
-      case 'boolean':
-        return typeof value === 'boolean';
-
-      case 'date':
-      case 'timestamp':
-        return value instanceof Date;
-
-      default:
-        return true; // Ignora tipos não mapeados
-    }
-  }
-
-  /**
    * Valida os tipos de dados de uma linha específica.
    */
   private validateRowTypes(
     row: unknown[],
-    columnMapping: {
-      dbColumn: string;
-      xlsxIndex: number | null;
-      expectedType: string;
-      isNullable: boolean;
-    }[],
+    columnMapping: ColumnMapping[],
     rowLabel: string
   ): ValidationResult {
     const incompatibleColumns: {
@@ -170,15 +128,21 @@ export default class ExternalFileService {
 
         // Verifica se o valor é nulo ou indefinido e se a coluna permite valores nulos
         if (
-          (cellValue === null || cellValue === undefined) &&
+          (cellValue === null || cellValue === undefined || cellValue === '') &&
           column.isNullable
         ) {
           // Valor nulo ou indefinido é permitido para colunas não obrigatórias
           return;
         }
 
+        // Converte o valor para o tipo esperado
+        const convertedValue = this.convertValue(
+          cellValue,
+          column.expectedType
+        );
+
         // Verifica se o tipo do valor é compatível com o tipo esperado
-        if (!this.isTypeCompatible(column.expectedType, cellValue)) {
+        if (!this.isTypeCompatible(column.expectedType, convertedValue)) {
           incompatibleColumns.push({
             column: column.dbColumn,
             expectedType: column.expectedType,
@@ -196,39 +160,251 @@ export default class ExternalFileService {
   }
 
   /**
-   * Lê o arquivo XLSX e valida os tipos de dados das colunas.
+   * Verifica se o valor é compatível com o tipo esperado.
    */
+  private isTypeCompatible(expectedType: string, value: unknown): boolean {
+    if (value === null || value === undefined) {
+      return false; // Valores nulos devem ser tratados separadamente
+    }
+
+    switch (expectedType.toLowerCase()) {
+      case 'integer':
+      case 'int':
+      case 'smallint':
+      case 'bigint':
+        return Number.isInteger(Number(value));
+      case 'numeric':
+      case 'decimal':
+      case 'real':
+      case 'double precision':
+        return typeof value === 'number' || !isNaN(Number(value));
+      case 'boolean':
+        return (
+          typeof value === 'boolean' ||
+          value === 'true' ||
+          value === 'false' ||
+          value === '1' ||
+          value === '0'
+        );
+      case 'date':
+      case 'timestamp':
+      case 'timestamptz':
+        return !isNaN(new Date(value as string).getTime());
+      case 'text':
+      case 'varchar':
+      case 'char':
+      default:
+        return typeof value === 'string';
+    }
+  }
+
+  /**
+   * Converte o valor para o tipo esperado.
+   */
+  private convertValue(value: unknown, expectedType: string): unknown {
+    if (value === null || value === undefined) {
+      return null;
+    }
+
+    switch (expectedType.toLowerCase()) {
+      case 'integer':
+      case 'int':
+      case 'smallint':
+      case 'bigint':
+        return parseInt(String(value), 10);
+      case 'numeric':
+      case 'decimal':
+      case 'real':
+      case 'double precision':
+        return parseFloat(String(value));
+      case 'boolean':
+        return (
+          value === 'true' || value === '1' || value === 'sim' || value === true
+        );
+      case 'date':
+      case 'timestamp':
+      case 'timestamptz':
+        return new Date(value as string);
+      case 'text':
+      case 'varchar':
+      case 'char':
+      default:
+        return String(value);
+    }
+  }
+
+  /**
+   * Corrige o cabeçalho da tabela no arquivo XLSX.
+   */
+  public fixTableHeader(linha: string[]): string[] {
+    // Modifica os valores da primeira linha
+    return linha.map((value) => {
+      // Exemplo de correção: converte todas as células para maiúsculas
+      if (value && typeof value === 'string') {
+        let v = extractTextInsideBrackets(value);
+        v = removeAccentsAndSymbols(v);
+        return string.snakeCase(v).toLowerCase().trim();
+      } else {
+        throw new Error(`❌ A coluna ${value} deve ser uma string.`);
+      }
+    });
+  }
+
+  /**
+   * Encontra todos os arquivos JSON em um diretório e suas subpastas.
+   * @param dir - Diretório inicial para busca.
+   * @returns Array de caminhos completos para os arquivos JSON encontrados.
+   */
+  private findJsonFiles(dir: string): string[] {
+    let results: string[] = [];
+    const list = fs.readdirSync(dir);
+
+    list.forEach((file) => {
+      const filePath = path.join(dir, file);
+      const stat = fs.statSync(filePath);
+
+      if (stat && stat.isDirectory()) {
+        // Recursão para subdiretórios
+        results = results.concat(this.findJsonFiles(filePath));
+      } else if (file.endsWith('.json')) {
+        results.push(filePath);
+      }
+    });
+
+    return results;
+  }
+
+  public getOutputDir(filePath: string): string {
+    // Obtém o diretório do arquivo
+    const dir = path.dirname(filePath);
+
+    // Obtém o nome do arquivo sem a extensão
+    const fileName = path.basename(filePath, '.xlsx');
+
+    // Combina o diretório e o nome do arquivo para formar o caminho da pasta
+    return path.join(dir, fileName);
+  }
+
+  public getRecords(outputDir: string): {
+    firstRecord: undefined;
+    lastRecord: undefined;
+    middleRecord: undefined;
+    randomRecord: undefined;
+  } {
+    // Filtra apenas os arquivos JSON e ordena
+    const jsonFiles = this.sortFiles(this.findJsonFiles(outputDir));
+
+    if (jsonFiles.length === 0) {
+      throw new Error('Nenhum arquivo JSON encontrado.');
+    }
+
+    // 1. Primeiro registro do primeiro arquivo
+    const firstFileData = fs.readFileSync(jsonFiles[0], 'utf-8');
+    const firstFileRecords = JSON.parse(firstFileData);
+    const firstRecord = firstFileRecords[0];
+
+    // 2. Último registro do último arquivo
+    const lastFileData = fs.readFileSync(
+      jsonFiles[jsonFiles.length - 1],
+      'utf-8'
+    );
+    const lastFileRecords = JSON.parse(lastFileData);
+    const lastRecord = lastFileRecords[lastFileRecords.length - 1];
+
+    // 3. Registro mais próximo do meio do arquivo do meio
+    const middleFileIndex = Math.floor(jsonFiles.length / 2);
+    const middleFileData = fs.readFileSync(jsonFiles[middleFileIndex], 'utf-8');
+    const middleFileRecords = JSON.parse(middleFileData);
+    const middleRecordIndex = Math.floor(middleFileRecords.length / 2);
+    const middleRecord = middleFileRecords[middleRecordIndex];
+
+    // 4. Um registro aleatório de um arquivo aleatório
+    const randomFileIndex = this.getRandomInt(0, jsonFiles.length - 1);
+    const randomFileData = fs.readFileSync(jsonFiles[randomFileIndex], 'utf-8');
+    const randomFileRecords = JSON.parse(randomFileData);
+    const randomRecordIndex = this.getRandomInt(
+      0,
+      randomFileRecords.length - 1
+    );
+    const randomRecord = randomFileRecords[randomRecordIndex];
+
+    return {
+      firstRecord,
+      lastRecord,
+      middleRecord,
+      randomRecord,
+    };
+  }
+
+  public sortFiles(files: string[]): string[] {
+    return files.sort((a, b) => {
+      const numA = parseInt(a.match(/\d+/)?.[0] || '0', 10);
+      const numB = parseInt(b.match(/\d+/)?.[0] || '0', 10);
+      return numA - numB;
+    });
+  }
+
+  public getRandomInt(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  // Função para obter os nomes dos campos de um registro
+  public getFieldNames(record: Record<string, unknown>): string[] {
+    if (!record || typeof record !== 'object') {
+      throw new Error('Registro inválido.');
+    }
+    return Object.keys(record);
+  }
+
   public async validateXlsxTypes(
     filePath: string,
     schema: string,
     table: string
   ): Promise<ValidationResult[]> {
-    // Recupera as colunas e tipos esperados do banco de dados
-    const dbColumns = await this.getColumnsFromDatabase(schema, table);
+    await new Promise((resolve, reject) => {
+      // Monta o comando
 
-    // Carrega o arquivo XLSX
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile(filePath);
-
-    // Assume que a primeira planilha é a correta
-    const worksheet = workbook.worksheets[0];
-
-    // Obtém todas as linhas do arquivo XLSX
-    const rows = worksheet.getSheetValues() as unknown[][];
-
-    // Extrai os nomes das colunas da primeira linha (cabeçalho)
-    const firstRow = rows[1]; // Primeira linha (cabeçalho)
-
-    // Verifica se a primeira linha existe
-    if (!firstRow || !Array.isArray(firstRow)) {
-      throw new Error(
-        '❌ A primeira linha do arquivo XLSX está vazia ou mal formatada.'
+      const command = env.get('XLSX_TO_JSON') ? env.get('XLSX_TO_JSON') : '';
+      const columnMapping = env.get('COLUMN_MAPPING')
+        ? env.get('COLUMN_MAPPING')
+        : '';
+      if (!command || !columnMapping) {
+        reject('O comando XLSX_TO_JSON não está definido.');
+        return;
+      }
+      console.log(`${command} ${filePath} ${columnMapping}`);
+      // Executa o comando
+      exec(
+        `${command} ${filePath} ${columnMapping}`,
+        (error, stdout, stderr) => {
+          if (error) {
+            console.error(`Erro ao executar o programa Rust: ${stderr}`);
+            reject(stderr);
+          } else {
+            console.log(`Saída do programa Rust: ${stdout}`);
+            resolve(stdout);
+          }
+        }
       );
+    });
+    console.log('🟢 Fim da partição do arquivo');
+
+    const outputDir = this.getOutputDir(filePath);
+
+    const { firstRecord, lastRecord, middleRecord, randomRecord } =
+      this.getRecords(outputDir);
+
+    if (!firstRecord || !lastRecord || !middleRecord || !randomRecord) {
+      throw new Error('Não foi possível obter os registros.');
     }
 
-    const presentColumns = firstRow.map(
-      (cell) => cell && string.snakeCase(cell.toString()).toLowerCase().trim()
+    // Recupera as colunas presentes no primeiro registro
+    const presentColumns = this.getFieldNames(
+      firstRecord as Record<string, unknown>
     );
+
+    // Recupera as colunas e tipos esperados do banco de dados
+    const dbColumns = await this.getColumnsFromDatabase(schema, table);
 
     // Mapeia as colunas do XLSX com as colunas do banco de dados
     const columnMapping = dbColumns.map((dbColumn) => {
@@ -241,40 +417,19 @@ export default class ExternalFileService {
       };
     });
 
-    // Seleciona as 4 linhas para teste (ignorando a primeira linha de cabeçalho)
-    const secondRow = rows[2]; // Segunda linha (primeira linha válida de dados)
-    const lastRow = rows[rows.length - 2]; // Última linha
-    const middleRow = rows[Math.floor((rows.length - 1) / 2) + 1]; // Linha mais próxima do meio
-    const randomRow = rows[Math.floor(Math.random() * (rows.length - 2)) + 2]; // Linha aleatória
-
-    // Valida os tipos das colunas para cada linha selecionada
     const results: ValidationResult[] = [];
     results.push(
-      this.validateRowTypes(
-        secondRow as unknown[],
-        columnMapping,
-        'Segunda linha'
-      )
+      this.validateRowTypes(firstRecord, columnMapping, 'Primeira linha')
     );
     results.push(
-      this.validateRowTypes(lastRow as unknown[], columnMapping, 'Última linha')
+      this.validateRowTypes(lastRecord, columnMapping, 'Ultima linha')
     );
     results.push(
-      this.validateRowTypes(
-        middleRow as unknown[],
-        columnMapping,
-        'Linha do meio'
-      )
+      this.validateRowTypes(middleRecord, columnMapping, 'linha do meio')
     );
     results.push(
-      this.validateRowTypes(
-        randomRow as unknown[],
-        columnMapping,
-        'Linha aleatória'
-      )
+      this.validateRowTypes(randomRecord, columnMapping, 'linha aleatoria')
     );
-
-    // Retorna todos os resultados de validação
     return results;
   }
 
@@ -351,7 +506,11 @@ export default class ExternalFileService {
 
     const dateTime = new Date().getTime();
     const newFileName = `${dateTime}.${file.extname}`;
-    const destinationPath = app.makePath('uploads/xlsx');
+    const nodeEnv = env.get('NODE_ENV') ? env.get('NODE_ENV') : 'production';
+    let destinationPath = app.makePath('../uploads/xlsx');
+    if (nodeEnv === 'development') {
+      destinationPath = app.makePath('uploads/xlsx');
+    }
     const fullPath = path.join(destinationPath, newFileName);
 
     // Tentar mover o arquivo uma vez
@@ -379,32 +538,37 @@ export default class ExternalFileService {
   }
 
   getFilePath(fileName: string) {
-    const filePath = `${app.makePath('uploads')}/xlsx/${fileName}`;
+    let filePath = `${app.makePath('../uploads')}/xlsx/${fileName}`;
+    const nodeEnv = env.get('NODE_ENV') ? env.get('NODE_ENV') : 'production';
+    if (nodeEnv === 'development') {
+      filePath = `${app.makePath('uploads')}/xlsx/${fileName}`;
+    }
     return filePath;
   }
 
   async checkColumns(fileName: string) {
     const filePath = this.getFilePath(fileName);
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile(filePath);
-    const worksheet = workbook.getWorksheet(1);
-    if (!worksheet) {
-      throw new Error('Worksheet not found');
+    const outputDir = this.getOutputDir(filePath);
+
+    const { firstRecord } = this.getRecords(outputDir);
+
+    // Recupera as colunas presentes no primeiro registro
+    // colunas presentes no primeiro registro
+    if (firstRecord === undefined) {
+      throw new Error('Não foi possível recuperar o primeiro registro');
     }
-    const firstRow = worksheet.getRow(1);
-
-    if (!firstRow) {
-      throw new Error('First row not found');
+    if (typeof firstRecord !== 'object') {
+      throw new Error('Registro inválido.');
+    }
+    if (firstRecord === null) {
+      throw new Error('Registro inválido.');
     }
 
-    const presentColumns =
-      firstRow.values && Array.isArray(firstRow.values)
-        ? firstRow.values.map(
-            (cell) =>
-              cell && string.snakeCase(cell.toString()).toLowerCase().trim()
-          )
-        : [];
+    const presentColumns = this.getFieldNames(
+      firstRecord as Record<string, unknown>
+    );
 
+    // Verifica se todas as colunas essenciais estão presentes
     const missingColumns = this.essentialColumns.filter(
       (col) => !presentColumns.includes(col)
     );
@@ -413,6 +577,7 @@ export default class ExternalFileService {
       throw new Error(`Missing columns: ${missingColumns.join(', ')} `);
     }
 
+    // Recupera as colunas extras
     const extraColumns = presentColumns.filter(
       (col) =>
         typeof col === 'string' && !this.essentialColumns.includes(`${col}`)
@@ -423,7 +588,7 @@ export default class ExternalFileService {
     }
   }
 
-  private async addExtraColumns(colunas: CellValue[]) {
+  private async addExtraColumns(colunas: string[]) {
     if (colunas.length > 0) {
       const colunasExistentes = await this.getExistingColumns();
       const colunasNovas = colunas.filter(
@@ -433,7 +598,7 @@ export default class ExternalFileService {
       if (colunasNovas.length > 0) {
         if (colunasNovas.length > 0) {
           const queries = colunasNovas.map((coluna) => {
-            return `ALTER TABLE tbl_base_cliente ADD COLUMN \`${coluna}\` VARCHAR(255) NULL`;
+            return `ALTER TABLE base_externa.tbl_base_dataset ADD COLUMN ${coluna} VARCHAR(255) NULL`;
           });
 
           for (const query of queries) {

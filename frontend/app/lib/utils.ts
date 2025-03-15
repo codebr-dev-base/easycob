@@ -363,3 +363,57 @@ export function isEqual<T>(objA: T, objB: T): boolean {
 
   return true;
 }
+
+const holidays = [
+  { date: "2025-01-01", name: "Confraternização mundial", type: "national" },
+  { date: "2025-03-04", name: "Carnaval", type: "national" },
+  { date: "2025-04-18", name: "Sexta-feira Santa", type: "national" },
+  { date: "2025-04-20", name: "Páscoa", type: "national" },
+  { date: "2025-04-21", name: "Tiradentes", type: "national" },
+  { date: "2025-05-01", name: "Dia do trabalho", type: "national" },
+  { date: "2025-06-19", name: "Corpus Christi", type: "national" },
+  { date: "2025-09-07", name: "Independência do Brasil", type: "national" },
+  { date: "2025-10-12", name: "Nossa Senhora Aparecida", type: "national" },
+  { date: "2025-11-02", name: "Finados", type: "national" },
+  { date: "2025-11-15", name: "Proclamação da República", type: "national" },
+  { date: "2025-11-20", name: "Dia da consciência negra", type: "national" },
+  { date: "2025-12-25", name: "Natal", type: "national" }
+];
+
+export function isHolidayOrWeekend(date: Date): boolean {
+  const dayOfWeek = date.getDay();
+  const formattedDate = date.toISOString().split("T")[0];
+
+  // Verifica se é fim de semana (sábado ou domingo) ou feriado
+  return dayOfWeek === 0 || dayOfWeek === 6 || holidays.some(holiday => holiday.date === formattedDate);
+}
+
+export function getNextValidDates(startDate: Date, count: number): Set<string> {
+  const validDates = new Set<string>();
+  let currentDate = new Date(startDate);
+  currentDate.setHours(0, 0, 0, 0);
+
+  while (validDates.size < count) {
+    if (!isHolidayOrWeekend(currentDate)) {
+      validDates.add(currentDate.toISOString().split("T")[0]);
+    }
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return validDates;
+}
+
+export function isDateDisabled(date: string | Date, limit: number = 7): boolean {
+  const parsedDate = typeof date === "string" ? new Date(date) : date;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normaliza para evitar problemas de fuso horário
+
+  // Obtém os próximos limit dias úteis
+  const validDates = getNextValidDates(today, limit);
+
+  const formattedDate = parsedDate.toISOString().split("T")[0];
+
+  // A data está fora dos limit dias úteis ou é um fim de semana/feriado
+  return !validDates.has(formattedDate);
+}
+

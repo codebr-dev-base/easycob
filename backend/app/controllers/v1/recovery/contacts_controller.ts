@@ -17,7 +17,8 @@ export default class ContactsController {
           'TELEFONE'
         );
       })
-      .orderBy('updatedAt', 'asc');
+      .orderBy('block', 'asc')
+      .orderBy('block_all', 'asc');
 
     const emails = await Contact.query()
       .where((q) => {
@@ -26,7 +27,9 @@ export default class ContactsController {
           'EMAIL'
         );
       })
-      .orderBy('updatedAt', 'asc');
+      .orderBy('block', 'asc')
+      .orderBy('block_all', 'asc');
+
     return { phones, emails };
   }
 

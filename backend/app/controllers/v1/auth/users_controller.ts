@@ -8,7 +8,7 @@ import {
 import { DateTime } from 'luxon';
 import hash from '@adonisjs/core/services/hash';
 import PasswordHistory from '#models/password_history';
-import Module from '#models/module';
+import db from '@adonisjs/lucid/services/db';
 
 export default class UsersController {
   public async index({ request }: HttpContext) {
@@ -143,33 +143,21 @@ export default class UsersController {
     const { name } = params;
     const qs = request.qs();
 
-    const module = await Module.findBy('short_name', name);
-    await module?.load('skills', (q) => {
-      return q.preload('users');
-    });
-    let listUserId: number[] = [];
-
-    if (module) {
-      for (const skill of module.skills) {
-        for (const user of skill.users) {
-          listUserId.push(user.id);
+    const users = await db
+      .from('public.users as u')
+      .distinct('u.id', 'u.name')
+      .select('u.id', 'u.name')
+      .join('public.skill_user as su', 'u.id', 'su.user_id')
+      .join('public.skills as s', 'su.skill_id', 's.id')
+      .join('public.modules as m', 's.module_id', 'm.id')
+      .where('m.short_name', name)
+      .where((q) => {
+        if (qs.status === 'true') {
+          q.where('u.is_actived', true);
         }
-      }
-
-      listUserId = [...new Set(listUserId)];
-      const users = await User.query()
-        .select('id', 'name')
-        .where((q) => {
-          if (qs.status) {
-            q.where('isActived', qs.status);
-          }
-          return q;
-        })
-        .whereIn('id', listUserId)
-        .orderBy('name', 'asc');
-      return users;
-    }
-
-    return [];
+        return q;
+      })
+      .orderBy('name', 'asc');
+    return users;
   }
 }

@@ -1,6 +1,6 @@
-import env from '#start/env'
-import { defineConfig } from '@adonisjs/redis'
-import { InferConnections } from '@adonisjs/redis/types'
+import env from '#start/env';
+import { defineConfig } from '@adonisjs/redis';
+import { InferConnections } from '@adonisjs/redis/types';
 
 const redisConfig = defineConfig({
   connection: 'main',
@@ -23,14 +23,15 @@ const redisConfig = defineConfig({
       db: 0,
       keyPrefix: '',
       retryStrategy(times) {
-        return times > 10 ? null : times * 50
+        return times > 10 ? null : times * 50;
       },
     },
   },
-})
+});
 
-export default redisConfig
+export default redisConfig;
 
 declare module '@adonisjs/redis/types' {
-  export interface RedisConnections extends InferConnections<typeof redisConfig> {}
+  export interface RedisConnections
+    extends InferConnections<typeof redisConfig> {}
 }
