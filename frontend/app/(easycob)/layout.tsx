@@ -5,9 +5,9 @@ export default function EasycobLayout({
 }: {
   children: React.ReactNode;
 }) {
+
   return (
     <section>
-      
       <Sidebar>{children}</Sidebar>
     </section>
   );

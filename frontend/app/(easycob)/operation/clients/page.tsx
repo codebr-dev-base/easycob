@@ -12,7 +12,7 @@ const initialQuery: IQueryClienteParams = {
   page: 1,
   perPage: 10,
   orderBy: "dtUpdate",
-  descending: false,
+  descending: true,
   keywordColumn: "nomClien",
   status: "ATIVO",
 };

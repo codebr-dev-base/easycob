@@ -35,7 +35,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { InputCurrency } from "@/components/ui/inputCurrency";
-import { calcDaylate, parseFromBRL } from "@/app/lib/utils";
+import { calcDaylate, isDateDisabled, parseFromBRL } from "@/app/lib/utils";
 import { useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { createAction } from "../../../../service/actions";
@@ -43,6 +43,13 @@ import { toast } from "@/hooks/use-toast";
 import { handlerError } from "@/app/lib/error";
 import { AlertaDuplicate } from "../AlertaDuplicate";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { FaRegCalendar } from "react-icons/fa";
+import { Calendar } from "@/components/ui/calendar";
+import PopoverForm from "../../../../components/PopoverForm";
+import CalendarForm from "@/app/(easycob)/components/CalendarForm";
 
 const channelOptions = [
   {
@@ -103,7 +110,7 @@ export default function FormNegotiation({
       dayLate: contract?.datVenci ? calcDaylate(contract?.datVenci) : "",
       datVenci: contract?.datVenci,
       channel: data.channel,
-      wallet: client.isFixa ? 'F' : 'V'
+      wallet: client.isFixa ? "F" : "V",
     };
 
     let n;
@@ -242,14 +249,17 @@ export default function FormNegotiation({
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[86vh] overflow-y-auto p-2">
-          <div className={`space-y-2 ${pending ? "" : "hidden"}`}>
+            <div className={`space-y-2 ${pending ? "" : "hidden"}`}>
               <Skeleton className="h-12 w-full" />
               <Skeleton className="h-12 w-full" />
               <Skeleton className="h-12 w-full" />
               <Skeleton className="h-12 w-full" />
             </div>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className={`${!pending ? "" : "hidden"}`}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className={`${!pending ? "" : "hidden"}`}
+              >
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                   {/* Campo Canal */}
                   <FormField
@@ -449,18 +459,13 @@ export default function FormNegotiation({
                   <FormField
                     control={form.control}
                     name="negotiation.datEntra"
+                    rules={{ required: "Campo obrigatório" }}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
                           Data da entrada
                           <FormControl>
-                            <Input
-                              type="date"
-                              {...form.register("negotiation.datEntra", {
-                                required: "Campo obrigatório",
-                              })}
-                              className="mb-1"
-                            />
+                            <CalendarForm field={field} />
                           </FormControl>
                         </FormLabel>
                         <FormMessage />
@@ -482,6 +487,8 @@ export default function FormNegotiation({
                               {...form.register("negotiation.datPrest", {
                                 required: "Campo obrigatório",
                               })}
+                              min={new Date().toISOString().split("T")[0]}
+                              max={new Date(new Date().getTime() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]}
                               className="mb-1"
                             />
                           </FormControl>

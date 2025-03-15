@@ -171,7 +171,7 @@ export default function TableContracts({
                       {formatCurrencyToBRL(contract.valPago)}
                     </TableCell>
                     <TableCell>{contract.countPago}</TableCell>
-                    <TableCell>{calcDaylate(`${contract.datVenci}`)}</TableCell>
+                    <TableCell>{calcDaylate(`${contract.datVenci}`) || "0"}</TableCell>
                   </TableRow>
                   <TableRow
                     className={

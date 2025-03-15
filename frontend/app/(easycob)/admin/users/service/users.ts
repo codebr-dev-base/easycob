@@ -98,3 +98,16 @@ export const updatePassword = async (user: IUser) => {
     throw result;
   }
 };
+
+export const deleteUser = async (user: IUser) => {
+  const result = await fetchAuth<IUser>(`${url}/${user.id}`, {
+    method: "DELETE",
+  });
+
+  if (result.success) {
+    //console.log("Dados recebidos:", result.data);
+    return result;
+  } else {
+    throw result;
+  }
+};

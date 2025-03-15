@@ -22,11 +22,12 @@ import {
 } from "@/app/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { FaUser } from "react-icons/fa";
+import { FaTrash, FaUser } from "react-icons/fa";
 import { ISkillModule, IUser } from "@/app/interfaces/auth";
 import { FormUser } from "./FormUser";
 import { FormPassword } from "./FormPassword";
 import { RiLockPasswordFill } from "react-icons/ri";
+import { AlertDelete } from "./AlertDelete";
 
 export default function TableRecords({
   meta,
@@ -134,14 +135,12 @@ export default function TableRecords({
                         <FaUser />
                       </Button>
                     </FormUser>
-                    <FormPassword
-                      refresh={refresh}
-                      user={user}
-                    >
+                    <FormPassword refresh={refresh} user={user}>
                       <Button className="mx-1">
                         <RiLockPasswordFill />
                       </Button>
                     </FormPassword>
+                    <AlertDelete user={user} refresh={refresh} />
                   </TableCell>
                 </TableRow>
               ))}

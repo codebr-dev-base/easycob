@@ -34,6 +34,7 @@ import { DateRange } from "react-day-picker";
 import { FaSearch } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { DatePickerClear } from "@/app/(easycob)/components/DatePickerClear";
+import { checkUserModule } from "@/app/lib/auth";
 
 export default function FilterPus({
   query,
@@ -42,7 +43,7 @@ export default function FilterPus({
   query: IQueryFollowingParams;
   refresh: (newParams: Partial<IQueryFollowingParams>) => void;
 }) {
-  const [status, setStatus] = useState(false);
+  const [status, setStatus] = useState(true);
   const [discount, setDiscount] = useState(false);
   const [rangeDateCreate, setRangeDateCreate] = useState<DateRange | undefined>(
     undefined
@@ -52,14 +53,6 @@ export default function FilterPus({
     to: new Date(new Date().setHours(23, 59, 59, 999)),
   });
   const [operators, setOperators] = useState<IUser[]>([]);
-
-  useEffect(() => {
-    fetchUserByModule("operator", true).then((value) => {
-      setOperators(value ? value : []);
-    });
-
-    const opts: Option[] = [];
-  }, []);
 
   useEffect(() => {
     if (query.status && query.status == "true") {
@@ -171,27 +164,29 @@ export default function FilterPus({
                 </div>
               </Label>
             </div>
-            <div className="flex">
-              <Label className="w-full">
-                Por operador:
-                <Select
-                  onValueChange={handleChangeOperator}
-                  defaultValue={query.userId}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Operador" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    {operators.map((operator) => (
-                      <SelectItem key={operator.id} value={`${operator.id}`}>
-                        {operator.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Label>
-            </div>
+            {checkUserModule("admin") && (
+              <div className="flex">
+                <Label className="w-full">
+                  Por operador:
+                  <Select
+                    onValueChange={handleChangeOperator}
+                    defaultValue={query.userId}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Operador" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      {operators.map((operator) => (
+                        <SelectItem key={operator.id} value={`${operator.id}`}>
+                          {operator.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Label>
+              </div>
+            )}
             <div className="flex">
               <Label>
                 Por data de vencimento:

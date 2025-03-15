@@ -24,6 +24,7 @@ import { Switch } from "@/components/ui/switch";
 import { createContact, updateContact } from "../../../../service/contacts";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
+import { checkUserModule } from "@/app/lib/auth";
 
 export function FormContactPhone({
   children,
@@ -189,25 +190,30 @@ export function FormContactPhone({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="blockAll"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center space-x-2 space-y-0 p-4">
-                  <FormControl>
-                    <Switch
-                      {...form.register("blockAll")}
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      aria-readonly
-                    />
-                  </FormControl>
-                  <div className="items-center">
-                    <FormLabel className="m-0">Bloqueado para todos</FormLabel>
-                  </div>
-                </FormItem>
-              )}
-            />
+            {checkUserModule("admin") && (
+              <FormField
+                control={form.control}
+                name="blockAll"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-2 space-y-0 p-4">
+                    <FormControl>
+                      <Switch
+                        {...form.register("blockAll")}
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        aria-readonly
+                      />
+                    </FormControl>
+                    <div className="items-center">
+                      <FormLabel className="m-0">
+                        Bloqueado para todos
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            )}
+
             <div className="flex justify-end py-2">
               <Button
                 type="submit"
