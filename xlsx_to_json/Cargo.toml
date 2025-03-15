@@ -1,0 +1,13 @@
+[package]
+name = "excel_to_json"
+version = "0.1.0"
+edition = "2024"
+build = "build.rs"
+
+[dependencies]
+calamine = "0.19" # Para ler arquivos Excel
+serde = { version = "1.0", features = ["derive"] } # Para serialização/deserialização JSON
+serde_json = "1.0" # Para manipulação de JSON
+regex = "1.7" # Para expressões regulares
+chrono = "0.4" # Para manipulação de datas
+unidecode = "0.3"
