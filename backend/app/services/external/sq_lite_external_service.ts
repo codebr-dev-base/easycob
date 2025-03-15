@@ -662,7 +662,6 @@ export default class SqLiteExternalService {
   public async syncTables(
     table: string,
     tableJSon: string,
-    columns: { column_name: string; column_type: string }[],
     columnsJson: string[]
   ): Promise<void> {
     console.log(`🔄 Sincronizando tabelas: ${table} ⬅️ ${tableJSon}`);
@@ -1089,7 +1088,7 @@ export default class SqLiteExternalService {
       );
 
     // 8️⃣ - Combinar dados da tabela original com os dados do JSON
-    await this.syncTables(table, `${table}_json`, columns, columnsJson);
+    await this.syncTables(table, `${table}_json`, columnsJson);
 
     // 9️⃣ - Enviar dados para o PostgreSQL
     await this.syncToPostgres(schema, table, columns);
