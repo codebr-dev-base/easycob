@@ -488,7 +488,7 @@ export default function FormNegotiation({
                                 required: "Campo obrigatório",
                               })}
                               min={new Date().toISOString().split("T")[0]}
-                              max={new Date(new Date().getTime() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]}
+                              max={new Date(new Date().getTime() + 90 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]}
                               className="mb-1"
                             />
                           </FormControl>

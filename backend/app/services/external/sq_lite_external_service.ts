@@ -1,6 +1,5 @@
 import db from '@adonisjs/lucid/services/db';
 import sqlite3 from 'sqlite3';
-import { Dictionary } from '@adonisjs/lucid/types/querybuilder';
 import { chunks } from '#utils/array';
 import ExternalFile from '#models/external/external_file';
 import { DateTime } from 'luxon';
@@ -350,53 +349,29 @@ export default class SqLiteExternalService {
   }
 
   // Método para inserção em lote (um arquivo de cada vez)
-  private async insertBatch(
+  private async insertBatchPostgres(
     table: string,
-    records: Record<string, unknown>[],
+    records: { [key: string]: unknown }[],
     columnsJson: string[]
   ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      // Inicia uma transação
-      this.dbSqlite.run('BEGIN TRANSACTION', (err) => {
-        if (err) return reject(err);
+    if (records.length === 0) {
+      return;
+    }
 
-        // Prepara a query de inserção
-        const columns = columnsJson.join(', ');
-        const placeholders = Object.keys(records[0])
-          .map(() => '?')
-          .join(', ');
-        const query = `INSERT OR REPLACE INTO ${table} (${columns}) VALUES (${placeholders})`;
+    const placeholders = records
+      .map(() => `(${columnsJson.map(() => '?').join(', ')})`)
+      .join(', ');
+    const values = records.flatMap((record) =>
+      columnsJson.map((col) => record[col])
+    );
 
-        // Itera sobre cada registro e insere na tabela
-        records.forEach((record) => {
-          const values = Object.values(record);
-
-          this.dbSqlite.run(query, values, (err) => {
-            if (err) {
-              // Em caso de erro, faz rollback da transação
-              this.dbSqlite.run('ROLLBACK', () => reject(err));
-            }
-          });
-          //const values = Object.values(record);
-
-          this.dbSqlite.run(query, values, (err) => {
-            if (err) {
-              // Em caso de erro, faz rollback da transação
-              this.dbSqlite.run('ROLLBACK', () => reject(err));
-            }
-          });
-        });
-
-        // Finaliza a transação
-        this.dbSqlite.run('COMMIT', (err) => {
-          if (err) {
-            this.dbSqlite.run('ROLLBACK', () => reject(err));
-          } else {
-            resolve();
-          }
-        });
-      });
-    });
+    await db.rawQuery(
+      `
+      INSERT INTO "temporary_${table}_json" (${columnsJson.map((col) => `"${col}"`).join(', ')})
+      VALUES ${placeholders}
+    `,
+      values
+    );
   }
 
   // Função de normalização
@@ -462,10 +437,11 @@ export default class SqLiteExternalService {
   }
 
   /**
-   * 3️⃣ - CRIA A TABELA NO SQLITE
+   * 3️⃣ - CRIA A TABELA NO Temporária PostgreSQL
    */
-  private async createTableInSqlite(
+  private async createTableInPostgres(
     table: string,
+    schema: string,
     columns: { column_name: string; column_type: string }[],
     filePath: string
   ): Promise<{
@@ -478,127 +454,52 @@ export default class SqLiteExternalService {
     const outputDir = this.getOutputDir(filePath);
     const firstRecord = this.getRecord(outputDir);
 
-    const columnDefs = columns
-      .map(
-        (col) =>
-          `${col.column_name} ${this.mapPostgresToSqliteType(col.column_type)}`
-      )
-      .join(', ');
+    // Verificar se a tabela temporária já existe e descartá-la se existir
+    await db.rawQuery(`DROP TABLE IF EXISTS "temporary_${table}"`);
+    await db.rawQuery(`DROP TABLE IF EXISTS "temporary_${table}_json"`);
 
-    await new Promise<void>((resolve, reject) => {
-      this.dbSqlite.run(
-        `CREATE TABLE ${table} (${columnDefs}, PRIMARY KEY (des_contr, num_nota));`,
-        (err) => {
-          if (err) reject(err);
-          else resolve();
-        }
+    try {
+      // Criar tabela temporária como uma cópia da tabela principal
+      await db.rawQuery(`
+      CREATE TEMPORARY TABLE temporary_${table} AS SELECT * FROM ${schema}.${table};
+    `);
+
+      // Adicionar restrição UNIQUE às colunas des_contr e num_nota
+      await db.rawQuery(`
+          ALTER TABLE "temporary_${table}"
+          ADD CONSTRAINT unique_des_contr_num_nota UNIQUE (des_contr, num_nota);
+        `);
+
+      // 2. Criar a tabela para Json
+      const columnsJson = Object.keys(firstRecord);
+      if (!columnsJson.includes('des_contr')) columnsJson.push('des_contr');
+      if (!columnsJson.includes('status')) columnsJson.push('status');
+
+      const columnDefsReduced = columns
+        .filter((col) => columnsJson.includes(col.column_name)) // Filtra colunas presentes no firstRecord
+        .map((col) => `${col.column_name} ${col.column_type}`)
+        .join(', ');
+
+      await db.rawQuery(`
+          CREATE TEMPORARY TABLE temporary_${table}_json (${columnDefsReduced}, PRIMARY KEY (des_contr, num_nota));
+        `);
+
+      console.log(`✅ Tabela temporária ${table}_json criada.`);
+
+      return { columns, columnsJson };
+    } catch (error) {
+      console.error(
+        `❌ Erro ao criar tabelas temporárias ${table} e ${table}_json:`,
+        error
       );
-    });
-
-    // 2. Criar a tabela para Json
-    const columnsJson = Object.keys(firstRecord);
-    if (!columnsJson.includes('des_contr')) columnsJson.push('des_contr');
-    if (!columnsJson.includes('status')) columnsJson.push('status');
-
-    const columnDefsReduced = columns
-      .filter((col) => columnsJson.includes(col.column_name)) // Filtra colunas presentes no firstRecord
-      .map(
-        (col) =>
-          `${col.column_name} ${this.mapPostgresToSqliteType(col.column_type)}`
-      )
-      .join(', ');
-
-    await new Promise<void>((resolve, reject) => {
-      this.dbSqlite.run(
-        `CREATE TABLE ${table}_json (${columnDefsReduced}, PRIMARY KEY (des_contr, num_nota));`,
-        (err) => {
-          if (err) reject(err);
-          else resolve();
-        }
-      );
-    });
-
-    return { columns, columnsJson };
-  }
-
-  /**
-   * 4️⃣ - CARREGA OS DADOS DO POSTGRES PARA O SQLITE
-   */
-  private async copyDataToSqlite(
-    schema: string,
-    table: string,
-    columns: { column_name: string; column_type: string }[]
-  ): Promise<void> {
-    const columnNames = columns.map((col) => col.column_name).join(', ');
-    const placeholders = columns.map(() => '?').join(', ');
-
-    // Identificar colunas que precisam de conversão
-    const dateColumns = new Set(
-      columns
-        .filter((col) =>
-          [
-            'date',
-            'datetime',
-            'timestamp',
-            'timestamp with time zone',
-          ].includes(col.column_type.toLowerCase())
-        )
-        .map((col) => col.column_name)
-    );
-
-    const sql = `SELECT ${columnNames} FROM ${schema}.${table};`;
-    const result = await db.rawQuery(sql);
-
-    if (!result.rows.length) {
-      console.warn(`⚠️ Nenhum dado encontrado em ${schema}.${table}`);
-      return;
+      throw error;
     }
-
-    // Percorrer os resultados e converter as datas
-    const formattedRows = result.rows.map((row: Record<string, unknown>) => {
-      const formattedRow: Record<string, unknown> = {};
-
-      for (const key in row) {
-        if (dateColumns.has(key) && row[key]) {
-          //const date = new Date(`${row[key]}`);
-          formattedRow[key] = (row[key] as Date).toISOString().split('T')[0];
-        } else {
-          formattedRow[key] = row[key];
-        }
-      }
-
-      return formattedRow;
-    });
-
-    return new Promise((resolve, reject) => {
-      this.dbSqlite.serialize(() => {
-        this.dbSqlite.run('BEGIN TRANSACTION;');
-
-        const stmt = this.dbSqlite.prepare(
-          `INSERT INTO ${table} (${columnNames}) VALUES (${placeholders})`
-        );
-
-        for (const row of formattedRows) {
-          stmt.run(Object.values(row), (err) => {
-            if (err) reject(err);
-          });
-        }
-
-        stmt.finalize((err) => {
-          if (err) {
-            reject(err);
-          } else {
-            this.dbSqlite.run('COMMIT;', resolve);
-          }
-        });
-      });
-    });
   }
 
   /**
-   * 5️⃣ - CARREGA OS DADOS DO JSON PARA O SQLITE
+   * 4️⃣ - CARREGA OS DADOS DO JSON PARA O PostgreSQL
    */
-  private async loadJsonToSqlite(
+  private async loadJsonToPostgres(
     table: string,
     filePath: string,
     columnsJson: string[]
@@ -642,7 +543,7 @@ export default class SqLiteExternalService {
         });
 
       try {
-        await this.insertBatch(table, processedRecords, columnsJson);
+        await this.insertBatchPostgres(table, processedRecords, columnsJson);
       } catch (error) {
         console.error(
           `Erro ao inserir em lote no arquivo ${file}:`,
@@ -656,60 +557,56 @@ export default class SqLiteExternalService {
   }
 
   /**
-   * 6️⃣ - COMBINAR DADOS DA TABELA ORIGINAL COM OS DADOS DO JSON
+   * 5️⃣ - COMBINAR DADOS DA TABELA ORIGINAL COM OS DADOS DO JSON
    */
 
-  public async syncTables(
+  public async syncTablesPostgres(
     table: string,
-    tableJSon: string,
     columnsJson: string[]
   ): Promise<void> {
-    console.log(`🔄 Sincronizando tabelas: ${table} ⬅️ ${tableJSon}`);
+    console.log(
+      `🔄 Sincronizando tabelas: temporary_${table} ⬅️ temporary_${table}_json`
+    );
 
     if (!columnsJson.includes('des_contr')) columnsJson.push('des_contr');
 
-    const columnNames = columnsJson.join(', ');
+    // Remover status e updated_at da lista de colunas
+    const filteredColumnsJson = columnsJson.filter(
+      (col) => col !== 'status' && col !== 'updated_at'
+    );
 
-    // Criando dinamicamente a query de UPSERT
-    const queryUpsert = `
-      INSERT OR REPLACE INTO ${table} (${columnNames}, status, updated_at)
-      SELECT ${columnNames}, 'ativo', CURRENT_TIMESTAMP
-      FROM ${tableJSon};
-    `;
+    const columnNames = filteredColumnsJson.map((col) => `"${col}"`).join(', ');
 
-    // Query para desativar registros que não foram atualizados
-    const queryDeactivate = `
-      UPDATE ${table}
-      SET status = 'inativo'
-      WHERE DATE(updated_at) < DATE('now');
-    `;
+    try {
+      // Query para UPSERT (INSERT ON CONFLICT)
+      await db.rawQuery(`
+      INSERT INTO "temporary_${table}" (${columnNames}, status, updated_at)
+      SELECT ${columnNames}, 'ativo', NOW()
+      FROM "temporary_${table}_json"
+      ON CONFLICT (des_contr, num_nota) DO UPDATE
+      SET ${filteredColumnsJson
+        .map((col) => `"${col}" = EXCLUDED."${col}"`)
+        .join(', ')}, updated_at = NOW();
+    `);
 
-    return new Promise((resolve, reject) => {
-      this.dbSqlite.serialize(() => {
-        this.dbSqlite.run(queryUpsert, (err) => {
-          if (err) {
-            console.error('❌ Erro no UPSERT:', err);
-            reject(err);
-          } else {
-            console.log('✅ UPSERT concluído!');
+      console.log('✅ UPSERT concluído!');
 
-            this.dbSqlite.run(queryDeactivate, (err) => {
-              if (err) {
-                console.error('❌ Erro ao desativar registros:', err);
-                reject(err);
-              } else {
-                console.log('✅ Registros inativos atualizados!');
-                resolve();
-              }
-            });
-          }
-        });
-      });
-    });
+      // Query para desativar registros que não foram atualizados
+      await db.rawQuery(`
+        UPDATE "temporary_${table}"
+        SET status = 'inativo'
+        WHERE DATE(updated_at) < CURRENT_DATE;
+      `);
+
+      console.log('✅ Registros inativos atualizados!');
+    } catch (error) {
+      console.error('❌ Erro ao sincronizar tabelas:', error);
+      throw error;
+    }
   }
 
   /**
-   * 7️⃣ - ENVIA OS DADOS DO SQLITE PARA O POSTGRES
+   * 6️⃣ - ENVIA OS DADOS DO SQLITE PARA O POSTGRES
    */
 
   public async syncToPostgres(
@@ -732,8 +629,12 @@ export default class SqLiteExternalService {
     try {
       // 1️⃣ Verificar se a tabela original existe
       const tableExists = await trx.rawQuery(
-        `SELECT EXISTS (SELECT FROM pg_tables WHERE schemaname = '${schema}' AND tablename = '${originalTable}');`
+        `
+        SELECT EXISTS (SELECT FROM pg_tables WHERE schemaname = ? AND tablename = ?);
+      `,
+        [schema, originalTable]
       );
+
       if (!tableExists.rows[0].exists) {
         throw new Error(`Tabela ${originalTable} não existe.`);
       }
@@ -759,54 +660,17 @@ export default class SqLiteExternalService {
 
       console.log(`✅ Criada tabela temporária ${tempTable}.`);
 
-      // 3️⃣ Ler dados do SQLite em memória
-      const rows = await new Promise<Dictionary<unknown, string>[]>(
-        (resolve, reject) => {
-          this.dbSqlite.all(
-            `SELECT ${columnNames}, status, updated_at FROM ${sourceTable}`,
-            (err, rows) => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve(rows as Dictionary<unknown, string>[]);
-              }
-            }
-          );
-        }
+      // 3️⃣ Inserir dados diretamente da temporary_${sourceTable} para sourceTable_new
+      await trx.rawQuery(`
+      INSERT INTO "${schema}"."${tempTable}" (${columnNames})
+      SELECT ${columnNames} FROM "temporary_${sourceTable}";
+    `);
+
+      console.log(
+        `✅ Dados inseridos em ${tempTable} diretamente da temporary_${sourceTable}.`
       );
 
-      console.log(`✅ Dados lidos do SQLite. Total de linhas: ${rows.length}.`);
-
-      // 4️⃣ Inserir os dados na tabela temporária do PostgreSQL
-      if (rows.length > 0) {
-        if (rows.length > 1000) {
-          const rowsChunked = chunks(rows, 1000);
-          for (const chunk of rowsChunked) {
-            await trx.table(`${schema}.${tempTable}`).multiInsert(chunk);
-            /*
-            try {
-              await trx.table(`${schema}.${tempTable}`).multiInsert(chunk);
-            } catch (error) {
-              console.error(
-                `Erro ao inserir dados em ${tempTable}:
-                  Dados: ${JSON.stringify(chunk)},
-                Erro: ${JSON.stringify(error)}`
-              );
-            }
-             */
-          }
-        } else {
-          await trx.table(`${schema}.${tempTable}`).multiInsert(rows);
-        }
-
-        console.log(
-          `✅ Dados inseridos em ${tempTable}. Linhas afetadas: ${rows.length}.`
-        );
-      } else {
-        console.log('ℹ️ Nenhum dado para inserir.');
-      }
-
-      // 5️⃣ Renomear a tabela original para `_old`
+      // 4️⃣ Renomear a tabela original para `_old`
       await trx.rawQuery(`
         ALTER TABLE ${schema}.${originalTable} RENAME TO ${oldTable};
         ALTER SEQUENCE "${schema}"."${originalTable}_id_seq" RENAME TO "${oldTable}_id_seq";
@@ -814,14 +678,14 @@ export default class SqLiteExternalService {
 
       console.log(`🔄 Renomeado ${originalTable} para ${oldTable}.`);
 
-      // 6️⃣ Renomear a nova tabela para o nome original
+      // 5️⃣ Renomear a nova tabela para o nome original
       await trx.rawQuery(`
         ALTER TABLE ${schema}.${tempTable} RENAME TO ${originalTable};
         ALTER SEQUENCE "${schema}"."${tempTable}_id_seq" RENAME TO "${originalTable}_id_seq";
       `);
       console.log(`🔄 Renomeado ${tempTable} para ${originalTable}.`);
 
-      // 7️⃣ Dropar a tabela antiga
+      // 6️⃣ Dropar a tabela antiga
       await trx.rawQuery(`
         ALTER TABLE ${schema}.${oldTable} ALTER COLUMN id DROP DEFAULT;
         DROP SEQUENCE IF EXISTS ${schema}.${oldTable}_id_seq;
@@ -839,7 +703,7 @@ export default class SqLiteExternalService {
   }
 
   /*
-   * 8️⃣ - Alimentar base contratos
+   * 7️⃣ - Alimentar base contratos
    */
   public async syncContratos(
     schema: string,
@@ -910,7 +774,7 @@ export default class SqLiteExternalService {
   }
 
   /**
-   * 9️⃣ - Alimentar base de prestações
+   * 8️⃣ - Alimentar base de prestações
    */
   public async syncPrestacoes(
     schema: string,
@@ -962,7 +826,7 @@ export default class SqLiteExternalService {
   }
 
   /**
-   * 1️⃣0️⃣- Alimentar base de contatos
+   * 9️⃣ - Alimentar base de contatos
    */
   public async syncContatos(
     schema: string,
@@ -1062,45 +926,44 @@ export default class SqLiteExternalService {
     const columns = await this.getColumnsFromDatabase(schema, table);
 
     // 2️⃣ - Remove a tabela se já existir no SQLite
-    console.log(`🔄 Removendo a tabela ${table} do SQLite (se existir)...`);
-    await this.dropTableIfExists(table);
-    await this.dropTableIfExists(`${table}_json`);
+    console.log(
+      `🔄 Removendo a tabela temporary_${table} do SQLite (se existir)...`
+    );
+    await this.dropTableIfExists(`temporary_${table}`);
+    await this.dropTableIfExists(`temporary_${table}_json`);
     console.log(`✅ Tabela ${table} removida do SQLite (se existia).`);
 
     // 3️⃣ - Cria a nova tabela no SQLite
-    const { columnsJson } = await this.createTableInSqlite(
+    const { columnsJson } = await this.createTableInPostgres(
       table,
+      schema,
       columns,
       externalFile.filePath
     );
-    console.log(`✅ Tabela ${table} recriada no SQLite.`);
+    console.log(`✅ Tabela temporary_${table} recriada no PostgreSQL.`);
 
-    // 4️⃣ - Copia os dados do PostgreSQL para o SQLite
-    await this.copyDataToSqlite(schema, table, columns);
-    console.log(`✅ Dados copiados de ${schema}.${table} para SQLite.`);
-
-    // 7️⃣ - Carregar dados do XLSX para SQLite
+    // 4️⃣ - Carregar dados do XLSX para SQLite
     const { totalValTotal: val_total, countTotal } =
-      await this.loadJsonToSqlite(
-        `${table}_json`,
+      await this.loadJsonToPostgres(
+        `${table}`,
         externalFile.filePath,
         columnsJson
       );
 
-    // 8️⃣ - Combinar dados da tabela original com os dados do JSON
-    await this.syncTables(table, `${table}_json`, columnsJson);
+    // 5️⃣ - Combinar dados da tabela original com os dados do JSON
+    await this.syncTablesPostgres(table, columnsJson);
 
-    // 9️⃣ - Enviar dados para o PostgreSQL
+    // 6️⃣ - Enviar dados para o PostgreSQL
     await this.syncToPostgres(schema, table, columns);
     //clearInterval(interval);
 
-    console.log('🔟 - Alimentar base contratos');
+    console.log('7️⃣ - Alimentar base contratos');
     await this.syncContratos(schema, table, 'tbl_base_contratos');
 
-    console.log('1️⃣ 1️⃣ - Alimentar base prestações');
+    console.log('8️⃣ - Alimentar base prestações');
     await this.syncPrestacoes(schema, table, 'tbl_base_prestacoes');
 
-    console.log('1️⃣ 2️⃣ - Alimentar base contatos');
+    console.log('9️⃣ - Alimentar base contatos');
     await this.syncContatos(schema, table, 'tbl_base_contatos');
 
     const finalCount = (
