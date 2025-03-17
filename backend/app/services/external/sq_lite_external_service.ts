@@ -119,7 +119,7 @@ export default class SqLiteExternalService {
   /**
    * Mapeia o tipo do PostgreSQL para o SQLite
    */
-  private mapPostgresToSqliteType(pgType: string): string {
+  /*   private mapPostgresToSqliteType(pgType: string): string {
     const typeMap: Record<string, string> = {
       integer: 'INTEGER',
       bigint: 'INTEGER',
@@ -140,6 +140,7 @@ export default class SqLiteExternalService {
     };
     return typeMap[pgType] || 'TEXT'; // Se o tipo não for mapeado, usa TEXT por padrão
   }
+ */
 
   private handleEmail(email: string): string {
     if (!email) {
