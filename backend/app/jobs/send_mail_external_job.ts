@@ -5,6 +5,7 @@ import { DateTime } from 'luxon';
 import Subsidiary from '#models/subsidiary';
 import CatchLog from '#models/catch_log';
 import { sendMailByApi } from '#services/utils/mail';
+import env from '#start/env';
 
 export interface IActionExternal {
   id: number; // Opcional, pois será gerado pelo banco de dados
@@ -84,6 +85,15 @@ export default class SendMailExternalJob extends Job {
       try {
         const im = Math.floor(Math.random() * 4);
 
+        // Alternar entre os servidores
+        const useCom = Math.random() < 0.5; // 50% de chance para cada servidor
+        const apiUrl = useCom
+          ? env.get('POSTAL_API_URL_COM')
+          : env.get('POSTAL_API_URL_COM_BR');
+        const apiKey = useCom
+          ? env.get('POSTAL_API_KEY_COM')
+          : env.get('POSTAL_API_KEY_COM_BR');
+
         const messageId = await sendMailByApi(
           item.contato,
           'Aviso de Débito em Atraso - Entre em Contato para Regularização',
@@ -97,7 +107,9 @@ export default class SendMailExternalJob extends Job {
             listUnsubscribe: '<mailto:aegea@yuancob.com>',
             listSubscribe: '<mailto:aegea@yuancob.com>',
             addListHeader: 'Aegea <aegea@yuancob.com>',
-          }
+          },
+          apiUrl ?? '',
+          apiKey ?? ''
         );
 
         await item.refresh();

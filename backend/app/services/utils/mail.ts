@@ -51,7 +51,9 @@ export const sendMailByApi = async (
   cliente: string,
   filial: string,
   chat: string,
-  options: optionsHeader
+  options: optionsHeader,
+  apiUrl: string,
+  apiKey: string
 ): Promise<string | undefined> => {
   const edge = Edge.create();
   edge.mount(app.viewsPath());
@@ -69,14 +71,14 @@ export const sendMailByApi = async (
       ...(options.addListHeader ? { 'List-ID': options.addListHeader } : {}),
     };
 
-    const response = await fetch(env.get('POSTAL_API_URL') || '', {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Server-API-Key': env.get('POSTAL_API_KEY') || '',
+        'X-Server-API-Key': apiKey,
       },
       body: JSON.stringify({
-        from: '"Cobrança AEGEA" <noreply@yuansolucoes.com.br>', // Remetente
+        from: `"Cobrança AEGEA" <noreply@${apiUrl.includes('.com.br') ? 'yuancob.com.br' : 'yuancob.com'}>`,
         to, // Destinatário
         subject, // Assunto
         plain_body: await edge.render(

@@ -17,6 +17,7 @@ import {
 import Action from '#models/action';
 import { sendMailByApi } from './utils/mail.js';
 import logger from '@adonisjs/core/services/logger';
+import env from '#start/env';
 
 interface IEmailData {
   subject: string;
@@ -260,6 +261,15 @@ export default class EmailService {
           try {
             const im = Math.floor(Math.random() * 4);
 
+            // Alternar entre os servidores
+            const useCom = Math.random() < 0.5; // 50% de chance para cada servidor
+            const apiUrl = useCom
+              ? env.get('POSTAL_API_URL_COM')
+              : env.get('POSTAL_API_URL_COM_BR');
+            const apiKey = useCom
+              ? env.get('POSTAL_API_KEY_COM')
+              : env.get('POSTAL_API_KEY_COM_BR');
+
             const messageId = await sendMailByApi(
               email.to,
               'Aviso de Débito em Atraso - Entre em Contato para Regularização',
@@ -273,7 +283,9 @@ export default class EmailService {
                 listUnsubscribe: '<mailto:aegea@yuancob.com>',
                 listSubscribe: '<mailto:aegea@yuancob.com>',
                 addListHeader: 'Aegea <aegea@yuancob.com>',
-              }
+              },
+              apiUrl ?? '',
+              apiKey ?? ''
             );
 
             const item = itemsChunks[i][j];
