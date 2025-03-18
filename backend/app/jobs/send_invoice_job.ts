@@ -61,7 +61,6 @@ export default class SendInvoiceJob extends Job {
             `${app.makePath('uploads')}${file.fileName}`
           );
           const base64Content = fileContent.toString('base64');
-          console.log(base64Content);
           attachments.push({
             filename: file.fileName,
             content: base64Content,

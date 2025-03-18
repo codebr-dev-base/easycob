@@ -150,7 +150,7 @@ export const sendMailByApiSimple = async (
 
     const formattedAttachments = attachments?.map((attachment) => ({
       name: attachment.filename,
-      content: attachment.content,
+      data: attachment.content,
       content_type: attachment.mimeType,
     }));
 
