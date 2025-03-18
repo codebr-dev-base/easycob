@@ -262,7 +262,7 @@ export default class EmailService {
             const im = Math.floor(Math.random() * 4);
 
             // Alternar entre os servidores
-            const useCom = Math.random() < 0.5; // 50% de chance para cada servidor
+            const useCom = i % 2 === 0; // Par para .com, ímpar para .com.br
             const apiUrl = useCom
               ? env.get('POSTAL_API_URL_COM')
               : env.get('POSTAL_API_URL_COM_BR');
