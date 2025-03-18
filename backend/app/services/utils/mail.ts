@@ -78,7 +78,7 @@ export const sendMailByApi = async (
         'X-Server-API-Key': apiKey,
       },
       body: JSON.stringify({
-        from: `"Cobrança AEGEA" <noreply@${apiUrl.includes('.com.br') ? 'yuancob.com.br' : 'yuancob.com'}>`,
+        from: `"Cobrança AEGEA" <noreply@${apiUrl.includes('.com.br') ? 'yuansolucoes.com.br' : 'yuansolucoes.com'}>`,
         to, // Destinatário
         subject, // Assunto
         plain_body: await edge.render(
