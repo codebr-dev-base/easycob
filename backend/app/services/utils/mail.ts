@@ -175,7 +175,7 @@ export const sendMailByApiSimple = async (
       }),
     });
 
-    console.log(response.json());
+    console.log(await response.json());
     if (!response.ok) {
       throw new Error(
         `Erro na requisição: ${response.status} - ${response.statusText}`
