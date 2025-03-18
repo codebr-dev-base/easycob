@@ -105,13 +105,16 @@ export const sendMailByApi = async (
       }),
     });
 
-    if (!response.ok) {
+    const data = (await response.json()) as ApiResponse;
+
+    if (data.status !== 'success') {
+      console.error(
+        `Erro na requisição: ${to} - ${data.data}`
+      );
       throw new Error(
-        `Erro na requisição: ${response.status} - ${response.statusText}`
+        `Erro na requisição: ${to} - ${data.data}`
       );
     }
-
-    const data = (await response.json()) as ApiResponse;
     /*
     console.log('E-mail enviado com sucesso:', data);
 
@@ -126,7 +129,6 @@ export const sendMailByApi = async (
     );
   }
 };
-
 export const sendMailByApiSimple = async (
   to: string,
   subject: string,

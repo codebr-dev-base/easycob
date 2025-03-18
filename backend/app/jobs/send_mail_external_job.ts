@@ -86,16 +86,13 @@ export default class SendMailExternalJob extends Job {
         const im = Math.floor(Math.random() * 4);
 
         // Alternar entre os servidores
-        const useCom = Math.random() < 0.5; // 50% de chance para cada servidor
+        const useCom = payload.id % 2 === 0;
         const apiUrl = useCom
           ? env.get('POSTAL_API_URL_COM')
           : env.get('POSTAL_API_URL_COM_BR');
         const apiKey = useCom
           ? env.get('POSTAL_API_KEY_COM')
           : env.get('POSTAL_API_KEY_COM_BR');
-
-        console.log('apiUrl', apiUrl);
-        console.log('apiUrl', apiKey);
 
         const messageId = await sendMailByApi(
           item.contato,
