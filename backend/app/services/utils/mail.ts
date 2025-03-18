@@ -176,13 +176,14 @@ export const sendMailByApiSimple = async (
     });
 
     console.log(await response.json());
-    if (!response.ok) {
+
+    const data = (await response.json()) as ApiResponse;
+
+    if (data.status !== 'success') {
       throw new Error(
         `Erro na requisição: ${response.status} - ${response.statusText}`
       );
     }
-
-    const data = (await response.json()) as ApiResponse;
     /*
     console.log('E-mail enviado com sucesso:', data);
 
@@ -196,7 +197,6 @@ export const sendMailByApiSimple = async (
     );
   }
 };
-
 export const sendMailBySmtp = async (
   to: string,
   subject: string,
