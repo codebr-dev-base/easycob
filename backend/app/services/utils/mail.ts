@@ -154,14 +154,14 @@ export const sendMailByApiSimple = async (
       content_type: attachment.mimeType,
     }));
 
-    const response = await fetch(env.get('POSTAL_API_URL') || '', {
+    const response = await fetch(env.get('POSTAL_API_URL_COM') || '', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Server-API-Key': env.get('POSTAL_API_KEY') || '',
+        'X-Server-API-Key': env.get('POSTAL_API_KEY_COM') || '',
       },
       body: JSON.stringify({
-        from: '"Cobrança AEGEA" <noreply@yuansolucoes.com.br>', // Remetente
+        from: '"Cobrança AEGEA" <noreply@yuansolucoes.com>', // Remetente
         to, // Destinatário
         subject, // Assunto
         plain_body: body, // Corpo em texto

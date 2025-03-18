@@ -263,7 +263,7 @@ export default class EmailService {
 
             // Alternar entre os servidores
             //const useCom = Math.random() < 0.5; // 50% de chance para cada servidor
-            const useCom = true;
+            const useCom = i % 2 === 0;
             const apiUrl = useCom
               ? env.get('POSTAL_API_URL_COM')
               : env.get('POSTAL_API_URL_COM_BR');
