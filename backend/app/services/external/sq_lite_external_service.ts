@@ -587,7 +587,7 @@ export default class SqLiteExternalService {
       ON CONFLICT (des_contr, num_nota) DO UPDATE
       SET ${filteredColumnsJson
         .map((col) => `"${col}" = EXCLUDED."${col}"`)
-        .join(', ')}, updated_at = NOW();
+        .join(', ')}, status = 'ativo', updated_at = NOW();
     `);
 
       console.log('✅ UPSERT concluído!');
@@ -772,6 +772,12 @@ export default class SqLiteExternalService {
         updated_at = CURRENT_TIMESTAMP`;
 
     await db.rawQuery(sql);
+
+    await db.rawQuery(`
+      UPDATE "${schema}.${destinationTable}"
+      SET status = 'inativo'
+      WHERE DATE(updated_at) < CURRENT_DATE;
+    `);
   }
 
   /**
@@ -824,6 +830,12 @@ export default class SqLiteExternalService {
         updated_at = CURRENT_TIMESTAMP; -- Atualiza o updated_at`;
 
     await db.rawQuery(sql);
+
+    await db.rawQuery(`
+      UPDATE "${schema}.${destinationTable}"
+      SET status = 'inativo'
+      WHERE DATE(updated_at) < CURRENT_DATE;
+    `);
   }
 
   /**
@@ -886,6 +898,12 @@ export default class SqLiteExternalService {
           );
         }
       }
+
+      await db.rawQuery(`
+        UPDATE "${schema}.${destinationTable}"
+        SET status = 'inativo'
+        WHERE DATE(updated_at) < CURRENT_DATE;
+      `);
 
       console.info('Transformação de contatos concluída com sucesso!');
     } catch (error) {
