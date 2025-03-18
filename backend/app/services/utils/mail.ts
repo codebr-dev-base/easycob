@@ -117,6 +117,7 @@ export const sendMailByApi = async (
 
     console.log(`E-mail enviado com sucesso para ${to} via API Fetch:`, data);
      */
+    console.log(data);
     return data.data.message_id;
   } catch (error) {
     console.error(
