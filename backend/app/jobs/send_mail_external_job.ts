@@ -94,6 +94,9 @@ export default class SendMailExternalJob extends Job {
           ? env.get('POSTAL_API_KEY_COM')
           : env.get('POSTAL_API_KEY_COM_BR');
 
+        console.log('apiUrl', apiUrl);
+        console.log('apiUrl', apiKey);
+
         const messageId = await sendMailByApi(
           item.contato,
           'Aviso de Débito em Atraso - Entre em Contato para Regularização',
