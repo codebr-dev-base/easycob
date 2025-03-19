@@ -553,7 +553,7 @@ export default class SqLiteExternalService {
           console.error(
             `Erro ao inserir em lote no arquivo ${file}:`,
             error,
-            processedRecords
+            chunk
           );
         }
       }
