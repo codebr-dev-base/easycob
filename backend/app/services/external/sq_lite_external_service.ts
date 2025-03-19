@@ -5,7 +5,6 @@ import ExternalFile from '#models/external/external_file';
 import { DateTime } from 'luxon';
 import path from 'path';
 import fs from 'fs';
-import { chunk } from 'lodash';
 
 interface DatasetRow {
   des_contr: string;
