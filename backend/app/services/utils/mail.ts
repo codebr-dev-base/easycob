@@ -107,13 +107,11 @@ export const sendMailByApi = async (
 
     const data = (await response.json()) as ApiResponse;
 
+    //console.log('E-mail enviado com sucesso:', data);
+
     if (data.status !== 'success') {
-      console.error(
-        `Erro na requisição: ${to} - ${data.data}`
-      );
-      throw new Error(
-        `Erro na requisição: ${to} - ${data.data}`
-      );
+      console.error(`Erro na requisição: ${to} - ${data.data}`);
+      throw new Error(`Erro na requisição: ${to} - ${data.data}`);
     }
     /*
     console.log('E-mail enviado com sucesso:', data);

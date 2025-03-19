@@ -5,6 +5,7 @@ import ExternalFile from '#models/external/external_file';
 import { DateTime } from 'luxon';
 import path from 'path';
 import fs from 'fs';
+import { chunk } from 'lodash';
 
 interface DatasetRow {
   des_contr: string;
@@ -543,14 +544,18 @@ export default class SqLiteExternalService {
           return true; // Combinação única, mantém
         });
 
-      try {
-        await this.insertBatchPostgres(table, processedRecords, columnsJson);
-      } catch (error) {
-        console.error(
-          `Erro ao inserir em lote no arquivo ${file}:`,
-          error,
-          processedRecords
-        );
+      const chunksProcessedRecords = chunks(processedRecords, 1);
+
+      for (const chunk of chunksProcessedRecords) {
+        try {
+          await this.insertBatchPostgres(table, chunk, columnsJson);
+        } catch (error) {
+          console.error(
+            `Erro ao inserir em lote no arquivo ${file}:`,
+            error,
+            processedRecords
+          );
+        }
       }
     }
 
