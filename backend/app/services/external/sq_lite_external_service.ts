@@ -599,7 +599,7 @@ export default class SqLiteExternalService {
 
       // Query para desativar registros que não foram atualizados
       await db.rawQuery(`
-        UPDATE "temporary_${table}"
+        UPDATE temporary_${table}
         SET status = 'inativo'
         WHERE DATE(updated_at) < CURRENT_DATE;
       `);
