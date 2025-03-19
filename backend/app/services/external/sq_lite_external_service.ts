@@ -904,12 +904,6 @@ export default class SqLiteExternalService {
         }
       }
 
-      await db.rawQuery(`
-        UPDATE ${schema}.${destinationTable}
-        SET status = 'inativo'
-        WHERE DATE(updated_at) < CURRENT_DATE;
-      `);
-
       console.info('Transformação de contatos concluída com sucesso!');
     } catch (error) {
       console.error(`Erro ao transformar contatos: ${error.message}`);
