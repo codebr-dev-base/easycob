@@ -779,7 +779,7 @@ export default class SqLiteExternalService {
     await db.rawQuery(sql);
 
     await db.rawQuery(`
-      UPDATE "${schema}.${destinationTable}"
+      UPDATE ${schema}.${destinationTable}
       SET status = 'inativo'
       WHERE DATE(updated_at) < CURRENT_DATE;
     `);
@@ -837,7 +837,7 @@ export default class SqLiteExternalService {
     await db.rawQuery(sql);
 
     await db.rawQuery(`
-      UPDATE "${schema}.${destinationTable}"
+      UPDATE ${schema}.${destinationTable}
       SET status = 'inativo'
       WHERE DATE(updated_at) < CURRENT_DATE;
     `);
@@ -905,7 +905,7 @@ export default class SqLiteExternalService {
       }
 
       await db.rawQuery(`
-        UPDATE "${schema}.${destinationTable}"
+        UPDATE ${schema}.${destinationTable}
         SET status = 'inativo'
         WHERE DATE(updated_at) < CURRENT_DATE;
       `);
