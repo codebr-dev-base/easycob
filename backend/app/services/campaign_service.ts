@@ -177,7 +177,7 @@ export default class CampaignService {
           .andOn('c.des_contr', '=', 'pt.des_contr')
           .andOnVal('c.status', '=', 'ATIVO');
       })
-      .groupByRaw('1,2');
+      .groupByRaw('1,2,3');
   }
 
   findClient(contact: any, clients: Array<any>) {
