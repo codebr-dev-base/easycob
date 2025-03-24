@@ -11,8 +11,11 @@ export default class HistorySendAction extends BaseModel {
   @column()
   declare actionId: number;
 
+  @column()
+  declare actionUuid: string;
+
   @belongsTo(() => Action, {
-    foreignKey: 'actionId',
+    foreignKey: 'actionUuid',
   })
   declare action: BelongsTo<typeof Action>;
 

@@ -13,7 +13,6 @@ import string from '@adonisjs/core/helpers/string';
 import { handleSendingForRecupera } from './utils/recupera.js';
 import { DatabaseQueryBuilderContract } from '@adonisjs/lucid/types/querybuilder';
 import lodash from 'lodash';
-
 export default class ActionService {
   // Define a helper function for querying and pushing IDs
   protected async getListTypeActionId(
@@ -201,6 +200,7 @@ export default class ActionService {
     const promise = await PromiseOfPayment.create({
       ...dataPromise,
       action_id: action.id,
+      action_uuid: action.uuid,
     });
 
     return {
@@ -213,6 +213,7 @@ export default class ActionService {
     const negotiation = await NegotiationOfPayment.create({
       ...dataNegotiation,
       actionId: action.id,
+      action_uuid: action.uuid,
     });
 
     let date = DateTime.fromSQL(dataNegotiation.datPrest);

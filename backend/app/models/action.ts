@@ -15,6 +15,9 @@ export default class Action extends BaseModel {
   declare id: number;
 
   @column()
+  declare uuid: string; // Adicionar campo UUID
+
+  @column()
   declare codCredorDesRegis: number | string;
 
   @column()

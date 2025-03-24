@@ -21,6 +21,7 @@ import HistorySendAction from '#models/history_send_action';
 
 interface SendRecuperaJobPayload {
   action_id: number;
+  action_uuid: string;
   codigo: string;
   credor: string;
   regis: string;
@@ -129,7 +130,7 @@ export default class SendRecuperaJob extends Job {
 
     //logger.info(envelop);
 
-    const action = await Action.find(payload.action_id);
+    const action = await Action.findBy('uuid', payload.action_uuid);
     if (action && action.sync === false) {
       try {
         const result = await $fetch(this.urlRecupera, {
@@ -172,6 +173,7 @@ export default class SendRecuperaJob extends Job {
                 const retorno = <string>resultSync.XML?.RETORNO;
                 await HistorySendAction.create({
                   actionId: action.id,
+                  actionUuid: action.uuid,
                   userId: action.userId,
                   countSends: action.countSends,
                   retorno: retorno,
@@ -189,6 +191,7 @@ export default class SendRecuperaJob extends Job {
 
               const item = {
                 action_id: action.id,
+                action_uuid: action.uuid,
                 codigo: <string>typeAction?.abbreviation,
                 credor: action.codCredor,
                 regis: action.desRegis,

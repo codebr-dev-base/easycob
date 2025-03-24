@@ -59,10 +59,13 @@ export default class NegotiationOfPayment extends BaseModel {
   declare actionId: number;
 
   @column()
+  declare actionUuid: string; // Adicionar action_uuid
+
+  @column()
   declare discount: boolean;
 
   @belongsTo(() => Action, {
-    localKey: 'actionId',
+    localKey: 'actionUuid',
   })
   declare action: BelongsTo<typeof Action>;
 

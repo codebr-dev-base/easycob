@@ -40,13 +40,16 @@ export default class PromiseOfPayment extends BaseModel {
   declare actionId: number;
 
   @column()
+  declare actionUuid: string; // Adicionar action_uuid
+
+  @column()
   declare discount: boolean;
 
   @column()
   declare status: boolean;
 
   @belongsTo(() => Action, {
-    localKey: 'actionId',
+    localKey: 'actionUuid',
   })
   declare action: BelongsTo<typeof Action>;
 

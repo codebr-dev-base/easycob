@@ -117,6 +117,7 @@ export async function dispatchToRecupera(
 
   const item = {
     action_id: action.id,
+    action_uuid: action.uuid,
     codigo: <string>typeAction?.abbreviation,
     credor: action.codCredor,
     regis: action.desRegis,

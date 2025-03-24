@@ -47,7 +47,7 @@ export default class NegotiationOfPaymentsController {
         .select('a.contato as contato')
         .select('a.des_contr as des_contr')
         .select('a.cod_credor_des_regis as cod_credor_des_regis')
-        .innerJoin('actions as a', 'a.id', '=', 'n.action_id')
+        .innerJoin('actions as a', 'a.uuid', '=', 'n.action_uuid')
         .innerJoin('users as u', 'u.id', '=', 'a.user_id')
         .innerJoin(
           'recupera.tbl_arquivos_clientes as cls',

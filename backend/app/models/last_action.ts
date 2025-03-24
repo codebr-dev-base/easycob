@@ -18,8 +18,11 @@ export default class LastAction extends BaseModel {
   @column()
   declare actionId: number;
 
+  @column()
+  declare actionUuid: string;
+
   @belongsTo(() => Action, {
-    foreignKey: 'action_id',
+    foreignKey: 'actionUuid',
   })
   declare action: BelongsTo<typeof Action>;
 
