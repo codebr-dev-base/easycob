@@ -377,6 +377,7 @@ export default class ActionService {
           contato: action.contato,
           typeActionId: promiseTypeAction?.id,
           description: '',
+          channel: action.channel,
           userId: action.userId,
           datVenci: DateTime.fromISO(datVenci.toISOString()),
           dayLate: Math.floor(days),
