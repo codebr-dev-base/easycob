@@ -35,7 +35,7 @@ import {
   getInverseColor,
   getRandomColor,
 } from "@/app/lib/utils";
-import React from "react";
+import React, { use, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import SkeletonTable from "@/app/(easycob)/components/SkeletonTable";
@@ -57,39 +57,47 @@ export default function TabChart({
   chartType: {
     chartData: IChartData[];
     chartConfig: IChartConfig;
-  };
+  } | null;
   pendingChartType: boolean;
   chartUser: {
     chartData: IChartData[];
     chartConfig: IChartConfig;
-  };
+  } | null;
   pendingChartUser: boolean;
   chartUserType: {
     chartData: IChartDataStack[];
     chartConfig: IChartConfig;
-  };
+  } | null;
   pendingChartUserType: boolean;
   chartUserCpc: {
     chartData: IChartDataStack[];
     chartConfig: IChartConfig;
-  };
+  } | null;
   pendingChartUserCpc: boolean;
   chartUserChannel: {
     chartData: IChartDataChannelItem[]; // Lista de dados para o gráfico
     chartConfig: IChartChannelConfig;
-  };
+  } | null;
   pendingChartUserChannel: boolean;
   query: IQueryActionParams;
 }) {
-  const actionKeys = Array.from(
-    new Set(
-      chartUserType.chartData.flatMap((item) =>
-        Object.keys(item).filter(
-          (key) => key !== "userId" && key !== "name" && key !== "total"
+
+  const actionKeys = useRef<string[]>([]);
+
+  useEffect(() => {
+    if (chartUserType) {
+      const actionKeys = Array.from(
+        new Set(
+          chartUserType.chartData.flatMap((item) =>
+            Object.keys(item).filter(
+              (key) => key !== "userId" && key !== "name" && key !== "total"
+            )
+          )
         )
-      )
-    )
-  );
+      );
+    }
+  }, [chartUserType]);
+
 
   let color = `rgb(34, 105, 211)`;
   let inverseColor = getInverseColor(`rgb(34, 105, 211)`);
@@ -105,7 +113,7 @@ export default function TabChart({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {!pendingChartType ? (
+            {!pendingChartType && chartType ? (
               <ChartContainer
                 config={chartType.chartConfig}
                 className="aspect-auto h-[250px] w-full"
@@ -171,7 +179,7 @@ export default function TabChart({
             <CardDescription>Classificação por operador</CardDescription>
           </CardHeader>
           <CardContent>
-            {!pendingChartUser ? (
+            {!pendingChartUser && chartUser ? (
               <ChartContainer
                 config={chartUser.chartConfig}
                 className="aspect-auto h-[250px] w-full"
@@ -238,7 +246,7 @@ export default function TabChart({
             <CardDescription>Classificação por operador e tipo</CardDescription>
           </CardHeader>
           <CardContent>
-            {!pendingChartUserType ? (
+            {!pendingChartUserType && chartUserType ? (
               <ChartContainer
                 config={chartUserType.chartConfig}
                 className="aspect-auto h-[250px] w-full"
@@ -275,7 +283,7 @@ export default function TabChart({
                       width={680}
                     />
                   </Bar>
-                  {actionKeys.map((key: string, index: number): any => {
+                  {actionKeys.current.length > 0 && actionKeys.current.map((key: string, index: number): any => {
                     if (index % 2 == 0) {
                       color = getColorVariation(color, 1.4);
                       return (
@@ -334,7 +342,7 @@ export default function TabChart({
             <CardDescription>Classificação por CPC</CardDescription>
           </CardHeader>
           <CardContent>
-            {!pendingChartUserCpc ? (
+            {!pendingChartUserCpc && chartUserCpc? (
               <ChartContainer
                 config={chartUserCpc.chartConfig}
                 className="aspect-auto h-[250px] w-full"
@@ -391,7 +399,7 @@ export default function TabChart({
             <CardDescription>Classificação por Canal</CardDescription>
           </CardHeader>
           <CardContent>
-            {!pendingChartUserChannel ? (
+            {!pendingChartUserChannel && chartUserChannel? (
               <ChartContainer
                 config={chartUserChannel.chartConfig}
                 className="aspect-auto h-[250px] w-full"

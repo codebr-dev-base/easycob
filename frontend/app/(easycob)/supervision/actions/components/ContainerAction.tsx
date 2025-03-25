@@ -31,41 +31,9 @@ import { TbFileTypeCsv } from "react-icons/tb";
 import { Parser } from "json2csv";
 import { FaSpinner } from "react-icons/fa";
 
-export default function ContainerAction({
-  actions,
-  chartType: ct,
-  chartUser: cu,
-  chartUserType: cut,
-  chartUserCpc: cuc,
-  chartUserChannel: cuch,
-}: {
-  actions: {
-    meta: IMeta;
-    data: IAction[];
-  };
-  chartType: {
-    chartData: IChartData[];
-    chartConfig: IChartConfig;
-  };
-  chartUser: {
-    chartData: IChartData[];
-    chartConfig: IChartConfig;
-  };
-  chartUserType: {
-    chartData: IChartDataStack[];
-    chartConfig: IChartConfig;
-  };
-  chartUserCpc: {
-    chartData: IChartDataStack[];
-    chartConfig: IChartConfig;
-  };
-  chartUserChannel: {
-    chartData: IChartDataChannelItem[]; // Lista de dados para o gráfico
-    chartConfig: IChartChannelConfig;
-  };
-}) {
-  const [meta, setMeta] = useState<IMeta>(actions.meta);
-  const [data, setData] = useState<IAction[]>(actions.data ? actions.data : []);
+export default function ContainerAction() {
+  const [meta, setMeta] = useState<IMeta | null>(null);
+  const [data, setData] = useState<IAction[] | null>(null);
   const [pendingRecords, setPendingRecords] = useState<boolean>(false);
   const [pendingChartType, setPendingChartType] = useState<boolean>(false);
   const [pendingChartUser, setPendingChartUser] = useState<boolean>(false);
@@ -80,27 +48,27 @@ export default function ContainerAction({
   const [chartType, setChartType] = useState<{
     chartData: IChartData[];
     chartConfig: IChartConfig;
-  }>(ct);
+  } | null>(null);
 
   const [chartUser, setChartUser] = useState<{
     chartData: IChartData[];
     chartConfig: IChartConfig;
-  }>(cu);
+  } | null>(null);
 
   const [chartUserType, setChartUserType] = useState<{
     chartData: IChartDataStack[];
     chartConfig: IChartConfig;
-  }>(cut);
+  } | null>(null);
 
   const [chartUserCpc, setChartUserCpc] = useState<{
     chartData: IChartDataStack[];
     chartConfig: IChartConfig;
-  }>(cuc);
+  } | null>(null);
 
   const [chartUserChannel, setChartUserChannel] = useState<{
     chartData: IChartDataChannelItem[]; // Lista de dados para o gráfico
     chartConfig: IChartChannelConfig;
-  }>(cuch);
+  } | null>(null);
 
   const refresh = async () => {
     setPendingRecords(true);
@@ -193,7 +161,11 @@ export default function ContainerAction({
       <div className="p-2">
         <Header title="Acionamentos">
           <div className="flex flex-col md:flex-row justify-end items-end gap-4">
-            <Button variant="secondary" onClick={fetchCsv} disabled={pendingCsv}>
+            <Button
+              variant="secondary"
+              onClick={fetchCsv}
+              disabled={pendingCsv}
+            >
               {pendingCsv ? (
                 <FaSpinner className="animate-spin mr-2" />
               ) : (
@@ -231,13 +203,15 @@ export default function ContainerAction({
             />
           </TabsContent>
           <TabsContent value="records">
-            <TabRecords
-              meta={meta}
-              data={data}
-              refresh={refresh}
-              query={query}
-              pending={pendingRecords}
-            />
+            {meta !== null && data !== null && (
+              <TabRecords
+                meta={meta}
+                data={data}
+                refresh={refresh}
+                query={query}
+                pending={pendingRecords}
+              />
+            )}
           </TabsContent>
         </Tabs>
       </main>
