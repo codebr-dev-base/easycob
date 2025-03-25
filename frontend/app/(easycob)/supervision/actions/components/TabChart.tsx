@@ -35,7 +35,7 @@ import {
   getInverseColor,
   getRandomColor,
 } from "@/app/lib/utils";
-import React, { use, useEffect, useRef } from "react";
+import React, { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import SkeletonTable from "@/app/(easycob)/components/SkeletonTable";
@@ -81,23 +81,23 @@ export default function TabChart({
   pendingChartUserChannel: boolean;
   query: IQueryActionParams;
 }) {
-
-  const actionKeys = useRef<string[]>([]);
+  const [actionKeys, setActionKeys] = useState<string[]>([]);
 
   useEffect(() => {
     if (chartUserType) {
-      const actionKeys = Array.from(
-        new Set(
-          chartUserType.chartData.flatMap((item) =>
-            Object.keys(item).filter(
-              (key) => key !== "userId" && key !== "name" && key !== "total"
+      setActionKeys(
+        Array.from(
+          new Set(
+            chartUserType.chartData.flatMap((item) =>
+              Object.keys(item).filter(
+                (key) => key !== "userId" && key !== "name" && key !== "total"
+              )
             )
           )
         )
       );
     }
   }, [chartUserType]);
-
 
   let color = `rgb(34, 105, 211)`;
   let inverseColor = getInverseColor(`rgb(34, 105, 211)`);
@@ -283,33 +283,34 @@ export default function TabChart({
                       width={680}
                     />
                   </Bar>
-                  {actionKeys.current.length > 0 && actionKeys.current.map((key: string, index: number): any => {
-                    if (index % 2 == 0) {
-                      color = getColorVariation(color, 1.4);
-                      return (
-                        <Bar
-                          key={key}
-                          dataKey={key}
-                          stackId="a"
-                          fill={rgbToRgba(color, 0.8)}
-                        />
-                      );
-                    } else {
-                      inverseColor = getInverseColor(color);
+                  {actionKeys.length > 0 &&
+                    actionKeys.map((key: string, index: number): any => {
+                      if (index % 2 == 0) {
+                        color = getColorVariation(color, 1.4);
+                        return (
+                          <Bar
+                            key={key}
+                            dataKey={key}
+                            stackId="a"
+                            fill={rgbToRgba(color, 0.8)}
+                          />
+                        );
+                      } else {
+                        inverseColor = getInverseColor(color);
 
-                      return (
-                        <Bar
-                          key={key}
-                          dataKey={key}
-                          stackId="a"
-                          fill={rgbToRgba(inverseColor, 0.6)}
-                        />
-                      );
-                    }
+                        return (
+                          <Bar
+                            key={key}
+                            dataKey={key}
+                            stackId="a"
+                            fill={rgbToRgba(inverseColor, 0.6)}
+                          />
+                        );
+                      }
 
-                    /* Add a bar just for the gap after each bar */
-                    /*  bars.push(<Bar dataKey="gap" stackId="a" fill="transparent" />); */
-                  })}
+                      /* Add a bar just for the gap after each bar */
+                      /*  bars.push(<Bar dataKey="gap" stackId="a" fill="transparent" />); */
+                    })}
                 </BarChart>
               </ChartContainer>
             ) : (
@@ -342,7 +343,7 @@ export default function TabChart({
             <CardDescription>Classificação por CPC</CardDescription>
           </CardHeader>
           <CardContent>
-            {!pendingChartUserCpc && chartUserCpc? (
+            {!pendingChartUserCpc && chartUserCpc ? (
               <ChartContainer
                 config={chartUserCpc.chartConfig}
                 className="aspect-auto h-[250px] w-full"
@@ -399,7 +400,7 @@ export default function TabChart({
             <CardDescription>Classificação por Canal</CardDescription>
           </CardHeader>
           <CardContent>
-            {!pendingChartUserChannel && chartUserChannel? (
+            {!pendingChartUserChannel && chartUserChannel ? (
               <ChartContainer
                 config={chartUserChannel.chartConfig}
                 className="aspect-auto h-[250px] w-full"
