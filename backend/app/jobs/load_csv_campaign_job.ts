@@ -12,6 +12,15 @@ interface LoadCsvCampaignJobPayload {
   user_id: number | string;
 }
 
+interface ContactValidator {
+  codCredorDesRegis: string;
+  contato: string;
+  standardized: string;
+  status: string;
+  codigoCampanha: string;
+  campaignId: number;
+}
+
 export default class LoadCsvCampaignJob extends Job {
   // This is the path to the file that is used to create the job
   static get $$filepath() {
@@ -45,22 +54,8 @@ export default class LoadCsvCampaignJob extends Job {
         const handleValidContact = service.handleValidContact;
 
         for (const chunkContacs of chunksContacs) {
-          const contactsValids: {
-            codCredorDesRegis: string;
-            contato: string;
-            standardized: string;
-            status: string;
-            codigoCampanha: string;
-            campaignId: number;
-          }[] = [];
-          const contactInvalids: {
-            codCredorDesRegis: string;
-            contato: string;
-            standardized: string;
-            status: string;
-            codigoCampanha: string;
-            campaignId: number;
-          }[] = [];
+          const contactsValids: ContactValidator[] = [];
+          const contactInvalids: ContactValidator[] = [];
 
           const clients = await service.getClients(chunkContacs);
 

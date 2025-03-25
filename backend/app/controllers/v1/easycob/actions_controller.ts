@@ -32,6 +32,16 @@ export default class ActionsController {
       );
     });
 
+  idExcludeTypeActions: number[] = [];
+
+  async getExcludeTypeActions() {
+    const typeActions = await TypeAction.query().whereIn('abbreviation', [
+      'EME',
+      'SMS',
+    ]);
+    this.idExcludeTypeActions = typeActions.map((typeAction) => typeAction.id);
+  }
+
   async index({ request }: HttpContext) {
     const qs = request.qs();
     const pageNumber = qs.page || '1';
@@ -287,8 +297,13 @@ export default class ActionsController {
     const qs = request.qs();
     const selected = await this.service.generateWhereInPaginate(qs);
 
+    if (this.idExcludeTypeActions.length < 1) {
+      await this.getExcludeTypeActions();
+    }
+
     const actionsByType = await db
       .from('public.actions AS a')
+      .whereNotIn('a.type_action_id', this.idExcludeTypeActions)
       .joinRaw(
         `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
          ON tac.des_contr = a.des_contr
@@ -309,7 +324,6 @@ export default class ActionsController {
         }
         return this.service.generateWherePaginate(q, qs);
       })
-      .whereNotIn('ta.abbreviation', ['EME', 'SMS']) // Excluindo 'EME' e 'SMS'
       .groupBy(['ta.name', 'ta.abbreviation'])
       .orderBy('total', 'desc') // Ordena pelo total de forma decrescente
       .limit(10); // Limita a 5 registros
@@ -356,12 +370,17 @@ export default class ActionsController {
   async categorizeByUser({ request }: HttpContext) {
     const qs = request.qs();
 
+    if (this.idExcludeTypeActions.length < 1) {
+      await this.getExcludeTypeActions();
+    }
+
     // Gera o where com paginação, caso seja necessário
     const selected = await this.service.generateWhereInPaginate(qs);
 
     // Consulta ao banco de dados para agrupar por usuários e contar acionamentos, excluindo SMS e EME
     const actionsByUser = await db
       .from('public.actions AS a')
+      .whereNotIn('a.type_action_id', this.idExcludeTypeActions)
       .joinRaw(
         `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
          ON tac.des_contr = a.des_contr
@@ -382,7 +401,6 @@ export default class ActionsController {
         }
         return this.service.generateWherePaginate(q, qs); // Gerar o paginate dinamicamente
       })
-      .whereNotIn('ta.abbreviation', ['EME', 'SMS']) // Excluindo os tipos de ação 'EME' e 'SMS'
       .groupBy('u.name') // Agrupa pelos usuários
       .orderBy('total', 'desc') // Ordena pelo total de acionamentos de forma decrescente
       .limit(10); // Limita a 5 registros
@@ -427,12 +445,17 @@ export default class ActionsController {
   async chartByUserAndTypeAction({ request }: HttpContext) {
     const qs = request.qs();
 
+    if (this.idExcludeTypeActions.length < 1) {
+      await this.getExcludeTypeActions();
+    }
+
     // Gera o where com paginação, caso seja necessário
     const selected = await this.service.generateWhereInPaginate(qs);
 
     // Obtenção dos usuários e seus acionamentos
     const userActions = await db
       .from('public.actions AS a')
+      .whereNotIn('a.type_action_id', this.idExcludeTypeActions)
       .joinRaw(
         `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
          ON tac.des_contr = a.des_contr
@@ -455,7 +478,6 @@ export default class ActionsController {
         }
         return this.service.generateWherePaginate(q, qs); // Gerar o paginate dinamicamente
       })
-      .whereNotIn('ta.abbreviation', ['SMS', 'EME']) // Excluir acionamentos de SMS e EME
       .groupBy(['a.user_id', 'u.name', 'ta.abbreviation']) // Agrupa por usuário, nome do usuário, e tipo de acionamento
       .orderBy('total', 'desc'); // Ordena pelo total de acionamentos
 
@@ -509,12 +531,17 @@ export default class ActionsController {
   async categorizeByUserAndCpc({ request }: HttpContext) {
     const qs = request.qs();
 
+    if (this.idExcludeTypeActions.length < 1) {
+      await this.getExcludeTypeActions();
+    }
+
     // Gera o where com paginação, caso seja necessário
     const selected = await this.service.generateWhereInPaginate(qs);
 
     // Consulta ao banco de dados para agrupar por usuários e contar acionamentos separados por CPC e NCPC
     const actionsByUser = await db
       .from('public.actions AS a')
+      .whereNotIn('a.type_action_id', this.idExcludeTypeActions)
       .joinRaw(
         `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
          ON tac.des_contr = a.des_contr
@@ -540,7 +567,6 @@ export default class ActionsController {
         }
         return this.service.generateWherePaginate(q, qs); // Gerar o paginate dinamicamente
       })
-      .whereNotIn('ta.abbreviation', ['EME', 'SMS']) // Excluindo os tipos de ação 'EME' e 'SMS'
       .groupBy('u.name') // Agrupa pelos usuários
       .orderBy('total', 'desc') // Ordena pelo total de acionamentos de forma decrescente
       .limit(10); // Limita a 10 registros
@@ -588,12 +614,17 @@ export default class ActionsController {
     const orderBy = this.service.generateOrderBy(qs);
     const descending = qs.descending || 'true';
 
+    if (this.idExcludeTypeActions.length < 1) {
+      await this.getExcludeTypeActions();
+    }
+
     // Gera o where com paginação, caso seja necessário
     const selected = await this.service.generateWhereInPaginate(qs);
 
     // Obtenção dos usuários e seus acionamentos
     const userActions = await db
       .from('public.actions AS a')
+      .whereNotIn('a.type_action_id', this.idExcludeTypeActions)
       .joinRaw(
         `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
          ON tac.des_contr = a.des_contr
@@ -638,7 +669,6 @@ export default class ActionsController {
         }
         return this.service.generateWherePaginate(q, qs); // Gerar o paginate dinamicamente
       })
-      .whereNotIn('ta.abbreviation', ['SMS', 'EME']) // Excluir acionamentos de SMS e EME
       .whereRaw('ta.commissioned > 0')
       .groupBy([
         'u.id',
@@ -657,6 +687,10 @@ export default class ActionsController {
 
   async listByUserAndCpc({ request }: HttpContext) {
     const qs = request.qs();
+
+    if (this.idExcludeTypeActions.length < 1) {
+      await this.getExcludeTypeActions();
+    }
 
     const orderBy = this.service.generateOrderBy(qs);
     const descending = qs.descending || 'true';
@@ -693,7 +727,6 @@ export default class ActionsController {
         }
         return this.service.generateWherePaginate(q, qs); // Gerar o paginate dinamicamente
       })
-      .whereNotIn('ta.abbreviation', ['EME', 'SMS']) // Excluindo os tipos de ação 'EME' e 'SMS'
       .groupBy(['u.id', 'u.name'])
       .orderBy(`${orderBy}`, descending === 'true' ? 'desc' : 'asc');
 
@@ -702,6 +735,10 @@ export default class ActionsController {
 
   async listByUserAndChannel({ request }: HttpContext) {
     const qs = request.qs();
+
+    if (this.idExcludeTypeActions.length < 1) {
+      await this.getExcludeTypeActions();
+    }
 
     const orderBy = this.service.generateOrderBy(qs);
     const descending = qs.descending || 'true';
@@ -712,6 +749,7 @@ export default class ActionsController {
     // Consulta ao banco de dados para agrupar por usuários e contar acionamentos separados por valores de `channel`
     const actionsByUser = await db
       .from('public.actions AS a')
+      .whereNotIn('type_action_id', this.idExcludeTypeActions)
       .joinRaw(
         `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
          ON tac.des_contr = a.des_contr
@@ -751,7 +789,6 @@ export default class ActionsController {
         }
         return this.service.generateWherePaginate(q, qs); // Gerar o paginate dinamicamente
       })
-      .whereNotIn('ta.abbreviation', ['EME', 'SMS']) // Excluindo os tipos de ação 'EME' e 'SMS'
       .groupBy(['u.id', 'u.name'])
       .orderBy(`${orderBy}`, descending === 'true' ? 'desc' : 'asc');
 
@@ -761,12 +798,17 @@ export default class ActionsController {
   async categorizeByUserAndChannel({ request }: HttpContext) {
     const qs = request.qs();
 
+    if (this.idExcludeTypeActions.length < 1) {
+      await this.getExcludeTypeActions();
+    }
+
     // Gera o where com paginação, caso seja necessário
     const selected = await this.service.generateWhereInPaginate(qs);
 
     // Consulta ao banco de dados para agrupar por usuários e contar acionamentos por valores da coluna channel
     const actionsByUser = await db
       .from('public.actions AS a')
+      .whereNotIn('type_action_id', this.idExcludeTypeActions)
       .joinRaw(
         `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
          ON tac.des_contr = a.des_contr
@@ -801,7 +843,6 @@ export default class ActionsController {
         }
         return this.service.generateWherePaginate(q, qs); // Gerar o paginate dinamicamente
       })
-      .whereNotIn('ta.abbreviation', ['EME', 'SMS']) // Excluindo os tipos de ação 'EME' e 'SMS'
       .groupBy('u.name') // Agrupa pelos usuários
       .orderBy('total', 'desc') // Ordena pelo total de acionamentos de forma decrescente
       .limit(10); // Limita a 10 registros
