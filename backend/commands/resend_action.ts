@@ -21,7 +21,6 @@ export default class ResendAction extends BaseCommand {
       .whereRaw(`created_at::date >= '2023-03-23'`)
       .whereNull('result_sync');
     for (const action of actions) {
-      console.log(action);
       await handleSendingForRecupera(action);
     }
 

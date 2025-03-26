@@ -39,7 +39,8 @@ export async function handleSendingForRecupera(
   action: Action,
   queueName = 'SendRecupera'
 ) {
-  if (await isToSendToRecupera(action)) {
+  const isSend = await isToSendToRecupera(action);
+  if (isSend) {
     action.retorno = 'Q';
     action.retornotexto = 'Em fila';
     await dispatchToRecupera(action, queueName);
