@@ -1,5 +1,6 @@
-const severPath = '/home/administrator/easycob/backend/';
+// const severPath = '/home/administrator/easycob/backend/';
 // const severPath = '/Users/thiago/Projects/Yuan/easycob/backend/';
+const severPath = '/home/administrator/easycob/backend/';
 
 module.exports = {
   apps: [
