@@ -139,11 +139,8 @@ export default class SendRecuperaJob extends Job {
         break;
     }
 
-    console.log(envelop);
-
     const action = await Action.find(payload.action_id);
-    console.log(action);
-    if (action && action.sync) {
+    if (action && !action.sync) {
       try {
         const result = await $fetch(this.urlRecupera, {
           method: 'POST',
