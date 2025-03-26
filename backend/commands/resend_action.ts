@@ -2,6 +2,7 @@ import { BaseCommand } from '@adonisjs/core/ace';
 import type { CommandOptions } from '@adonisjs/core/types/ace';
 import { handleSendingForRecupera } from '#services/utils/recupera';
 import Action from '#models/action';
+import { DateTime } from 'luxon';
 
 export default class ResendAction extends BaseCommand {
   static commandName = 'resend:action';
@@ -16,10 +17,24 @@ export default class ResendAction extends BaseCommand {
 
     const actions = await Action.query()
       .whereILike('retornotexto', 'Em fila')
-      .whereRaw(`created_at::date BETWEEN '2025-03-22' AND '2025-03-26'`);
+      .whereRaw(`created_at::date BETWEEN '2025-03-22' AND '2025-03-26'`)
+      .whereNull('result_sync');
     for (const action of actions) {
       console.log(action);
       await handleSendingForRecupera(action);
+    }
+
+    const actionsSync = await Action.query()
+      .whereILike('retornotexto', 'Em fila')
+      .whereRaw(`created_at::date BETWEEN '2025-03-22' AND '2025-03-26'`)
+      .whereNotNull('result_sync');
+
+    for (const action of actionsSync) {
+      action.sync = true;
+      const resultSync = JSON.parse(action.resultSync);
+      action.syncedAt = DateTime.now();
+      action.retorno = <string>resultSync.XML?.RETORNO;
+      action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
     }
   }
 }
