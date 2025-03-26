@@ -42,14 +42,13 @@ export async function handleSendingForRecupera(
   if (await isToSendToRecupera(action)) {
     action.retorno = 'Q';
     action.retornotexto = 'Em fila';
-    await action.save();
     await dispatchToRecupera(action, queueName);
   } else {
     action.retorno = null;
     action.retornotexto =
       'Já existe um acionamento válido de prioridade igual ou maior';
-    await action.save();
   }
+  await action.save();
 }
 
 export async function isToSendToRecupera(action: Action) {
@@ -63,6 +62,7 @@ export async function isToSendToRecupera(action: Action) {
     );
 
     if (!jsonString) {
+      console.log('Nenhum last_action encontrado');
       return true;
     }
 

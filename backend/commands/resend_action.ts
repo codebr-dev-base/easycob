@@ -37,6 +37,7 @@ export default class ResendAction extends BaseCommand {
       action.syncedAt = DateTime.now();
       action.retorno = <string>resultSync.XML?.RETORNO;
       action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
+      await action.save();
     }
   }
 }
