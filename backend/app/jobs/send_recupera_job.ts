@@ -157,6 +157,8 @@ export default class SendRecuperaJob extends Job {
 
         const retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
 
+        console.log(resultSync);
+
         action.countSends = action.countSends + 1;
 
         if (action.countSends <= 10) {
@@ -220,7 +222,7 @@ export default class SendRecuperaJob extends Job {
         }
 
         action.isOk = action.retorno === '00' ? true : false;
-
+        console.log(action.isOk);
         if (action.isOk) {
           const cod_credor_des_regis = `${action.codCredorDesRegis}`;
           const jsonString = JSON.stringify(
@@ -228,7 +230,8 @@ export default class SendRecuperaJob extends Job {
           );
           await redis.hset('last_actions', cod_credor_des_regis, jsonString);
         }
-
+        console.log("save action");
+        console.log(action);
         await action.save();
       } catch (error) {
         action.sync = false;
