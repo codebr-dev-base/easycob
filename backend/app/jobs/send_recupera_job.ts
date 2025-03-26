@@ -160,6 +160,8 @@ export default class SendRecuperaJob extends Job {
         console.log(resultSync);
 
         action.countSends = action.countSends + 1;
+        action.retorno = <string>resultSync.XML?.RETORNO;
+        action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
 
         if (action.countSends <= 10) {
           const isNotOK = this.checkResultSync(retornotexto);
@@ -216,8 +218,6 @@ export default class SendRecuperaJob extends Job {
             action.sync = true;
             action.resultSync = JSON.stringify(resultSync);
             action.syncedAt = DateTime.now();
-            action.retorno = <string>resultSync.XML?.RETORNO;
-            action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
           }
         }
 
@@ -230,7 +230,7 @@ export default class SendRecuperaJob extends Job {
           );
           await redis.hset('last_actions', cod_credor_des_regis, jsonString);
         }
-        console.log("save action");
+        console.log('save action');
         console.log(action);
         await action.save();
       } catch (error) {

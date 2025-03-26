@@ -22,7 +22,7 @@ export default class ResendAction extends BaseCommand {
       .whereNull('result_sync');
     for (const action of actions) {
       await handleSendingForRecupera(action);
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     const actionsSync = await Action.query()
