@@ -18,6 +18,7 @@ export default class ResendAction extends BaseCommand {
       .whereILike('retornotexto', 'Em fila')
       .whereRaw(`created_at::date BETWEEN '2025-03-22' AND '2025-03-26'`);
     for (const action of actions) {
+      console.log(action);
       await handleSendingForRecupera(action);
     }
   }
