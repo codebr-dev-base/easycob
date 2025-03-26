@@ -18,7 +18,6 @@ export default class ResendAction extends BaseCommand {
 
     const actions = await Action.query()
       .whereILike('retornotexto', 'Em fila')
-      .whereIn('type_action_id', [1, 2, 3])
       .whereRaw(`created_at::date >= '2023-03-23'`)
       .whereNull('result_sync');
     for (const action of actions) {
@@ -28,7 +27,6 @@ export default class ResendAction extends BaseCommand {
 
     const actionsSync = await Action.query()
       .whereILike('retornotexto', 'Em fila')
-      .whereIn('type_action_id', [1, 2, 3])
       .whereRaw(`created_at::date >= '2023-03-23'`)
       .whereNotNull('result_sync');
 
