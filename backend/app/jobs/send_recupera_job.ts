@@ -159,10 +159,6 @@ export default class SendRecuperaJob extends Job {
 
         console.log(resultSync);
 
-        action.countSends = action.countSends + 1;
-        action.retorno = <string>resultSync.XML?.RETORNO;
-        action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
-
         if (action.countSends <= 10) {
           const isNotOK = this.checkResultSync(retornotexto);
           if (isNotOK) {
@@ -219,6 +215,11 @@ export default class SendRecuperaJob extends Job {
             action.resultSync = JSON.stringify(resultSync);
             action.syncedAt = DateTime.now();
           }
+        } else {
+          action.countSends = action.countSends + 1;
+          action.retorno = <string>resultSync.XML?.RETORNO;
+          action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
+          action.sync = false;
         }
 
         action.isOk = action.retorno === '00' ? true : false;
