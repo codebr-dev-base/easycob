@@ -126,8 +126,6 @@ export async function dispatchToRecupera(
     wallet: action.wallet,
   };
 
-  console.log(queueName);
-
   if (queueName) {
     await SendRecuperaJob.dispatch(item, {
       queueName,

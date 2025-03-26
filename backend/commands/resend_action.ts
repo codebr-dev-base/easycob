@@ -3,6 +3,7 @@ import type { CommandOptions } from '@adonisjs/core/types/ace';
 import { handleSendingForRecupera } from '#services/utils/recupera';
 import Action from '#models/action';
 import { DateTime } from 'luxon';
+import { time } from 'node:console';
 
 export default class ResendAction extends BaseCommand {
   static commandName = 'resend:action';
@@ -22,6 +23,7 @@ export default class ResendAction extends BaseCommand {
       .whereNull('result_sync');
     for (const action of actions) {
       await handleSendingForRecupera(action);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     const actionsSync = await Action.query()

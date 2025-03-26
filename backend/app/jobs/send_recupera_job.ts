@@ -103,6 +103,18 @@ export default class SendRecuperaJob extends Job {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  parseResult(result: any) {
+    const resultJson = <SoapResponse>xmlParser.toJson(result, this.optionsJson);
+
+    const OcorrenciaResult =
+      resultJson['soap:Envelope']?.['soap:Body']?.IncluirOcorrenciaResponse
+        ?.IncluirOcorrenciaResult;
+
+    const soapBody = OcorrenciaResult ? OcorrenciaResult : '';
+
+    return <SoapBody>xmlParser.toJson(soapBody, this.optionsJson);
+  }
   /**
    * Base Entry point
    */
@@ -127,7 +139,7 @@ export default class SendRecuperaJob extends Job {
         break;
     }
 
-    //logger.info(envelop);
+    this.logger.info(envelop);
 
     const action = await Action.find(payload.action_id);
     if (action && action.sync === false) {
@@ -141,39 +153,21 @@ export default class SendRecuperaJob extends Job {
           timeout: 20000,
         });
 
-        const resultJson = <SoapResponse>(
-          xmlParser.toJson(result, this.optionsJson)
-        );
-
-        const OcorrenciaResult =
-          resultJson['soap:Envelope']?.['soap:Body']?.IncluirOcorrenciaResponse
-            ?.IncluirOcorrenciaResult;
-
-        const soapBody = OcorrenciaResult ? OcorrenciaResult : '';
-
-        const resultSync = <SoapBody>(
-          xmlParser.toJson(soapBody, this.optionsJson)
-        );
+        const resultSync = this.parseResult(result);
 
         const retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
 
-        // Inicializa um flag para controlar se precisamos salvar
-        let needsSave = false;
-        let saveReason = '';
-
         action.countSends = action.countSends + 1;
-        needsSave = true;
-        saveReason = 'countSends incrementado';
 
         if (action.countSends <= 10) {
-          if (this.checkResultSync(retornotexto)) {
+          const isNotOK = this.checkResultSync(retornotexto);
+          if (isNotOK) {
             action.sync = false;
 
-            if (await isToSendToRecupera(action)) {
+            const isSend = await isToSendToRecupera(action);
+            if (isSend) {
               action.retorno = 'Q';
               action.retornotexto = `Em Tentativa - ${retornotexto}`;
-              needsSave = true;
-              saveReason = 'preparando para reenvio';
 
               if (action.countSends > 1) {
                 const retorno = <string>resultSync.XML?.RETORNO;
@@ -186,12 +180,6 @@ export default class SendRecuperaJob extends Job {
                 });
               }
 
-              /*
-              const contract = await Contract.findBy(
-                'des_contr',
-                action.desContr
-              );
-              */
               const typeAction = await TypeAction.find(action.typeActionId);
 
               const item = {
@@ -221,8 +209,6 @@ export default class SendRecuperaJob extends Job {
               action.retorno = null;
               action.retornotexto =
                 'Já existe um acionamento válido de prioridade igual ou maior';
-              needsSave = true;
-              saveReason = 'acionamento não necessário';
             }
           } else {
             action.sync = true;
@@ -230,26 +216,20 @@ export default class SendRecuperaJob extends Job {
             action.syncedAt = DateTime.now();
             action.retorno = <string>resultSync.XML?.RETORNO;
             action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
-            needsSave = true;
-            saveReason = 'sincronização bem-sucedida';
           }
         }
 
         action.isOk = action.retorno === '00' ? true : false;
 
-        // Salva apenas se necessário
-        if (needsSave) {
-          console.log(`Salvando action ${action.id} devido a: ${saveReason}`);
-          await action.save();
-        }
-
-        if (action.retorno === '00') {
+        if (action.isOk) {
           const cod_credor_des_regis = `${action.codCredorDesRegis}`;
           const jsonString = JSON.stringify(
             serializeKeysSnakeCase(action.toJSON())
           );
-          redis.hset('last_actions', cod_credor_des_regis, jsonString);
+          await redis.hset('last_actions', cod_credor_des_regis, jsonString);
         }
+
+        await action.save();
       } catch (error) {
         action.sync = false;
         await action.save();
