@@ -63,7 +63,6 @@ export async function isToSendToRecupera(action: Action) {
     );
 
     if (!jsonString) {
-      console.log('Nenhum last_action encontrado');
       return true;
     }
 
@@ -127,22 +126,7 @@ export async function dispatchToRecupera(
     wallet: action.wallet,
   };
 
-  /*   const jobMapping: any = {
-      SendRecupera: SendRecuperaJob,
-      SendSmsRecupera: SendSmsRecuperaJob,
-      SendEmailRecupera: SendEmailRecuperaJob,
-    };
-
-    const job = jobMapping[queueName];
-
-    if (job) {
-      await job.dispatch(item, {
-        queueName
-      });
-    } else {
-      // Opcional: Tratamento para filas não reconhecidas
-      console.error(`Queue name "${queueName}" is not recognized.`);
-    } */
+  console.log(item);
 
   if (queueName) {
     await SendRecuperaJob.dispatch(item, {
