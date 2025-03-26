@@ -43,6 +43,7 @@ export async function handleSendingForRecupera(
   if (isSend) {
     action.retorno = 'Q';
     action.retornotexto = 'Em fila';
+    action.sync = false;
     await dispatchToRecupera(action, queueName);
   } else {
     action.retorno = null;
