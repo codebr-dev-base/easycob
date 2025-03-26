@@ -13,6 +13,11 @@ import path from 'path';
 import User from '#models/user';
 import string from '@adonisjs/core/helpers/string';
 
+export interface CsvRow {
+  cod_credor_des_regis: string;
+  contato: string;
+}
+
 export default class CampaignService {
   generateWherePaginate(q: DatabaseQueryBuilderContract<any>, qs: any) {
     const type = qs.type || 'SMS';
@@ -188,6 +193,32 @@ export default class CampaignService {
           .localeCompare(contact.cod_credor_des_regis.toLowerCase()) === 0
       );
     });
+  }
+
+  async removeFullDuplicates(rows: CsvRow[]): Promise<CsvRow[]> {
+    const uniqueRows: CsvRow[] = [];
+    const seenCodCredor = new Set<string>();
+    const seenContato = new Set<string>();
+
+    for (const row of rows) {
+      const codCredor = row.cod_credor_des_regis;
+      const contato = row.contato;
+
+      // Verifica se JÁ EXISTE cod_credor OU contato
+      if (seenCodCredor.has(codCredor) || seenContato.has(contato)) {
+        console.warn(
+          `Duplicata ignorada: cod_credor=${codCredor}, contato=${contato}`
+        );
+        continue; // Pula se já existir
+      }
+
+      // Adiciona aos registros únicos
+      seenCodCredor.add(codCredor);
+      seenContato.add(contato);
+      uniqueRows.push(row);
+    }
+
+    return uniqueRows;
   }
 
   handleInvalidContact(

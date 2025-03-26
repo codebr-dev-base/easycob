@@ -6,6 +6,7 @@ import CampaignLot from '#models/campaign_lot';
 import ErrorCampaignImport from '#models/error_campaign_import';
 import SendEmailJob from '#jobs/send_email_job';
 import SendSmsJob from '#jobs/send_sms_job';
+import contact from '#routes/recovery/contact';
 
 interface LoadCsvCampaignJobPayload {
   campaign_id: number;
@@ -39,6 +40,7 @@ export default class LoadCsvCampaignJob extends Job {
         const dateTime = new Date().getTime();
         const blockContacts = await service.getBlockedContacts();
         const contacts = await service.readCsvFile(campaign.fileName);
+        const contactsClear = await service.removeFullDuplicates(contacts);
 
         const chunksContacs = chunks(contacts, 500);
 
