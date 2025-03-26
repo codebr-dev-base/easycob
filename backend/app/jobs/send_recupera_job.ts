@@ -157,7 +157,13 @@ export default class SendRecuperaJob extends Job {
 
         const retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
 
+        // Inicializa um flag para controlar se precisamos salvar
+        let needsSave = false;
+        let saveReason = '';
+
         action.countSends = action.countSends + 1;
+        needsSave = true;
+        saveReason = 'countSends incrementado';
 
         if (action.countSends <= 10) {
           if (this.checkResultSync(retornotexto)) {
@@ -166,7 +172,8 @@ export default class SendRecuperaJob extends Job {
             if (await isToSendToRecupera(action)) {
               action.retorno = 'Q';
               action.retornotexto = `Em Tentativa - ${retornotexto}`;
-              await action.save();
+              needsSave = true;
+              saveReason = 'preparando para reenvio';
 
               if (action.countSends > 1) {
                 const retorno = <string>resultSync.XML?.RETORNO;
@@ -214,7 +221,8 @@ export default class SendRecuperaJob extends Job {
               action.retorno = null;
               action.retornotexto =
                 'Já existe um acionamento válido de prioridade igual ou maior';
-              await action.save();
+              needsSave = true;
+              saveReason = 'acionamento não necessário';
             }
           } else {
             action.sync = true;
@@ -222,12 +230,18 @@ export default class SendRecuperaJob extends Job {
             action.syncedAt = DateTime.now();
             action.retorno = <string>resultSync.XML?.RETORNO;
             action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
+            needsSave = true;
+            saveReason = 'sincronização bem-sucedida';
           }
         }
 
         action.isOk = action.retorno === '00' ? true : false;
 
-        await action.save();
+        // Salva apenas se necessário
+        if (needsSave) {
+          console.log(`Salvando action ${action.id} devido a: ${saveReason}`);
+          await action.save();
+        }
 
         if (action.retorno === '00') {
           const cod_credor_des_regis = `${action.codCredorDesRegis}`;
