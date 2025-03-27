@@ -58,18 +58,7 @@ WHERE
                 SELECT DISTINCT
                     cod_credor_des_regis,
                     MAX(id) AS max_id
-                FROM
-                    (
-                        SELECT
-                            *
-                        FROM
-                            actions
-                        UNION ALL
-                        SELECT
-                            *
-                        FROM
-                            history_actions
-                    ) AS combined_sub
+                FROM actions AS combined_sub
                 WHERE
                     retornotexto = 'RETORNO OK'
                 GROUP BY
