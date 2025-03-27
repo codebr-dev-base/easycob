@@ -6,7 +6,7 @@ import CampaignLot from '#models/campaign_lot';
 import ErrorCampaignImport from '#models/error_campaign_import';
 import SendEmailJob from '#jobs/send_email_job';
 import SendSmsJob from '#jobs/send_sms_job';
-import contact from '#routes/recovery/contact';
+//import contact from '#routes/recovery/contact';
 
 interface LoadCsvCampaignJobPayload {
   campaign_id: number;
@@ -42,9 +42,9 @@ export default class LoadCsvCampaignJob extends Job {
         const contacts = await service.readCsvFile(campaign.fileName);
         const contactsClear = await service.removeFullDuplicates(contacts);
 
-        const chunksContacs = chunks(contacts, 500);
+        const chunksContacs = chunks(contactsClear, 500);
 
-        if (contacts.length === 0) {
+        if (contactsClear.length === 0) {
           console.error('Contacts is empty');
         }
 
