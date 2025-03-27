@@ -48,18 +48,7 @@ SELECT
     synced_at,
     created_at,
     updated_at
-FROM
-    (
-        SELECT
-            *
-        FROM
-            actions
-        UNION ALL
-        SELECT
-            *
-        FROM
-            history_actions
-    ) AS combined
+FROM actions AS combined
 WHERE
     id IN (
         SELECT

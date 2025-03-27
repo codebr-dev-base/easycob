@@ -3,7 +3,7 @@ import type { CommandOptions } from '@adonisjs/core/types/ace';
 import { handleSendingForRecupera } from '#services/utils/recupera';
 import Action from '#models/action';
 import { DateTime } from 'luxon';
-import { time } from 'node:console';
+//import { time } from 'node:console';
 
 export default class ResendAction extends BaseCommand {
   static commandName = 'resend:action';
@@ -28,7 +28,6 @@ export default class ResendAction extends BaseCommand {
       action.retorno = <string>resultSync.XML?.RETORNO;
       action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
       await action.save();
-      console.log(action);
     }
 
     const actions = await Action.query()
