@@ -155,7 +155,7 @@ export default class SendRecuperaJob extends Job {
       queueName: 'ResendRecupera',
       delay,
     });
-
+    action.save();
     return;
   }
 
@@ -244,7 +244,7 @@ export default class SendRecuperaJob extends Job {
         }
 
         await this.handleResend(action);
-        await action.save();
+        //await action.save();
         return;
       } catch (error) {
         action.sync = false;
