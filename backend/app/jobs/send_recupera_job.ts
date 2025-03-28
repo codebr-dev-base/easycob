@@ -115,6 +115,50 @@ export default class SendRecuperaJob extends Job {
 
     return <SoapBody>xmlParser.toJson(soapBody, this.optionsJson);
   }
+
+  async handleResend(action: Action) {
+    action.retorno = 'Q';
+    action.retornotexto = `Em Tentativa - ${action.retornotexto}`;
+
+    if (action.countSends > 1) {
+      await HistorySendAction.create({
+        actionId: action.id,
+        userId: action.userId,
+        countSends: action.countSends,
+        retorno: action.retorno,
+        retornotexto: action.retornotexto,
+      });
+    }
+
+    const typeAction = await TypeAction.find(action.typeActionId);
+
+    const item = {
+      action_id: action.id,
+      codigo: <string>typeAction?.abbreviation,
+      credor: action.codCredor,
+      regis: action.desRegis,
+      complemento: action.description ? action.description : '',
+      fonediscado: action.contato,
+      //cocontratovincular: <string>contract?.desContr,
+      cocontratovincular: '',
+      wallet: action.wallet,
+      error: action.retornotexto,
+    };
+
+    const d = new Date();
+    let delay = 1000 * 60 * 60;
+    if (d.getHours() > 19 && d.getMinutes() > 30) {
+      delay = 1000 * 60 * 60 * 12;
+    }
+
+    await ResendRecuperaJob.dispatch(item, {
+      queueName: 'ResendRecupera',
+      delay,
+    });
+
+    return;
+  }
+
   /**
    * Base Entry point
    */
@@ -158,80 +202,50 @@ export default class SendRecuperaJob extends Job {
         action.retorno = <string>resultSync.XML?.RETORNO;
         action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
 
-        if (action.countSends <= 10) {
-          const isNotOK = this.checkResultSync(retornotexto);
-          if (isNotOK) {
-            action.sync = false;
+        if (action.countSends > 10) {
+          action.sync = false;
+          action.save();
+          return;
+        }
 
-            const isSend = await isToSendToRecupera(action);
-            if (isSend) {
-              action.retorno = 'Q';
-              action.retornotexto = `Em Tentativa - ${retornotexto}`;
+        action.countSends = action.countSends + 1;
+        const isResend = this.checkResultSync(retornotexto);
 
-              if (action.countSends > 1) {
-                const retorno = <string>resultSync.XML?.RETORNO;
-                await HistorySendAction.create({
-                  actionId: action.id,
-                  userId: action.userId,
-                  countSends: action.countSends,
-                  retorno: retorno,
-                  retornotexto: retornotexto,
-                });
-              }
-
-              const typeAction = await TypeAction.find(action.typeActionId);
-
-              const item = {
-                action_id: action.id,
-                codigo: <string>typeAction?.abbreviation,
-                credor: action.codCredor,
-                regis: action.desRegis,
-                complemento: action.description ? action.description : '',
-                fonediscado: action.contato,
-                //cocontratovincular: <string>contract?.desContr,
-                cocontratovincular: '',
-                wallet: action.wallet,
-                error: retornotexto,
-              };
-
-              const d = new Date();
-              let delay = 1000 * 60 * 60;
-              if (d.getHours() > 19 && d.getMinutes() > 30) {
-                delay = 1000 * 60 * 60 * 12;
-              }
-
-              await ResendRecuperaJob.dispatch(item, {
-                queueName: 'ResendRecupera',
-                delay,
-              });
-            } else {
-              action.retorno = null;
-              action.retornotexto =
-                'Já existe um acionamento válido de prioridade igual ou maior';
-            }
-          } else {
-            action.sync = true;
-            action.resultSync = JSON.stringify(resultSync);
-            action.syncedAt = DateTime.now();
-            action.retorno = <string>resultSync.XML?.RETORNO;
-            action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
-          }
-        } else {
-          action.countSends = action.countSends + 1;
+        if (!isResend) {
+          action.sync = true;
+          action.resultSync = JSON.stringify(resultSync);
+          action.syncedAt = DateTime.now();
           action.retorno = <string>resultSync.XML?.RETORNO;
           action.retornotexto = <string>resultSync.XML?.RETORNOTEXTO;
-          action.sync = false;
+
+          action.isOk = action.retorno === '00' ? true : false;
+          if (action.isOk) {
+            const cod_credor_des_regis = `${action.codCredorDesRegis}`;
+            const jsonString = JSON.stringify(
+              serializeKeysSnakeCase(action.toJSON())
+            );
+            await redis.hset('last_actions', cod_credor_des_regis, jsonString);
+          }
+
+          await action.save();
+          return;
         }
 
-        action.isOk = action.retorno === '00' ? true : false;
-        if (action.isOk) {
-          const cod_credor_des_regis = `${action.codCredorDesRegis}`;
-          const jsonString = JSON.stringify(
-            serializeKeysSnakeCase(action.toJSON())
-          );
-          await redis.hset('last_actions', cod_credor_des_regis, jsonString);
+        action.sync = false;
+
+        const isSendRecupera = await isToSendToRecupera(action);
+
+        if (!isSendRecupera) {
+          action.retorno = null;
+          action.retornotexto =
+            'Já existe um acionamento válido de prioridade igual ou maior';
+          await action.save();
+          return;
         }
+
+        await this.handleResend(action);
         await action.save();
+        return;
       } catch (error) {
         action.sync = false;
         await action.save();
