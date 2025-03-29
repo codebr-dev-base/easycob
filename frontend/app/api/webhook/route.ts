@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getIO } from '@/server/socket'; // Ajuste o caminho
 
 export async function GET(request: Request) {
+
+  console.log('Rota de webhook acionada');
   try {
     const io = getIO();
     io.emit('evento-da-api', { message: 'Este evento foi disparado de uma Route Handler!' });
