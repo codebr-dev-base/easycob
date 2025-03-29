@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getIO, io } from '@/server/socket'; // Ajuste o caminho
+import oi from '@/server/socket'; // Ajuste o caminho
 
 export async function GET(request: Request) {
 
