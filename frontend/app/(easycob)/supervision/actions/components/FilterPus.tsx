@@ -31,6 +31,7 @@ import { DatePicker } from "@/app/(easycob)/components/DatePicker";
 import { Input } from "@/components/ui/input";
 import { DateRange } from "react-day-picker";
 import { Checkbox } from "@/components/ui/checkbox";
+import { parseStringDateToDate } from "@/app/lib/utils";
 
 export default function FilterPus({
   query,
@@ -203,8 +204,8 @@ export default function FilterPus({
                   placeholder="Ínicio"
                   onChange={handleChangeDate}
                   defaultDate={{
-                    from: query.startDate ? new Date(query.startDate) : undefined,
-                    to: query.endDate ? new Date(query.endDate) : undefined,
+                    from: query.startDate ? parseStringDateToDate(query.startDate) : undefined,
+                    to: query.endDate ? parseStringDateToDate(query.endDate) : undefined,
                   }}
                 />
               </Label>

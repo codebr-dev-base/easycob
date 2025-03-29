@@ -37,7 +37,7 @@ export default function TabInvoices({
   refresh,
   pending,
 }: {
-  invoices: IPaginationResponse<INegotiationInvoice>;
+  invoices: IPaginationResponse<INegotiationInvoice> | null;
   query: IQueryFollowingParams;
   refresh: (newParams: Partial<IQueryFollowingParams>) => void;
   pending: boolean;
@@ -91,11 +91,7 @@ export default function TabInvoices({
           }`}
         >
           <SkeletonTable
-            rows={
-              invoices.meta && invoices.meta.perPage
-                ? invoices.meta.perPage
-                : query.perPage
-            }
+            rows={invoices ? invoices.meta.perPage : query.perPage}
           />
         </div>
 
@@ -164,49 +160,52 @@ export default function TabInvoices({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invoices.data.map((invoice) => (
-                <TableRow key={invoice.id}>
-                  <TableCell>
-                    <Switch
-                      checked={!!selectRow && selectRow.id === invoice.id}
-                      onCheckedChange={() => {
-                        handleSelectRow(invoice);
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>{selecIcon(invoice.status)}</TableCell>
-                  <TableCell>{formatDateToBR(invoice.datPrest)}</TableCell>
-                  <TableCell>{formatDateToBR(invoice.createdAt)}</TableCell>
-                  <TableCell>{invoice.desContr}</TableCell>
-                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
-                    <Tooltips message={invoice.client ? invoice.client : ""}>
-                      <p className="truncate hover:text-clip">
-                        {invoice.client}
-                      </p>
-                    </Tooltips>
-                  </TableCell>
-                  <TableCell>{formatCurrencyToBRL(invoice.valPrest)}</TableCell>
-                  <TableCell>
-                    {formatarFone(invoice.contato ? invoice.contato : "")}
-                  </TableCell>
-                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip hover:cursor-pointer">
-                    <Tooltips message={invoice.user ? invoice.user : ""}>
-                      <p className="truncate hover:text-clip">
-                        {getFirstAndLastName(`${invoice.user}`)}
-                      </p>
-                    </Tooltips>
-                  </TableCell>
-                  <TableCell className="flex">
-                    <Button asChild className="mx-1">
-                      <Link
-                        href={`/operation/clients/details/${invoice.codCredorDesRegis}`}
-                      >
-                        <FaUser />
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {invoices &&
+                invoices.data.map((invoice) => (
+                  <TableRow key={invoice.id}>
+                    <TableCell>
+                      <Switch
+                        checked={!!selectRow && selectRow.id === invoice.id}
+                        onCheckedChange={() => {
+                          handleSelectRow(invoice);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>{selecIcon(invoice.status)}</TableCell>
+                    <TableCell>{formatDateToBR(invoice.datPrest)}</TableCell>
+                    <TableCell>{formatDateToBR(invoice.createdAt)}</TableCell>
+                    <TableCell>{invoice.desContr}</TableCell>
+                    <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
+                      <Tooltips message={invoice.client ? invoice.client : ""}>
+                        <p className="truncate hover:text-clip">
+                          {invoice.client}
+                        </p>
+                      </Tooltips>
+                    </TableCell>
+                    <TableCell>
+                      {formatCurrencyToBRL(invoice.valPrest)}
+                    </TableCell>
+                    <TableCell>
+                      {formatarFone(invoice.contato ? invoice.contato : "")}
+                    </TableCell>
+                    <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip hover:cursor-pointer">
+                      <Tooltips message={invoice.user ? invoice.user : ""}>
+                        <p className="truncate hover:text-clip">
+                          {getFirstAndLastName(`${invoice.user}`)}
+                        </p>
+                      </Tooltips>
+                    </TableCell>
+                    <TableCell className="flex">
+                      <Button asChild className="mx-1">
+                        <Link
+                          href={`/operation/clients/details/${invoice.codCredorDesRegis}`}
+                        >
+                          <FaUser />
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </div>
@@ -216,7 +215,9 @@ export default function TabInvoices({
           pending ? "opacity-0 hidden" : "opacity-100"
         }`}
       >
-        <Pagination meta={invoices.meta} query={query} refresh={refresh} />
+        {invoices && (
+          <Pagination meta={invoices.meta} query={query} refresh={refresh} />
+        )}
       </CardFooter>
     </Card>
   );

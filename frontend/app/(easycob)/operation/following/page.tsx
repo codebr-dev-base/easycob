@@ -13,13 +13,6 @@ import {
 } from "../../interfaces/actions";
 import { IQueryFollowingParams } from "./interfaces/following";
 
-let initialNegotiationOfPayment: IPaginationResponse<INegotiationOfPayment> | null =
-  null;
-let initialAgreement: IPaginationResponse<IPromiseOfPayment> | null = null;
-let initialNegotiationInvoice: IPaginationResponse<INegotiationInvoice> | null =
-  null;
-let initialPromise: IPaginationResponse<IPromiseOfPayment> | null = null;
-
 const initialQuery: IQueryFollowingParams = {
   page: 1,
   perPage: 10,
@@ -31,40 +24,9 @@ const initialQuery: IQueryFollowingParams = {
 
 export default async function Followings() {
   try {
-    initialNegotiationOfPayment = await fetchNegotiations(initialQuery);
-    initialAgreement = await fetchPromises({
-      ...initialQuery,
-      typeActionIds: 1,
-    });
-
-    initialNegotiationInvoice = await fetchInvoices(initialQuery);
-    initialPromise = await fetchPromises({
-      ...initialQuery,
-      typeActionIds: 2,
-    });
-
-    if (
-      !initialNegotiationOfPayment ||
-      !initialAgreement ||
-      !initialNegotiationInvoice ||
-      !initialPromise
-    ) {
-      return (
-        <div className="w-full h-full">
-          <span>Api indisponivel</span>
-        </div>
-      );
-    }
-
     return (
       <Suspense fallback={<SkeletonFullPage />}>
-        <ContainerFollowings
-          initialNegotiationOfPayment={initialNegotiationOfPayment}
-          initialAgreement={initialAgreement}
-          initialNegotiationInvoice={initialNegotiationInvoice}
-          initialPromise={initialPromise}
-          initialQuery={initialQuery}
-        />
+        <ContainerFollowings initialQuery={initialQuery} />
       </Suspense>
     );
   } catch (error) {

@@ -8,10 +8,8 @@ import FilterPus from "./FilterPus";
 import useLoyalsService from "../service/use-loyals-service";
 
 export default function ContainerLoyal({
-  initialData,
   initialQuery,
 }: {
-  initialData: IPaginationResponse<ILoyal>;
   initialQuery: IQueryLoyalParams;
 }) {
   const {
@@ -22,7 +20,7 @@ export default function ContainerLoyal({
     queryParams,
     fetchLoyals,
     setQueryParams,
-  } = useLoyalsService({ initialData, initialQuery });
+  } = useLoyalsService({ initialQuery });
 
   const refresh = useCallback(
     (newParams: Partial<IQueryLoyalParams>) => {
@@ -32,13 +30,9 @@ export default function ContainerLoyal({
     [setQueryParams, fetchLoyals]
   );
 
-  if (!loyals || !initialData){
-    return (
-      <div className="w-full h-full">
-        <span>Api indisponivel</span>
-      </div>
-    );
-  }
+  useEffect(() => {
+    fetchLoyals();
+  }, []);
 
   return (
     <article className="max-w-full">

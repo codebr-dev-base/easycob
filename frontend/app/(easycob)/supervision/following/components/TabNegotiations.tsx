@@ -23,7 +23,7 @@ import Tooltips from "../../../components/Tooltips";
 import SkeletonTable from "@/app/(easycob)/components/SkeletonTable";
 import Link from "next/link";
 import { IQueryDiscountParams } from "../interfaces/discounts";
-import { IMeta } from "@/app/interfaces/pagination";
+import { IMeta, IPaginationResponse } from "@/app/interfaces/pagination";
 import { INegotiationOfPayment } from "@/app/(easycob)/interfaces/actions";
 import { HeaderTable } from "@/app/(easycob)/components/HeaderTable";
 import { BsCheck, BsHourglassSplit } from "react-icons/bs";
@@ -33,14 +33,12 @@ import FormNegotiationHistories from "./FormNegotiationHistories";
 
 export default function TabNegotiations({
   query,
-  meta,
-  data,
+  negotiations,
   refresh,
   pending,
 }: {
   query: IQueryDiscountParams;
-  meta?: IMeta;
-  data: INegotiationOfPayment[];
+  negotiations: IPaginationResponse<INegotiationOfPayment> | null;
   refresh: () => Promise<void>;
   pending: boolean;
 }) {
@@ -95,7 +93,7 @@ export default function TabNegotiations({
           }`}
         >
           <SkeletonTable
-            rows={meta && meta.perPage ? meta.perPage : query.perPage}
+            rows={negotiations ? negotiations.meta.perPage : query.perPage}
           />
         </div>
 
@@ -171,58 +169,65 @@ export default function TabNegotiations({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((negotiation) => (
-                <TableRow key={negotiation.id}>
-                  <TableCell>
-                    <Switch
-                      checked={!!selectRow && (selectRow.id === negotiation.id)}
-                      onCheckedChange={() => {
-                        handleSelectRow(negotiation);
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>{selecIcon(negotiation.status)}</TableCell>
-                  <TableCell>{formatDateToBR(negotiation.datEntra)}</TableCell>
-                  <TableCell>{formatDateToBR(negotiation.createdAt)}</TableCell>
-                  <TableCell>{negotiation.desContr}</TableCell>
-                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
-                    <Tooltips
-                      message={negotiation.client ? negotiation.client : ""}
-                    >
-                      <p className="truncate hover:text-clip">
-                        {negotiation.client}
-                      </p>
-                    </Tooltips>
-                  </TableCell>
-                  <TableCell>{formatCurrencyToBRL(negotiation.valOriginal)}</TableCell>
-                  <TableCell>
-                    {formatCurrencyToBRL(negotiation.valTotalPrest)}
-                  </TableCell>
-                  <TableCell>
-                    {formatarFone(
-                      negotiation.contato ? negotiation.contato : ""
-                    )}
-                  </TableCell>
-                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip hover:cursor-pointer">
-                    <Tooltips
-                      message={negotiation.user ? negotiation.user : ""}
-                    >
-                      <p className="truncate hover:text-clip">
-                        {getFirstAndLastName(`${negotiation.user}`)}
-                      </p>
-                    </Tooltips>
-                  </TableCell>
-                  <TableCell className="flex">
-                    <Button asChild className="mx-1">
-                      <Link
-                        href={`/supervision/campaigns/lots/${negotiation.id}`}
+              {negotiations &&
+                negotiations.data.map((negotiation) => (
+                  <TableRow key={negotiation.id}>
+                    <TableCell>
+                      <Switch
+                        checked={!!selectRow && selectRow.id === negotiation.id}
+                        onCheckedChange={() => {
+                          handleSelectRow(negotiation);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>{selecIcon(negotiation.status)}</TableCell>
+                    <TableCell>
+                      {formatDateToBR(negotiation.datEntra)}
+                    </TableCell>
+                    <TableCell>
+                      {formatDateToBR(negotiation.createdAt)}
+                    </TableCell>
+                    <TableCell>{negotiation.desContr}</TableCell>
+                    <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
+                      <Tooltips
+                        message={negotiation.client ? negotiation.client : ""}
                       >
-                        <FaRegEye />
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                        <p className="truncate hover:text-clip">
+                          {negotiation.client}
+                        </p>
+                      </Tooltips>
+                    </TableCell>
+                    <TableCell>
+                      {formatCurrencyToBRL(negotiation.valOriginal)}
+                    </TableCell>
+                    <TableCell>
+                      {formatCurrencyToBRL(negotiation.valTotalPrest)}
+                    </TableCell>
+                    <TableCell>
+                      {formatarFone(
+                        negotiation.contato ? negotiation.contato : ""
+                      )}
+                    </TableCell>
+                    <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip hover:cursor-pointer">
+                      <Tooltips
+                        message={negotiation.user ? negotiation.user : ""}
+                      >
+                        <p className="truncate hover:text-clip">
+                          {getFirstAndLastName(`${negotiation.user}`)}
+                        </p>
+                      </Tooltips>
+                    </TableCell>
+                    <TableCell className="flex">
+                      <Button asChild className="mx-1">
+                        <Link
+                          href={`/supervision/campaigns/lots/${negotiation.id}`}
+                        >
+                          <FaRegEye />
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </div>
@@ -232,7 +237,13 @@ export default function TabNegotiations({
           pending ? "opacity-0 hidden" : "opacity-100"
         }`}
       >
-        <Pagination meta={meta} query={query} refresh={refresh} />
+        {negotiations && (
+          <Pagination
+            meta={negotiations.meta}
+            query={query}
+            refresh={refresh}
+          />
+        )}
       </CardFooter>
     </Card>
   );

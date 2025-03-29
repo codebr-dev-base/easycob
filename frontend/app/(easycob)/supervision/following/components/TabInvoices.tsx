@@ -23,7 +23,7 @@ import Tooltips from "../../../components/Tooltips";
 import SkeletonTable from "@/app/(easycob)/components/SkeletonTable";
 import Link from "next/link";
 import { IQueryDiscountParams } from "../interfaces/discounts";
-import { IMeta } from "@/app/interfaces/pagination";
+import { IMeta, IPaginationResponse } from "@/app/interfaces/pagination";
 import { INegotiationInvoice } from "../../../interfaces/actions";
 import { BsCheck, BsHourglassSplit } from "react-icons/bs";
 import { HeaderTable } from "@/app/(easycob)/components/HeaderTable";
@@ -33,14 +33,12 @@ import FormInvoiceHistories from "./FormInvoiceHistories";
 
 export default function TabInvoices({
   query,
-  meta,
-  data,
+  invoices,
   refresh,
   pending,
 }: {
   query: IQueryDiscountParams;
-  meta?: IMeta;
-  data: INegotiationInvoice[];
+  invoices: IPaginationResponse<INegotiationInvoice> | null;
   refresh: () => Promise<void>;
   pending: boolean;
 }) {
@@ -93,7 +91,7 @@ export default function TabInvoices({
           }`}
         >
           <SkeletonTable
-            rows={meta && meta.perPage ? meta.perPage : query.perPage}
+            rows={invoices ? invoices.meta.perPage : query.perPage}
           />
         </div>
 
@@ -162,47 +160,52 @@ export default function TabInvoices({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((invoice) => (
-                <TableRow key={invoice.id}>
-                  <TableCell>
-                    <Switch
-                      checked={!!selectRow && selectRow.id === invoice.id}
-                      onCheckedChange={() => {
-                        handleSelectRow(invoice);
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>{selecIcon(invoice.status)}</TableCell>
-                  <TableCell>{formatDateToBR(invoice.datPrest)}</TableCell>
-                  <TableCell>{formatDateToBR(invoice.createdAt)}</TableCell>
-                  <TableCell>{invoice.desContr}</TableCell>
-                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
-                    <Tooltips message={invoice.client ? invoice.client : ""}>
-                      <p className="truncate hover:text-clip">
-                        {invoice.client}
-                      </p>
-                    </Tooltips>
-                  </TableCell>
-                  <TableCell>{formatCurrencyToBRL(invoice.valPrest)}</TableCell>
-                  <TableCell>
-                    {formatarFone(invoice.contato ? invoice.contato : "")}
-                  </TableCell>
-                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip hover:cursor-pointer">
-                    <Tooltips message={invoice.user ? invoice.user : ""}>
-                      <p className="truncate hover:text-clip">
-                        {getFirstAndLastName(`${invoice.user}`)}
-                      </p>
-                    </Tooltips>
-                  </TableCell>
-                  <TableCell className="flex">
-                    <Button asChild className="mx-1">
-                      <Link href={`/supervision/campaigns/lots/${invoice.id}`}>
-                        <FaRegEye />
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {invoices &&
+                invoices.data.map((invoice) => (
+                  <TableRow key={invoice.id}>
+                    <TableCell>
+                      <Switch
+                        checked={!!selectRow && selectRow.id === invoice.id}
+                        onCheckedChange={() => {
+                          handleSelectRow(invoice);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>{selecIcon(invoice.status)}</TableCell>
+                    <TableCell>{formatDateToBR(invoice.datPrest)}</TableCell>
+                    <TableCell>{formatDateToBR(invoice.createdAt)}</TableCell>
+                    <TableCell>{invoice.desContr}</TableCell>
+                    <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
+                      <Tooltips message={invoice.client ? invoice.client : ""}>
+                        <p className="truncate hover:text-clip">
+                          {invoice.client}
+                        </p>
+                      </Tooltips>
+                    </TableCell>
+                    <TableCell>
+                      {formatCurrencyToBRL(invoice.valPrest)}
+                    </TableCell>
+                    <TableCell>
+                      {formatarFone(invoice.contato ? invoice.contato : "")}
+                    </TableCell>
+                    <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip hover:cursor-pointer">
+                      <Tooltips message={invoice.user ? invoice.user : ""}>
+                        <p className="truncate hover:text-clip">
+                          {getFirstAndLastName(`${invoice.user}`)}
+                        </p>
+                      </Tooltips>
+                    </TableCell>
+                    <TableCell className="flex">
+                      <Button asChild className="mx-1">
+                        <Link
+                          href={`/supervision/campaigns/lots/${invoice.id}`}
+                        >
+                          <FaRegEye />
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </div>
@@ -212,7 +215,7 @@ export default function TabInvoices({
           pending ? "opacity-0 hidden" : "opacity-100"
         }`}
       >
-        <Pagination meta={meta} query={query} refresh={refresh} />
+        {invoices && <Pagination meta={invoices.meta} query={query} refresh={refresh} />}
       </CardFooter>
     </Card>
   );

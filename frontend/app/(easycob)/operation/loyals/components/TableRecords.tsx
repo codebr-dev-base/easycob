@@ -27,7 +27,6 @@ import {
   Dispatch,
   Fragment,
   SetStateAction,
-  use,
   useEffect,
   useState,
 } from "react";
@@ -172,7 +171,7 @@ export default function TableRecords({
   pending,
   setLoyals,
 }: {
-  loyals: IPaginationResponse<ILoyal>;
+  loyals: IPaginationResponse<ILoyal> | null;
   query: IQueryPaginationParams;
   refresh: (newParams: Partial<IQueryLoyalParams>) => void;
   pending: boolean;
@@ -241,11 +240,7 @@ export default function TableRecords({
             }`}
           >
             <SkeletonTable
-              rows={
-                loyals.meta && loyals.meta.perPage
-                  ? loyals.meta.perPage
-                  : query.perPage
-              }
+              rows={loyals ? loyals.meta.perPage : query.perPage}
             />
           </div>
         ) : (
@@ -321,98 +316,101 @@ export default function TableRecords({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {loyals.data.map((loyal) => (
-                  <Fragment key={loyal.id}>
-                    <TableRow className={setColorRow(loyal)}>
-                      <TableCell
-                        onClick={() => {
-                          handleSelectLoyal(loyal);
-                        }}
-                        className={`hover:cursor-pointer ${
-                          !loyal.tagColor
-                            ? "bg-slate-100"
-                            : "text-primary-foreground"
-                        } }`}
-                        style={
-                          loyal.tagColor
-                            ? { backgroundColor: loyal.tagColor }
-                            : undefined
-                        }
-                      >
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              {selectLoyal && selectLoyal.id === loyal.id ? (
-                                <FaCaretUp />
-                              ) : (
-                                <FaCaretDown />
-                              )}
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>{loyal.tagName ? loyal.tagName : "Sem tag"}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableCell>
-                      <TableCell>
-                        <FormTag client={loyal} set={setLoyals} tags={tags} />
-                      </TableCell>
-                      <TableCell>
-                        {formatDateToBR(`${loyal.lastAction}`)}
-                      </TableCell>
-                      <TableCell className="max-w-2  md:max-w-28 lg:max-w-36">
-                        <Tooltips
-                          message={
-                            loyal.lastActionName ? loyal.lastActionName : ""
+                {loyals &&
+                  loyals.data.map((loyal) => (
+                    <Fragment key={loyal.id}>
+                      <TableRow className={setColorRow(loyal)}>
+                        <TableCell
+                          onClick={() => {
+                            handleSelectLoyal(loyal);
+                          }}
+                          className={`hover:cursor-pointer ${
+                            !loyal.tagColor
+                              ? "bg-slate-100"
+                              : "text-primary-foreground"
+                          } }`}
+                          style={
+                            loyal.tagColor
+                              ? { backgroundColor: loyal.tagColor }
+                              : undefined
                           }
                         >
-                          <p className="truncate hover:text-clip">
-                            {loyal.lastActionName}
-                          </p>
-                        </Tooltips>
-                      </TableCell>
-                      <TableCell>{loyal.unidade}</TableCell>
-                      <TableCell className="max-w-28 md:max-w-36 lg:max-w-48">
-                        <Tooltips
-                          message={loyal.nomClien ? loyal.nomClien : ""}
-                        >
-                          <p className="truncate hover:text-clip">
-                            {loyal.nomClien}
-                          </p>
-                        </Tooltips>
-                      </TableCell>
-                      <TableCell>
-                        {loyal.phones && Array.isArray(loyal.phones) && (
-                          <ContainerContactFone contacts={loyal.phones} />
-                        )}
-                      </TableCell>
-                      <TableCell>{loyal.desContr}</TableCell>
-                      <TableCell>{loyal.faixaTempo}</TableCell>
-                      <TableCell>{loyal.faixaValor}</TableCell>
-                      <TableCell>{loyal.faixaTitulos}</TableCell>
-                      <TableCell>
-                        <Button asChild className="mx-1">
-                          <Link
-                            href={`/operation/clients/details/${loyal.codCredorDesRegis}`}
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                {selectLoyal && selectLoyal.id === loyal.id ? (
+                                  <FaCaretUp />
+                                ) : (
+                                  <FaCaretDown />
+                                )}
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>
+                                  {loyal.tagName ? loyal.tagName : "Sem tag"}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </TableCell>
+                        <TableCell>
+                          <FormTag client={loyal} set={setLoyals} tags={tags} />
+                        </TableCell>
+                        <TableCell>
+                          {formatDateToBR(`${loyal.lastAction}`)}
+                        </TableCell>
+                        <TableCell className="max-w-2  md:max-w-28 lg:max-w-36">
+                          <Tooltips
+                            message={
+                              loyal.lastActionName ? loyal.lastActionName : ""
+                            }
                           >
-                            <FaUser />
-                          </Link>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow
-                      className={
-                        !!selectLoyal && selectLoyal.id === loyal.id
-                          ? ""
-                          : "hidden"
-                      }
-                    >
-                      <TableCell colSpan={12}>
-                        <TableDetails loyal={loyal} />
-                      </TableCell>
-                    </TableRow>
-                  </Fragment>
-                ))}
+                            <p className="truncate hover:text-clip">
+                              {loyal.lastActionName}
+                            </p>
+                          </Tooltips>
+                        </TableCell>
+                        <TableCell>{loyal.unidade}</TableCell>
+                        <TableCell className="max-w-28 md:max-w-36 lg:max-w-48">
+                          <Tooltips
+                            message={loyal.nomClien ? loyal.nomClien : ""}
+                          >
+                            <p className="truncate hover:text-clip">
+                              {loyal.nomClien}
+                            </p>
+                          </Tooltips>
+                        </TableCell>
+                        <TableCell>
+                          {loyal.phones && Array.isArray(loyal.phones) && (
+                            <ContainerContactFone contacts={loyal.phones} />
+                          )}
+                        </TableCell>
+                        <TableCell>{loyal.desContr}</TableCell>
+                        <TableCell>{loyal.faixaTempo}</TableCell>
+                        <TableCell>{loyal.faixaValor}</TableCell>
+                        <TableCell>{loyal.faixaTitulos}</TableCell>
+                        <TableCell>
+                          <Button asChild className="mx-1">
+                            <Link
+                              href={`/operation/clients/details/${loyal.codCredorDesRegis}`}
+                            >
+                              <FaUser />
+                            </Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow
+                        className={
+                          !!selectLoyal && selectLoyal.id === loyal.id
+                            ? ""
+                            : "hidden"
+                        }
+                      >
+                        <TableCell colSpan={12}>
+                          <TableDetails loyal={loyal} />
+                        </TableCell>
+                      </TableRow>
+                    </Fragment>
+                  ))}
               </TableBody>
             </Table>
           </div>
@@ -423,7 +421,9 @@ export default function TableRecords({
           pending ? "opacity-0 hidden" : "opacity-100"
         }`}
       >
-        <Pagination meta={loyals.meta} query={query} refresh={refresh} />
+        {loyals && (
+          <Pagination meta={loyals.meta} query={query} refresh={refresh} />
+        )}
       </CardFooter>
     </Card>
   );

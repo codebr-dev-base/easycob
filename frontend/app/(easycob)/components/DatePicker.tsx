@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
@@ -14,6 +14,8 @@ import {
 import { ptBR } from "date-fns/locale";
 import { formatDateToBR } from "@/app/lib/utils";
 import { ActiveModifiers, DateRange } from "react-day-picker";
+import { on } from "events";
+import { check } from "../operation/loyals/service/loyals";
 
 export function DatePicker({
   placeholder,
@@ -25,27 +27,26 @@ export function DatePicker({
   defaultDate?: DateRange | undefined;
 }) {
   const [date, setDate] = useState<DateRange | undefined>(undefined);
+  const prevDate = useRef<DateRange>({ from: undefined, to: undefined });
 
   useEffect(() => {
     if (defaultDate) {
+      prevDate.current = { from: defaultDate.from, to: defaultDate.to };
       setDate(defaultDate);
     }
-  }, [defaultDate]);
+  }, []);
 
-  const handlerSelectRangeDate = (
-    range: DateRange | undefined,
-    selectedDay: Date,
-    activeModifiers: ActiveModifiers,
-    e: React.MouseEvent
-  ) => {
-    if (range) {
-      setDate(range);
-
-      if (range.from && range.to) {
-        onChange(range);
+  useEffect(() => {
+    if (date && date.from && date.to) {
+      if (
+        prevDate.current.from !== date.from ||
+        prevDate.current.to !== date.to
+      ) {
+        prevDate.current = { from: date.from, to: date.to };
+        onChange(date);
       }
     }
-  };
+  }, [date]);
 
   return (
     <Popover>
@@ -68,10 +69,10 @@ export function DatePicker({
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <Calendar
+          initialFocus
           mode="range"
           selected={date}
-          onSelect={handlerSelectRangeDate}
-          initialFocus
+          onSelect={setDate}
           locale={ptBR}
         />
       </PopoverContent>

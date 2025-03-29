@@ -1,7 +1,7 @@
 "use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "../../../components/Header";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { IMeta, IPaginationResponse } from "@/app/interfaces/pagination";
 import "@/app/assets/css/tabs.css";
 import {
@@ -20,16 +20,8 @@ import useActionsService from "@/app/(easycob)/supervision/actions/service/use-a
 import { IQueryActionParams } from "@/app/(easycob)/supervision/actions/interfaces/action";
 
 export default function ContainerFollowings({
-  initialNegotiationOfPayment,
-  initialAgreement,
-  initialNegotiationInvoice,
-  initialPromise,
   initialQuery,
 }: {
-  initialNegotiationOfPayment: IPaginationResponse<INegotiationOfPayment>;
-  initialAgreement: IPaginationResponse<IPromiseOfPayment>;
-  initialNegotiationInvoice: IPaginationResponse<INegotiationInvoice>;
-  initialPromise: IPaginationResponse<IPromiseOfPayment>;
   initialQuery: IQueryFollowingParams;
 }) {
   const {
@@ -46,10 +38,6 @@ export default function ContainerFollowings({
     fetchInvoices,
     fetchPromises,
   } = useFollowingService({
-    initialNegotiationOfPayment: initialNegotiationOfPayment,
-    initialAgreement: initialAgreement,
-    initialNegotiationInvoice: initialNegotiationInvoice,
-    initialPromise: initialPromise,
     initialQuery: initialQuery,
   });
 
@@ -60,7 +48,7 @@ export default function ContainerFollowings({
 
     switch (value) {
       case "negotiations":
-        //refreshNegotiations();
+        fetchNegotiations();
         break;
       case "agreements":
         setQueryParams({ typeActionIds: 1 });
@@ -71,7 +59,7 @@ export default function ContainerFollowings({
         fetchPromises();
         break;
       default:
-        //refreshInvoices();
+        fetchInvoices();
         break;
     }
   };
@@ -87,13 +75,9 @@ export default function ContainerFollowings({
     [setQueryParams, fetchNegotiations, fetchPromises, fetchInvoices]
   );
 
-  if (!negotiations || !agreements || !invoices! || !promises) {
-    return (
-      <div className="w-full h-full">
-        <span>Api indisponivel</span>
-      </div>
-    );
-  }
+  useEffect(() => {
+    fetchNegotiations();
+  }, []);
 
   return (
     <article>

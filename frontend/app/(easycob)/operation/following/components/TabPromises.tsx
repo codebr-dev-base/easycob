@@ -37,7 +37,7 @@ export default function TabPromises({
   refresh,
   pending,
 }: {
-  promises: IPaginationResponse<IPromiseOfPayment>;
+  promises: IPaginationResponse<IPromiseOfPayment> | null;
   query: IQueryFollowingParams;
   refresh: (newParams: Partial<IQueryFollowingParams>) => void;
   pending: boolean;
@@ -91,11 +91,7 @@ export default function TabPromises({
           }`}
         >
           <SkeletonTable
-            rows={
-              promises.meta && promises.meta.perPage
-                ? promises.meta.perPage
-                : query.perPage
-            }
+            rows={promises ? promises.meta.perPage : query.perPage}
           />
         </div>
 
@@ -171,60 +167,61 @@ export default function TabPromises({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {promises.data.map((promese) => (
-                <TableRow key={promese.id}>
-                  <TableCell>
-                    <Switch
-                      checked={!!selectRow && selectRow.id === promese.id}
-                      onCheckedChange={() => {
-                        handleSelectRow(promese);
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>{selecIcon(promese.status)}</TableCell>
-                  <TableCell>
-                    {promese.datPrev ? formatDateToBR(promese.datPrev) : ""}
-                  </TableCell>
-                  <TableCell>{formatDateToBR(promese.createdAt)}</TableCell>
-                  <TableCell>{promese.desContr}</TableCell>
-                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
-                    <Tooltips message={promese.client ? promese.client : ""}>
-                      <p className="truncate hover:text-clip">
-                        {promese.client}
-                      </p>
-                    </Tooltips>
-                  </TableCell>
-                  <TableCell>
-                    {promese.valPrest
-                      ? formatCurrencyToBRL(promese.valPrest)
-                      : ""}
-                  </TableCell>
-                  <TableCell>
-                    {promese.valOriginal
-                      ? formatCurrencyToBRL(promese.valOriginal)
-                      : ""}
-                  </TableCell>
-                  <TableCell>
-                    {formatarFone(promese.contato ? promese.contato : "")}
-                  </TableCell>
-                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip hover:cursor-pointer">
-                    <Tooltips message={promese.user ? promese.user : ""}>
-                      <p className="truncate hover:text-clip">
-                        {getFirstAndLastName(`${promese.user}`)}
-                      </p>
-                    </Tooltips>
-                  </TableCell>
-                  <TableCell className="flex">
-                    <Button asChild className="mx-1">
-                      <Link
-                        href={`/operation/clients/details/${promese.codCredorDesRegis}`}
-                      >
-                        <FaUser />
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {promises &&
+                promises.data.map((promese) => (
+                  <TableRow key={promese.id}>
+                    <TableCell>
+                      <Switch
+                        checked={!!selectRow && selectRow.id === promese.id}
+                        onCheckedChange={() => {
+                          handleSelectRow(promese);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>{selecIcon(promese.status)}</TableCell>
+                    <TableCell>
+                      {promese.datPrev ? formatDateToBR(promese.datPrev) : ""}
+                    </TableCell>
+                    <TableCell>{formatDateToBR(promese.createdAt)}</TableCell>
+                    <TableCell>{promese.desContr}</TableCell>
+                    <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
+                      <Tooltips message={promese.client ? promese.client : ""}>
+                        <p className="truncate hover:text-clip">
+                          {promese.client}
+                        </p>
+                      </Tooltips>
+                    </TableCell>
+                    <TableCell>
+                      {promese.valPrest
+                        ? formatCurrencyToBRL(promese.valPrest)
+                        : ""}
+                    </TableCell>
+                    <TableCell>
+                      {promese.valOriginal
+                        ? formatCurrencyToBRL(promese.valOriginal)
+                        : ""}
+                    </TableCell>
+                    <TableCell>
+                      {formatarFone(promese.contato ? promese.contato : "")}
+                    </TableCell>
+                    <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip hover:cursor-pointer">
+                      <Tooltips message={promese.user ? promese.user : ""}>
+                        <p className="truncate hover:text-clip">
+                          {getFirstAndLastName(`${promese.user}`)}
+                        </p>
+                      </Tooltips>
+                    </TableCell>
+                    <TableCell className="flex">
+                      <Button asChild className="mx-1">
+                        <Link
+                          href={`/operation/clients/details/${promese.codCredorDesRegis}`}
+                        >
+                          <FaUser />
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </div>
@@ -234,7 +231,9 @@ export default function TabPromises({
           pending ? "opacity-0 hidden" : "opacity-100"
         }`}
       >
-        <Pagination meta={promises.meta} query={query} refresh={refresh} />
+        {promises && (
+          <Pagination meta={promises.meta} query={query} refresh={refresh} />
+        )}
       </CardFooter>
     </Card>
   );

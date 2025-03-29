@@ -7,7 +7,6 @@ import { IQueryLoyalParams } from "./interfaces/loyal";
 import { ILoyal } from "./interfaces/loyal";
 import { IPaginationResponse } from "@/app/interfaces/pagination";
 
-let loyals: IPaginationResponse<ILoyal> | null = null;
 const initialQuery: IQueryLoyalParams = {
   page: 1,
   perPage: 10,
@@ -18,19 +17,10 @@ const initialQuery: IQueryLoyalParams = {
 
 export default async function Loyals() {
   try {
-    loyals = await fetchLoyals(initialQuery);
-
-    if (!loyals) {
-      return (
-        <div className="w-full h-full">
-          <span>Api indisponivel</span>
-        </div>
-      );
-    }
 
     return (
       <Suspense fallback={<SkeletonFullPage />}>
-        <ContainerLoyal initialData={loyals} initialQuery={initialQuery} />
+        <ContainerLoyal initialQuery={initialQuery} />
       </Suspense>
     );
   } catch (error) {

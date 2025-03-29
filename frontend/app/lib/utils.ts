@@ -417,3 +417,7 @@ export function isDateDisabled(date: string | Date, limit: number = 7): boolean 
   return !validDates.has(formattedDate);
 }
 
+export function parseStringDateToDate(dateString: string): Date {
+  const parts = dateString.split('-');
+  return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])); // Ano, Mês (0-based), Dia
+}

@@ -23,7 +23,7 @@ import Tooltips from "../../../components/Tooltips";
 import SkeletonTable from "@/app/(easycob)/components/SkeletonTable";
 import Link from "next/link";
 import { IQueryDiscountParams } from "../interfaces/discounts";
-import { IMeta } from "@/app/interfaces/pagination";
+import { IMeta, IPaginationResponse } from "@/app/interfaces/pagination";
 import { IPromiseOfPayment } from "@/app/(easycob)/interfaces/actions";
 import { BsCheck, BsHourglassSplit } from "react-icons/bs";
 import { HeaderTable } from "@/app/(easycob)/components/HeaderTable";
@@ -33,14 +33,12 @@ import { Switch } from "@/components/ui/switch";
 
 export default function TabPromises({
   query,
-  meta,
-  data,
+  promises,
   refresh,
   pending,
 }: {
   query: IQueryDiscountParams;
-  meta?: IMeta;
-  data: IPromiseOfPayment[];
+  promises: IPaginationResponse<IPromiseOfPayment> | null;
   refresh: () => Promise<void>;
   pending: boolean;
 }) {
@@ -93,7 +91,7 @@ export default function TabPromises({
           }`}
         >
           <SkeletonTable
-            rows={meta && meta.perPage ? meta.perPage : query.perPage}
+            rows={promises ? promises.meta.perPage : query.perPage}
           />
         </div>
 
@@ -169,56 +167,61 @@ export default function TabPromises({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((promese) => (
-                <TableRow key={promese.id}>
-                  <TableCell>
-                    <Switch
-                      checked={!!selectRow && selectRow.id === promese.id}
-                      onCheckedChange={() => {
-                        handleSelectRow(promese);
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>{selecIcon(promese.status)}</TableCell>
-                  <TableCell>
-                    {promese.datPrev ? formatDateToBR(promese.datPrev) : ""}
-                  </TableCell>
-                  <TableCell>{formatDateToBR(promese.createdAt)}</TableCell>
-                  <TableCell>{promese.desContr}</TableCell>
-                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
-                    <Tooltips message={promese.client ? promese.client : ""}>
-                      <p className="truncate hover:text-clip">
-                        {promese.client}
-                      </p>
-                    </Tooltips>
-                  </TableCell>
-                  <TableCell>
-                    {promese.valPrest ? formatCurrencyToBRL(promese.valPrest) : ""}
-                  </TableCell>
-                  <TableCell>
-                    {promese.valOriginal
-                      ? formatCurrencyToBRL(promese.valOriginal)
-                      : ""}
-                  </TableCell>
-                  <TableCell>
-                    {formatarFone(promese.contato ? promese.contato : "")}
-                  </TableCell>
-                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip hover:cursor-pointer">
-                    <Tooltips message={promese.user ? promese.user : ""}>
-                      <p className="truncate hover:text-clip">
-                        {getFirstAndLastName(`${promese.user}`)}
-                      </p>
-                    </Tooltips>
-                  </TableCell>
-                  <TableCell className="flex">
-                    <Button asChild className="mx-1">
-                      <Link href={`/supervision/campaigns/lots/${promese.id}`}>
-                        <FaRegEye />
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {promises &&
+                promises.data.map((promese) => (
+                  <TableRow key={promese.id}>
+                    <TableCell>
+                      <Switch
+                        checked={!!selectRow && selectRow.id === promese.id}
+                        onCheckedChange={() => {
+                          handleSelectRow(promese);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>{selecIcon(promese.status)}</TableCell>
+                    <TableCell>
+                      {promese.datPrev ? formatDateToBR(promese.datPrev) : ""}
+                    </TableCell>
+                    <TableCell>{formatDateToBR(promese.createdAt)}</TableCell>
+                    <TableCell>{promese.desContr}</TableCell>
+                    <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
+                      <Tooltips message={promese.client ? promese.client : ""}>
+                        <p className="truncate hover:text-clip">
+                          {promese.client}
+                        </p>
+                      </Tooltips>
+                    </TableCell>
+                    <TableCell>
+                      {promese.valPrest
+                        ? formatCurrencyToBRL(promese.valPrest)
+                        : ""}
+                    </TableCell>
+                    <TableCell>
+                      {promese.valOriginal
+                        ? formatCurrencyToBRL(promese.valOriginal)
+                        : ""}
+                    </TableCell>
+                    <TableCell>
+                      {formatarFone(promese.contato ? promese.contato : "")}
+                    </TableCell>
+                    <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip hover:cursor-pointer">
+                      <Tooltips message={promese.user ? promese.user : ""}>
+                        <p className="truncate hover:text-clip">
+                          {getFirstAndLastName(`${promese.user}`)}
+                        </p>
+                      </Tooltips>
+                    </TableCell>
+                    <TableCell className="flex">
+                      <Button asChild className="mx-1">
+                        <Link
+                          href={`/supervision/campaigns/lots/${promese.id}`}
+                        >
+                          <FaRegEye />
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </div>
@@ -228,7 +231,7 @@ export default function TabPromises({
           pending ? "opacity-0 hidden" : "opacity-100"
         }`}
       >
-        <Pagination meta={meta} query={query} refresh={refresh} />
+        {promises && <Pagination meta={promises.meta} query={query} refresh={refresh} />}
       </CardFooter>
     </Card>
   );

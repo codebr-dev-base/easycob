@@ -1,8 +1,8 @@
 "use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "../../../components/Header";
-import { useRef, useState } from "react";
-import { IMeta } from "@/app/interfaces/pagination";
+import { use, useEffect, useRef, useState } from "react";
+import { IMeta, IPaginationResponse } from "@/app/interfaces/pagination";
 import "@/app/assets/css/tabs.css";
 import {
   INegotiationInvoice,
@@ -16,30 +16,10 @@ import FilterPus from "./FilterPus";
 import { fetchInvoices, queryInvoices } from "../service/invoices";
 import { fetchPromises, queryPromises } from "../service/promises";
 import { fetchNegotiations, queryNegotiations } from "../service/negotiations";
-export default function ContainerFlowings({
-  negotiations,
-  promises,
-  invoices,
-}: {
-  negotiations: {
-    meta: IMeta;
-    data: INegotiationOfPayment[];
-  };
-  promises: {
-    meta: IMeta;
-    data: IPromiseOfPayment[];
-  };
-  invoices: {
-    meta: IMeta;
-    data: INegotiationInvoice[];
-  };
-}) {
-  const negotiationsMeta = useRef<IMeta>(negotiations.meta);
-  const negotiationsData = useRef<INegotiationOfPayment[]>(negotiations.data);
-  const promisesMeta = useRef<IMeta>(promises.meta);
-  const promisesData = useRef<IPromiseOfPayment[]>(promises.data);
-  const invoicesMeta = useRef<IMeta>(invoices.meta);
-  const invoicesData = useRef<INegotiationInvoice[]>(invoices.data);
+export default function ContainerFlowings() {
+  const negotiations = useRef<IPaginationResponse<INegotiationOfPayment> | null>(null);
+  const promises = useRef<IPaginationResponse<IPromiseOfPayment> | null>(null);
+  const invoices = useRef<IPaginationResponse<INegotiationInvoice> | null>(null);
 
   const [pending, setPending] = useState<boolean>(false);
   const [type, setType] = useState<string>("negotiations");
@@ -47,26 +27,21 @@ export default function ContainerFlowings({
   const refreshNegotiations = async () => {
     setPending(true);
     const n = await fetchNegotiations();
-    negotiationsMeta.current = n.meta;
-    negotiationsData.current = n.data;
-
+    negotiations.current = n;
     setPending(false);
   };
 
   const refreshPromises = async () => {
     setPending(true);
     const p = await fetchPromises();
-    promisesMeta.current = p.meta;
-    promisesData.current = p.data;
-
+    promises.current = p;
     setPending(false);
   };
 
   const refreshInvoices = async () => {
     setPending(true);
     const i = await fetchInvoices();
-    invoicesMeta.current = i.meta;
-    invoicesData.current = i.data;
+    invoices.current = i;
     setPending(false);
   };
 
@@ -85,6 +60,12 @@ export default function ContainerFlowings({
         break;
     }
   };
+
+  useEffect(() => {
+    refreshNegotiations();
+    //refreshPromises();
+    //refreshInvoices();
+  }, []);
 
   return (
     <article>
@@ -124,8 +105,7 @@ export default function ContainerFlowings({
           <TabsContent value="negotiations">
             <TabNegotiations
               query={queryNegotiations}
-              meta={negotiationsMeta.current}
-              data={negotiationsData.current}
+              negotiations={negotiations.current}
               refresh={refreshNegotiations}
               pending={pending}
             />
@@ -133,8 +113,7 @@ export default function ContainerFlowings({
           <TabsContent value="promises">
             <TabPromises
               query={queryPromises}
-              meta={promisesMeta.current}
-              data={promisesData.current}
+              promises={promises.current}
               refresh={refreshPromises}
               pending={pending}
             />
@@ -142,8 +121,7 @@ export default function ContainerFlowings({
           <TabsContent value="invoices">
             <TabInvoices
               query={queryInvoices}
-              meta={invoicesMeta.current}
-              data={invoicesData.current}
+              invoices={invoices.current}
               refresh={refreshInvoices}
               pending={pending}
             />

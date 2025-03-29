@@ -1,12 +1,4 @@
 import { redirect } from "next/navigation";
-import {
-  fetchActions,
-  fetchChartType,
-  fetchChartUser,
-  fetchChartUserAndType,
-  fetchChartUserAndCpc,
-  fetchChartUserAndChannel,
-} from "./service/actions";
 import ContainerAction from "./components/ContainerAction";
 import { Suspense } from "react";
 import SkeletonFullPage from "../../components/SkeletonFullPage";

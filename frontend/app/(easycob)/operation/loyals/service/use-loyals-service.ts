@@ -18,16 +18,14 @@ const urn = "/v1/recovery/loyal";
 const baseUrl = `${apiUrl}${urn}`;
 
 const useLoyalsService = ({
-  initialData,
   initialQuery,
 }: {
-  initialData: IPaginationResponse<ILoyal>;
   initialQuery: IQueryLoyalParams;
 }) => {
   const { queryParams, setQueryParams } = useQueryParams(initialQuery);
 
   const [loyals, setLoyals] = useState<IPaginationResponse<ILoyal> | null>(
-    initialData
+    null
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

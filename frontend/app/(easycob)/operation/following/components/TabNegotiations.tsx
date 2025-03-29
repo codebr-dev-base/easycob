@@ -36,7 +36,7 @@ export default function TabNegotiations({
   refresh,
   pending,
 }: {
-  negotiations: IPaginationResponse<INegotiationOfPayment>;
+  negotiations: IPaginationResponse<INegotiationOfPayment> | null;
   query: IQueryFollowingParams;
   refresh: (newParams: Partial<IQueryFollowingParams>) => void;
   pending: boolean;
@@ -92,11 +92,7 @@ export default function TabNegotiations({
           }`}
         >
           <SkeletonTable
-            rows={
-              negotiations.meta && negotiations.meta.perPage
-                ? negotiations.meta.perPage
-                : query.perPage
-            }
+            rows={negotiations ? negotiations.meta.perPage : query.perPage}
           />
         </div>
 
@@ -172,60 +168,65 @@ export default function TabNegotiations({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {negotiations.data.map((negotiation) => (
-                <TableRow key={negotiation.id}>
-                  <TableCell>
-                    <Switch
-                      checked={!!selectRow && selectRow.id === negotiation.id}
-                      onCheckedChange={() => {
-                        handleSelectRow(negotiation);
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>{selecIcon(negotiation.status)}</TableCell>
-                  <TableCell>{formatDateToBR(negotiation.datEntra)}</TableCell>
-                  <TableCell>{formatDateToBR(negotiation.createdAt)}</TableCell>
-                  <TableCell>{negotiation.desContr}</TableCell>
-                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
-                    <Tooltips
-                      message={negotiation.client ? negotiation.client : ""}
-                    >
-                      <p className="truncate hover:text-clip">
-                        {negotiation.client}
-                      </p>
-                    </Tooltips>
-                  </TableCell>
-                  <TableCell>
-                    {formatCurrencyToBRL(negotiation.valOriginal)}
-                  </TableCell>
-                  <TableCell>
-                    {formatCurrencyToBRL(negotiation.valTotalPrest)}
-                  </TableCell>
-                  <TableCell>
-                    {formatarFone(
-                      negotiation.contato ? negotiation.contato : ""
-                    )}
-                  </TableCell>
-                  <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip hover:cursor-pointer">
-                    <Tooltips
-                      message={negotiation.user ? negotiation.user : ""}
-                    >
-                      <p className="truncate hover:text-clip">
-                        {getFirstAndLastName(`${negotiation.user}`)}
-                      </p>
-                    </Tooltips>
-                  </TableCell>
-                  <TableCell className="flex">
-                    <Button asChild className="mx-1">
-                      <Link
-                        href={`/operation/clients/details/${negotiation.codCredorDesRegis}`}
+              {negotiations &&
+                negotiations.data.map((negotiation) => (
+                  <TableRow key={negotiation.id}>
+                    <TableCell>
+                      <Switch
+                        checked={!!selectRow && selectRow.id === negotiation.id}
+                        onCheckedChange={() => {
+                          handleSelectRow(negotiation);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>{selecIcon(negotiation.status)}</TableCell>
+                    <TableCell>
+                      {formatDateToBR(negotiation.datEntra)}
+                    </TableCell>
+                    <TableCell>
+                      {formatDateToBR(negotiation.createdAt)}
+                    </TableCell>
+                    <TableCell>{negotiation.desContr}</TableCell>
+                    <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip">
+                      <Tooltips
+                        message={negotiation.client ? negotiation.client : ""}
                       >
-                        <FaUser />
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                        <p className="truncate hover:text-clip">
+                          {negotiation.client}
+                        </p>
+                      </Tooltips>
+                    </TableCell>
+                    <TableCell>
+                      {formatCurrencyToBRL(negotiation.valOriginal)}
+                    </TableCell>
+                    <TableCell>
+                      {formatCurrencyToBRL(negotiation.valTotalPrest)}
+                    </TableCell>
+                    <TableCell>
+                      {formatarFone(
+                        negotiation.contato ? negotiation.contato : ""
+                      )}
+                    </TableCell>
+                    <TableCell className="max-w-36 md:max-w-44 lg:max-w-52 truncate hover:text-clip hover:cursor-pointer">
+                      <Tooltips
+                        message={negotiation.user ? negotiation.user : ""}
+                      >
+                        <p className="truncate hover:text-clip">
+                          {getFirstAndLastName(`${negotiation.user}`)}
+                        </p>
+                      </Tooltips>
+                    </TableCell>
+                    <TableCell className="flex">
+                      <Button asChild className="mx-1">
+                        <Link
+                          href={`/operation/clients/details/${negotiation.codCredorDesRegis}`}
+                        >
+                          <FaUser />
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </div>
@@ -235,7 +236,13 @@ export default function TabNegotiations({
           pending ? "opacity-0 hidden" : "opacity-100"
         }`}
       >
-        <Pagination meta={negotiations.meta} query={query} refresh={refresh} />
+        {negotiations && (
+          <Pagination
+            meta={negotiations.meta}
+            query={query}
+            refresh={refresh}
+          />
+        )}
       </CardFooter>
     </Card>
   );

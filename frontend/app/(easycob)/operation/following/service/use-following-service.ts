@@ -24,39 +24,23 @@ const urn = "/v1/action";
 const baseUrl = `${apiUrl}${urn}`;
 
 const useFlouwingsService = ({
-  initialNegotiationOfPayment,
-  initialAgreement,
-  initialNegotiationInvoice,
-  initialPromise,
   initialQuery,
 }: {
-  initialNegotiationOfPayment: IPaginationResponse<INegotiationOfPayment>;
-  initialAgreement: IPaginationResponse<IPromiseOfPayment>;
-  initialNegotiationInvoice: IPaginationResponse<INegotiationInvoice>;
-  initialPromise: IPaginationResponse<IPromiseOfPayment>;
   initialQuery: IQueryFollowingParams;
 }) => {
   const { queryParams, setQueryParams } = useQueryParams(initialQuery);
-  
-  const [negotiations, setNegotiations] =
-    useState<IPaginationResponse<INegotiationOfPayment> | null>(
-      initialNegotiationOfPayment
-    );
 
-    const [agreements, setAgreements] =
-    useState<IPaginationResponse<IPromiseOfPayment> | null>(
-      initialAgreement,
-    );
+  const [negotiations, setNegotiations] =
+    useState<IPaginationResponse<INegotiationOfPayment> | null>(null);
+
+  const [agreements, setAgreements] =
+    useState<IPaginationResponse<IPromiseOfPayment> | null>(null);
 
   const [invoices, setInvoices] =
-    useState<IPaginationResponse<INegotiationInvoice> | null>(
-      initialNegotiationInvoice
-    );
+    useState<IPaginationResponse<INegotiationInvoice> | null>(null);
 
-    const [promises, setPromises] =
-    useState<IPaginationResponse<IPromiseOfPayment> | null>(
-      initialPromise,
-    );
+  const [promises, setPromises] =
+    useState<IPaginationResponse<IPromiseOfPayment> | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +76,7 @@ const useFlouwingsService = ({
       const result = await fetchAuth<IPaginationResponse<IPromiseOfPayment>>(
         `${baseUrl}/promise`,
         {
-          query: {...queryParams.current as IQueryParams, typeActionIds: 1},
+          query: { ...(queryParams.current as IQueryParams), typeActionIds: 1 },
         }
       );
       if (result.success) {
@@ -140,7 +124,7 @@ const useFlouwingsService = ({
       const result = await fetchAuth<IPaginationResponse<IPromiseOfPayment>>(
         `${baseUrl}/promise`,
         {
-          query: {...queryParams.current as IQueryParams, typeActionIds: 2},
+          query: { ...(queryParams.current as IQueryParams), typeActionIds: 2 },
         }
       );
       if (result.success) {
@@ -159,9 +143,6 @@ const useFlouwingsService = ({
   useEffect(() => {
     if (!isEqual(initialQuery, queryParams.current)) {
       fetchNegotiations();
-      fetchAgreements;
-      fetchInvoices();
-      fetchPromises();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

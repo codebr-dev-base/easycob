@@ -34,6 +34,7 @@ import { DateRange } from "react-day-picker";
 import { FaSearch } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/app/(easycob)/components/DatePicker";
+import { parseStringDateToDate } from "@/app/lib/utils";
 
 export default function FilterPus({
   query,
@@ -121,9 +122,20 @@ export default function FilterPus({
               </Label>
             </div>
             <div className="flex">
-              <Label>
+              <Label className="w-full">
                 Por data de criação:
-                <DatePicker placeholder="Ínicio" onChange={handleChangeDate} />
+                <DatePicker
+                  placeholder="Ínicio"
+                  onChange={handleChangeDate}
+                  defaultDate={{
+                    from: query.startDate
+                      ? parseStringDateToDate(query.startDate)
+                      : undefined,
+                    to: query.endDate
+                      ? parseStringDateToDate(query.endDate)
+                      : undefined,
+                  }}
+                />
               </Label>
             </div>
 
