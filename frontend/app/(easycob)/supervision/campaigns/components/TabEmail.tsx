@@ -36,14 +36,14 @@ export default function TabEmail({
     refresh();
   }, []);
 
-  const skeletons = [];
+  const skeletons: JSX.Element[] = [];
   for (let i = 0; i < 12; i++) {
     skeletons.push(<Skeleton key={i} className="h-10 w-full my-2" />);
   }
 
   const handleResend = async (id: number | string) => {
     try {
-      await await sendCampaign(id);
+      await sendCampaign(id);
       toast({
         title: "Sucesso",
         description: "Campanha enviada!",

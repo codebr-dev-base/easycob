@@ -52,7 +52,7 @@ export default function TableRecords({
 
   function getBackgroundClass(
     user: IUserChannel,
-    currentColumn: keyof typeof counts
+    currentColumn: keyof IUserChannel
   ): string | undefined {
     const { activeCount, dialerCount, whatsappCount, nullCount } = user;
 
@@ -86,7 +86,6 @@ export default function TableRecords({
     // Caso não seja o maior valor, retorna undefined
     return undefined;
   }
-
   return (
     <Card>
       <CardHeader>

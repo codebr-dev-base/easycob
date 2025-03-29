@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
 export default function SkeletonTable({ rows }: { rows: number }) {
-  const rowsArray = [];
+  const rowsArray: JSX.Element[] = [];
 
   for (let i = 0; i < rows; i++) {
     rowsArray.push(

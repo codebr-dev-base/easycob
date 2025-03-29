@@ -49,7 +49,7 @@ export default function CardContract({
           </p>
           {contract.numDoc1 && (
             <p className="text-sm text-muted-foreground">
-              CFP/CNPJ: {formatStringToCpfCnpj(contract.numDoc1)}
+              CPF/CNPJ: {formatStringToCpfCnpj(contract.numDoc1)}
             </p>
           )}
           <p className="text-sm text-muted-foreground">

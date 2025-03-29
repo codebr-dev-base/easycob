@@ -354,7 +354,7 @@ export default function ConteinerDetails({
             </p>
             {client.desCpf && (
               <p className="text-sm text-muted-foreground">
-                CFP/CNPJ: {formatStringToCpfCnpj(client.desCpf)}
+                CPF/CNPJ: {formatStringToCpfCnpj(client.desCpf)}
               </p>
             )}
             <p className="text-sm text-muted-foreground">
