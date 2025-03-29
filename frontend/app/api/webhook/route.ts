@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server';
-import { getIO } from '@/server/socket'; // Ajuste o caminho
+import { getIO, io } from '@/server/socket'; // Ajuste o caminho
 
 export async function GET(request: Request) {
 
   console.log('Rota de webhook acionada');
+
+  console.log('io:', io);
+
+}
+
+/*   
   try {
     const io = getIO();
     io.emit('evento-da-api', { message: 'Este evento foi disparado de uma Route Handler!' });
@@ -11,5 +17,4 @@ export async function GET(request: Request) {
   } catch (error: any) {
     console.error('Erro ao disparar evento Socket.IO:', error.message);
     return NextResponse.json({ error: 'Falha ao disparar evento Socket.IO.' }, { status: 500 });
-  }
-}
+  } */

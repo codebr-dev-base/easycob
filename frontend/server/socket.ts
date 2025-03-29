@@ -7,6 +7,9 @@ export function initializeSocketIO(httpServer: HttpServer): SocketIOServer {
   if (!io) {
     io = new SocketIOServer(httpServer);
     console.log('Socket.IO inicializado com sucesso.');
+
+    io.on('error', (error) => { console.error('Erro no Socket.IO:', error); });
+
     io.on('connection', (socket) => {
       console.log('Cliente conectado ao Socket.IO (global):', socket.id);
       socket.on('disconnect', () => {
@@ -14,13 +17,17 @@ export function initializeSocketIO(httpServer: HttpServer): SocketIOServer {
       });
       // Outros listeners globais...
     });
+    
   }
   return io;
 }
 
 export function getIO(): SocketIOServer {
+
   if (!io) {
     throw new Error('Socket.IO não foi inicializado. Certifique-se de chamar initializeSocketIO no seu servidor customizado.');
   }
   return io;
 }
+
+export default io;
