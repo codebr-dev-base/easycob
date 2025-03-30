@@ -30,8 +30,6 @@ export default async function Page() {
   try {
     if (!tags) tags = await fetchTags();
 
-    console.log(tags);
-
     if (!tags) {
       return (
         <div className="w-full h-full">
