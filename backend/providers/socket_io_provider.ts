@@ -37,11 +37,16 @@ export default class SocketIoProvider {
    */
   async ready() {
     if (env.get('APP_MODE') !== 'main') {
-      console.log(`📁 ${env.get('APP_MODE')}`);
       return;
     }
-    SocketIoProvider.loginTactium();
-    this.scheduleLoginDiary();
+    console.log(`📁 ${env.get('APP_MODE')}`);
+    try {
+      SocketIoProvider.loginTactium();
+      this.scheduleLoginDiary();
+    } catch (error) {
+      console.error('Erro ao realizar login:', error);
+      return;
+    }
 
     this.server = (await this.app.container.make(
       'server'
