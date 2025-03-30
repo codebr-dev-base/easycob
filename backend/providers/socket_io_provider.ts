@@ -8,6 +8,7 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import redis from '@adonisjs/redis/services/main';
 import User from '#models/user';
 import env from '#start/env';
+import { Application } from '@adonisjs/core/app';
 
 interface UserSocket {
   user: User;
@@ -36,6 +37,10 @@ export default class SocketIoProvider {
    * The process has been started
    */
   async ready() {
+    console.log(env.get('APP_MODE'));
+    if (env.get('APP_MODE') !== 'main') {
+      return;
+    }
     SocketIoProvider.loginTactium();
     this.scheduleLoginDiary();
 

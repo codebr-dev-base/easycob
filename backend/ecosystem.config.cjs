@@ -14,6 +14,7 @@ module.exports = {
       node_args: '--max-old-space-size=4096', // Adicione esta linha
       env: {
         TZ: 'America/Fortaleza',
+        APP_MODE: 'main',
       },
     },
     {
