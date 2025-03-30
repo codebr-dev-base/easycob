@@ -11,9 +11,11 @@ export const useSocket = () => {
     const user = getUser();
     if (user) {
       // Conecta ao servidor socket.io
-      const newSocket = io({
-        auth: {
-          userId: user.id, // Envia o ID do usuário ao servidor
+
+      const newSocket = io("http://localhost:4444", {
+        path: "/ws",
+        query: {
+          userId: user.id,
         },
       });
 

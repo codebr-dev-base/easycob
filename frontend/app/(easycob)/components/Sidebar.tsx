@@ -2,7 +2,7 @@
 import Image from "next/image";
 import easycobWhite from "@/app/assets/img/easycob_white.png";
 import logo from "@/app/assets/img/logo.svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaBars } from "react-icons/fa"; // Exemplo de ícones
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import { LuListTodo, LuLock } from "react-icons/lu";
@@ -19,6 +19,9 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import { Suspense } from "react";
+import { Socket } from "socket.io-client";
+import { useSocket } from "@/app/hooks/useSocket";
+import { toast } from "@/hooks/use-toast";
 
 interface ModuleLink {
   href: string;
@@ -158,6 +161,34 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [accordionSections, setAccordionSections] = useState<string[]>([]);
+  const [webhookData, setWebhookData] = useState(null);
+  const socket = useSocket();
+
+  // Escuta os dados do webhook enviados pelo servidor
+  useEffect(() => {
+    if (socket) {
+      socket.on("webhook", (data) => {
+        setWebhookData(data);
+      });
+    }
+
+    // Limpa o listener ao desmontar o componente
+    return () => {
+      if (socket) {
+        socket.off("webhook");
+      }
+    };
+  }, [socket]);
+
+
+  useEffect(() => {
+    // Verifica se o usuário está autenticado
+    toast({
+      title: "Alerta",
+      description: JSON.stringify(webhookData, null, 2),
+      variant: "default",
+    });
+  }, [webhookData]);
 
   const toggleSidebar = () => {
     if (isExpanded) {

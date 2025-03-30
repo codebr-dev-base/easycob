@@ -3,8 +3,7 @@ import "dotenv/config";
 import { createServer } from "http";
 import { parse } from "url";
 import next from "next";
-import { Server as SocketIOServer } from "socket.io";
-import { initializeSocketIO, getIO } from "./server/socket";
+import { initializeSocketIO } from "./server/socket";
 
 async function startServer() {
   // Check if we're running in development
@@ -22,6 +21,7 @@ async function startServer() {
     await app.prepare();
     const httpServer = createServer(handle);
     const io = initializeSocketIO(httpServer);
+    (app as any).io = io; // Salva a instância globalmente dentro do app
 
     httpServer.listen(port, hostname, () => {
       console.log(`🚀 👂 http://${hostname}:${port}`);
