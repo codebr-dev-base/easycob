@@ -7,10 +7,19 @@ import config from '#config/socket';
 import { createAdapter } from '@socket.io/redis-adapter';
 import redis from '@adonisjs/redis/services/main';
 import User from '#models/user';
+import env from '#start/env';
 
 interface UserSocket {
   user: User;
   socket: Socket;
+}
+
+interface LoginResponse {
+  status: number;
+  dados?: {
+    token: string;
+    expiraEm: string;
+  };
 }
 
 export default class SocketIoProvider {
@@ -19,12 +28,17 @@ export default class SocketIoProvider {
   private static usersAndSockets: UserSocket[] = [];
   private booted = false;
   private server: HttpServerService | undefined;
+  private static token: string | undefined;
+  private static expiraEm: string | undefined;
   constructor(protected app: ApplicationService) {}
 
   /**
    * The process has been started
    */
   async ready() {
+    SocketIoProvider.loginTactium();
+    this.scheduleLoginDiary();
+
     this.server = (await this.app.container.make(
       'server'
     )) as HttpServerService;
@@ -130,5 +144,75 @@ export default class SocketIoProvider {
       (userSocket) => userSocket.user.id === userId
     );
     return userSocket?.socket;
+  }
+
+  public static async loginTactium() {
+    const urlTactium = env.get('TACTIUM_URL');
+    const body = {
+      usuario: env.get('TACTIUM_USER'),
+      senha: env.get('TACTIUM_PASSWORD'),
+      urlEventos: env.get('TACTIUM_URL_EVENTS'),
+      modeloEventos: 'webhook',
+    };
+
+    try {
+      const response = await fetch(`${urlTactium}/agente/autenticar`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        const data = (await response.json()) as LoginResponse;
+        if (data.status === 0 && data.dados) {
+          const token = data.dados.token;
+          const expiraEm = data.dados.expiraEm;
+          console.log('Login realizado com sucesso!');
+          console.log('Token:', token);
+          console.log('Expira em:', expiraEm);
+          this.token = token;
+          this.expiraEm = expiraEm;
+        } else {
+          console.error('Login realizado, mas dados inválidos:', data);
+        }
+      } else {
+        console.error('Falha ao realizar login:', response.status);
+      }
+    } catch (error) {
+      console.error('Erro ao realizar login:', error);
+    }
+  }
+
+  public scheduleLoginDiary() {
+    const now = new Date();
+    const nextLogin = new Date(now);
+    nextLogin.setHours(7, 0, 0, 0);
+
+    if (now > nextLogin) {
+      nextLogin.setDate(nextLogin.getDate() + 1);
+    }
+
+    const timeUntilNextLogin = nextLogin.getTime() - now.getTime();
+
+    setTimeout(() => {
+      SocketIoProvider.loginTactium();
+      setInterval(
+        () => {
+          SocketIoProvider.loginTactium();
+        },
+        24 * 60 * 60 * 1000
+      );
+    }, timeUntilNextLogin);
+
+    console.log('Agendamento de login diário configurado.');
+  }
+
+  public static getToken(): string | null | undefined {
+    return this.token;
+  }
+  public static getExpiraEm(): string | null | undefined {
+    return this.expiraEm;
   }
 }
