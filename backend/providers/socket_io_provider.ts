@@ -36,8 +36,8 @@ export default class SocketIoProvider {
    * The process has been started
    */
   async ready() {
-    console.log(`📁${env.get('APP_MODE')}`);
     if (env.get('APP_MODE') !== 'main') {
+      console.log(`📁 ${env.get('APP_MODE')}`);
       return;
     }
     SocketIoProvider.loginTactium();
