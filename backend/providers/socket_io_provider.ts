@@ -49,10 +49,13 @@ export default class SocketIoProvider {
 
     SocketIoProvider.setInstance(this.io);
 
-    console.log('Socket.IO initialized');
+    console.log('🐣 Socket.IO initialized 🚀');
     // Gerenciar as conexões do Socket.IO
     this.io.on('connection', (socket) => {
       console.log('Novo cliente conectado:', socket.id);
+
+      const userId = socket.handshake.query.userId;
+      console.log('ID do usuário:', userId);
 
       socket.on('auth', async (data) => {
         console.log('Autenticação recebida:', data);

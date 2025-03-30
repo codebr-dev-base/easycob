@@ -27,6 +27,7 @@ import externalAction from '#routes/external/action';
 import externalContract from '#routes/external/contract';
 import externalContact from '#routes/external/contact';
 import externalInvoice from '#routes/external/invoice';
+import webhook from './routes/tactium/webhook.js';
 
 router.get('/', async () => {
   return {
@@ -53,6 +54,7 @@ router.group(() => {
   externalContract;
   externalContact;
   externalInvoice;
+  webhook;
 });
 
 router.jobs();
