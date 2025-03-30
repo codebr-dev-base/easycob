@@ -9,7 +9,6 @@ module.exports = {
       script: './build/bin/server.js',
       cwd: severPath,
       instances: 1,
-      exec_mode: 'cluster',
       autorestart: true,
       node_args: '--max-old-space-size=4096', // Adicione esta linha
       env: {
