@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
 import { getUser } from "@/app/lib/auth";
+const url = process.env.API_URL ? process.env.API_URL : "";
 
 export const useSocket = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -12,7 +13,7 @@ export const useSocket = () => {
     if (user) {
       // Conecta ao servidor socket.io
 
-      const newSocket = io("http://localhost:4444", {
+      const newSocket = io(url, {
         path: "/ws",
         query: {
           userId: user.id,
