@@ -184,6 +184,9 @@ export default class SocketIoProvider {
       modeloEventos: 'webhook',
     };
 
+    console.log('body', body);
+    console.log('urlTactium', `${urlTactium}/agente/autenticar`);
+
     try {
       const response = await fetch(`${urlTactium}/agente/autenticar`, {
         method: 'POST',
