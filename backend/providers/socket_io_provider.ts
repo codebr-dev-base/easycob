@@ -9,9 +9,18 @@ import redis from '@adonisjs/redis/services/main';
 import User from '#models/user';
 import env from '#start/env';
 
+interface UserTactium {
+  dispositivo: string;
+  usuario: string;
+  senha: string;
+  status?: number;
+  mensagem?: string;
+  dados?: { idLogon: string };
+}
 interface UserSocket {
   user: User;
   socket: Socket;
+  userTectium: UserTactium;
 }
 
 interface LoginResponse {
@@ -77,14 +86,21 @@ export default class SocketIoProvider {
     this.io.on('connection', (socket) => {
       console.log('Novo cliente conectado:', socket.id);
 
+      /*
       const userId = socket.handshake.query.userId;
       console.log('ID do usuário:', userId);
+      */
 
       socket.on('auth', async (data) => {
         console.log('Autenticação recebida:', data);
         const user = await User.find(data.userId);
+        const userTectium = {
+          dispositivo: data.dispositivo,
+          usuario: data.usuario,
+          senha: data.senha,
+        };
         if (user) {
-          SocketIoProvider.setUserSocket(user, socket);
+          SocketIoProvider.setUserSocket(user, socket, userTectium);
           socket.emit('auth', { success: true });
         } else {
           socket.emit('auth', { success: false });
@@ -118,8 +134,12 @@ export default class SocketIoProvider {
     return this.usersAndSockets;
   }
 
-  public static setUserSocket(user: User, socket: Socket) {
-    this.usersAndSockets.push({ user, socket });
+  public static setUserSocket(
+    user: User,
+    socket: Socket,
+    userTectium: UserTactium
+  ) {
+    this.usersAndSockets.push({ user, socket, userTectium });
   }
 
   public static removeUserSocket(user: User) {
