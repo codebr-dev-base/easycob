@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node --max-old-space-size=8192 bin/server.js",
     "build": "node ace build",
-    "dev": "node --max-old-space-size=8192 ace serve --watch",
+    "dev": "APP_MODE=main node --max-old-space-size=8192 ace serve --watch",
     "test": "node ace test",
     "lint": "eslint .",
     "format": "prettier --write .",

@@ -388,6 +388,7 @@ export default class ActionService {
           valTotal: aggregationClient.val_total,
           pecldTotal: aggregationClient.pecld_total,
         });
+        await a.save();
 
         await handleSendingForRecupera(a);
       }
