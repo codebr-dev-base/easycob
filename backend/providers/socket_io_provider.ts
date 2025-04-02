@@ -6,28 +6,34 @@ import { Server, Socket } from 'socket.io';
 import config from '#config/socket';
 import { createAdapter } from '@socket.io/redis-adapter';
 import redis from '@adonisjs/redis/services/main';
-import User from '#models/user';
 import env from '#start/env';
 
 interface UserTactium {
   dispositivo: string;
   usuario: string;
   senha: string;
-  status?: number;
-  mensagem?: string;
-  dados?: { idLogon: string };
+  idLogon?: string;
 }
+
 interface UserSocket {
-  user: User;
+  userId: number;
   socket: Socket;
-  userTectium: UserTactium;
+  userTactiumId: string;
+  dispositivo: string;
+}
+
+interface AuthResponse {
+  status: number;
+  dados?: {
+    token: string;
+    expiraEm: string;
+  };
 }
 
 interface LoginResponse {
   status: number;
   dados?: {
-    token: string;
-    expiraEm: string;
+    idLogon: string;
   };
 }
 
@@ -52,6 +58,7 @@ export default class SocketIoProvider {
     try {
       SocketIoProvider.loginTactium();
       this.scheduleLoginDiary();
+      this.pulsar();
     } catch (error) {
       console.error('Erro ao realizar login:', error);
       return;
@@ -93,17 +100,29 @@ export default class SocketIoProvider {
 
       socket.on('auth', async (data) => {
         console.log('Autenticação recebida:', data);
-        const user = await User.find(data.userId);
-        const userTectium = {
+        const userTactium: UserTactium = {
           dispositivo: data.dispositivo,
           usuario: data.usuario,
           senha: data.senha,
         };
-        if (user) {
-          SocketIoProvider.setUserSocket(user, socket, userTectium);
+
+        try {
+          userTactium.idLogon = await this.loginAgente(
+            userTactium.dispositivo,
+            userTactium.usuario,
+            userTactium.senha
+          );
+          SocketIoProvider.setUserSocket(
+            data.userId,
+            socket,
+            userTactium.idLogon,
+            userTactium.dispositivo
+          );
           socket.emit('auth', { success: true });
-        } else {
+        } catch (error) {
           socket.emit('auth', { success: false });
+          console.error('Erro ao realizar login:', error);
+          //return;
         }
       });
 
@@ -135,17 +154,12 @@ export default class SocketIoProvider {
   }
 
   public static setUserSocket(
-    user: User,
+    userId: number,
     socket: Socket,
-    userTectium: UserTactium
+    userTactiumId: string,
+    dispositivo: string
   ) {
-    this.usersAndSockets.push({ user, socket, userTectium });
-  }
-
-  public static removeUserSocket(user: User) {
-    this.usersAndSockets = this.usersAndSockets.filter(
-      (userSocket) => userSocket.user.id !== user.id
-    );
+    this.usersAndSockets.push({ userId, socket, userTactiumId, dispositivo });
   }
 
   public static removeSocketById(id: string) {
@@ -154,11 +168,22 @@ export default class SocketIoProvider {
     );
   }
 
-  public static getSocketByUser(user: User): Socket | undefined {
-    const userSocket = this.usersAndSockets.find(
-      (userSocket) => userSocket.user.id === user.id
+  public static removeSocketByUserId(userId: number) {
+    this.usersAndSockets = this.usersAndSockets.filter(
+      (userSocket) => userSocket.userId !== userId
     );
-    return userSocket?.socket;
+  }
+
+  public static removeSocketByUserTactiumId(userTactiumId: string) {
+    this.usersAndSockets = this.usersAndSockets.filter(
+      (userSocket) => userSocket.userTactiumId !== userTactiumId
+    );
+  }
+
+  public static removeSocketByDispositivo(dispositivo: string) {
+    this.usersAndSockets = this.usersAndSockets.filter(
+      (userSocket) => userSocket.dispositivo !== dispositivo
+    );
   }
 
   public static getSocketById(id: string): Socket | undefined {
@@ -170,7 +195,25 @@ export default class SocketIoProvider {
 
   public static getSocketByUserId(userId: number): Socket | undefined {
     const userSocket = this.usersAndSockets.find(
-      (userSocket) => userSocket.user.id === userId
+      (userSocket) => userSocket.userId === userId
+    );
+    return userSocket?.socket;
+  }
+
+  public static getSocketByUserTactiumId(
+    userTactiumId: string
+  ): Socket | undefined {
+    const userSocket = this.usersAndSockets.find(
+      (userSocket) => userSocket.userTactiumId === userTactiumId
+    );
+    return userSocket?.socket;
+  }
+
+  public static getSocketByDispositivo(
+    dispositivo: string
+  ): Socket | undefined {
+    const userSocket = this.usersAndSockets.find(
+      (userSocket) => userSocket.dispositivo === dispositivo
     );
     return userSocket?.socket;
   }
@@ -184,9 +227,6 @@ export default class SocketIoProvider {
       modeloEventos: 'webhook',
     };
 
-    console.log('body', body);
-    console.log('urlTactium', `${urlTactium}/agente/autenticar`);
-
     try {
       const response = await fetch(`${urlTactium}/agente/autenticar`, {
         method: 'POST',
@@ -197,13 +237,10 @@ export default class SocketIoProvider {
       });
 
       if (response.ok) {
-        const data = (await response.json()) as LoginResponse;
+        const data = (await response.json()) as AuthResponse;
         if (data.status === 0 && data.dados) {
           const token = data.dados.token;
           const expiraEm = data.dados.expiraEm;
-          console.log('Login realizado com sucesso!');
-          console.log('Token:', token);
-          console.log('Expira em:', expiraEm);
           this.token = token;
           this.expiraEm = expiraEm;
         } else {
@@ -241,10 +278,85 @@ export default class SocketIoProvider {
     console.log('Agendamento de login diário configurado.');
   }
 
+  public async loginAgente(
+    dispositivo: string,
+    usuario: string,
+    senha: string
+  ): Promise<string> {
+    const urlTactium = env.get('TACTIUM_URL');
+    const body = {
+      dispositivo,
+      usuario,
+      senha,
+    };
+
+    try {
+      const response = await fetch(`${urlTactium}/agente/logon`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${SocketIoProvider.token}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        const data = (await response.json()) as LoginResponse;
+        if (data.status === 0 && data.dados) {
+          console.log('Login realizado com sucesso!');
+          return data.dados.idLogon;
+        } else {
+          console.error('Login realizado, mas dados inválidos:', data);
+          throw new Error('Falha ao realizar login');
+        }
+      } else {
+        console.error('Falha ao realizar login:', response.status);
+        throw new Error('Falha ao realizar login');
+      }
+    } catch (error) {
+      throw new Error('Falha ao realizar login');
+    }
+  }
+
   public static getToken(): string | null | undefined {
     return this.token;
   }
   public static getExpiraEm(): string | null | undefined {
     return this.expiraEm;
+  }
+
+  public async pulsar() {
+    const urlTactium = env.get('TACTIUM_URL');
+
+    const delayBetweenRequests = 100;
+    const delayBetweenInterval = 10000;
+
+    const delay = (ms: number) =>
+      new Promise((resolve) => setTimeout(resolve, ms));
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      console.log('Pulsando...❤️');
+
+      for (const usersAndSocket of SocketIoProvider.usersAndSockets) {
+        try {
+          await fetch(`${urlTactium}/agente/pulsar`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${SocketIoProvider.token}`,
+            },
+            body: JSON.stringify({
+              idLogon: usersAndSocket.userTactiumId,
+            }),
+          });
+        } catch (error) {
+          console.error('Erro ao realizar pulso 😵⚰️:', error);
+        }
+        await delay(delayBetweenRequests);
+      }
+
+      await delay(delayBetweenInterval);
+    }
   }
 }

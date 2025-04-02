@@ -19,9 +19,7 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import { Suspense } from "react";
-import { Socket } from "socket.io-client";
-import { useSocket } from "@/app/hooks/useSocket";
-import { toast } from "@/hooks/use-toast";
+import LoginTactium from "./tactium/Login";
 
 interface ModuleLink {
   href: string;
@@ -161,34 +159,6 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [accordionSections, setAccordionSections] = useState<string[]>([]);
-  const [webhookData, setWebhookData] = useState(null);
-  const socket = useSocket();
-
-  // Escuta os dados do webhook enviados pelo servidor
-  useEffect(() => {
-    if (socket) {
-      socket.on("webhook", (data) => {
-        setWebhookData(data);
-      });
-    }
-
-    // Limpa o listener ao desmontar o componente
-    return () => {
-      if (socket) {
-        socket.off("webhook");
-      }
-    };
-  }, [socket]);
-
-
-  useEffect(() => {
-    // Verifica se o usuário está autenticado
-    toast({
-      title: "Alerta",
-      description: JSON.stringify(webhookData, null, 2),
-      variant: "default",
-    });
-  }, [webhookData]);
 
   const toggleSidebar = () => {
     if (isExpanded) {
@@ -309,31 +279,34 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             />
           </nav>
         </main>
-        <footer
-          className={`flex items-center justify-between w-full p-3 ${
-            isExpanded ? "flex-row" : "flex-col"
-          }`}
-        >
-          <Link href="/profile" className="p-1">
-            <div className="p-1 bg-slate-300 rounded-3xl justify-start items-center gap-2 flex text-blue-600">
-              <div className="w-10 h-10 bg-slate-200 rounded-full flex justify-center">
-                <div className="m-auto font-medium">{initials ?? "U"}</div>
-              </div>
-            </div>
-          </Link>
-          <form
-            action={logout}
-            className="p-1 flex items-center justify-center"
+        <footer className="flex items-center justify-between w-full pb-3 flex-col">
+          <div
+            className={`flex items-center justify-between w-full pb-3 ${
+              isExpanded ? "flex-row" : "flex-col"
+            }`}
           >
-            <Button
-              variant="destructive"
-              type="submit"
-              className="max-w-[80%]"
-              size={!isExpanded ? "sm" : "default"}
+            <Link href="/profile" className="p-1">
+              <div className="p-1 bg-slate-300 rounded-3xl justify-start items-center gap-2 flex text-blue-600">
+                <div className="w-10 h-10 bg-slate-200 rounded-full flex justify-center">
+                  <div className="m-auto font-medium">{initials ?? "U"}</div>
+                </div>
+              </div>
+            </Link>
+            <form
+              action={logout}
+              className="p-1 flex items-center justify-center"
             >
-              Sair
-            </Button>
-          </form>
+              <Button
+                variant="destructive"
+                type="submit"
+                className="max-w-[80%]"
+                size={!isExpanded ? "sm" : "default"}
+              >
+                Sair
+              </Button>
+            </form>
+          </div>
+          <LoginTactium />
         </footer>
       </aside>
 

@@ -17,9 +17,6 @@ export const useSocket = () => {
 
       const newSocket = io(url, {
         path: "/ws",
-        query: {
-          userId: user.id,
-        },
       });
 
       setSocket(newSocket);
