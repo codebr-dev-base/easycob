@@ -34,8 +34,7 @@ export default class WebhooksController {
       }
     }
 
-    if (body.evento === eventoCodes.AGENTE_LOGON) {
-      console.log('Evento AGENTE_LOGON recebido');
+    if (body.dispositivo === '0091') {
       console.log(body);
     }
     console.log('Evento recebido:', body.evento);
