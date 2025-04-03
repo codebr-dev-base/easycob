@@ -99,7 +99,6 @@ export default class SocketIoProvider {
       */
 
       socket.on('auth', async (data) => {
-        console.log('Autenticação recebida:', data);
         const userTactium: UserTactium = {
           dispositivo: data.dispositivo,
           usuario: data.usuario,

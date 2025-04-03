@@ -38,6 +38,7 @@ export default class WebhooksController {
       console.log('Evento AGENTE_LOGON recebido');
       console.log(body);
     }
+    console.log('Evento recebido:', body.evento);
     //io.emit('webhook', body);
     response.status(200).send('OK');
   }
