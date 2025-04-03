@@ -25,13 +25,18 @@ export default class WebhooksController {
     const io = SocketIoProvider.getInstance();
     const body = request.body();
 
-    if (body.dispositivo) {
-      switch (body.dispositivo) {
-        case '0091':
+    if (body.evento) {
+      switch (body.evento) {
+        case eventoCodes.AGENTE_LOGON:
           io.emit('message', body);
           console.log(body);
           break;
       }
+    }
+
+    if (body.evento === eventoCodes.AGENTE_LOGON) {
+      console.log('Evento AGENTE_LOGON recebido');
+      console.log(body);
     }
     //io.emit('webhook', body);
     response.status(200).send('OK');
