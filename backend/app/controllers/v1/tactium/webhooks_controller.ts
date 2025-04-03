@@ -24,7 +24,7 @@ export default class WebhooksController {
   public async handle({ request, response }: HttpContext) {
     const io = SocketIoProvider.getInstance();
     const body = request.body();
-
+    console.log(body);
     if (body.evento) {
       switch (body.evento) {
         case eventoCodes.AGENTE_LOGON:
