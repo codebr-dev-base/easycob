@@ -31,13 +31,25 @@ export default class WebhooksController {
           io.emit('message', body);
           console.log(body);
           break;
+        case eventoCodes.AGENTE_LOGOFF:
+          io.emit('message', body);
+          console.log(body);
+          break;
+        case eventoCodes.AGENTE_PAUSA:
+          io.emit('message', body);
+          console.log(body);
+          break;
+        case eventoCodes.AGENTE_PRONTO:
+          io.emit('message', body);
+          console.log(body);
+          break;
+        case eventoCodes.AGENTE_POS_ATENDIMENTO:
+          io.emit('message', body);
+          console.log(body);
+          break;
       }
     }
 
-    if (body.dispositivo === '0091') {
-      console.log(body);
-    }
-    console.log('Evento recebido:', body.evento);
     //io.emit('webhook', body);
     response.status(200).send('OK');
   }
