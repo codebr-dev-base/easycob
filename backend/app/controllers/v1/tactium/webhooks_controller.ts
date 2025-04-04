@@ -24,15 +24,25 @@ export default class WebhooksController {
   public async handle({ request, response }: HttpContext) {
     const io = SocketIoProvider.getInstance();
     const body = request.body();
+    const socket = SocketIoProvider.getSocketByDispositivo(body.dispositivo);
 
+    if (!socket) {
+      return response.status(404).json({ error: 'Socket not found' });
+    }
     if (body.evento) {
       switch (body.evento) {
         case eventoCodes.AGENTE_LOGON:
-          io.emit('message', body);
-          console.log(body);
+          if (body.status === 0) {
+            socket.emit('auth', { success: true });
+            console.log(body);
+          }
+          if (body.status === 1) {
+            socket.emit('auth', { success: false });
+            console.log(body);
+          }
           break;
         case eventoCodes.AGENTE_LOGOFF:
-          io.emit('message', body);
+          socket.emit('auth', { success: false });
           console.log(body);
           break;
         case eventoCodes.AGENTE_PAUSA:

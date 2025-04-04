@@ -117,9 +117,7 @@ export default class SocketIoProvider {
             userTactium.idLogon,
             userTactium.dispositivo
           );
-          socket.emit('auth', { success: true });
         } catch (error) {
-          socket.emit('auth', { success: false });
           console.error('Erro ao realizar login:', error);
           //return;
         }
