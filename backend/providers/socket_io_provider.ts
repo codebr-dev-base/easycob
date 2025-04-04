@@ -58,7 +58,7 @@ export default class SocketIoProvider {
     try {
       SocketIoProvider.loginTactium();
       this.scheduleLoginDiary();
-      //this.pulsar();
+      this.pulsar();
     } catch (error) {
       console.error('Erro ao realizar login:', error);
       return;

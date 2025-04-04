@@ -33,17 +33,23 @@ export default class WebhooksController {
       switch (body.evento) {
         case eventoCodes.AGENTE_LOGON:
           if (body.status === 0) {
-            socket.emit('auth', { success: true });
+            socket.emit('auth', { auth: true });
             console.log(body);
           }
           if (body.status === 1) {
-            socket.emit('auth', { success: false });
+            socket.emit('auth', { auth: false });
             console.log(body);
           }
           break;
         case eventoCodes.AGENTE_LOGOFF:
-          socket.emit('auth', { success: false });
-          console.log(body);
+          if (body.status === 0) {
+            socket.emit('auth', { auth: true });
+            console.log(body);
+          }
+          if (body.status === 1) {
+            socket.emit('auth', { auth: false });
+            console.log(body);
+          }
           break;
         case eventoCodes.AGENTE_PAUSA:
           io.emit('message', body);
