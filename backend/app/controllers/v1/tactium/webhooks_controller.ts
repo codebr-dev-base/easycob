@@ -43,11 +43,11 @@ export default class WebhooksController {
           break;
         case eventoCodes.AGENTE_LOGOFF:
           if (body.status === 0) {
-            socket.emit('auth', { auth: true });
+            socket.emit('auth', { auth: false });
             console.log(body);
           }
           if (body.status === 1) {
-            socket.emit('auth', { auth: false });
+            socket.emit('auth', { auth: true });
             console.log(body);
           }
           break;
