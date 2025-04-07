@@ -9,6 +9,7 @@ import redis from '@adonisjs/redis/services/main';
 import env from '#start/env';
 
 interface UserTactium {
+  userId: number;
   dispositivo: string;
   usuario: string;
   senha: string;
@@ -98,18 +99,26 @@ export default class SocketIoProvider {
       console.log('ID do usuário:', userId);
       */
 
-      socket.on('auth', async (data) => {
-        const userTactium: UserTactium = {
-          dispositivo: data.dispositivo,
-          usuario: data.usuario,
-          senha: data.senha,
-        };
+      socket.on('refresh', async (data: { dispositivo: string }) => {
+        const userSocket = SocketIoProvider.getUserSocketByDispositivo(
+          data.dispositivo
+        );
+        if (userSocket) {
+          userSocket.socket.disconnect();
+          userSocket.socket = socket;
+          console.log('Usuário Refresh');
+          return;
+        }
+      });
+
+      socket.on('auth', async (data: UserTactium) => {
+        const userTactium: UserTactium = { ...data };
 
         try {
           userTactium.idLogon = await this.loginAgente(
-            userTactium.dispositivo,
-            userTactium.usuario,
-            userTactium.senha
+            data.dispositivo,
+            data.usuario,
+            data.senha
           );
           SocketIoProvider.setUserSocket(
             data.userId,
@@ -206,6 +215,11 @@ export default class SocketIoProvider {
     return userSocket?.socket;
   }
 
+  /**
+   * Get the socket instance by dispositivo
+   * @param dispositivo
+   * @returns Socket | undefined
+   */
   public static getSocketByDispositivo(
     dispositivo: string
   ): Socket | undefined {
@@ -213,6 +227,20 @@ export default class SocketIoProvider {
       (userSocket) => userSocket.dispositivo === dispositivo
     );
     return userSocket?.socket;
+  }
+
+  /**
+   * Get object type UserSocket by dispositivo
+   * @param dispositivo
+   * @returns UserSocket | undefined
+   */
+  public static getUserSocketByDispositivo(
+    dispositivo: string
+  ): UserSocket | undefined {
+    const userSocket = this.usersAndSockets.find(
+      (userSocket) => userSocket.dispositivo === dispositivo
+    );
+    return userSocket;
   }
 
   public static async loginTactium() {
@@ -354,6 +382,46 @@ export default class SocketIoProvider {
       }
 
       await delay(delayBetweenInterval);
+    }
+  }
+
+  public async logoffAgente(
+    dispositivo: string,
+    usuario: string,
+    senha: string
+  ): Promise<string> {
+    const urlTactium = env.get('TACTIUM_URL');
+    const body = {
+      dispositivo,
+      usuario,
+      senha,
+    };
+
+    try {
+      const response = await fetch(`${urlTactium}/agente/logoff`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${SocketIoProvider.token}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        const data = (await response.json()) as LoginResponse;
+        if (data.status === 0 && data.dados) {
+          console.log('Login realizado com sucesso!');
+          return data.dados.idLogon;
+        } else {
+          console.error('Login realizado, mas dados inválidos:', data);
+          throw new Error('Falha ao realizar login');
+        }
+      } else {
+        console.error('Falha ao realizar login:', response.status);
+        throw new Error('Falha ao realizar login');
+      }
+    } catch (error) {
+      throw new Error('Falha ao realizar login');
     }
   }
 }

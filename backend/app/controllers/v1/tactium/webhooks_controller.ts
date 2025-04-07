@@ -39,6 +39,9 @@ export default class WebhooksController {
           if (body.status === 1) {
             socket.emit('auth', { auth: false });
             console.log(body);
+            SocketIoProvider.removeSocketById(socket.id);
+            socket.disconnect();
+            console.log('Socket disconnected:', socket.id);
           }
           break;
         case eventoCodes.AGENTE_LOGOFF:
