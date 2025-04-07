@@ -103,6 +103,8 @@ export default class SocketIoProvider {
         const userSocket = SocketIoProvider.getUserSocketByDispositivo(
           data.dispositivo
         );
+        console.log('Refresh', data.dispositivo);
+        console.log(userSocket);
         if (userSocket) {
           userSocket.socket.disconnect();
           userSocket.socket = socket;
