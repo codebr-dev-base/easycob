@@ -141,7 +141,6 @@ export default class SocketIoProvider {
 
       socket.on('disconnect', () => {
         console.log('Cliente desconectado:', socket.id);
-        SocketIoProvider.removeSocketById(socket.id);
       });
     });
   }
