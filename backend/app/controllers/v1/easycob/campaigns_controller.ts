@@ -68,6 +68,8 @@ export default class CampaignsController {
     try {
       const newFileName = await this.service.handlerFile(request);
 
+      console.log(newFileName);
+
       const campaign = await Campaign.create({
         ...payload,
         fileName: `/csv/${newFileName}`,
