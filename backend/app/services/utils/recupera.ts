@@ -334,7 +334,11 @@ export async function createActionForClient(
 
 export function makeNameQueue(type: string, subsidiary: string) {
   const local = string.pascalCase(
-    string.camelCase(subsidiary).replace('aguasDe', '')
+    string
+      .camelCase(subsidiary)
+      .replace('aguasDe', '')
+      .replace('aguasDo', '')
+      .replace('aguasDa', '')
   );
   return `SendRecupera:${type}:${local}`;
   //return `SendRecupera`;
