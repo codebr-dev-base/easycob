@@ -12,6 +12,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import User from '#models/user';
 import string from '@adonisjs/core/helpers/string';
+import env from '#start/env';
 
 export interface CsvRow {
   cod_credor_des_regis: string;
@@ -57,8 +58,11 @@ export default class CampaignService {
 
     const dateTime = new Date().getTime();
     const newFileName = `${dateTime}.${file.extname}`;
-    //TODO corrigir antes de ir para produção altereção para teste
-    const destinationPath = app.makePath('../uploads/csv');
+    const nodeEnv = env.get('NODE_ENV') ? env.get('NODE_ENV') : 'production';
+    let destinationPath = app.makePath('../uploads/xlsx');
+    if (nodeEnv === 'development') {
+      destinationPath = app.makePath('uploads/xlsx');
+    }
     //const destinationPath = app.makePath('uploads/csv');
     const fullPath = path.join(destinationPath, newFileName);
 
