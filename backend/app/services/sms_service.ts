@@ -241,12 +241,10 @@ export default class SmsService {
             item.descricao = returnBatch[i].descricao;
             item.messageid = returnBatch[i].messageid;
             item.codigo_status = returnBatch[i].codigo_status;
-            item.shipping = item.shipping + 1;
             await item.save();
-
             await this.createAction(item, clientsGroups, campaign);
           } else {
-            item.shipping = item.shipping + 1;
+            item.shipping = -1;
             item.status = 'Error';
             item.valid = true;
             await item.save();
@@ -259,7 +257,7 @@ export default class SmsService {
         await CatchLog.create({
           classJob: 'SendSms',
           payload: JSON.stringify(campaign.toJSON()),
-          error: JSON.stringify(error),
+          error: JSON.stringify(error) + ' ' + batch,
         });
       }
     }
@@ -278,8 +276,16 @@ export default class SmsService {
       .whereNotNull('contato')
       .whereNull('messageid')
       .where('valid', true)
-      .where('shipping', '<', 4)
+      .where('shipping', 0)
       .limit(limit);
+
+    await CampaignLot.query()
+      .where(
+        'id',
+        'in',
+        lots.map((lot) => lot.id)
+      )
+      .update({ shipping: 1 });
 
     if (newLots.length > 0) {
       await this.works(campaign, newLots);

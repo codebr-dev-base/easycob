@@ -343,3 +343,31 @@ export function makeNameQueue(type: string, subsidiary: string) {
   return `SendRecupera:${type}:${local}`;
   //return `SendRecupera`;
 }
+
+interface MocObject {
+  messageid: string;
+  descricao: string;
+  codigo_status: number;
+}
+
+export function gerarMoc(quant: number): MocObject[] {
+  const resultado: {
+    messageid: string;
+    descricao: string;
+    codigo_status: number;
+  }[] = [];
+  for (let i = 0; i < quant; i++) {
+    const timestamp = Date.now().toString().slice(0, 10); // Milissegundos desde a época (aproximadamente os primeiros 10 dígitos)
+    const randomHex = Math.random().toString(16).substring(2, 18); // Gera uma string hexadecimal aleatória
+
+    // Combina os elementos para criar o messageid no padrão
+    const messageid = `${timestamp}${randomHex}`;
+
+    resultado.push({
+      messageid: messageid,
+      descricao: 'Mensagem enviada com sucesso',
+      codigo_status: 200,
+    });
+  }
+  return resultado;
+}

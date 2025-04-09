@@ -59,9 +59,9 @@ export default class CampaignService {
     const dateTime = new Date().getTime();
     const newFileName = `${dateTime}.${file.extname}`;
     const nodeEnv = env.get('NODE_ENV') ? env.get('NODE_ENV') : 'production';
-    let destinationPath = app.makePath('../uploads/xlsx');
+    let destinationPath = app.makePath('../uploads/csv');
     if (nodeEnv === 'development') {
-      destinationPath = app.makePath('uploads/xlsx');
+      destinationPath = app.makePath('uploads/csv');
     }
     //const destinationPath = app.makePath('uploads/csv');
     const fullPath = path.join(destinationPath, newFileName);

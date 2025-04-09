@@ -296,14 +296,13 @@ export default class EmailService {
             item.descricao = 'Envio inserido para processamento';
             item.messageid = messageId;
             item.codigo_status = '13';
-            item.shipping = item.shipping + 1;
             await item.save();
             await this.createAction(item, clientsGroups, campaign);
           } catch (error) {
             const item = itemsChunks[i][j];
 
             await item.refresh();
-            item.shipping = item.shipping + 1;
+            item.shipping = -1;
 
             this.blacklist = this.blacklist.filter(
               (standardized) => standardized !== item.standardized
@@ -347,8 +346,16 @@ export default class EmailService {
       .whereNotNull('contato')
       .whereNull('messageid')
       .where('valid', true)
-      .where('shipping', '<', 4)
+      .where('shipping', 0)
       .limit(limit);
+
+    await CampaignLot.query()
+      .where(
+        'id',
+        'in',
+        lots.map((lot) => lot.id)
+      )
+      .update({ shipping: 1 });
 
     if (newLots.length > 0) {
       await this.works(campaign, newLots);

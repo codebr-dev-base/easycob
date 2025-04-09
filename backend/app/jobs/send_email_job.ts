@@ -29,7 +29,17 @@ export default class SendEmailJob extends Job {
           .whereNotNull('contato')
           .whereNull('messageid')
           .where('valid', true)
+          .where('shipping', 0)
           .limit(500);
+
+        await CampaignLot.query()
+          .where(
+            'id',
+            'in',
+            lots.map((lot) => lot.id)
+          )
+          .update({ shipping: 1 });
+
         await service.works(campaign, lots);
       }
     } catch (error) {
