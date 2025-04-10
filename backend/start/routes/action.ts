@@ -65,5 +65,6 @@ export default router
         ]);
       })
       .prefix('/external');
+    router.post('/action/api/create', [ActionsController, 'createByApi']);
   })
   .prefix('/v1');
