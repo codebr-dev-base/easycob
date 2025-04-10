@@ -229,6 +229,26 @@ export default class SmsService {
             'Content-Type': 'application/json',
           },
           timeout: 120000,
+          retry: 1,
+          retryDelay: 120000,
+          async onRequestError({ request, options, error }) {
+            // Log error
+            console.log({ error, request, options });
+            await CatchLog.create({
+              classJob: 'SendSms:request:sms:api',
+              payload: JSON.stringify(batch),
+              error: JSON.stringify({ error, request, options }),
+            });
+          },
+          async onResponseError({ request, response, options }) {
+            // Log error
+            console.log({ response, request, options });
+            await CatchLog.create({
+              classJob: 'SendSms:response:sms:api',
+              payload: JSON.stringify(batch),
+              error: JSON.stringify({ response, request, options }),
+            });
+          },
         });
 
         const returnBatch = JSON.parse(result);
@@ -257,7 +277,7 @@ export default class SmsService {
         await CatchLog.create({
           classJob: 'SendSms',
           payload: JSON.stringify(campaign.toJSON()),
-          error: JSON.stringify(error) + ' ' + batch,
+          error: JSON.stringify({ error, batch }),
         });
       }
     }
