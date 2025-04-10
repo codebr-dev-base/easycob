@@ -29,10 +29,12 @@ export default class ResendAction extends BaseCommand {
           ) as pa ON a.cod_credor_des_regis = pa.cod_credor_des_regis
           AND a.created_at = pa.primeiro_acionamento
         `
-      );
+      )
+      .whereNot('a.retornotexto', 'ILIKE', 'RETORNO OK')
+      .whereNot('a.type_action_id', 14);
 
     for (const action of actions) {
-      await handleSendingForRecupera(action);
+      await handleSendingForRecupera(action, 'SendRecupera:SMS:Rio');
     }
   }
 }
