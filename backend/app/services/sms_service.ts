@@ -252,6 +252,7 @@ export default class SmsService {
         });
 
         const returnBatch = JSON.parse(result);
+        // const returnBatch = gerarMoc(batch.envios.length);
 
         for (const [i, item] of chunkLots[index].entries()) {
           if (returnBatch[i].messageid) {
