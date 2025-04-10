@@ -3,7 +3,10 @@ import type { HttpContext } from '@adonisjs/core/http';
 import { inject } from '@adonisjs/core';
 import Action from '#models/action';
 import ActionService from '#services/action_service';
-import { createActionValidator } from '#validators/action_validator';
+import {
+  createActionByApiValidator,
+  createActionValidator,
+} from '#validators/action_validator';
 import User from '#models/user';
 import db from '@adonisjs/lucid/services/db';
 import fs from 'fs';
@@ -234,6 +237,58 @@ export default class ActionsController {
           data,
           message: 'Usuário não existe',
           error: 'Usuário não existe',
+        });
+      }
+    } catch (error) {
+      return response.badRequest({
+        success: false,
+        data: request.all(),
+        message: JSON.stringify(error),
+        error: JSON.stringify(error),
+      });
+    }
+  }
+
+  public async createByApi({ request, response }: HttpContext) {
+    try {
+      const data = request.all();
+
+      const payload = await request.validateUsing(createActionByApiValidator);
+
+      if (await this.service.checkExisteContract(payload.desContr)) {
+        const aggregation = await this.service.getAggregationContract(
+          payload.desContr
+        );
+
+        const aggregationClient = await this.service.getAggregationClient(
+          payload.codCredorDesRegis
+        );
+
+        const datVenciTotal = new Date(aggregationClient.dat_venci_total);
+
+        const intervalTotal = DateTime.now().diff(
+          DateTime.fromISO(datVenciTotal.toISOString()),
+          'days'
+        );
+
+        const daysTotal = intervalTotal.as('days');
+
+        const action = await Action.create({
+          ...aggregation,
+          ...payload,
+          datVenciTotal: DateTime.fromISO(datVenciTotal.toISOString()),
+          dayLateTotal: Math.floor(daysTotal),
+          valTotal: aggregationClient.val_total,
+          pecldTotal: aggregationClient.pecld_total,
+        });
+
+        return this.service.afterCreate(action, data);
+      } else {
+        return response.badRequest({
+          success: false,
+          message: 'Contrato Inativo',
+          error: 'Contrato Inativo',
+          data,
         });
       }
     } catch (error) {
