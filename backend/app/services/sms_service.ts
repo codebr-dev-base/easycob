@@ -229,11 +229,18 @@ export default class SmsService {
             'Content-Type': 'application/json',
           },
           timeout: 120000,
-          retry: 1,
+          retry: 0,
           retryDelay: 120000,
           async onRequestError({ request, options, error }) {
             // Log error
             console.log({ error, request, options });
+            await CampaignLot.query()
+              .where(
+                'id',
+                'in',
+                chunkLots[index].map((lot: CampaignLot) => lot.id)
+              )
+              .update({ shipping: -1, status: 'Error', valid: true });
             await CatchLog.create({
               classJob: 'SendSms:request:sms:api',
               payload: JSON.stringify(batch),
@@ -243,6 +250,13 @@ export default class SmsService {
           async onResponseError({ request, response, options }) {
             // Log error
             console.log({ response, request, options });
+            await CampaignLot.query()
+              .where(
+                'id',
+                'in',
+                chunkLots[index].map((lot: CampaignLot) => lot.id)
+              )
+              .update({ shipping: -1, status: 'Error', valid: true });
             await CatchLog.create({
               classJob: 'SendSms:response:sms:api',
               payload: JSON.stringify(batch),
@@ -264,17 +278,16 @@ export default class SmsService {
             item.codigo_status = returnBatch[i].codigo_status;
             await item.save();
             await this.createAction(item, clientsGroups, campaign);
-          } else {
-            item.shipping = -1;
-            item.status = 'Error';
-            item.valid = true;
-            await item.save();
-            this.blacklist = this.blacklist.filter(
-              (standardized) => standardized !== item.standardized
-            );
           }
         }
       } catch (error) {
+        await CampaignLot.query()
+          .where(
+            'id',
+            'in',
+            chunkLots[index].map((lot: CampaignLot) => lot.id)
+          )
+          .update({ shipping: -1, status: 'Error', valid: true });
         await CatchLog.create({
           classJob: 'SendSms',
           payload: JSON.stringify(campaign.toJSON()),
