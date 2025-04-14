@@ -19,8 +19,10 @@ interface UserTactium {
 interface UserSocket {
   userId: number;
   socket: Socket;
-  userTactiumId: string;
   dispositivo: string;
+  usuario: string;
+  senha: string;
+  idLogon: string;
 }
 
 interface AuthResponse {
@@ -115,7 +117,7 @@ export default class SocketIoProvider {
         }
       });
 
-      socket.on('auth', async (data: UserTactium) => {
+      socket.on('login', async (data: UserTactium) => {
         const userTactium: UserTactium = { ...data };
 
         try {
@@ -124,15 +126,44 @@ export default class SocketIoProvider {
             data.usuario,
             data.senha
           );
-          SocketIoProvider.setUserSocket(
-            data.userId,
+          SocketIoProvider.setUserSocket({
+            userId: userTactium.userId,
             socket,
-            userTactium.idLogon,
-            userTactium.dispositivo
-          );
+            dispositivo: userTactium.dispositivo,
+            usuario: userTactium.usuario,
+            senha: userTactium.senha,
+            idLogon: userTactium.idLogon,
+          });
         } catch (error) {
           console.error('Erro ao realizar login:', error);
           //return;
+        }
+      });
+
+      socket.on('logout', async (data: UserTactium) => {
+        const userSocket = SocketIoProvider.getUserSocketByDispositivo(
+          data.dispositivo
+        );
+
+        if (userSocket) {
+          try {
+            const idLogon = await this.logoffAgente(
+              userSocket.dispositivo,
+              userSocket.usuario,
+              userSocket.senha
+            );
+            if (idLogon) {
+              SocketIoProvider.removeSocketByDispositivo(data.dispositivo);
+            } else {
+              throw new Error('Não teve retorno esperado do logoff - idLogon');
+            }
+          } catch (error) {
+            console.error('Erro ao realizar logoff:', error);
+            //return;
+          }
+        } else {
+          console.log('Usuário não encontrado');
+          socket.emit('refresh', { auth: false });
         }
       });
 
@@ -162,13 +193,8 @@ export default class SocketIoProvider {
     return this.usersAndSockets;
   }
 
-  public static setUserSocket(
-    userId: number,
-    socket: Socket,
-    userTactiumId: string,
-    dispositivo: string
-  ) {
-    this.usersAndSockets.push({ userId, socket, userTactiumId, dispositivo });
+  public static setUserSocket(userSocket: UserSocket) {
+    this.usersAndSockets.push(userSocket);
   }
 
   public static removeSocketById(id: string) {
@@ -180,12 +206,6 @@ export default class SocketIoProvider {
   public static removeSocketByUserId(userId: number) {
     this.usersAndSockets = this.usersAndSockets.filter(
       (userSocket) => userSocket.userId !== userId
-    );
-  }
-
-  public static removeSocketByUserTactiumId(userTactiumId: string) {
-    this.usersAndSockets = this.usersAndSockets.filter(
-      (userSocket) => userSocket.userTactiumId !== userTactiumId
     );
   }
 
@@ -205,15 +225,6 @@ export default class SocketIoProvider {
   public static getSocketByUserId(userId: number): Socket | undefined {
     const userSocket = this.usersAndSockets.find(
       (userSocket) => userSocket.userId === userId
-    );
-    return userSocket?.socket;
-  }
-
-  public static getSocketByUserTactiumId(
-    userTactiumId: string
-  ): Socket | undefined {
-    const userSocket = this.usersAndSockets.find(
-      (userSocket) => userSocket.userTactiumId === userTactiumId
     );
     return userSocket?.socket;
   }
@@ -349,6 +360,7 @@ export default class SocketIoProvider {
   public static getToken(): string | null | undefined {
     return this.token;
   }
+
   public static getExpiraEm(): string | null | undefined {
     return this.expiraEm;
   }
@@ -375,7 +387,7 @@ export default class SocketIoProvider {
               Authorization: `Bearer ${SocketIoProvider.token}`,
             },
             body: JSON.stringify({
-              idLogon: usersAndSocket.userTactiumId,
+              idLogon: usersAndSocket.idLogon,
             }),
           });
         } catch (error) {
