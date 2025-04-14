@@ -153,6 +153,7 @@ export default class SocketIoProvider {
             );
             if (status === 0) {
               SocketIoProvider.removeSocketByDispositivo(data.dispositivo);
+              socket.emit('refresh', { auth: false });
             } else {
               throw new Error('Não teve retorno esperado do logoff - idLogon');
             }
