@@ -421,7 +421,7 @@ export default class SocketIoProvider {
         },
         body: JSON.stringify(body),
       });
-      console.log(response);
+      console.log(response.json());
       if (response.ok) {
         const data = (await response.json()) as LoginResponse;
         if (data.status === 0 && data.dados) {
