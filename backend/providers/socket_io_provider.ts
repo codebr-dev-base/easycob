@@ -106,7 +106,6 @@ export default class SocketIoProvider {
           data.dispositivo
         );
         console.log('Refresh', data.dispositivo);
-        console.log(userSocket);
         if (userSocket) {
           userSocket.socket.disconnect();
           userSocket.socket = socket;
@@ -147,12 +146,12 @@ export default class SocketIoProvider {
 
         if (userSocket) {
           try {
-            const idLogon = await this.logoffAgente(
+            const status = await this.logoffAgente(
               userSocket.dispositivo,
               userSocket.usuario,
               userSocket.senha
             );
-            if (idLogon) {
+            if (status === 0) {
               SocketIoProvider.removeSocketByDispositivo(data.dispositivo);
             } else {
               throw new Error('Não teve retorno esperado do logoff - idLogon');
@@ -404,7 +403,7 @@ export default class SocketIoProvider {
     dispositivo: string,
     usuario: string,
     senha: string
-  ): Promise<string> {
+  ): Promise<string | number> {
     const urlTactium = env.get('TACTIUM_URL');
     const body = {
       dispositivo,
@@ -421,22 +420,21 @@ export default class SocketIoProvider {
         },
         body: JSON.stringify(body),
       });
-      console.log(await response.json());
       if (response.ok) {
         const data = (await response.json()) as LoginResponse;
-        if (data.status === 0 && data.dados) {
-          console.log('Login realizado com sucesso!');
-          return data.dados.idLogon;
+        if (data.status === 0) {
+          console.log('logout realizado com sucesso!');
+          return data.status;
         } else {
-          console.error('Login realizado, mas dados inválidos:', data);
-          throw new Error('Falha ao realizar login');
+          console.error('logout realizado, mas dados inválidos:', data);
+          throw new Error('Falha ao realizar logout');
         }
       } else {
-        console.error('Falha ao realizar login:', response.status);
-        throw new Error('Falha ao realizar login');
+        console.error('Falha ao realizar logout:', response.status);
+        throw new Error('Falha ao realizar logout');
       }
     } catch (error) {
-      throw new Error('Falha ao realizar login');
+      throw new Error('Falha ao realizar logout');
     }
   }
 }
