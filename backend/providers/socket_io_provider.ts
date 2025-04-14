@@ -109,7 +109,9 @@ export default class SocketIoProvider {
           userSocket.socket.disconnect();
           userSocket.socket = socket;
           console.log('Usuário Refresh');
-          return;
+        } else {
+          console.log('Usuário não encontrado');
+          socket.emit('refresh', { auth: false });
         }
       });
 
