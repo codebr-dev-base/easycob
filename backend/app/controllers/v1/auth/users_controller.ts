@@ -120,7 +120,7 @@ export default class UsersController {
         .merge({
           ...payload,
           passwordExpiresAt: dt,
-          password: hash.make(payload.password),
+          password: await hash.make(payload.password),
         })
         .save();
       return user;
