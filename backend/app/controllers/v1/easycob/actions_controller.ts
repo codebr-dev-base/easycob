@@ -61,9 +61,9 @@ export default class ActionsController {
     const actions = await db
       .from('public.actions AS a')
       .joinRaw(
-        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
-         ON tac.des_contr = a.des_contr
-         AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
+        `LEFT JOIN recupera.tbl_arquivos_contratos AS tac
+         ON tac.des_contr = a.des_contr`
+        // AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
       )
       .joinRaw(
         'LEFT JOIN public.subsidiaries AS s ON s.nom_loja = tac.nom_loja'
