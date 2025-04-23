@@ -116,15 +116,13 @@ export default class UsersController {
         throw new Error('The password has already been used');
       }
       const dt: DateTime = DateTime.local().plus({ days: passwordExpires });
-      await user
-        .merge({
-          ...payload,
-          passwordExpiresAt: dt,
-          password: await hash.make(payload.password),
-        })
-        .save();
-      return user;
+      user.password = payload.password;
+      user.passwordExpiresAt = dt;
+      await user.save();
+      response.ok({ message: 'Password updated successfully' });
     } catch (error) {
+      console.log(error);
+      console.log('tivemos um erro');
       response.badRequest({ messages: error.messages });
     }
   }
