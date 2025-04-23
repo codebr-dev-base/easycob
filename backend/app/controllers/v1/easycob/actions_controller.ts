@@ -51,6 +51,10 @@ export default class ActionsController {
     const limit = qs.perPage || '10';
     const orderBy = this.service.generateOrderBy(qs);
 
+    if (this.idExcludeTypeActions.length < 1) {
+      await this.getExcludeTypeActions();
+    }
+
     const descending = qs.descending || 'true';
 
     const selected = await this.service.generateWhereInPaginate(qs);
@@ -87,6 +91,7 @@ export default class ActionsController {
         'ta.name As type_action',
         's.name AS subsidiary'
       )
+      .whereNotIn('a.type_action_id', this.idExcludeTypeActions)
       .where((q) => {
         if (selected) {
           q.whereIn(selected.column, selected.list);
