@@ -116,7 +116,7 @@ export default class ActionsController {
     const actions = await db
       .from('public.actions AS a')
       .joinRaw(
-        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+        `LEFT JOIN recupera.tbl_arquivos_contratos AS tac
          ON tac.des_contr = a.des_contr
          AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
       )
@@ -365,7 +365,7 @@ export default class ActionsController {
       .from('public.actions AS a')
       .whereNotIn('a.type_action_id', this.idExcludeTypeActions)
       .joinRaw(
-        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+        `LEFT JOIN recupera.tbl_arquivos_contratos AS tac
          ON tac.des_contr = a.des_contr
          AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
       )
@@ -442,7 +442,7 @@ export default class ActionsController {
       .from('public.actions AS a')
       .whereNotIn('a.type_action_id', this.idExcludeTypeActions)
       .joinRaw(
-        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+        `LEFT JOIN recupera.tbl_arquivos_contratos AS tac
          ON tac.des_contr = a.des_contr
          AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
       )
@@ -517,7 +517,7 @@ export default class ActionsController {
       .from('public.actions AS a')
       .whereNotIn('a.type_action_id', this.idExcludeTypeActions)
       .joinRaw(
-        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+        `LEFT JOIN recupera.tbl_arquivos_contratos AS tac
          ON tac.des_contr = a.des_contr
          AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
       )
@@ -603,7 +603,7 @@ export default class ActionsController {
       .from('public.actions AS a')
       .whereNotIn('a.type_action_id', this.idExcludeTypeActions)
       .joinRaw(
-        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+        `LEFT JOIN recupera.tbl_arquivos_contratos AS tac
          ON tac.des_contr = a.des_contr
          AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
       )
@@ -686,7 +686,7 @@ export default class ActionsController {
       .from('public.actions AS a')
       .whereNotIn('a.type_action_id', this.idExcludeTypeActions)
       .joinRaw(
-        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+        `LEFT JOIN recupera.tbl_arquivos_contratos AS tac
          ON tac.des_contr = a.des_contr
          AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
       )
@@ -762,7 +762,7 @@ export default class ActionsController {
     const actionsByUser = await db
       .from('public.actions AS a')
       .joinRaw(
-        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+        `LEFT JOIN recupera.tbl_arquivos_contratos AS tac
          ON tac.des_contr = a.des_contr
          AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
       )
@@ -811,7 +811,7 @@ export default class ActionsController {
       .from('public.actions AS a')
       .whereNotIn('type_action_id', this.idExcludeTypeActions)
       .joinRaw(
-        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+        `LEFT JOIN recupera.tbl_arquivos_contratos AS tac
          ON tac.des_contr = a.des_contr
          AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
       )
@@ -870,7 +870,7 @@ export default class ActionsController {
       .from('public.actions AS a')
       .whereNotIn('type_action_id', this.idExcludeTypeActions)
       .joinRaw(
-        `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+        `LEFT JOIN recupera.tbl_arquivos_contratos AS tac
          ON tac.des_contr = a.des_contr
          AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
       )
