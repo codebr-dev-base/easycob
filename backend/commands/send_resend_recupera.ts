@@ -17,14 +17,17 @@ export default class SendResendRecupera extends BaseCommand {
     const actions = await Action.query()
       .whereILike(
         'retornotexto',
-        '%Erro ao Incluir ocorrencia: Passo 2 - Inicializa: Passo 16 - Msg: Erro ao autenticar o operador.%'
+        '%Erro ao Incluir ocorrencia: Passo 4 - Cliente não está na assessoria.%'
       )
-      .whereRaw("created_at::date > '2024-10-30'");
+      .whereRaw("created_at::date > '2025-04-01'")
+      .where('wallet', 'F');
 
     console.log(actions.length);
 
     for (const action of actions) {
-      await handleSendingForRecupera(action);
+      action.wallet = 'V';
+      await action.save();
+      await handleSendingForRecupera(action, 'ResendRecupera');
     }
     console.log(actions.length);
   }
