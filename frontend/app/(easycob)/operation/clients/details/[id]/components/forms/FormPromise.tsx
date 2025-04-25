@@ -99,7 +99,7 @@ export default function FormPromise({
       valPrinc: parseFloat(`${contract?.valPrinc}`),
       datVenci: contract?.datVenci,
       channel: data.channel,
-      wallet: client.isFixa ? 'F' : 'V'
+      wallet: contract?.isFixa ? 'F' : 'V'
     };
 
     let p;

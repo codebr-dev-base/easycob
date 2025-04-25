@@ -20,6 +20,7 @@ import SendMailExternalJob, {
 } from '#jobs/send_mail_external_job';
 import { DateTime } from 'luxon';
 import Subsidiary from '#models/subsidiary';
+import Contract from '#models/recovery/contract';
 
 @inject()
 export default class ActionsController {
@@ -209,6 +210,18 @@ export default class ActionsController {
 
             const daysTotal = intervalTotal.as('days');
 
+            const contract = await Contract.findBy({
+              desContr: payload.desContr,
+            });
+
+            let wallet = 'V';
+
+            if (contract) {
+              if (contract.isFixa) {
+                wallet = 'F';
+              }
+            }
+
             const action = await Action.create({
               ...aggregation,
               ...payload,
@@ -217,6 +230,7 @@ export default class ActionsController {
               dayLateTotal: Math.floor(daysTotal),
               valTotal: aggregationClient.val_total,
               pecldTotal: aggregationClient.pecld_total,
+              wallet,
             });
 
             return this.service.afterCreate(action, data);
@@ -278,6 +292,18 @@ export default class ActionsController {
 
         const daysTotal = intervalTotal.as('days');
 
+        const contract = await Contract.findBy({
+          desContr: payload.desContr,
+        });
+
+        let wallet = 'V';
+
+        if (contract) {
+          if (contract.isFixa) {
+            wallet = 'F';
+          }
+        }
+
         const action = await Action.create({
           ...aggregation,
           ...payload,
@@ -285,6 +311,7 @@ export default class ActionsController {
           dayLateTotal: Math.floor(daysTotal),
           valTotal: aggregationClient.val_total,
           pecldTotal: aggregationClient.pecld_total,
+          wallet,
         });
 
         return this.service.afterCreate(action, data);

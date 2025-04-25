@@ -96,7 +96,7 @@ export default function FormSimple({
       dayLate: contract?.datVenci ? calcDaylate(contract?.datVenci) : "",
       datVenci: contract?.datVenci,
       channel: data.channel,
-      wallet: client.isFixa ? 'F' : 'V'
+      wallet: contract?.isFixa ? 'F' : 'V'
     };
 
     try {
