@@ -103,7 +103,7 @@ export default class NegotiationInvoicesController {
             q.whereILike('cls.nom_clien', `%${qs.keyword}%`);
           }
 
-          if (qs.nomLoja) {
+          if (qs.nomLoja && qs.nomLoja !== 'all') {
             q.where('s.nom_loja', `%${qs.nomLoja}%`);
           }
 
