@@ -47,6 +47,7 @@ export default class NegotiationOfPaymentsController {
         .select('a.contato as contato')
         .select('a.des_contr as des_contr')
         .select('a.cod_credor_des_regis as cod_credor_des_regis')
+        .select('s.name AS subsidiary')
         .innerJoin('actions as a', 'a.id', '=', 'n.action_id')
         .innerJoin('users as u', 'u.id', '=', 'a.user_id')
         .innerJoin(
@@ -54,6 +55,18 @@ export default class NegotiationOfPaymentsController {
           'cls.cod_credor_des_regis',
           '=',
           'a.cod_credor_des_regis'
+        )
+        .innerJoin(
+          'recupera.tbl_arquivos_contratos AS tac',
+          'tac.des_contr',
+          '=',
+          'a.des_contr'
+        )
+        .innerJoin(
+          'public.subsidiaries AS s',
+          's.nom_loja',
+          '=',
+          'tac.nom_loja'
         )
         .where((q) => {
           if (qs.startDate && qs.endDate) {
@@ -85,6 +98,10 @@ export default class NegotiationOfPaymentsController {
 
           if (qs.keyword) {
             q.whereILike('cls.nom_clien', `%${qs.keyword}%`);
+          }
+
+          if (qs.nomLoja) {
+            q.where('s.nom_loja', `%${qs.nomLoja}%`);
           }
 
           return q;

@@ -116,8 +116,11 @@ export default class UsersController {
         throw new Error('The password has already been used');
       }
       const dt: DateTime = DateTime.local().plus({ days: passwordExpires });
+      user.password = '';
+      await user.save();
       user.password = payload.password;
       user.passwordExpiresAt = dt;
+      console.log(user);
       await user.save();
       response.ok({ message: 'Password updated successfully' });
     } catch (error) {

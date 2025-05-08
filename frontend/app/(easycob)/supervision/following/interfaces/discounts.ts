@@ -1,7 +1,7 @@
 import {
   INegotiationInvoice,
   INegotiationOfPayment,
-  IPromiseOfPayment
+  IPromiseOfPayment,
 } from "@/app/(easycob)/interfaces/actions";
 import { IQueryPaginationParams } from "@/app/interfaces/pagination";
 
@@ -13,6 +13,7 @@ export interface IQueryDiscountParams extends IQueryPaginationParams {
   endDateCreate?: string;
   status?: boolean;
   discount?: boolean;
+  nomLoja?: string;
 }
 
 export interface INegotiationHistory {

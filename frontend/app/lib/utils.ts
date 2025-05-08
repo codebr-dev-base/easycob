@@ -4,6 +4,22 @@
  * @returns A data formatada no padrão brasileiro (ex: 04/09/2024).
  */
 
+export function formatarDataHora(dataISO) {
+  const data = new Date(dataISO);
+
+  const formatoBrasil = new Intl.DateTimeFormat('pt-BR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZone: 'America/Sao_Paulo' // Define o fuso horário para o Brasil
+  });
+
+  return formatoBrasil.format(data);
+}
+
 export function formatDateToBR(
   isoDateString: string | null | undefined
 ): string {

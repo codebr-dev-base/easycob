@@ -1,6 +1,6 @@
 import { IAction, ITypeAction } from "@/app/(easycob)/interfaces/actions";
 import { IUser } from "@/app/interfaces/auth";
-import { formatCurrencyToBRL, formatDateToBR } from "@/app/lib/utils";
+import { formatCurrencyToBRL, formatarDataHora } from "@/app/lib/utils";
 import {
   Card,
   CardContent,
@@ -87,7 +87,7 @@ export default function CardAction({ action }: { action: IAction }) {
         </CardContent>
         <CardFooter>
           <p>
-            Atualizado em: {formatDateToBR(`${action.updatedAt}`)} Operador:{" "}
+            Atualizado em: {formatarDataHora(`${action.updatedAt}`)} Operador:{" "}
             {action.user.name}{" "}
           </p>
         </CardFooter>

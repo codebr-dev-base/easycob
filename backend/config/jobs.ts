@@ -29,6 +29,7 @@ const jobsConfig = defineConfig({
     'SendRecupera:EME:Prolagos',
     'SendRecupera:EME:Rio',
     'SendRecupera:EME:Jaru',
+    'SendRecupera:EME:Guariroba',
     'SendRecupera:SMS:RolimDeMoura',
     'SendRecupera:SMS:Ariquemes',
     'SendRecupera:SMS:PimentaBueno',
@@ -40,6 +41,7 @@ const jobsConfig = defineConfig({
     'SendRecupera:SMS:Prolagos',
     'SendRecupera:SMS:Rio',
     'SendRecupera:SMS:Jaru',
+    'SendRecupera:SMS:Guariroba',
     'SendInvoice',
   ],
 

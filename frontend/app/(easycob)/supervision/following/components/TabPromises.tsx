@@ -163,6 +163,7 @@ export default function TabPromises({
                     refresh={refresh}
                   />
                 </TableHead>
+                <TableHead>Unidade</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -211,6 +212,7 @@ export default function TabPromises({
                         </p>
                       </Tooltips>
                     </TableCell>
+                    <TableCell>{promese.subsidiary ? promese.subsidiary : ""}</TableCell>
                     <TableCell className="flex">
                       <Button asChild className="mx-1">
                         <Link
@@ -231,7 +233,9 @@ export default function TabPromises({
           pending ? "opacity-0 hidden" : "opacity-100"
         }`}
       >
-        {promises && <Pagination meta={promises.meta} query={query} refresh={refresh} />}
+        {promises && (
+          <Pagination meta={promises.meta} query={query} refresh={refresh} />
+        )}
       </CardFooter>
     </Card>
   );

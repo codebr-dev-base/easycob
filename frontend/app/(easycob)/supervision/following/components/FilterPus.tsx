@@ -29,7 +29,7 @@ import MultipleSelector, { Option } from "@/components/ui/multiple-selector";
 import { ChangeEvent, useEffect, useState } from "react";
 import { fetchUserByModule } from "@/app/(easycob)/admin/users/service/users";
 import { IQueryDiscountParams } from "../interfaces/discounts";
-import { IReturnType } from "../../actions/interfaces/action";
+import { IReturnType, ISubsidiary } from "../../actions/interfaces/action";
 import { DatePicker } from "@/app/(easycob)/components/DatePicker";
 import { DateRange } from "react-day-picker";
 import {
@@ -41,6 +41,7 @@ import {
 import { FaSearch } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { DatePickerClear } from "@/app/(easycob)/components/DatePickerClear";
+import { fetchSubsidiaries } from "../../actions/service/actions";
 
 export default function FilterPus({
   query,
@@ -53,10 +54,17 @@ export default function FilterPus({
   const [status, setStatus] = useState(false);
   const [discount, setDiscount] = useState(false);
   const [operators, setOperators] = useState<IUser[]>([]);
+  const [subsidiaries, setSubsidiaries] = useState<ISubsidiary[]>([]);
 
   useEffect(() => {
     fetchUserByModule("operator", true).then((value) => {
       setOperators(value ? value : []);
+    });
+
+    fetchSubsidiaries().then((result) => {
+      if (result) {
+        setSubsidiaries(result);
+      }
     });
 
     const opts: Option[] = [];
@@ -121,6 +129,18 @@ export default function FilterPus({
       query.endDateCreate = range.to?.toISOString().split("T")[0];
       refresh();
     }
+  };
+
+  const handleChangeSubsidiary = (value: string) => {
+    console.log(value);
+    if (value == "all") {
+      query.nomLoja = "";
+    } else {
+      query.nomLoja = value;
+    }
+    query.page = 1;
+    query.perPage = 10;
+    refresh();
   };
 
   return (
@@ -204,6 +224,27 @@ export default function FilterPus({
                   onCheckedChange={handleChangeDiscount}
                 />
                 <span>Acordo com descontos</span>
+              </Label>
+            </div>
+            <div className="flex">
+              <Label className="w-full">
+                Unidade:
+                <Select onValueChange={handleChangeSubsidiary} defaultValue={query.nomLoja}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Unidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    {subsidiaries.map((subsidiary) => (
+                      <SelectItem
+                        key={subsidiary.nomLoja}
+                        value={`${subsidiary.nomLoja}`}
+                      >
+                        {subsidiary.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </Label>
             </div>
           </CardContent>

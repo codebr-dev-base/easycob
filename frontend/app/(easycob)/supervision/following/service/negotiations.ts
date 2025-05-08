@@ -16,6 +16,7 @@ export const queryNegotiations: IQueryDiscountParams = {
   descending: false,
   startDate: new Date().toISOString().split("T")[0],
   endDate: new Date().toISOString().split("T")[0],
+  nomLoja: "all"
 };
 
 export const fetchNegotiations = async (): Promise<{
