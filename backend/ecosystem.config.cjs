@@ -188,6 +188,16 @@ module.exports = {
         TZ: 'America/Fortaleza',
       },
     },
+    {
+      name: 'queue:SendRecupera:EME:Guariroba',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:EME:Guariroba',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
     // Filas SendRecupera:SMS
     {
       name: 'queue:SendRecupera:SMS:RolimDeMoura',
@@ -293,6 +303,16 @@ module.exports = {
       name: 'queue:SendRecupera:SMS:Jaru',
       script: 'ace.js',
       args: 'jobs:listen --queue=SendRecupera:SMS:Jaru',
+      instances: 1,
+      autorestart: true,
+      env: {
+        TZ: 'America/Fortaleza',
+      },
+    },
+    {
+      name: 'queue:SendRecupera:SMS:Guariroba',
+      script: 'ace.js',
+      args: 'jobs:listen --queue=SendRecupera:SMS:Guariroba',
       instances: 1,
       autorestart: true,
       env: {
