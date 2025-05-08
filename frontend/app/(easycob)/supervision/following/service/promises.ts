@@ -16,7 +16,7 @@ export const queryPromises: IQueryDiscountParams = {
   descending: false,
   startDate: new Date().toISOString().split("T")[0],
   endDate: new Date().toISOString().split("T")[0],
-  nomLoja: "all"
+  nomLoja: "all",
 };
 
 export const fetchPromises = async (): Promise<{
@@ -37,13 +37,10 @@ export const fetchPromises = async (): Promise<{
 };
 
 export const updatePromise = async (partial: any) => {
-  const result = await fetchAuth(
-    `${url}/promise/${partial.id}`,
-    {
-      method: "PUT",
-      body: JSON.stringify(partial),
-    }
-  );
+  const result = await fetchAuth(`${url}/promise/${partial.id}`, {
+    method: "PUT",
+    body: JSON.stringify(partial),
+  });
 
   if (result.success) {
     //console.log("Dados recebidos:", result.data);
