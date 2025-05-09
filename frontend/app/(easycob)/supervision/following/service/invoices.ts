@@ -16,7 +16,6 @@ export const queryInvoices: IQueryDiscountParams = {
   descending: false,
   startDate: new Date().toISOString().split("T")[0],
   endDate: new Date().toISOString().split("T")[0],
-  nomLoja: "all"
 };
 
 export const fetchInvoices = async (): Promise<{
@@ -37,13 +36,10 @@ export const fetchInvoices = async (): Promise<{
 };
 
 export const updateInvoice = async (partial: any) => {
-  const result = await fetchAuth(
-    `${url}/negotiation/invoice/${partial.id}`,
-    {
-      method: "PUT",
-      body: JSON.stringify(partial),
-    }
-  );
+  const result = await fetchAuth(`${url}/negotiation/invoice/${partial.id}`, {
+    method: "PUT",
+    body: JSON.stringify(partial),
+  });
 
   if (result.success) {
     //console.log("Dados recebidos:", result.data);
