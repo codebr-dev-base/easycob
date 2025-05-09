@@ -109,7 +109,7 @@ export default class PromiseOfPaymentsController {
           }
 
           if (qs.nomLoja && qs.nomLoja !== 'all') {
-            q.where('s.nom_loja', `%${qs.nomLoja}%`);
+            q.where('s.nom_loja', `${qs.nomLoja}`);
           }
 
           return q;

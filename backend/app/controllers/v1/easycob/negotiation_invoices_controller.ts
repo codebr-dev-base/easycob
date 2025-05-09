@@ -104,7 +104,7 @@ export default class NegotiationInvoicesController {
           }
 
           if (qs.nomLoja && qs.nomLoja !== 'all') {
-            q.where('s.nom_loja', `%${qs.nomLoja}%`);
+            q.where('s.nom_loja', `${qs.nomLoja}`);
           }
 
           return q;

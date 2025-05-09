@@ -134,7 +134,9 @@ export default function FilterPus({
   const handleChangeSubsidiary = (value: string) => {
     console.log(value);
     if (value == "all") {
-      query.nomLoja = "";
+      if (query.nomLoja) {
+        delete query.nomLoja;
+      }
     } else {
       query.nomLoja = value;
     }
