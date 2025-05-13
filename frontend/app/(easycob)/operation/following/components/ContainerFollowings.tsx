@@ -67,10 +67,22 @@ export default function ContainerFollowings({
   const refresh = useCallback(
     (newParams: Partial<IQueryFollowingParams>) => {
       setQueryParams(newParams);
-      fetchNegotiations();
-      fetchAgreements();
-      fetchInvoices();
-      fetchPromises();
+      switch (type) {
+        case "negotiations":
+          fetchNegotiations();
+          break;
+        case "agreements":
+          setQueryParams({ typeActionIds: 1 });
+          fetchAgreements();
+          break;
+        case "promises":
+          setQueryParams({ typeActionIds: 2 });
+          fetchPromises();
+          break;
+        default:
+          fetchInvoices();
+          break;
+      }
     },
     [setQueryParams, fetchNegotiations, fetchPromises, fetchInvoices]
   );

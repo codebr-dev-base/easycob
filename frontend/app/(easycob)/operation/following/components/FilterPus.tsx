@@ -35,6 +35,9 @@ import { FaSearch } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { DatePickerClear } from "@/app/(easycob)/components/DatePickerClear";
 import { checkUserModule } from "@/app/lib/auth";
+import { ISubsidiary } from "@/app/(easycob)/supervision/actions/interfaces/action";
+import { fetchSubsidiaries } from "@/app/(easycob)/supervision/actions/service/actions";
+import { parseStringDateToDate } from "@/app/lib/utils";
 
 export default function FilterPus({
   query,
@@ -43,48 +46,22 @@ export default function FilterPus({
   query: IQueryFollowingParams;
   refresh: (newParams: Partial<IQueryFollowingParams>) => void;
 }) {
-  const [status, setStatus] = useState(true);
+  const [status, setStatus] = useState(false);
   const [discount, setDiscount] = useState(false);
-  const [rangeDateCreate, setRangeDateCreate] = useState<DateRange | undefined>(
-    undefined
-  );
-  const [rangeDate, setRangeDate] = useState<DateRange>({
-    from: new Date(new Date().setHours(1, 1, 1, 0)),
-    to: new Date(new Date().setHours(23, 59, 59, 999)),
-  });
   const [operators, setOperators] = useState<IUser[]>([]);
+  const [subsidiaries, setSubsidiaries] = useState<ISubsidiary[]>([]);
 
   useEffect(() => {
-    if (query.status && query.status == "true") {
-      setStatus(true);
-    } else if (query.status && query.status == "false") {
-      setStatus(false);
-    }
+    fetchUserByModule("operator", true).then((value) => {
+      setOperators(value ? value : []);
+    });
 
-    if (query.discount && query.discount == "true") {
-      setDiscount(true);
-    } else if (query.discount && query.discount == "false") {
-      setDiscount(false);
-    }
-  }, [query.status, query.discount]);
-
-  useEffect(() => {
-    if (query.startDate && query.endDate) {
-      setRangeDate({
-        from: new Date(query.startDate),
-        to: new Date(query.endDate),
-      });
-    }
-  }, [query.startDate, query.endDate]);
-
-  useEffect(() => {
-    if (query.startDateCreate && query.endDateCreate) {
-      setRangeDateCreate({
-        from: new Date(query.startDateCreate),
-        to: new Date(query.endDateCreate),
-      });
-    }
-  }, [query.startDateCreate, query.endDateCreate]);
+    fetchSubsidiaries().then((result) => {
+      if (result) {
+        setSubsidiaries(result);
+      }
+    });
+  }, []);
 
   const handleChangeStatus = () => {
     setStatus(!status);
@@ -133,6 +110,10 @@ export default function FilterPus({
         page: 1,
       });
     }
+  };
+
+  const handleChangeSubsidiary = (value: string) => {
+    refresh({ nomLoja: value == "all" ? "" : value, page: 1 });
   };
 
   return (
@@ -193,7 +174,14 @@ export default function FilterPus({
                 <DatePicker
                   placeholder="Período de vencimento"
                   onChange={handleChangeDate}
-                  defaultDate={rangeDate}
+                  defaultDate={{
+                    from: query.startDate
+                      ? parseStringDateToDate(query.startDate)
+                      : undefined,
+                    to: query.endDate
+                      ? parseStringDateToDate(query.endDate)
+                      : undefined,
+                  }}
                 />
               </Label>
             </div>
@@ -203,7 +191,6 @@ export default function FilterPus({
                 <DatePicker
                   placeholder="Período da criação"
                   onChange={handleChangeDateCreate}
-                  defaultDate={rangeDateCreate}
                 />
               </Label>
             </div>
@@ -225,6 +212,30 @@ export default function FilterPus({
                   onCheckedChange={handleChangeDiscount}
                 />
                 <span>Acordo com descontos</span>
+              </Label>
+            </div>
+            <div className="flex">
+              <Label className="w-full">
+                Unidade:
+                <Select
+                  onValueChange={handleChangeSubsidiary}
+                  defaultValue={query.nomLoja}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Unidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    {subsidiaries.map((subsidiary) => (
+                      <SelectItem
+                        key={subsidiary.nomLoja}
+                        value={`${subsidiary.nomLoja}`}
+                      >
+                        {subsidiary.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </Label>
             </div>
           </CardContent>

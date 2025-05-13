@@ -29,26 +29,21 @@ import MultipleSelector, { Option } from "@/components/ui/multiple-selector";
 import { ChangeEvent, useEffect, useState } from "react";
 import { fetchUserByModule } from "@/app/(easycob)/admin/users/service/users";
 import { IQueryDiscountParams } from "../interfaces/discounts";
-import { IReturnType, ISubsidiary } from "../../actions/interfaces/action";
+import { ISubsidiary } from "../../actions/interfaces/action";
 import { DatePicker } from "@/app/(easycob)/components/DatePicker";
 import { DateRange } from "react-day-picker";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { FaSearch } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { DatePickerClear } from "@/app/(easycob)/components/DatePickerClear";
 import { fetchSubsidiaries } from "../../actions/service/actions";
+import { parseStringDateToDate } from "@/app/lib/utils";
 
 export default function FilterPus({
   query,
   refresh,
 }: {
   query: IQueryDiscountParams;
-  refresh: () => void;
+  refresh: (newParams: Partial<IQueryDiscountParams>) => void;
 }) {
   const [statusOperator, setStatusOperator] = useState(true);
   const [status, setStatus] = useState(false);
@@ -66,35 +61,20 @@ export default function FilterPus({
         setSubsidiaries(result);
       }
     });
-
-    const opts: Option[] = [];
   }, []);
 
   const handleChangeStatus = () => {
-    query.status = !status;
     setStatus(!status);
-    query.page = 1;
-    query.perPage = 10;
-    refresh();
+    refresh({ status: `${!status}`, page: 1 });
   };
 
   const handleChangeDiscount = () => {
-    query.discount = !discount;
     setDiscount(!discount);
-    query.page = 1;
-    query.perPage = 10;
-    refresh();
+    refresh({ discount: `${!discount}`, page: 1 });
   };
 
   const handleChangeOperator = (value: string) => {
-    if (value == "all") {
-      query.userId = "";
-    } else {
-      query.userId = value;
-    }
-    query.page = 1;
-    query.perPage = 10;
-    refresh();
+    refresh({ userId: value == "all" ? "" : value, page: 1 });
   };
 
   useEffect(() => {
@@ -108,41 +88,32 @@ export default function FilterPus({
 
   const handleChangeKeyword = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.name == "keyword") {
-      if (e.target.value.length > 4) {
-        query.keyword = e.target.value;
-        refresh();
-      }
+      refresh({ keyword: e.target.value, page: 1 });
     }
   };
 
   const handleChangeDate = (range: DateRange) => {
     if (range.from && range.to) {
-      query.startDate = range.from?.toISOString().split("T")[0];
-      query.endDate = range.to?.toISOString().split("T")[0];
-      refresh();
+      refresh({
+        startDate: range.from?.toISOString().split("T")[0],
+        endDate: range.to?.toISOString().split("T")[0],
+        page: 1,
+      });
     }
   };
 
   const handleChangeDateCreate = (range: DateRange) => {
     if (range.from && range.to) {
-      query.startDateCreate = range.from?.toISOString().split("T")[0];
-      query.endDateCreate = range.to?.toISOString().split("T")[0];
-      refresh();
+      refresh({
+        startDateCreate: range.from?.toISOString().split("T")[0],
+        endDateCreate: range.to?.toISOString().split("T")[0],
+        page: 1,
+      });
     }
   };
 
   const handleChangeSubsidiary = (value: string) => {
-    console.log(value);
-    if (value == "all") {
-      if (query.nomLoja) {
-        delete query.nomLoja;
-      }
-    } else {
-      query.nomLoja = value;
-    }
-    query.page = 1;
-    query.perPage = 10;
-    refresh();
+    refresh({ nomLoja: value == "all" ? "" : value, page: 1 });
   };
 
   return (
@@ -197,6 +168,14 @@ export default function FilterPus({
                 <DatePicker
                   placeholder="Período de vencimento"
                   onChange={handleChangeDate}
+                  defaultDate={{
+                    from: query.startDate
+                      ? parseStringDateToDate(query.startDate)
+                      : undefined,
+                    to: query.endDate
+                      ? parseStringDateToDate(query.endDate)
+                      : undefined,
+                  }}
                 />
               </Label>
             </div>
@@ -231,7 +210,10 @@ export default function FilterPus({
             <div className="flex">
               <Label className="w-full">
                 Unidade:
-                <Select onValueChange={handleChangeSubsidiary} defaultValue={query.nomLoja}>
+                <Select
+                  onValueChange={handleChangeSubsidiary}
+                  defaultValue={query.nomLoja}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Unidade" />
                   </SelectTrigger>

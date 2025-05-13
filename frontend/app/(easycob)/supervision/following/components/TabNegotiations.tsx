@@ -16,7 +16,7 @@ import {
   formatarFone,
   getFirstAndLastName,
 } from "@/app/lib/utils";
-import Pagination from "@/app/(easycob)/components/Pagination";
+import Pagination from "@/app/(easycob)/components/Pagination2";
 import { Button } from "@/components/ui/button";
 import { FaRegEye } from "react-icons/fa";
 import Tooltips from "../../../components/Tooltips";
@@ -25,7 +25,7 @@ import Link from "next/link";
 import { IQueryDiscountParams } from "../interfaces/discounts";
 import { IMeta, IPaginationResponse } from "@/app/interfaces/pagination";
 import { INegotiationOfPayment } from "@/app/(easycob)/interfaces/actions";
-import { HeaderTable } from "@/app/(easycob)/components/HeaderTable";
+import { HeaderTable } from "@/app/(easycob)/components/HeaderTable2";
 import { BsCheck, BsHourglassSplit } from "react-icons/bs";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
@@ -39,7 +39,7 @@ export default function TabNegotiations({
 }: {
   query: IQueryDiscountParams;
   negotiations: IPaginationResponse<INegotiationOfPayment> | null;
-  refresh: () => Promise<void>;
+  refresh: (newParams: Partial<IQueryDiscountParams>) => void;
   pending: boolean;
 }) {
   const [selectRow, setSelectRow] = useState<INegotiationOfPayment | null>(

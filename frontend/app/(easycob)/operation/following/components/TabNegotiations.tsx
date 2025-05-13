@@ -164,6 +164,7 @@ export default function TabNegotiations({
                     refresh={refresh}
                   />
                 </TableHead>
+                <TableHead>Unidade</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -216,6 +217,7 @@ export default function TabNegotiations({
                         </p>
                       </Tooltips>
                     </TableCell>
+                    <TableCell>{negotiation.subsidiary ? negotiation.subsidiary : ""}</TableCell>
                     <TableCell className="flex">
                       <Button asChild className="mx-1">
                         <Link

@@ -156,6 +156,7 @@ export default function TabInvoices({
                     refresh={refresh}
                   />
                 </TableHead>
+                <TableHead>Unidade</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -195,6 +196,7 @@ export default function TabInvoices({
                         </p>
                       </Tooltips>
                     </TableCell>
+                    <TableCell>{invoice.subsidiary ? invoice.subsidiary : ""}</TableCell>
                     <TableCell className="flex">
                       <Button asChild className="mx-1">
                         <Link

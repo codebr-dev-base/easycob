@@ -16,7 +16,7 @@ import {
   formatarFone,
   getFirstAndLastName,
 } from "@/app/lib/utils";
-import Pagination from "@/app/(easycob)/components/Pagination";
+import Pagination from "@/app/(easycob)/components/Pagination2";
 import { Button } from "@/components/ui/button";
 import { FaRegEye } from "react-icons/fa";
 import Tooltips from "../../../components/Tooltips";
@@ -26,7 +26,7 @@ import { IQueryDiscountParams } from "../interfaces/discounts";
 import { IMeta, IPaginationResponse } from "@/app/interfaces/pagination";
 import { IPromiseOfPayment } from "@/app/(easycob)/interfaces/actions";
 import { BsCheck, BsHourglassSplit } from "react-icons/bs";
-import { HeaderTable } from "@/app/(easycob)/components/HeaderTable";
+import { HeaderTable } from "@/app/(easycob)/components/HeaderTable2";
 import { useState } from "react";
 import FormPromiseHistories from "./FormPromiseHistories";
 import { Switch } from "@/components/ui/switch";
@@ -39,7 +39,7 @@ export default function TabPromises({
 }: {
   query: IQueryDiscountParams;
   promises: IPaginationResponse<IPromiseOfPayment> | null;
-  refresh: () => Promise<void>;
+  refresh: (newParams: Partial<IQueryDiscountParams>) => void;
   pending: boolean;
 }) {
   const [selectRow, setSelectRow] = useState<IPromiseOfPayment | null>(null);

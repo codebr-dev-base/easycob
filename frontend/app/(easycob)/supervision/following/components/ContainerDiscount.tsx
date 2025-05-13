@@ -1,70 +1,80 @@
 "use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "../../../components/Header";
-import { use, useEffect, useRef, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 import { IMeta, IPaginationResponse } from "@/app/interfaces/pagination";
 import "@/app/assets/css/tabs.css";
-import {
-  INegotiationInvoice,
-  INegotiationOfPayment,
-  IPromiseOfPayment,
-} from "@/app/(easycob)/interfaces/actions";
 import TabNegotiations from "./TabNegotiations";
 import TabPromises from "./TabPromises";
 import TabInvoices from "./TabInvoices";
 import FilterPus from "./FilterPus";
-import { fetchInvoices, queryInvoices } from "../service/invoices";
-import { fetchPromises, queryPromises } from "../service/promises";
-import { fetchNegotiations, queryNegotiations } from "../service/negotiations";
-export default function ContainerFlowings() {
-  const negotiations = useRef<IPaginationResponse<INegotiationOfPayment> | null>(null);
-  const promises = useRef<IPaginationResponse<IPromiseOfPayment> | null>(null);
-  const invoices = useRef<IPaginationResponse<INegotiationInvoice> | null>(null);
+import { IQueryDiscountParams } from "../interfaces/discounts";
+import useDiscountService from "../service/use-discount-service";
+
+export default function ContainerFlowings({
+  initialQuery,
+}: {
+  initialQuery: IQueryDiscountParams;
+}) {
+  const {
+    negotiations,
+    agreements,
+    invoices,
+    promises,
+    isLoading,
+    error,
+    queryParams,
+    setQueryParams,
+    fetchNegotiations,
+    fetchAgreements,
+    fetchInvoices,
+    fetchPromises,
+  } = useDiscountService({
+    initialQuery: initialQuery,
+  });
 
   const [pending, setPending] = useState<boolean>(false);
+
   const [type, setType] = useState<string>("negotiations");
-
-  const refreshNegotiations = async () => {
-    setPending(true);
-    const n = await fetchNegotiations();
-    negotiations.current = n;
-    setPending(false);
-  };
-
-  const refreshPromises = async () => {
-    setPending(true);
-    const p = await fetchPromises();
-    promises.current = p;
-    setPending(false);
-  };
-
-  const refreshInvoices = async () => {
-    setPending(true);
-    const i = await fetchInvoices();
-    invoices.current = i;
-    setPending(false);
-  };
 
   const handleTabChange = (value: string) => {
     setType(value);
 
     switch (value) {
       case "negotiations":
-        refreshNegotiations();
+        fetchNegotiations();
         break;
       case "promises":
-        refreshPromises();
+        setQueryParams({ typeActionIds: 2 });
+        fetchPromises();
         break;
       default:
-        refreshInvoices();
+        fetchInvoices();
         break;
     }
   };
 
+  const refresh = useCallback(
+    (newParams: Partial<IQueryDiscountParams>) => {
+      setQueryParams(newParams);
+      switch (type) {
+        case "negotiations":
+          fetchNegotiations();
+          break;
+        case "promises":
+          setQueryParams({ typeActionIds: 2 });
+          fetchPromises();
+          break;
+        default:
+          fetchInvoices();
+          break;
+      }
+    },
+    [setQueryParams, fetchNegotiations, fetchPromises, fetchInvoices]
+  );
+
   useEffect(() => {
-    refreshNegotiations();
-    //refreshPromises();
-    //refreshInvoices();
+    fetchNegotiations();
   }, []);
 
   return (
@@ -72,15 +82,10 @@ export default function ContainerFlowings() {
       <div className="p-2">
         <Header title="Descontos">
           <div className="flex flex-col md:flex-row justify-end items-end gap-4">
-            {type === "negotiations" && (
-              <FilterPus query={queryNegotiations} refresh={refreshNegotiations} />
-            )}
-            {type === "promises" && (
-              <FilterPus query={queryPromises} refresh={refreshPromises} />
-            )}
-            {type === "invoices" && (
-              <FilterPus query={queryInvoices} refresh={refreshInvoices} />
-            )}
+            <FilterPus
+              query={queryParams.current as IQueryDiscountParams}
+              refresh={refresh}
+            />
           </div>
         </Header>
       </div>
@@ -104,25 +109,25 @@ export default function ContainerFlowings() {
           </TabsList>
           <TabsContent value="negotiations">
             <TabNegotiations
-              query={queryNegotiations}
-              negotiations={negotiations.current}
-              refresh={refreshNegotiations}
-              pending={pending}
+              negotiations={negotiations}
+              query={queryParams.current as IQueryDiscountParams}
+              refresh={refresh}
+              pending={isLoading}
             />
           </TabsContent>
           <TabsContent value="promises">
             <TabPromises
-              query={queryPromises}
-              promises={promises.current}
-              refresh={refreshPromises}
+              promises={promises}
+              query={queryParams.current as IQueryDiscountParams}
+              refresh={refresh}
               pending={pending}
             />
           </TabsContent>
           <TabsContent value="invoices">
             <TabInvoices
-              query={queryInvoices}
-              invoices={invoices.current}
-              refresh={refreshInvoices}
+              invoices={invoices}
+              query={queryParams.current as IQueryDiscountParams}
+              refresh={refresh}
               pending={pending}
             />
           </TabsContent>

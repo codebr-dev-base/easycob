@@ -14,6 +14,7 @@ export interface IQueryFollowingParams extends IQueryPaginationParams {
   status?: string;
   discount?: string;
   keyword?: string;
+  nomLoja?: string;
 }
 
 export interface INegotiationHistory {

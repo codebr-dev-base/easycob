@@ -11,8 +11,8 @@ export interface IQueryDiscountParams extends IQueryPaginationParams {
   userId?: string; // ID do usuário (ou null)
   startDateCreate?: string;
   endDateCreate?: string;
-  status?: boolean;
-  discount?: boolean;
+  status?: string;
+  discount?: string;
   nomLoja?: string;
 }
 
