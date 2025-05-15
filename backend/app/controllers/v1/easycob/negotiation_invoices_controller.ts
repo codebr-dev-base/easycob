@@ -11,6 +11,17 @@ import db from '@adonisjs/lucid/services/db';
 @inject()
 export default class NegotiationInvoicesController {
   constructor(protected userService: UserService) {}
+
+  unionQuery = db
+    .query()
+    .select('des_contr', 'cod_credor_des_regis', 'nom_loja')
+    .from('recupera.tbl_arquivos_contratos_old')
+    .union((q) => {
+      q.select('des_contr', 'cod_credor_des_regis', 'nom_loja').from(
+        'recupera.tbl_arquivos_contratos'
+      );
+    });
+
   public async index({ request, auth }: HttpContext) {
     if (auth && auth.user && auth.user.id) {
       let userId = undefined;
@@ -63,11 +74,10 @@ export default class NegotiationInvoicesController {
           '=',
           'a.cod_credor_des_regis'
         )
-        .innerJoin(
-          'recupera.tbl_arquivos_contratos AS tac',
-          'tac.des_contr',
-          '=',
-          'a.des_contr'
+        .joinRaw(
+          `LEFT JOIN (${this.unionQuery.toQuery()}) AS tac
+         ON tac.des_contr = a.des_contr`
+          // AND tac.cod_credor_des_regis = a.cod_credor_des_regis`
         )
         .innerJoin(
           'public.subsidiaries AS s',
