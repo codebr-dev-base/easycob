@@ -142,6 +142,7 @@ const useDiscountService = ({
 
   useEffect(() => {
     if (!isEqual(initialQuery, queryParams.current)) {
+      console.log(initialQuery, queryParams.current);
       fetchNegotiations();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

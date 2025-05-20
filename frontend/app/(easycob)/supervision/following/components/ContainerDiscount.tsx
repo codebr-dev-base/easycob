@@ -11,11 +11,16 @@ import FilterPus from "./FilterPus";
 import { IQueryDiscountParams } from "../interfaces/discounts";
 import useDiscountService from "../service/use-discount-service";
 
-export default function ContainerFlowings({
-  initialQuery,
-}: {
-  initialQuery: IQueryDiscountParams;
-}) {
+export default function ContainerFlowings() {
+  const initialQuery: IQueryDiscountParams = {
+    page: 1,
+    perPage: 10,
+    orderBy: "id",
+    descending: false,
+    startDate: new Date().toISOString().split("T")[0],
+    endDate: new Date().toISOString().split("T")[0],
+  };
+
   const {
     negotiations,
     agreements,

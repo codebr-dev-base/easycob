@@ -19,11 +19,17 @@ import { IQueryFollowingParams } from "../interfaces/following";
 import useActionsService from "@/app/(easycob)/supervision/actions/service/use-action-service";
 import { IQueryActionParams } from "@/app/(easycob)/supervision/actions/interfaces/action";
 
-export default function ContainerFollowings({
-  initialQuery,
-}: {
-  initialQuery: IQueryFollowingParams;
-}) {
+export default function ContainerFollowings() {
+
+  const initialQuery: IQueryFollowingParams = {
+    page: 1,
+    perPage: 10,
+    orderBy: "id",
+    descending: false,
+    startDate: new Date().toISOString().split("T")[0],
+    endDate: new Date().toISOString().split("T")[0],
+  };
+  
   const {
     negotiations,
     agreements,

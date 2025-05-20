@@ -92,21 +92,34 @@ export default function FilterPus({
     }
   };
 
-  const handleChangeDate = (range: DateRange) => {
-    if (range.from && range.to) {
+  const handleChangeDate = (range: DateRange | undefined) => {
+    console.log("handleChangeDate", range);
+    if (range && range.from && range.to) {
       refresh({
         startDate: range.from?.toISOString().split("T")[0],
         endDate: range.to?.toISOString().split("T")[0],
         page: 1,
       });
+    } else {
+      delete query.startDate;
+      delete query.endDate;
+      refresh({ ...query, page: 1 });
     }
   };
 
-  const handleChangeDateCreate = (range: DateRange) => {
-    if (range.from && range.to) {
+  const handleChangeDateCreate = (range: DateRange | undefined) => {
+    console.log("handleChangeDateCreate", range);
+    if (range && range.from && range.to) {
       refresh({
         startDateCreate: range.from?.toISOString().split("T")[0],
         endDateCreate: range.to?.toISOString().split("T")[0],
+        page: 1,
+      });
+    } else {
+      delete query.startDateCreate;
+      delete query.endDateCreate;
+      refresh({
+        ...query,
         page: 1,
       });
     }
@@ -171,7 +184,7 @@ export default function FilterPus({
             <div className="flex">
               <Label>
                 Por data de vencimento:
-                <DatePicker
+                <DatePickerClear
                   placeholder="Período de vencimento"
                   onChange={handleChangeDate}
                   defaultDate={{
@@ -188,7 +201,7 @@ export default function FilterPus({
             <div className="flex">
               <Label className="w-full">
                 Por data de criação:
-                <DatePicker
+                <DatePickerClear
                   placeholder="Período da criação"
                   onChange={handleChangeDateCreate}
                 />

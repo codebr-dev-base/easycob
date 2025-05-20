@@ -13,20 +13,11 @@ import {
 } from "../../interfaces/actions";
 import { IQueryFollowingParams } from "./interfaces/following";
 
-const initialQuery: IQueryFollowingParams = {
-  page: 1,
-  perPage: 10,
-  orderBy: "id",
-  descending: false,
-  startDate: new Date().toISOString().split("T")[0],
-  endDate: new Date().toISOString().split("T")[0],
-};
-
 export default async function Followings() {
   try {
     return (
       <Suspense fallback={<SkeletonFullPage />}>
-        <ContainerFollowings initialQuery={initialQuery} />
+        <ContainerFollowings />
       </Suspense>
     );
   } catch (error) {

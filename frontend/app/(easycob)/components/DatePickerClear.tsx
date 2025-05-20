@@ -13,10 +13,8 @@ import {
 } from "@/components/ui/popover";
 import { ptBR } from "date-fns/locale";
 import { formatDateToBR } from "@/app/lib/utils";
-import {
-  ActiveModifiers,
-  DateRange,
-} from "react-day-picker";
+import { ActiveModifiers, DateRange } from "react-day-picker";
+import { useEffect, useRef } from "react";
 
 export function DatePickerClear({
   placeholder,
@@ -24,10 +22,18 @@ export function DatePickerClear({
   defaultDate,
 }: {
   placeholder: string;
-  onChange: (range: DateRange) => void;
+  onChange: (range: DateRange | undefined) => void;
   defaultDate?: DateRange | undefined;
 }) {
   const [date, setDate] = React.useState<DateRange | undefined>(undefined);
+  const prevDate = useRef<DateRange>({ from: undefined, to: undefined });
+
+  useEffect(() => {
+    if (defaultDate) {
+      prevDate.current = { from: defaultDate.from, to: defaultDate.to };
+      setDate(defaultDate);
+    }
+  }, []);
 
   const handlerSelectRangeDate = (
     range: DateRange | undefined,
@@ -41,6 +47,9 @@ export function DatePickerClear({
       if (range.from && range.to) {
         onChange(range);
       }
+    } else {
+      setDate(undefined);
+      onChange(undefined);
     }
   };
 
@@ -71,7 +80,6 @@ export function DatePickerClear({
           initialFocus
           locale={ptBR}
         />
-
       </PopoverContent>
     </Popover>
   );
