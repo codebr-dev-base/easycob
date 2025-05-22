@@ -1,8 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { useSocket } from "@/app/hooks/useSocket";
-import { toast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -13,82 +10,40 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import Form from "./Form";
-import { da } from "date-fns/locale";
 import { ILoginTactium } from "@/app/(easycob)/interfaces/tactium";
 import { getUser } from "@/app/lib/auth";
-import { set } from "date-fns";
-import { log } from "console";
-import useStateTactium from "../hooks/useStateTactium";
+import { Socket } from "socket.io-client";
+import { is } from "date-fns/locale";
 
-const Login = () => {
-  const [isOnline, setIsOnline] = useStateTactium("isOnlineTactium", false);
-  const [dispositivo, setDispositivo] = useStateTactium(
-    "dispositivoTactium",
-    ""
-  );
-  const [webhookData, setWebhookData] = useState(null);
+const Login = ({
+  children,
+  socket,
+  dispositivo,
+  setDispositivo,
+  isLoading,
+  setIsLoading,
+}: {
+  children: React.ReactNode;
+  socket: Socket;
+  dispositivo: string;
+  setDispositivo: (string) => void;
+  isLoading: boolean;
+  setIsLoading: (boolean) => void;
+}) => {
   const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [dataLogin, setDataLogin] = useState<{
-    dispositivo: string;
-    usuario: string;
-    senha: string;
-    userId: number | string | null;
-  } | null>(null);
-
-  const socket = useSocket();
-
-  // Escuta os dados do webhook enviados pelo servidor
-  useEffect(() => {
-    if (socket) {
-      socket.on("auth", (data) => {
-        if (data.auth) {
-          toast({
-            title: "Sucesso",
-            description: "Você está Online!",
-            variant: "success",
-          });
-          setIsOnline(true);
-        } else {
-          toast({
-            title: "Erro",
-            description: "Você está Offline!",
-            variant: "destructive",
-          });
-          setIsOnline(false);
-        }
-        setIsLoading(false);
-        setOpen(false);
-      });
-
-      if (isOnline && dispositivo !== "") {
-        socket.emit("refresh", { "dispositivo": dispositivo });
-      }
-
-    }
-
-    // Limpa o listener ao desmontar o componente
-    return () => {
-      if (socket) {
-        socket.off("auth");
-      }
-    };
-  }, [socket]);
-
-  useEffect(() => {
-    // Alerta com dados vindo do servidor
-    toast({
-      title: "Alerta",
-      description: JSON.stringify(webhookData, null, 2),
-      variant: "default",
-    });
-  }, [webhookData]);
 
   const login = async (data: ILoginTactium) => {
     if (!socket) {
       console.error("Socket não está disponível.");
       return;
     }
+
+    if (!data.dispositivo || data.dispositivo === "") {
+      console.error("Dispositivo não encontrado.");
+      return;
+    }
+
+    setDispositivo(data.dispositivo);
     const userId = getUser()?.id;
     if (!userId) {
       console.error("ID do usuário não encontrado.");
@@ -96,10 +51,9 @@ const Login = () => {
     }
     setIsLoading(true);
     try {
-      socket.emit("auth", { ...data, userId });
-      //setDataLogin({ ...data, userId });
-      setDispositivo(data.dispositivo);
-      //setIsOnline(true);
+      socket.emit("login", { ...data, userId });
+      console.log(data.dispositivo);
+      setOpen(false);
     } catch (error) {
       console.error(error);
     }
@@ -107,14 +61,7 @@ const Login = () => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          className="w-full relative text-blue-600 hover:text-blue-400"
-        >
-          <span>{isOnline ? "Online" : "Offline"}</span>
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Em teste! não usar</DialogTitle>
@@ -128,7 +75,7 @@ const Login = () => {
           </div>
         ) : (
           <div>
-            <Form login={login} />
+            <Form login={login} dispositivo={dispositivo} />
           </div>
         )}
       </DialogContent>

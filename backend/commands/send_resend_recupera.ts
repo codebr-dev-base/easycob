@@ -13,22 +13,42 @@ export default class SendResendRecupera extends BaseCommand {
 
   async run() {
     this.logger.info('Hello world from "SendResendRecupera"');
+    /*
+    const as = await Action.query()
+      .whereILike(
+        'retornotexto',
+        '%Erro ao Incluir ocorrencia: Passo 4 - Cliente não está na assessoria.%'
+      )
+      .whereRaw("created_at::date > '2025-05-01'")
+      .whereRaw("created_at::date < '2025-05-04'")
+      .where('wallet', 'V');
+
+    console.log(as.length);
+
+    for (const action of as) {
+      action.wallet = 'F';
+      await action.save();
+    }
 
     const actions = await Action.query()
       .whereILike(
         'retornotexto',
         '%Erro ao Incluir ocorrencia: Passo 4 - Cliente não está na assessoria.%'
       )
-      .whereRaw("created_at::date > '2025-04-01'")
+      .whereRaw("created_at::date > '2025-05-01'")
+      .whereRaw("created_at::date < '2025-05-04'")
       .where('wallet', 'F');
+ */
 
-    console.log(actions.length);
+    const actions = await Action.query()
+      .whereILike('retornotexto', '%Em fila%')
+      .whereRaw("created_at::date > '2025-05-01'")
+      .whereRaw("created_at::date < '2025-05-03'");
 
     for (const action of actions) {
-      action.wallet = 'V';
-      await action.save();
-      await handleSendingForRecupera(action, 'ResendRecupera');
+      await handleSendingForRecupera(action);
     }
+
     console.log(actions.length);
   }
 }

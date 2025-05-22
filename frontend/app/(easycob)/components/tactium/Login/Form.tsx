@@ -11,7 +11,7 @@ import {
 import { ILoginTactium } from "@/app/(easycob)/interfaces/tactium";
 import { Button } from "@/components/ui/button";
 
-const Form = ({ login }: { login: (data: ILoginTactium) => void }) => {
+const Form = ({ login, dispositivo }: { login: (data: ILoginTactium) => void, dispositivo: string }) => {
   const form = useForm<ILoginTactium>({
     mode: "all",
   });
@@ -27,6 +27,7 @@ const Form = ({ login }: { login: (data: ILoginTactium) => void }) => {
           control={form.control}
           name="dispositivo"
           rules={{ required: "Campo obrigatório" }}
+          defaultValue={dispositivo}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Dispositivo/Ramal</FormLabel>

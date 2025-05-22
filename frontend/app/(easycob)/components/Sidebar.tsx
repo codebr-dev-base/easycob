@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/accordion";
 import { Suspense } from "react";
 import LoginTactium from "./tactium/Login";
+import ToolBar from "./tactium/ToolBar";
 
 interface ModuleLink {
   href: string;
@@ -306,7 +307,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
               </Button>
             </form>
           </div>
-          <LoginTactium />
+          <ToolBar />
         </footer>
       </aside>
 

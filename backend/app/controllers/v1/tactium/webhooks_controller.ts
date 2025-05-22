@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http';
 import SocketIoProvider from '#providers/socket_io_provider';
+import Contract from '#models/recovery/contract';
 
 const eventoCodes = {
   AGENTE_LOGON: 1,
@@ -64,6 +65,18 @@ export default class WebhooksController {
           break;
         case eventoCodes.AGENTE_POS_ATENDIMENTO:
           io.emit('message', body);
+          console.log(body);
+          break;
+        case eventoCodes.LIGACAO_COMPLETADA: {
+          const contract = await Contract.query()
+            .where('des_contr', body.dados.discador.idExterno)
+            .first();
+          socket.emit('ringing', contract?.codCredorDesRegis);
+          console.log(body);
+          break;
+        }
+        case eventoCodes.LIGACAO_ATENDIDA:
+          socket.emit('answered', body);
           console.log(body);
           break;
       }
