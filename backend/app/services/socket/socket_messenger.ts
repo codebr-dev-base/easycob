@@ -78,6 +78,10 @@ class SocketMessenger {
    * @param payload Os dados a serem enviados.
    */
   public broadcast(eventName: string, payload: IPayloadWebHook): void {
+    if (!this.io) {
+      this.io = SocketIoProvider.getInstance();
+    }
+
     //TODO: Verificar se o payload é do tipo IPayloadWebHook
     console.log(this.io);
     this.io.emit(eventName, payload);

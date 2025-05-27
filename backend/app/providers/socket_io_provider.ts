@@ -33,22 +33,6 @@ export default class SocketIoProvider {
    */
     console.log(`📁 ${env.get('APP_MODE')}`);
 
-    try {
-      await TactiumAuthService.loginTactium(); // Login inicial na Tactium
-      TactiumAuthService.scheduleLoginDiary(); // Agenda login diário
-
-      //TactiumAuthService.pulsar();
-
-      (async () => {
-        await TactiumAuthService.pulsar();
-      })().catch((error) => {
-        console.error('Erro no processo de pulsar da Tactium:', error);
-      });
-    } catch (error) {
-      console.error('Erro ao realizar login:', error);
-      return;
-    }
-
     this.server = (await this.app.container.make(
       'server'
     )) as HttpServerService;
@@ -80,6 +64,22 @@ export default class SocketIoProvider {
       console.log(`🔗 Socket.IO client connected: ${socket.id}`);
       SocketEventHandlers.registerHandlers(socket); // Delega para o handler de eventos
     });
+
+    try {
+      await TactiumAuthService.loginTactium(); // Login inicial na Tactium
+      TactiumAuthService.scheduleLoginDiary(); // Agenda login diário
+
+      //TactiumAuthService.pulsar();
+
+      (async () => {
+        await TactiumAuthService.pulsar();
+      })().catch((error) => {
+        console.error('Erro no processo de pulsar da Tactium:', error);
+      });
+    } catch (error) {
+      console.error('Erro ao realizar login:', error);
+      return;
+    }
   }
 
   public static setInstance(io: Server) {
