@@ -1,6 +1,6 @@
 // app/Services/Socket/WebhookEventHandler.ts
 import SocketMessenger from './socket_messenger.js';
-import Contract from '#models/recovery/contract'; // O model que você já usa
+//import Contract from '#models/recovery/contract'; // O model que você já usa
 import { IPayloadWebHook } from '#helpers/web_socket_interfaces.js';
 
 // Definindo os códigos de evento (mantidos como no seu controller)
@@ -87,18 +87,25 @@ class WebhookEventHandler {
         break;
 
       case eventoCodes.LIGACAO_COMPLETADA: {
+        console.log('Ligação completada:', body);
+        console.log(dados.discador);
+        console.log('#############################################');
+
+        /*
         const contract = await Contract.query()
-          .where('des_contr', dados.discador.idExterno)
-          .first();
-        if (contract) {
-          SocketMessenger.emitToDispositivo(dispositivo, 'ringing', contract);
-        }
+                  .where('des_contr', dados.discador.idExterno)
+                  .first();
+                if (contract) {
+                  SocketMessenger.emitToDispositivo(dispositivo, 'ringing', contract);
+                }
+                   */
         break;
       }
 
       case eventoCodes.LIGACAO_ATENDIDA: {
-        console.log(body);
-        console.log(dados);
+        console.log('Ligação atendida:', body);
+        console.log(dados.discador);
+        console.log('#############################################');
 
         /* const contract = await Contract.query()
           .where('des_contr', dados.discador.idExterno)
