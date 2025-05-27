@@ -87,11 +87,13 @@ class SocketEventHandlers {
         senha: userTactium.senha,
         idLogon: userTactium.idLogon!, // Já validado pelo loginAgente
       });
-      socket.emit('auth', {
+      /*
+  socket.emit('auth', {
         message: 'Login do agente realizado com sucesso!',
         idLogon: userTactium.idLogon,
         auth: true,
       });
+      */
     } catch (error) {
       console.error(
         `Erro ao realizar login do agente para ${data.dispositivo}:`,
@@ -113,11 +115,12 @@ class SocketEventHandlers {
 
     if (userSocket) {
       try {
-        const status = await TactiumAuthService.logoffAgente(
+        await TactiumAuthService.logoffAgente(
           userSocket.dispositivo,
           userSocket.usuario,
           userSocket.senha
         );
+        /*
         if (status === 0) {
           SocketConnectionManager.removeSocketByDispositivo(data.dispositivo);
           socket.emit('logout', {
@@ -128,6 +131,7 @@ class SocketEventHandlers {
         } else {
           throw new Error('Não teve retorno esperado do logoff - idLogon');
         }
+          */
       } catch (error) {
         console.error(
           `Erro ao realizar logoff para ${data.dispositivo}:`,
@@ -176,15 +180,17 @@ class SocketEventHandlers {
     );
     try {
       const response = await TactiumAuthService.pauseAgente(data);
-      socket.emit('pause_success', {
+      socket.emit('pause', {
         message: 'Agente pausado com sucesso!',
         responseData: response.dados,
+        pausa: true,
       });
     } catch (error) {
       console.error(`Erro ao pausar agente ${data.dispositivo}:`, error);
       socket.emit('pause_failure', {
         message: 'Falha ao pausar agente.',
         error: error.message,
+        pausa: false,
       });
     }
   }
@@ -193,15 +199,17 @@ class SocketEventHandlers {
     console.log(`Tentativa de reiniciar dispositivo: ${data.dispositivo}`);
     try {
       const response = await TactiumAuthService.resumeAgente(data);
-      socket.emit('resume_success', {
+      socket.emit('pause', {
         message: 'Agente reiniciado com sucesso!',
         responseData: response.dados,
+        pausa: false,
       });
     } catch (error) {
       console.error(`Erro ao reiniciar agente ${data.dispositivo}:`, error);
       socket.emit('resume_failure', {
         message: 'Falha ao reiniciar agente.',
         error: error.message,
+        pausa: true,
       });
     }
   }

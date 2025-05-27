@@ -78,12 +78,41 @@ class WebhookEventHandler {
         break;
 
       case eventoCodes.AGENTE_PAUSA:
-        SocketMessenger.emitToDispositivo(dispositivo, 'pause_status', body); // Emite para o dispositivo específico
+        if (status === 0) {
+          SocketMessenger.emitToDispositivo(dispositivo, 'pause', {
+            pause: true,
+          });
+        } else if (status === 1) {
+          // No caso de status 1 para AGENTE_PAUSA (falha na pausa), desconecta o socket
+          SocketMessenger.emitToDispositivo(dispositivo, 'pause', {
+            pause: false,
+          });
+        }
         break;
 
       case eventoCodes.AGENTE_PRONTO:
+        if (status === 0) {
+          SocketMessenger.emitToDispositivo(dispositivo, 'pause', {
+            pause: false,
+          });
+        } else if (status === 1) {
+          // No caso de status 1 para AGENTE_PAUSA (falha na pausa), desconecta o socket
+          SocketMessenger.emitToDispositivo(dispositivo, 'pause', {
+            pause: true,
+          });
+        }
+        break;
       case eventoCodes.AGENTE_POS_ATENDIMENTO:
-        SocketMessenger.emitToDispositivo(dispositivo, 'agent_status', body); // Evento mais genérico para status do agente
+        if (status === 0) {
+          SocketMessenger.emitToDispositivo(dispositivo, 'pause', {
+            pause: true,
+          });
+        } else if (status === 1) {
+          // No caso de status 1 para AGENTE_PAUSA (falha na pausa), desconecta o socket
+          SocketMessenger.emitToDispositivo(dispositivo, 'pause', {
+            pause: false,
+          });
+        }
         break;
 
       case eventoCodes.LIGACAO_COMPLETADA: {
