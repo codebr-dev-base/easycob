@@ -1,16 +1,16 @@
-import { Server } from 'socket.io';
+//import { Server } from 'socket.io';
 import SocketIoProvider from '#providers/socket_io_provider'; // Para obter a instância do servidor Socket.IO
 import SocketConnectionManager from './socket_connection_manager.js'; // Para buscar sockets específicos
 import { IPayloadWebHook } from '#helpers/web_socket_interfaces.js';
 import Contract from '#models/recovery/contract';
 
 class SocketMessenger {
-  private io: Server;
+  //private io: Server;
   private static instance: SocketMessenger;
 
   private constructor() {
     // Garante que a instância do Socket.IO já está pronta antes de usar
-    this.io = SocketIoProvider.getInstance();
+    //this.io = SocketIoProvider.getInstance();
   }
 
   public static getInstance(): SocketMessenger {
@@ -78,9 +78,11 @@ class SocketMessenger {
    * @param payload Os dados a serem enviados.
    */
   public broadcast(eventName: string, payload: IPayloadWebHook): void {
+    const io = SocketIoProvider.getInstance();
+
     //TODO: Verificar se o payload é do tipo IPayloadWebHook
-    console.log(this.io);
-    this.io.emit(eventName, payload);
+    console.log(io);
+    io.emit(eventName, payload);
     console.log(`Broadcast da mensagem '${eventName}' para todos os clientes.`);
   }
 
