@@ -120,8 +120,9 @@ class SocketEventHandlers {
         );
         if (status === 0) {
           SocketConnectionManager.removeSocketByDispositivo(data.dispositivo);
-          socket.emit('logout_success', {
+          socket.emit('logout', {
             message: 'Logoff do agente realizado com sucesso!',
+            auth: false,
           });
           socket.disconnect(true); // Desconecta o cliente após o logoff
         } else {
@@ -134,14 +135,14 @@ class SocketEventHandlers {
         );
         socket.emit('auth', {
           message: 'Falha ao realizar logoff do agente.',
-          auth: false,
+          auth: true,
         });
       }
     } else {
       console.log('Usuário não encontrado para logoff:', data.dispositivo);
       socket.emit('auth', {
         message: 'Usuário não encontrado para logoff.',
-        auth: true,
+        auth: false,
       });
     }
   }

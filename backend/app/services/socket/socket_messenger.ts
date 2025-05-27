@@ -79,6 +79,7 @@ class SocketMessenger {
    */
   public broadcast(eventName: string, payload: IPayloadWebHook): void {
     //TODO: Verificar se o payload é do tipo IPayloadWebHook
+    console.log(this.io);
     this.io.emit(eventName, payload);
     console.log(`Broadcast da mensagem '${eventName}' para todos os clientes.`);
   }
