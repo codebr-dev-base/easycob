@@ -21,15 +21,16 @@ export default class SocketIoProvider {
   /**
    * The process has been started
    */
-  async start() {
+  async ready() {
     // Verifica se o ambiente é web
     if (this.app.getEnvironment() !== 'web') {
       return;
     }
-    /*     if (env.get('APP_MODE') !== 'main') {
+    /*
+    if (env.get('APP_MODE') !== 'main') {
       return;
-    } */
-
+    }
+   */
     console.log(`📁 ${env.get('APP_MODE')}`);
 
     try {
@@ -76,6 +77,7 @@ export default class SocketIoProvider {
 
     // Gerenciar as conexões do Socket.IO
     this.io.on('connection', (socket) => {
+      console.log(`🔗 Socket.IO client connected: ${socket.id}`);
       SocketEventHandlers.registerHandlers(socket); // Delega para o handler de eventos
     });
   }
@@ -86,7 +88,7 @@ export default class SocketIoProvider {
 
   public static getInstance(): Server {
     if (!this.instance) {
-      throw new Error('Socket.IO não foi inicializado!');
+      //throw new Error('Socket.IO não foi inicializado!');
     }
     return this.instance;
   }

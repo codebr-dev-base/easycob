@@ -37,7 +37,7 @@ class TactiumAuthService {
       modeloEventos: 'webhook',
     };
 
-    console.log(body);
+    //console.log(body);
 
     try {
       const response = await fetch(`${urlTactium}/agente/autenticar`, {
@@ -48,10 +48,9 @@ class TactiumAuthService {
         body: JSON.stringify(body),
       });
 
-      console.log(await response.json());
-
       if (response.ok) {
         const data = (await response.json()) as IAuthResponse;
+        //console.log(data);
         if (data.status === 0 && data.dados) {
           this.token = data.dados.token;
           this.expiraEm = data.dados.expiraEm;

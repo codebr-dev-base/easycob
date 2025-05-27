@@ -9,6 +9,7 @@ const url = process.env.WEBSOCKET_URL
 
 export const useSocket = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
 
   useEffect(() => {
     const user = getUser();
@@ -21,6 +22,10 @@ export const useSocket = () => {
 
       setSocket(newSocket);
 
+      // Verificar conexão
+      newSocket.on("connect", () => setIsConnected(true));
+      newSocket.on("disconnect", () => setIsConnected(false));
+
       // Limpeza ao desmontar o componente
       return () => {
         newSocket.disconnect();
@@ -28,5 +33,5 @@ export const useSocket = () => {
     }
   }, []);
 
-  return socket;
+  return { socket, isConnected };
 };

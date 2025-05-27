@@ -25,7 +25,7 @@ export default function ToolBar() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const socket = useSocket();
+  const {socket, isConnected} = useSocket();
 
   // Escuta os dados do webhook enviados pelo servidor
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function ToolBar() {
     setPulsarActive(!pulsarActive);
   };
 
-  return (
+  return isConnected &&(
     <div className="flex justify-center items-center">
       <Button
         variant="outline"
