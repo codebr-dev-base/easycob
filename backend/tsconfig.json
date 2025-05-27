@@ -20,7 +20,7 @@
         "app/controllers/http/*"
       ],
       "#providers/*": [
-        "providers/*"
+        "app/providers/*"
       ],
       "#services/*": [
         "app/services/*"

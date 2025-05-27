@@ -10,7 +10,8 @@ import Logout from "../Logout";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { FaSpinner } from "react-icons/fa";
-import { is } from "date-fns/locale";
+import Pausa from "../Pause";
+import Pause from "../Pause";
 
 export default function ToolBar() {
   const [menuOpen, setMenuOpen] = useState(true);
@@ -57,8 +58,26 @@ export default function ToolBar() {
             variant: "destructive",
           });
           setIsOnline(false);
+          setIsPause(false);
         }
         setIsLoading(false);
+      });
+
+      socket.on("pause", (data) => {
+        if (data.pause) {
+          toast({
+            title: "Pausa",
+            description: "Você está Pausa!",
+            variant: "destructive",
+          });
+          setIsOnline(true);
+        } else {
+          toast({
+            title: "Ativo",
+            description: "Fim da pausa!",
+            variant: "success",
+          });
+        }
       });
 
       if (isOnline) {
@@ -110,29 +129,34 @@ export default function ToolBar() {
         {socket && (
           <ul className="p-2 flex row justify-center bg-white rounded-md shadow-lg space-x-4">
             {!isOnline ? (
-              <li className="py-2">
-                <Login
-                  socket={socket}
-                  dispositivo={dispositivo}
-                  setDispositivo={setDispositivo}
-                  isLoading={isLoading}
-                  setIsLoading={setIsLoading}
-                >
-                  <Button
-                    variant="outline"
-                    className={`h-10 w-10 p-0 bg-green-500 ${
-                      isLoading ? "animate-pulse" : ""
-                    }`}
-                    disabled={isLoading}
+              <>
+                <li className="py-2">
+                  <Login
+                    socket={socket}
+                    dispositivo={dispositivo}
+                    setDispositivo={setDispositivo}
+                    isLoading={isLoading}
+                    setIsLoading={setIsLoading}
                   >
-                    {isLoading ? (
-                      <FaSpinner className="h-6 w-6 animate-spin" />
-                    ) : (
-                      <MdLogin className="h-6 w-6" />
-                    )}
-                  </Button>
-                </Login>
-              </li>
+                    <Button
+                      variant="outline"
+                      className={`h-10 w-10 p-0 bg-green-500 ${
+                        isLoading ? "animate-pulse" : ""
+                      }`}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <FaSpinner className="h-6 w-6 animate-spin" />
+                      ) : (
+                        <MdLogin className="h-6 w-6" />
+                      )}
+                    </Button>
+                  </Login>
+                </li>
+                <li className="py-2">
+                  <Pause socket={socket} />
+                </li>
+              </>
             ) : (
               <>
                 <li className="py-2">
@@ -146,7 +170,9 @@ export default function ToolBar() {
                   </Logout>
                 </li>
                 {isPause ? (
-                  <li className="py-2"></li>
+                  <li className="py-2">
+                    <Pausa  socket={socket}/>
+                  </li>
                 ) : (
                   <li className="py-2"></li>
                 )}
