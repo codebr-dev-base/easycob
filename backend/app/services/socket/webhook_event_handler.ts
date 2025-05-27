@@ -87,6 +87,13 @@ class WebhookEventHandler {
         break;
 
       case eventoCodes.LIGACAO_COMPLETADA: {
+        if (!dados || !dados.discador || !dados.discador.idExterno) {
+          console.warn(
+            'Dados de discador ausentes ou incompletos no evento LIGACAO_COMPLETADA.'
+          );
+          console.warn('Dados recebidos:', dados);
+          return;
+        }
         console.log('Ligação completada:', dados.discador.idExterno);
         console.log('Cliente:', dados.discador.descricao);
 
@@ -104,6 +111,13 @@ class WebhookEventHandler {
       }
 
       case eventoCodes.LIGACAO_ATENDIDA: {
+        if (!dados || !dados.discador || !dados.discador.idExterno) {
+          console.warn(
+            'Dados de discador ausentes ou incompletos no evento LIGACAO_COMPLETADA.'
+          );
+          console.warn('Dados recebidos:', dados);
+          return;
+        }
         console.log('Ligação atendida:', dados.discador.idExterno);
         console.log('Cliente:', dados.discador.descricao);
 
