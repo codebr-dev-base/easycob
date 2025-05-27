@@ -1,6 +1,6 @@
 // app/Services/Socket/WebhookEventHandler.ts
 import SocketMessenger from './socket_messenger.js';
-//import Contract from '#models/recovery/contract'; // O model que você já usa
+import Contract from '#models/recovery/contract'; // O model que você já usa
 import { IPayloadWebHook } from '#helpers/web_socket_interfaces.js';
 
 // Definindo os códigos de evento (mantidos como no seu controller)
@@ -87,7 +87,8 @@ class WebhookEventHandler {
         break;
 
       case eventoCodes.LIGACAO_COMPLETADA: {
-        if (!dados || !dados.discador || !dados.discador.idExterno) {
+        return; // Retorna imediatamente se o evento for LIGACAO_COMPLETADA, sem emitir nada
+        if (!dados || !dados.discador || !dados.discador?.idExterno) {
           /*
           console.warn(
             'Dados de discador ausentes ou incompletos no evento LIGACAO_COMPLETADA.'
@@ -96,8 +97,8 @@ class WebhookEventHandler {
           */
           return;
         }
-        console.log('Ligação completada:', dados.discador.idExterno);
-        console.log('Cliente:', dados.discador.descricao);
+        console.log('Ligação completada:', dados.discador?.idExterno);
+        console.log('Cliente:', dados.discador?.descricao);
         console.log('discador:', dados.discador);
 
         console.log('#############################################');
@@ -115,12 +116,6 @@ class WebhookEventHandler {
 
       case eventoCodes.LIGACAO_ATENDIDA: {
         if (!dados || !dados.discador || !dados.discador.idExterno) {
-          /*
-          console.warn(
-            'Dados de discador ausentes ou incompletos no evento LIGACAO_COMPLETADA.'
-          );
-          console.warn('Dados recebidos:', dados);
-           */
           return;
         }
         console.log('Ligação atendida:', dados.discador.idExterno);
@@ -129,12 +124,17 @@ class WebhookEventHandler {
 
         console.log('#############################################');
 
-        /* const contract = await Contract.query()
+        const contract = await Contract.query()
           .where('des_contr', dados.discador.idExterno)
-          .first(); */
-        /* if (contract) {
-          SocketMessenger.emitToDispositivo(dispositivo, 'ringing', contract);
-        } */
+          .first();
+        if (contract) {
+          console.log('Emitindo para dispositivo:', dispositivo);
+          SocketMessenger.broadcast(
+            'ringing',
+            contract.toJSON() as IPayloadWebHook
+          ); // Emitindo para todos os dispositivos conectados
+          //SocketMessenger.emitToDispositivo(dispositivo, 'answered', contract);
+        }
         break;
       }
 

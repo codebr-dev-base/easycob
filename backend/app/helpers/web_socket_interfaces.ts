@@ -88,7 +88,7 @@ export interface IPayloadWebHook {
 
     ura: [{ chave1: string }, { chave2: string }, { chaveN: string }];
 
-    discador: {
+    discador?: {
       idItem: string;
       idExterno: string;
       descricao: string;
