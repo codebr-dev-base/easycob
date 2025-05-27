@@ -97,12 +97,15 @@ class WebhookEventHandler {
       }
 
       case eventoCodes.LIGACAO_ATENDIDA: {
-        const contract = await Contract.query()
+        console.log(body);
+        console.log(dados);
+
+        /* const contract = await Contract.query()
           .where('des_contr', dados.discador.idExterno)
-          .first();
-        if (contract) {
+          .first(); */
+        /* if (contract) {
           SocketMessenger.emitToDispositivo(dispositivo, 'ringing', contract);
-        }
+        } */
         break;
       }
 
