@@ -130,7 +130,7 @@ class WebhookEventHandler {
         if (contract) {
           console.log('Emitindo para dispositivo:', dispositivo);
           SocketMessenger.broadcast(
-            'ringing',
+            'answered',
             contract.toJSON() as IPayloadWebHook
           ); // Emitindo para todos os dispositivos conectados
           //SocketMessenger.emitToDispositivo(dispositivo, 'answered', contract);

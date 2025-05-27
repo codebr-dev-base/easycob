@@ -53,12 +53,13 @@ class SocketEventHandlers {
       userSocket.socket.disconnect(true); // Desconecta o socket antigo
       userSocket.socket = socket; // Atribui o novo socket
       // Podemos enviar um emit de sucesso se necessário
-      socket.emit('refresh_success', {
+      socket.emit('refresh', {
         message: 'Socket atualizado com sucesso.',
+        auth: true,
       });
     } else {
       console.log('Usuário não encontrado para refresh:', data.dispositivo);
-      socket.emit('refresh_failure', {
+      socket.emit('refresh', {
         message: 'Usuário não encontrado para refresh.',
         auth: false,
       });
@@ -86,18 +87,20 @@ class SocketEventHandlers {
         senha: userTactium.senha,
         idLogon: userTactium.idLogon!, // Já validado pelo loginAgente
       });
-      socket.emit('login_success', {
+      socket.emit('auth', {
         message: 'Login do agente realizado com sucesso!',
         idLogon: userTactium.idLogon,
+        auth: true,
       });
     } catch (error) {
       console.error(
         `Erro ao realizar login do agente para ${data.dispositivo}:`,
         error
       );
-      socket.emit('login_failure', {
+      socket.emit('auth', {
         message: 'Falha ao realizar login do agente.',
         error: error.message,
+        auth: false,
       });
     }
   }
@@ -129,15 +132,16 @@ class SocketEventHandlers {
           `Erro ao realizar logoff para ${data.dispositivo}:`,
           error
         );
-        socket.emit('logout_failure', {
+        socket.emit('auth', {
           message: 'Falha ao realizar logoff do agente.',
-          error: error.message,
+          auth: false,
         });
       }
     } else {
       console.log('Usuário não encontrado para logoff:', data.dispositivo);
-      socket.emit('logout_failure', {
+      socket.emit('auth', {
         message: 'Usuário não encontrado para logoff.',
+        auth: true,
       });
     }
   }
