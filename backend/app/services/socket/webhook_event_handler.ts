@@ -88,6 +88,8 @@ class WebhookEventHandler {
 
       case eventoCodes.LIGACAO_COMPLETADA: {
         console.log('Ligação completada:', dados.discador.idExterno);
+        console.log('Cliente:', dados.discador.descricao);
+
         console.log('#############################################');
 
         /*
@@ -103,6 +105,8 @@ class WebhookEventHandler {
 
       case eventoCodes.LIGACAO_ATENDIDA: {
         console.log('Ligação atendida:', dados.discador.idExterno);
+        console.log('Cliente:', dados.discador.descricao);
+
         console.log('#############################################');
 
         /* const contract = await Contract.query()
