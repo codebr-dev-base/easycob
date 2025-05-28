@@ -179,12 +179,7 @@ class SocketEventHandlers {
   private async handleResume(socket: Socket, data: IResumeRequest) {
     console.log(`Tentativa de reiniciar dispositivo: ${data.dispositivo}`);
     try {
-      const response = await TactiumAuthService.resumeAgente(data.dispositivo);
-      socket.emit('pause', {
-        message: 'Agente reiniciado com sucesso!',
-        responseData: response.dados,
-        pausa: false,
-      });
+      await TactiumAuthService.resumeAgente(data.dispositivo);
     } catch (error) {
       console.error(`Erro ao reiniciar agente ${data.dispositivo}:`, error);
       socket.emit('resume_failure', {
