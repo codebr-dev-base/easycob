@@ -120,18 +120,6 @@ class SocketEventHandlers {
           userSocket.usuario,
           userSocket.senha
         );
-        /*
-        if (status === 0) {
-          SocketConnectionManager.removeSocketByDispositivo(data.dispositivo);
-          socket.emit('logout', {
-            message: 'Logoff do agente realizado com sucesso!',
-            auth: false,
-          });
-          socket.disconnect(true); // Desconecta o cliente após o logoff
-        } else {
-          throw new Error('Não teve retorno esperado do logoff - idLogon');
-        }
-          */
       } catch (error) {
         console.error(
           `Erro ao realizar logoff para ${data.dispositivo}:`,
@@ -172,21 +160,12 @@ class SocketEventHandlers {
     SocketConnectionManager.removeSocketById(socket.id);
   }
 
-  // --- NOVOS HANDLERS ---
-
   private async handlePause(socket: Socket, data: IPauseRequest) {
     console.log(
       `Tentativa de pausar dispositivo: ${data.dispositivo} por motivo: ${data.motivo}`
     );
     try {
       await TactiumAuthService.pauseAgente(data.dispositivo, data.motivo);
-      /*
-      socket.emit('pause', {
-        message: 'Agente pausado com sucesso!',
-        responseData: response.dados,
-        pausa: true,
-      });
-      */
     } catch (error) {
       console.error(`Erro ao pausar agente ${data.dispositivo}:`, error);
       socket.emit('pause_failure', {
@@ -200,7 +179,7 @@ class SocketEventHandlers {
   private async handleResume(socket: Socket, data: IResumeRequest) {
     console.log(`Tentativa de reiniciar dispositivo: ${data.dispositivo}`);
     try {
-      const response = await TactiumAuthService.resumeAgente(data);
+      const response = await TactiumAuthService.resumeAgente(data.dispositivo);
       socket.emit('pause', {
         message: 'Agente reiniciado com sucesso!',
         responseData: response.dados,

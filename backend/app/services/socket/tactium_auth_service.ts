@@ -3,7 +3,6 @@ import {
   IAgentStatusResponse,
   IAuthResponse,
   ILoginResponse,
-  IResumeRequest,
 } from '#helpers/web_socket_interfaces.js';
 import SocketConnectionManager from './socket_connection_manager.js';
 
@@ -227,7 +226,7 @@ class TactiumAuthService {
   }
 
   public async resumeAgente(
-    request: IResumeRequest
+    dispositivo: string
   ): Promise<IAgentStatusResponse> {
     const urlTactium = env.get('TACTIUM_URL');
 
@@ -244,11 +243,10 @@ class TactiumAuthService {
     }
 
     const body = {
-      dispositivo: request.dispositivo,
+      dispositivo,
     };
 
     try {
-      // CORRIGIDO AQUI: A URL do endpoint
       const response = await fetch(`${urlTactium}/agente/reinicio`, {
         method: 'POST',
         headers: {
@@ -261,12 +259,12 @@ class TactiumAuthService {
       const data = (await response.json()) as IAgentStatusResponse;
       if (response.ok && data.status === 0) {
         console.log(
-          `Agente do dispositivo ${request.dispositivo} reiniciado com sucesso!`
+          `Agente do dispositivo ${dispositivo} reiniciado com sucesso!`
         );
         return data;
       } else {
         console.error(
-          `Falha ao reiniciar agente ${request.dispositivo}:`,
+          `Falha ao reiniciar agente ${dispositivo}:`,
           response.status,
           data
         );
@@ -276,7 +274,7 @@ class TactiumAuthService {
       }
     } catch (error) {
       console.error(
-        `Erro na requisição de reinício do agente ${request.dispositivo}:`,
+        `Erro na requisição de reinício do agente ${dispositivo}:`,
         error
       );
       throw new Error(

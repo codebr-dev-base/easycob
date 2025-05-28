@@ -48,12 +48,10 @@ export interface IPauseResponse {
 export interface IPauseRequest {
   dispositivo: string;
   motivo: string;
-  idLogon?: string; // Adicionado para ser enviado à Tactium, se necessário
 }
 
 export interface IResumeRequest {
   dispositivo: string;
-  idLogon?: string; // Adicionado para ser enviado à Tactium, se necessário
 }
 
 export interface IAgentStatusResponse {

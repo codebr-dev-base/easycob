@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { da } from "date-fns/locale";
 import { FaPause } from "react-icons/fa";
 import { Socket } from "socket.io-client";
 const reasonsToPause = [
@@ -27,20 +28,15 @@ const reasonsToPause = [
   "Pausa sistema",
 ];
 
-const Pausa = ({socket}: {socket: Socket}) => {
+const Pausa = ({socket, dispositivo}: {socket: Socket, dispositivo: string}) => {
   let selectedReason = "";
   const handleSelectChange = (value) => { 
     selectedReason = value;
     console.log("Motivo selecionado:", selectedReason);
   }
 
-  // Aqui você pode adicionar a lógica para lidar com a mudança de seleção
-  const handlePause = (reason) => {
-    console.log("Pausando por:", reason);
-    // Aqui você pode adicionar a lógica para pausar o sistema
-  };
-
-  const pause = async (data: IPausaTactium) => {
+  const handlePause = () => {
+     
     if (!socket) {
       console.error("Socket não está disponível.");
       return;
@@ -50,9 +46,12 @@ const Pausa = ({socket}: {socket: Socket}) => {
       return;
     }
     try {
-      socket.emit("pause", { reason: selectedReason });
+      socket.emit("pause", {
+        motivo: selectedReason,
+        dispositivo: dispositivo,
+      });
       console.log("Pausando por:", selectedReason);
-      // Aqui você pode adicionar a lógica para pausar o sistema
+
     } catch (error) {
       console.error(error);
     }
@@ -73,7 +72,7 @@ const Pausa = ({socket}: {socket: Socket}) => {
           <div className="flex items-center space-x-2">
             <Select onValueChange={(value) => handleSelectChange(value)}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select a fruit" />
+                <SelectValue placeholder="Motivo" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -84,7 +83,7 @@ const Pausa = ({socket}: {socket: Socket}) => {
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <Button>Pausar</Button>
+            <Button onClick={() => handlePause()}>Pausar</Button>
           </div>
         </div>
       </PopoverContent>

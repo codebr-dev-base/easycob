@@ -25,7 +25,7 @@ export default function ToolBar() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const {socket, isConnected} = useSocket();
+  const { socket, isConnected } = useSocket();
 
   // Escuta os dados do webhook enviados pelo servidor
   useEffect(() => {
@@ -91,10 +91,15 @@ export default function ToolBar() {
         }
       });
 
-      socket.on("ringing", (data) => {
-        router.push(`/operation/clients/details/${data}`);
+      socket.onAny((event, ...args) => {
+        console.log(`Evento recebido: ${event}`, args);
       });
+
       socket.on("answered", (data) => {
+        console.log("Ligação atendida:", data);
+        router.push(`/operation/clients/details/${data.codCredorDesRegis}`);
+      });
+      socket.on("ringing", (data) => {
         toast({
           title: "Ligação Atendida",
           description: `Ligação atendida por ${data}`,
@@ -112,75 +117,70 @@ export default function ToolBar() {
     setPulsarActive(!pulsarActive);
   };
 
-  return isConnected &&(
-    <div className="flex justify-center items-center">
-      <Button
-        variant="outline"
-        onClick={() => setMenuOpen(!menuOpen)}
-        className="h-10 w-10 p-0 text-gray-800 hover:text-gray-950"
-      >
-        <CgMenuGridO className="h-6 w-6" />
-      </Button>
-      <div
-        className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-10 transition-opacity duration-1000 rounded-lg ${
-          menuOpen ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        {socket && (
-          <ul className="p-2 flex row justify-center bg-white rounded-md shadow-lg space-x-4">
-            {!isOnline ? (
-              <>
-                <li className="py-2">
-                  <Login
-                    socket={socket}
-                    dispositivo={dispositivo}
-                    setDispositivo={setDispositivo}
-                    isLoading={isLoading}
-                    setIsLoading={setIsLoading}
-                  >
-                    <Button
-                      variant="outline"
-                      className={`h-10 w-10 p-0 bg-green-500 ${
-                        isLoading ? "animate-pulse" : ""
-                      }`}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <FaSpinner className="h-6 w-6 animate-spin" />
-                      ) : (
-                        <MdLogin className="h-6 w-6" />
-                      )}
-                    </Button>
-                  </Login>
-                </li>
-                <li className="py-2">
-                  <Pause socket={socket} />
-                </li>
-              </>
-            ) : (
-              <>
-                <li className="py-2">
-                  <Logout
-                    socket={socket}
-                    dispositivo={dispositivo}
-                    isLoading={isLoading}
-                    setIsLoading={setIsLoading}
-                  >
-                    <MdLogout className="h-6 w-6" />
-                  </Logout>
-                </li>
-                {isPause ? (
+  return (
+    isConnected && (
+      <div className="flex justify-center items-center">
+        <Button
+          variant="outline"
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="h-10 w-10 p-0 text-gray-800 hover:text-gray-950"
+        >
+          <CgMenuGridO className="h-6 w-6" />
+        </Button>
+        <div
+          className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-10 transition-opacity duration-1000 rounded-lg ${
+            menuOpen ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          {socket && (
+            <ul className="p-2 flex row justify-center bg-white rounded-md shadow-lg space-x-4">
+              {!isOnline ? (
+                <>
                   <li className="py-2">
-                    <Pausa  socket={socket}/>
+                    <Login
+                      socket={socket}
+                      dispositivo={dispositivo}
+                      setDispositivo={setDispositivo}
+                      isLoading={isLoading}
+                      setIsLoading={setIsLoading}
+                    >
+                      <Button
+                        variant="outline"
+                        className={`h-10 w-10 p-0 bg-green-500 ${
+                          isLoading ? "animate-pulse" : ""
+                        }`}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <FaSpinner className="h-6 w-6 animate-spin" />
+                        ) : (
+                          <MdLogin className="h-6 w-6" />
+                        )}
+                      </Button>
+                    </Login>
                   </li>
-                ) : (
-                  <li className="py-2"></li>
-                )}
-              </>
-            )}
-          </ul>
-        )}
+                </>
+              ) : (
+                <>
+                  <li className="py-2">
+                    <Logout
+                      socket={socket}
+                      dispositivo={dispositivo}
+                      isLoading={isLoading}
+                      setIsLoading={setIsLoading}
+                    >
+                      <MdLogout className="h-6 w-6" />
+                    </Logout>
+                  </li>
+                  <li className="py-2">
+                    <Pausa socket={socket} dispositivo={dispositivo} />
+                  </li>
+                </>
+              )}
+            </ul>
+          )}
+        </div>
       </div>
-    </div>
+    )
   );
 }
