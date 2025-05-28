@@ -3,7 +3,6 @@ import {
   IAgentStatusResponse,
   IAuthResponse,
   ILoginResponse,
-  IPauseRequest,
   IResumeRequest,
 } from '#helpers/web_socket_interfaces.js';
 import SocketConnectionManager from './socket_connection_manager.js';
@@ -177,43 +176,22 @@ class TactiumAuthService {
   }
 
   public async pauseAgente(
-    request: IPauseRequest
+    dispositivo: string,
+    motivo: string
   ): Promise<IAgentStatusResponse> {
     const urlTactium = env.get('TACTIUM_URL');
 
     if (!this.token) {
-      console.error(
-        'Token Tactium não disponível para pausa. Tentando reautenticar.'
-      );
-      await this.loginTactium();
-      if (!this.token) {
-        throw new Error(
-          'Token Tactium não obtido após tentativa de reautenticação para pausa.'
-        );
-      }
-    }
-
-    let idLogonToUse = request.idLogon;
-    if (!idLogonToUse) {
-      const userSocket = SocketConnectionManager.getUserSocketByDispositivo(
-        request.dispositivo
-      );
-      if (userSocket && userSocket.idLogon) {
-        idLogonToUse = userSocket.idLogon;
-      } else {
-        throw new Error(
-          `idLogon não encontrado para o dispositivo ${request.dispositivo} para pausar.`
-        );
-      }
+      throw new Error('Token Tactium não disponível para logoff.');
     }
 
     const body = {
-      idLogon: idLogonToUse,
-      motivo: request.motivo,
+      dispositivo,
+      motivo,
     };
 
     try {
-      const response = await fetch(`${urlTactium}/agente/pausar`, {
+      const response = await fetch(`${urlTactium}/agente/pausa`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -223,16 +201,15 @@ class TactiumAuthService {
       });
 
       const data = (await response.json()) as IAgentStatusResponse;
-      if (response.ok && data.status === 0) {
+      if (response.ok) {
         console.log(
-          `Agente do dispositivo ${request.dispositivo} pausado com sucesso por: ${request.motivo}`
+          `Agente do dispositivo ${dispositivo} pausado com sucesso por: ${motivo}`
         );
         return data;
       } else {
         console.error(
-          `Falha ao pausar agente ${request.dispositivo}:`,
-          response.status,
-          data
+          `Falha ao pausar agente ${dispositivo}:`,
+          response.status
         );
         throw new Error(
           `Falha ao pausar agente: ${data.dados?.mensagem || 'Erro desconhecido'}`
@@ -240,7 +217,7 @@ class TactiumAuthService {
       }
     } catch (error) {
       console.error(
-        `Erro na requisição de pausa do agente ${request.dispositivo}:`,
+        `Erro na requisição de pausa do agente ${dispositivo}:`,
         error
       );
       throw new Error(
@@ -266,10 +243,6 @@ class TactiumAuthService {
       }
     }
 
-    // Busque o idLogon pelo dispositivo se ele não estiver no request
-    // Para o endpoint /agente/reinicio, o idLogon NÃO é enviado no corpo, apenas o dispositivo
-    // Mas mantemos a lógica de busca aqui, caso o cliente precise do idLogon para algo localmente.
-    // O CORPO da requisição será apenas { dispositivo: string }
     const body = {
       dispositivo: request.dispositivo,
     };

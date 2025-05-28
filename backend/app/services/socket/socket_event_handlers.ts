@@ -179,12 +179,14 @@ class SocketEventHandlers {
       `Tentativa de pausar dispositivo: ${data.dispositivo} por motivo: ${data.motivo}`
     );
     try {
-      const response = await TactiumAuthService.pauseAgente(data);
+      await TactiumAuthService.pauseAgente(data.dispositivo, data.motivo);
+      /*
       socket.emit('pause', {
         message: 'Agente pausado com sucesso!',
         responseData: response.dados,
         pausa: true,
       });
+      */
     } catch (error) {
       console.error(`Erro ao pausar agente ${data.dispositivo}:`, error);
       socket.emit('pause_failure', {
