@@ -4,20 +4,22 @@ import Cookie from "js-cookie";
 
 const useStateTactium = <T>(
   key: string,
-  initialValue: T
+  initialValue: T,
+  limit: number = 12
 ): [T, (value: T) => void] => {
   const [state, setState] = useState<T>(() => {
     const cookieValue = Cookie.get(key);
+    console.log("Cookie value for key:", key, "is:", cookieValue);
     return cookieValue ? (JSON.parse(cookieValue) as T) : initialValue;
   });
 
   useEffect(() => {
     const expires = new Date();
-    expires.setTime(expires.getTime() + 12 * 60 * 60 * 1000); // 12 hours
+    expires.setTime(expires.getTime() + limit * 60 * 60 * 1000);
 
     Cookie.set(key, JSON.stringify(state), {
-        expires: expires,
-        path: "/"
+      expires: expires,
+      path: "/",
     });
   }, [key, state]);
 

@@ -44,6 +44,10 @@ const Login = ({
     }
 
     setDispositivo(data.dispositivo);
+
+    console.log("Dispositivo Data:", data.dispositivo);
+    console.log("Dispositivo:", dispositivo);
+
     const userId = getUser()?.id;
     if (!userId) {
       console.error("ID do usuário não encontrado.");
@@ -52,8 +56,8 @@ const Login = ({
     setIsLoading(true);
     try {
       socket.emit("login", { ...data, userId });
-      console.log(data.dispositivo);
-      setOpen(false);
+      console.log(`dispositivo pos envio: ${data.dispositivo}`);
+      //setOpen(false);
     } catch (error) {
       console.error(error);
     }

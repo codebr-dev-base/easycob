@@ -16,8 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { set } from "date-fns";
 import { da } from "date-fns/locale";
-import { FaPause } from "react-icons/fa";
+import { useState } from "react";
+import { FaPause, FaPlay, FaSpinner } from "react-icons/fa";
 import { Socket } from "socket.io-client";
 const reasonsToPause = [
   "Intervalo",
@@ -28,15 +30,50 @@ const reasonsToPause = [
   "Pausa sistema",
 ];
 
-const Pausa = ({socket, dispositivo}: {socket: Socket, dispositivo: string}) => {
+const Pausa = ({
+  socket,
+  dispositivo,
+  isLoading,
+  isPause,
+}: {
+  socket: Socket;
+  dispositivo: string;
+  isLoading: boolean;
+  isPause: boolean;
+}) => {
+  const [open, setOpen] = useState(false);
+
   let selectedReason = "";
-  const handleSelectChange = (value) => { 
+  const handleSelectChange = (value) => {
     selectedReason = value;
     console.log("Motivo selecionado:", selectedReason);
-  }
+  };
+
+  const handleOpen = () => {
+    if (isPause) {
+      handResume();
+      return;
+    }
+    setOpen(!open);
+  };
+
+  const handResume = () => {
+    if (!socket) {
+      console.error("Socket não está disponível.");
+      return;
+    }
+    try {
+      socket.emit("resume", {
+        dispositivo: dispositivo,
+      });
+      console.log("Retomando a pausa.");
+      setOpen(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handlePause = () => {
-     
     if (!socket) {
       console.error("Socket não está disponível.");
       return;
@@ -51,17 +88,28 @@ const Pausa = ({socket, dispositivo}: {socket: Socket, dispositivo: string}) => 
         dispositivo: dispositivo,
       });
       console.log("Pausando por:", selectedReason);
-
+      setOpen(false);
     } catch (error) {
       console.error(error);
     }
   };
 
   return (
-    <Popover>
+    <Popover open={open}>
       <PopoverTrigger asChild>
-        <Button variant="secondary" size="icon">
-          <FaPause />
+        <Button
+          variant="secondary"
+          size="icon"
+          disabled={isLoading}
+          onClick={handleOpen}
+        >
+          {isLoading ? (
+            <FaSpinner className="h-6 w-6 animate-spin" />
+          ) : !isPause ? (
+            <FaPause className="h-6 w-6 text-red-500" />
+          ) : (
+            <FaPlay className="h-6 w-6 text-green-500" />
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80">
@@ -78,7 +126,9 @@ const Pausa = ({socket, dispositivo}: {socket: Socket, dispositivo: string}) => 
                 <SelectGroup>
                   <SelectLabel>Motivos</SelectLabel>
                   {reasonsToPause.map((reason, index) => (
-                    <SelectItem key={index} value={reason}>{reason}</SelectItem>
+                    <SelectItem key={index} value={reason}>
+                      {reason}
+                    </SelectItem>
                   ))}
                 </SelectGroup>
               </SelectContent>

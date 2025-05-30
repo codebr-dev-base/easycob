@@ -17,6 +17,7 @@ const Form = ({ login, dispositivo }: { login: (data: ILoginTactium) => void, di
   });
 
   const onSubmit = (data: ILoginTactium) => {
+    //console.log("Form data submitted:", data);
     login(data);
   };
 
@@ -27,7 +28,7 @@ const Form = ({ login, dispositivo }: { login: (data: ILoginTactium) => void, di
           control={form.control}
           name="dispositivo"
           rules={{ required: "Campo obrigatório" }}
-          defaultValue={dispositivo}
+          defaultValue={dispositivo ?? ""}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Dispositivo/Ramal</FormLabel>
@@ -60,7 +61,7 @@ const Form = ({ login, dispositivo }: { login: (data: ILoginTactium) => void, di
             <FormItem>
               <FormLabel>Senha</FormLabel>
               <FormControl>
-                <Input placeholder="Senha" {...field} />
+                <Input type="password" placeholder="Senha" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

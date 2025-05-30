@@ -12,6 +12,8 @@ import { useRouter } from "next/navigation";
 import { FaSpinner } from "react-icons/fa";
 import Pausa from "../Pause";
 import Pause from "../Pause";
+import { set } from "date-fns";
+import { se } from "date-fns/locale";
 
 export default function ToolBar() {
   const [menuOpen, setMenuOpen] = useState(true);
@@ -19,7 +21,8 @@ export default function ToolBar() {
   const [isOnline, setIsOnline] = useStateTactium("isOnlineTactium", false);
   const [dispositivo, setDispositivo] = useStateTactium(
     "dispositivoTactium",
-    ""
+    "",
+    12000
   );
   const [isPause, setIsPause] = useStateTactium("isPauseTactium", false);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,8 +61,8 @@ export default function ToolBar() {
             variant: "destructive",
           });
           setIsOnline(false);
-          setIsPause(false);
         }
+        setIsPause(false);
         setIsLoading(false);
       });
 
@@ -70,13 +73,15 @@ export default function ToolBar() {
             description: "Você está Pausa!",
             variant: "destructive",
           });
-          setIsOnline(true);
+          //setIsOnline(true);
+          setIsPause(true);
         } else {
           toast({
             title: "Ativo",
             description: "Fim da pausa!",
             variant: "success",
           });
+          setIsPause(false);
         }
       });
 
@@ -87,6 +92,7 @@ export default function ToolBar() {
         console.log("Dados recebidos do servidor:", data);
         if (!data.auth) {
           setIsOnline(false);
+          setIsPause(false);
           setDispositivo("");
         }
       });
@@ -173,7 +179,12 @@ export default function ToolBar() {
                     </Logout>
                   </li>
                   <li className="py-2">
-                    <Pausa socket={socket} dispositivo={dispositivo} />
+                    <Pausa
+                      socket={socket}
+                      dispositivo={dispositivo}
+                      isLoading={isLoading}
+                      isPause={isPause}
+                    />
                   </li>
                 </>
               )}
