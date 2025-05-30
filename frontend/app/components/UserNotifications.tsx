@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSocket } from "../hooks/useSocket";
 
 export default function UserNotifications() {
-  const socket = useSocket();
+  const { socket, isConnected } = useSocket();
   const [notifications, setNotifications] = useState<unknown[]>([]);
 
   // Escuta os eventos do webhook

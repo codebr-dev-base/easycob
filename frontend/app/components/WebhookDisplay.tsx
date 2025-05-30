@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useSocket } from '../hooks/useSocket';
+import { useEffect, useState } from "react";
+import { useSocket } from "../hooks/useSocket";
 
 export default function WebhookDisplay() {
-  const socket = useSocket();
+  const { socket } = useSocket();
   const [webhookData, setWebhookData] = useState(null);
 
   // Escuta os dados do webhook enviados pelo servidor
   useEffect(() => {
     if (socket) {
-      socket.on('webhook', (data) => {
+      socket.on("webhook", (data) => {
         setWebhookData(data);
       });
     }
@@ -18,7 +18,7 @@ export default function WebhookDisplay() {
     // Limpa o listener ao desmontar o componente
     return () => {
       if (socket) {
-        socket.off('webhook');
+        socket.off("webhook");
       }
     };
   }, [socket]);
