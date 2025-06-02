@@ -1,11 +1,11 @@
 {
   "name": "backend",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "license": "UNLICENSED",
   "scripts": {
-    "start": "node --max-old-space-size=8192 bin/server.js",
+    "start": "node --max-old-space-size=8192 build/bin/server.js",
     "build": "node ace build",
     "dev": "APP_MODE=main node --max-old-space-size=8192 ace serve --watch",
     "test": "node ace test",
