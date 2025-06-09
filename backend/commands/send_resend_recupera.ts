@@ -41,9 +41,11 @@ export default class SendResendRecupera extends BaseCommand {
  */
 
     const actions = await Action.query()
-      .whereILike('retornotexto', '%Em fila%')
-      .whereRaw("created_at::date > '2025-05-01'")
-      .whereRaw("created_at::date < '2025-05-03'");
+      .whereILike(
+        'retornotexto',
+        '%Em Tentativa - Erro ao Incluir ocorrencia: Passo 4 - Cliente não está na assessoria.%'
+      )
+      .whereRaw("created_at::date >= '2025-06-01'");
 
     for (const action of actions) {
       await handleSendingForRecupera(action);
